@@ -1,0 +1,21 @@
+configure(allprojects) { project ->
+    group = 'fi.sangre.renesans'
+}
+
+subprojects {
+    repositories {
+        maven { 
+            url "https://artifactory.sangre.eu:443/artifactory/libs-release/"
+            credentials {
+                username = "${maven_resolver_username}"
+                password = "${maven_resolver_password}"
+            }
+        }
+    }
+}
+
+wrapper {
+    description = "Generates gradlew[.bat] scripts"
+    gradleVersion = '6.7'
+    distributionType = Wrapper.DistributionType.ALL
+}

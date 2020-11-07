@@ -1,0 +1,103 @@
+type Mutation {
+
+    storeUser(
+        id: ID
+        firstName: String
+        lastName: String
+        email: String
+        password: String
+        username: String
+        enabled: Boolean
+        roles: [String]
+    ): User
+
+    allowUserCustomerAccess(
+        id: ID
+        customerId: ID
+    ): User
+
+    revokeUserCustomerAccess(
+        id: ID
+        customerId: ID
+    ): User
+
+    updatePassword(
+        id: ID!
+        oldPassword: String!
+        newPassword: String!
+    ): Boolean
+
+    adminUpdatePassword(
+        id: ID!
+        newPassword: String!
+    ): Boolean
+
+    requestPasswordReset(
+        email: String!
+    ): Boolean
+
+    resetUserPassword(
+        token: String!
+        newPassword: String!
+    ): Boolean
+
+    sendInvitation(
+        invitation: InvitationInput
+        recipients: [RecipientInput!]!
+    ): Resultdetails
+
+    storeWeights(
+        weights: [WeightInput!]!
+    ): [Weight]
+
+    storeCustomer(customer: CustomerInput!): Customer
+
+    storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
+
+    removeCustomer(id: ID!): Customer
+
+    storeSegment(languageCode: String!, segment: SegmentInput!): Segment
+
+    storeSegmentQuestion(languageCode: String!, segmentId: ID!, question: QuestionInput!): Question
+
+    storeQuestion(languageCode: String!, question: QuestionInput!): Question
+
+    storeCustomerQuestion(languageCode: String!, customerId: ID!, question: QuestionInput!): Question
+
+    removeQuestion(id: ID!): Question
+
+    removeUser(id: ID!): User
+
+    storeRespondentGroup(respondentGroup: RespondentGroupInput!): RespondentGroup
+
+    removeRespondentGroup(id: ID!): RespondentGroup
+
+    removeRespondent(id: ID!): Respondent
+
+    storeNamedPhrase(phrase: PhraseInput!): MultiLingualPhrase
+
+    submitSurvey(
+        respondentGroupId: ID!,
+        respondent: RespondentInput!,
+        answers: [AnswerInput!]!
+    ): Respondent
+
+    moveRespondentToRespondentGroup(
+        respondentId: ID!
+        respondentGroupId: ID!
+    ): Respondent
+
+    copyRespondentToRespondentGroup(
+        respondentId: ID!
+        respondentGroupId: ID!
+    ): Respondent
+
+    login(
+        username: String!
+        password: String!
+    ): Authorization
+
+    logout(
+        token: String!
+    ): Boolean
+}

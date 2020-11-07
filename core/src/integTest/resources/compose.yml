@@ -1,0 +1,8 @@
+data-db:
+  image: postgres:10-alpine
+  environment:
+    POSTGRES_DB: ${DB_NAME}
+    POSTGRES_USER: masteradmin
+    POSTGRES_PASSWORD: qazwsx
+    TZ: UTC
+    PGTZ: UTC

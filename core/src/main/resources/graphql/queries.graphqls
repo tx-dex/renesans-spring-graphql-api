@@ -1,0 +1,107 @@
+type Query {
+    locale(languageCode: String): Locale
+
+    survey(
+        languageCode: String
+        id: ID!
+        customerId: ID
+    ): Survey!
+
+    respondentOptions(
+        languageCode: String
+        optionType: String!
+    ): [RespondentOption]
+
+    countries(languageCode: String): [Country]
+
+    languages(languageCode: String): [Language]
+
+    respondents(
+        filters: Filters
+    ): [Respondent]
+
+    respondentGroups(
+        languageCode: String
+        customerId: ID
+    ): [RespondentGroup]
+
+    defaultRespondentGroupId: String
+    defaultRespondentGroup(languageCode: String): RespondentGroup
+
+    defaultSurveyId: String
+
+    respondentGroup(
+        languageCode: String
+        id: ID!
+    ): RespondentGroup
+
+    phrases(
+        languageCode: String
+        names: [String]
+        startsWith: String
+    ): [MultiLingualPhrase]
+
+    phrase(languageCode: String, name: String): MultiLingualPhrase
+
+    invitations(respondentGroupId: ID!): [InvitationDetails]
+
+    invitationsByEmail(
+        respondentGroupId: ID!
+        email: String!
+        status: String
+    ): [InvitationDetails]
+
+    customers(
+        languageCode: String
+    ): [Customer]
+
+    customer(
+        languageCode: String
+        id: ID!
+    ): Customer
+
+    segment(
+        languageCode: String
+        id: ID!
+    ): Segment
+
+    segments: [Segment]
+
+    question(
+        languageCode: String
+        id: ID!
+    ): Question
+
+    statistics(
+        languageCode: String
+        filters: Filters
+    ): Statistics
+
+    comparativeStatistics(
+        languageCode: String
+        filters: Filters
+        customerIds: [ID]
+        respondentGroupIds: [ID]
+        respondentIds: [ID]
+        edit: Boolean
+    ): ComparativeStatistics
+
+    imageUploadUrl(fileName: String!): ImageUpload
+
+    questionnaire(
+        languageCode: String
+        respondentGroupId: ID
+        respondentId: ID
+    ): Questionnaire
+
+    users: [User]
+    user(id: ID): User
+    roles: [Role]
+
+    validateResetPasswordToken(
+        token: String!
+    ): Boolean
+
+    validateEmail(value: String!, userId: ID): Validation
+    validateUsername(value: String!, userId: ID): Validation
+}

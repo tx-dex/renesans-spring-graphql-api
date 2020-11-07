@@ -1,0 +1,93 @@
+stages:
+  - build
+  - publish_image
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+#
+# (1) Build latest "stable" or tagged version
+#
+job_build:
+  image: java:8u111-jdk-alpine
+  services:
+    - docker:dind
+  variables:
+    # Instruct Testcontainers to use the daemon of DinD.
+    DOCKER_HOST: "tcp://docker:2375"
+  stage: build
+  script:
+    - ./gradlew -p core clean test bootJar --stacktrace
+  artifacts:
+    name: "$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+    paths:
+      - core/build/libs/*.jar
+    expire_in: 1 day
+  only:
+    - tags
+    - master
+    - branches
+  tags:
+    - docker
+
+#
+# (2) Create and publish tagged image
+#
+job_publish_tagged_image:
+  image: docker:latest
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    IMAGE_TAG_LATEST: $CI_REGISTRY_IMAGE:latest
+  services:
+    - docker:dind
+  stage: publish_image
+  script:
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+    - docker build --pull --rm -t $IMAGE_TAG core
+    - docker push $IMAGE_TAG
+  only:
+    - tags
+  tags:
+    - docker
+
+#
+# (2) Create and publish latest master image
+#
+job_publish_master_image:
+  image: docker:latest
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  services:
+    - docker:dind
+  stage: publish_image
+  script:
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+    - docker build --pull --rm -t $IMAGE_TAG core
+    - docker push $IMAGE_TAG
+  only:
+    - master
+  tags:
+    - docker
+
+#
+# (2) Create and publish latest branch image
+#
+job_publish_branch_image:
+  image: docker:latest
+  services:
+  - docker:dind
+  stage: publish_image
+  before_script:
+  - BRANCH_REGISTRY=$CI_REGISTRY_IMAGE/$(echo $CI_COMMIT_REF_NAME | awk '{print tolower($0)}' | sed  -r 's/^(feature|bug|task)\///g')
+  script:
+  - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+  - docker build --pull --rm -t "$BRANCH_REGISTRY:$CI_PIPELINE_ID" core
+  - docker push "$BRANCH_REGISTRY:$CI_PIPELINE_ID"
+  - docker tag "$BRANCH_REGISTRY:$CI_PIPELINE_ID" "$BRANCH_REGISTRY:latest"
+  - docker push "$BRANCH_REGISTRY:latest"
+  only:
+  - branches
+  except:
+  - master
+  tags:
+  - docker

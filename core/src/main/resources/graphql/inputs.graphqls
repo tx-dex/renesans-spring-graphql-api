@@ -1,0 +1,97 @@
+input RecipientInput {
+    respondentGroupId: String!
+    email: String!
+}
+
+input SegmentInput {
+    id: ID
+    name: String!
+    questions: [QuestionInput]
+}
+
+input QuestionInput {
+    id: ID
+    title: String!
+    catalystId: ID
+    weights: [WeightInput]
+}
+
+input InvitationInput {
+    subject: String
+    body: String
+}
+
+input WeightInput {
+    questionId: Int
+    questionGroupId: Int!
+    weight: Float!
+}
+
+input DriverWeightInput {
+    id: ID!
+    weight: Float!
+}
+
+input RespondentGroupInput {
+    id: ID
+    title: String!
+    description: String!
+    customerId: ID!
+    surveyId: String!
+    questionGroupIds: [ID]!
+    defaultLocale: String!
+}
+
+input PhraseInput {
+    id: ID
+    name: String
+    text: String!
+    languageCode: String
+}
+
+input CustomerInput {
+    id: ID
+    name: String
+    description: String!
+    segmentId: Long
+}
+
+input AnswerInput {
+    id: ID
+    answerIndex: Int!
+    questionId: Long!
+}
+
+input RespondentInput {
+    id: ID
+    name: String
+    email: String
+    age: Int
+    position: Long
+    industry: Long
+    segment: Long
+    phone: String
+    gender: String
+    country: String
+    experience: Int
+    consent: Boolean
+    locale: String
+}
+
+input Filters {
+    surveyId: String
+    respondentName: String
+    ageMin: Long
+    ageMax: Long
+    countries: [String]
+    experienceMin: Long
+    experienceMax: Long
+    genders: [String]
+    industryIds: [ID]
+    positionIds: [ID]
+    customerIds: [ID]
+    respondentGroupIds: [ID]
+    respondentIds: [ID]
+    segmentIds: [ID]
+}
+

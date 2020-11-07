@@ -1,0 +1,376 @@
+scalar Date
+
+enum QuestionSourceType {
+    GENERIC
+    SEGMENT
+    ORGANISATION
+}
+
+type Answer {
+    id: ID!
+    answerValue: Long
+    question: Question
+}
+
+type RespondentOption {
+    id: ID!
+    title: String
+    titlePhraseId: ID
+}
+
+type Respondent {
+    id: ID!
+    age: Long
+    consent: Boolean
+    country: String
+    email: String
+    experience: Long
+    officeLocation: String
+    gender: String
+    name: String
+    phone: String
+    answers: [Answer]
+    position: RespondentOption
+    industry: RespondentOption
+    segment: RespondentOption
+    respondentGroup: RespondentGroup
+    created: Date
+    answerTime: Date
+    state: String
+    locale: String
+}
+
+type RespondentGroup {
+    id: ID
+    title: String
+    description: String
+    customer: Customer!
+    survey: Survey!
+    respondents: [Respondent]
+    isDefault: Boolean
+    questionGroups: [QuestionGroup] @deprecated(reason: "Catalysts field should be used now")
+    defaultLocale: String
+    respondentCount: Long
+    catalysts: [Catalyst]
+}
+
+type Segment{
+    id: ID!
+    name: String!
+    questions: [Question] @deprecated(reason: "Catalysts field should be used now")
+    catalysts: [Catalyst]
+    customers: [Customer]
+    customerCount: Long
+}
+
+enum QuestionType {
+    DEFAULT
+    INVERTED
+    DUAL
+}
+
+type AnswerOption {
+    title: String
+    titlePhraseId: ID
+    index: Long
+    value: Long
+}
+
+type Weight {
+    id: ID
+    questionGroupId: ID
+    questionId: ID
+    weight: Float
+}
+
+type Catalyst {
+    id: ID!
+    title: String
+    titleId: ID
+    description: String
+    pdfName: String
+    questions: [Question]
+    drivers: [Driver]
+}
+
+type Driver {
+    id: ID!
+    title: String
+    titleId: ID
+    description: String
+    prescription: String
+    weight: Float
+}
+
+type Question {
+    id: ID
+    sourceType: QuestionSourceType!
+    title: String
+    titlePhraseId: ID
+    answerOptions: [AnswerOption]
+    questionType: QuestionType
+    weights: [Weight]
+    seq: Long
+    created: Date
+    modified: Date
+    # The number of answers for the specific question. NOTICE!!! Use only if needed, may cause performance issues
+    answerCount: Long
+}
+
+type QuestionGroup {
+    id: ID!
+    title: String
+    titlePhraseId: ID
+    description: String
+    descriptionPhraseId: ID
+    prescription: String
+    prescriptionPhraseId: ID
+    pdfName: String
+    weight: Float
+    questions: [Question]
+    parent: QuestionGroup
+    children: [QuestionGroup]
+}
+
+type Country {
+    code: String
+    name: String
+}
+
+type MultiLingualPhrase {
+    id: ID!
+    name: String
+    text: String
+}
+
+type Language {
+    code: String
+    name: String
+    nativeName: String
+    prompt: String
+}
+
+type Survey {
+    id: ID!
+    title: String
+    titlePhraseId: ID
+    description: String
+    descriptionPhraseId: ID
+    questionGroups: [QuestionGroup] @deprecated(reason: "Catalysts field should be used now")
+    catalysts: [Catalyst]
+    respondentGroups: [RespondentGroup]
+    respondent: Respondent
+}
+
+
+type Questionnaire {
+    id: ID!
+    questionGroups: [Catalyst]
+    respondent: Respondent
+}
+
+type InvitationDetails {
+    id: ID!
+    respondentGroupId: String!
+    email: String!
+    status: String
+    sentTime: Date
+    subject: String
+    body: String
+    hash:String
+}
+
+type Recipient {
+    groupId: String!
+    email: String!
+}
+
+type Resultdetails{
+    sentCount: Long
+    failedCount: Long
+    recipients: [Recipient]
+}
+
+type Customer{
+    id: ID!
+    name: String!
+    description: String
+    respondentGroups:[RespondentGroup]
+    createdBy: User
+    respondentGroupCount: Long
+    respondentCount: Long
+    isDefault: Boolean
+    segment: Segment
+    questions: [Question] @deprecated(reason: "Catalysts field should be used now")
+    catalysts: [Catalyst]
+}
+
+type MultiLingualPhrase{
+    id: ID!
+    name: String
+    text:String
+}
+type Locale{
+    validation_email: String
+    validation_age: String
+    validation_age_min: String
+    validation_length: String
+    validation_experience: String
+    background_position_options_freelancer: String
+    questionnaire_title: String
+    questionnaire_start_linkText: String
+    results_contactDescription: String
+    background_industry_options_retail: String
+    results_startOverLink: String
+    privacy_policy_accept: String
+    html_title_default: String
+    statistics_totalGrowthIndex: String
+    background_experience: String
+    background_industry_options_financeInsurance: String
+    background_segment_options_other: String
+    background_industry: String
+    html_title_finish: String
+    validation_phoneNumber: String
+    validation_number: String
+    html_title_template: String
+    question_answerOption_always: String
+    background_gender: String
+    background_segment_options_businessToBusiness: String
+    validation_required: String
+    background_segment: String
+    background_industry_options_manufacturing: String
+    questionnaire_start_title: String
+    language_prompt: String
+    background_location: String
+    question_answerOption_rarely: String
+    questionnaire_submitDescription: String
+    questionnaire_submitLinkText: String
+    background_email: String
+    background_industry_options_manufacturingService: String
+    background_age: String
+    background_gender_options_male: String
+    background_industry_options_publicServices: String
+    background_name: String
+    html_title_questionnaire: String
+    ui_loading: String
+    ui_next: String
+    ui_back: String
+    background_position_options_management: String
+    background_position_options_employee: String
+    statistics_result_all: String
+    background_segment_options_businessToConsumer: String
+    background_industry_options_consulting: String
+    background_phone: String
+    questionnaire_submitError: String
+    background_required: String
+    questionnaire_background_title: String
+    background_industry_options_service: String
+    background_industry_options_other: String
+    html_title_background: String
+    background_position: String
+    background_gender_options_female: String
+    privacy_policy_full: String
+    statistics_result_filtered: String
+    privacy_policy_consent_label: String
+    background_industry_options_trading: String
+    results_contactLink: String
+    question_answerOption_never: String
+    privacy_policy_read_more: String
+    questionnaire_results_title: String
+    questionnaire_submitting: String
+    questionnaire_background_description: String
+    questionnaire_description: String
+    question_answerOption_sometimes: String
+    question_answerOption_often: String
+    privacy_policy_title: String
+    background_position_options_other: String
+    html_title_start: String
+    questionnaire_results_description: String
+    questionnaire_start_description: String
+}
+
+type Authorization {
+    token: String
+}
+
+type StatisticsQuestion {
+    title: String
+    max: Int
+    min: Int
+    avg: Float
+    count: Long
+}
+
+type StatisticsQuestionsRank {
+    top(size: Int = 5): [StatisticsQuestion]
+    last(size: Int = 5): [StatisticsQuestion]
+}
+
+type StatisticsDevelopmentTrack {
+    pdfName: String
+    title: String
+    index: Float @deprecated(reason: "result field should be used now")
+    weighedIndex: Float @deprecated(reason: "weighedResult field should be used now")
+    result: Float
+    weighedResult: Float
+    weight: Float
+    weightModifier: Float
+    importance: Float
+}
+
+type StatisticsCatalyst {
+    pdfName: String
+    title: String
+    index: Float @deprecated(reason: "result field should be used now")
+    weighedIndex: Float @deprecated(reason: "weighedResult field should be used now")
+    result: Float
+    weighedResult: Float
+    weight: Float
+    importance: Float
+    developmentTrackIndices: [StatisticsDevelopmentTrack]
+    questions: [StatisticsQuestion]
+}
+
+type Statistics {
+    customerName: String
+    companyName: String
+    name: String
+    totalGrowthIndex: Float
+    surveyTitle: String
+    respondentCount: Long
+    catalysts: [StatisticsCatalyst]
+    questionsRank: StatisticsQuestionsRank
+}
+
+type ComparativeStatistics {
+    customers: [Statistics]
+    respondentGroups: [Statistics]
+    respondents: [Statistics]
+}
+
+type User {
+    id: ID
+    email: String
+    username: String!
+    firstName: String
+    lastName: String
+    enabled: Boolean
+    roles: [Role]
+    customers: [Customer]
+}
+
+type Role {
+    name: String,
+    title: String
+}
+type ImageUpload {
+    hash: String!
+    url: String!
+}
+
+type Validation {
+    valid: Boolean!
+    error: String
+}
+
+

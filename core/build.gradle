@@ -1,0 +1,163 @@
+import org.gradle.internal.jvm.Jvm
+
+// Project-specific configuration
+plugins {
+    id 'java-library'
+    id 'groovy'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'jacoco'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+sourceCompatibility = 1.8
+
+version = "0.1.0"
+
+configurations {
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
+}
+
+sourceSets {
+    generated {
+        java {
+            srcDir 'src/generated/java'
+        }
+    }
+    main {
+        java {
+            srcDir 'src/generated/java'
+            srcDir 'src/main/java'
+        }
+    }
+    other {
+        resources {
+            srcDir "scripts"
+            srcDir "etc"
+        }
+    }
+    integTest {
+        groovy {
+            compileClasspath += main.compileClasspath + test.compileClasspath
+            runtimeClasspath += main.runtimeClasspath + test.runtimeClasspath
+            srcDir 'src/integTest/groovy'
+        }
+        java {
+            compileClasspath += main.compileClasspath + test.compileClasspath
+            runtimeClasspath += main.runtimeClasspath + test.runtimeClasspath
+            srcDir 'src/integTest/java'
+        }
+        resources {
+            srcDir 'src/integTest/resources'
+        }
+    }
+}
+
+task integTest(type: Test) {
+    testClassesDirs = sourceSets.integTest.output.classesDirs
+    classpath = sourceSets.integTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+    description ='Spring junit5 tests'
+    group = 'verification'
+    jacoco {
+        destinationFile = file("${buildDir}/jacoco/integTest.exec")
+        classDumpDir = file("${buildDir}/classes/integTest")
+    }
+    useJUnitPlatform()
+}
+
+integTest.mustRunAfter test
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework:spring-framework-bom:${springFrameworkVersion}"
+    }
+}
+
+dependencies {
+    annotationProcessor(
+            "org.projectlombok:lombok:${lombokVersion}",
+            "com.querydsl:querydsl-apt:${queryDslVersion}:jpa",
+            "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}",
+    )
+
+    implementation("com.querydsl:querydsl-apt:${queryDslVersion}")
+    implementation("com.querydsl:querydsl-jpa:${queryDslVersion}")
+    implementation("org.projectlombok:lombok:${lombokVersion}")
+
+
+    implementation("com.google.guava:guava:${guavaVersion}")
+    implementation("org.apache.commons:commons-lang3:${commonsLangVersion}")
+    implementation("org.apache.commons:commons-math3:${commonsMathVersion}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    implementation("org.apache.poi:poi-ooxml:${poiOoxmlVersion}")
+    implementation("com.github.ben-manes.caffeine:caffeine:${caffeineVersion}")
+    implementation("net.time4j:time4j-range:${time4jVersion}")
+    implementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
+    implementation("io.minio:minio:${minioVersion}")
+    implementation("io.jsonwebtoken:jjwt:${jjwtVersion}")
+    implementation("com.squarespace.cldr:cldr-core:${cldrVersion}")
+    implementation("com.squarespace.cldr:cldr-runtime:${cldrVersion}")
+
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE")
+    implementation("org.springframework.security:spring-security-jwt:1.1.1.RELEASE")
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-ribbon:2.0.4.RELEASE")
+
+    implementation("com.graphql-java-kickstart:graphql-spring-boot-starter:${graphqlVersion}")
+    implementation("com.graphql-java-kickstart:graphql-java-tools:${graphqlToolsVersion}")
+
+    implementation("org.flywaydb:flyway-core:${flywayVersion}")
+    implementation("org.hibernate:hibernate-java8:${hibernateVersion}")
+    implementation("org.hibernate:hibernate-ehcache:${hibernateVersion}")
+
+    runtime("org.postgresql:postgresql:${postgresqlVersion}")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.codehaus.groovy:groovy-all:${groovyVersion}")
+    testImplementation("cglib:cglib-nodep:${cglibVersion}")
+    testImplementation("org.hamcrest:hamcrest-all:${hamcrestVersion}")
+    testImplementation("org.spockframework:spock-core:${spockVersion}")
+    testImplementation("org.spockframework:spock-spring:${spockVersion}")
+    testImplementation("org.springframework:spring-test:${springFrameworkVersion}")
+    testImplementation("org.springframework.security:spring-security-test:${springSecurityVersion}")
+    testImplementation("org.awaitility:awaitility:${awaitilityVersion}")
+    testImplementation("org.awaitility:awaitility-proxy:${awaitilityVersion}")
+    testRuntimeOnly("com.h2database:h2:${h2Version}")
+
+    integTestImplementation("org.mockito:mockito-core:${mockitoVersion}")
+    integTestImplementation("org.mockito:mockito-junit-jupiter:${mockitoVersion}")
+    integTestImplementation("org.junit.jupiter:junit-jupiter-api:${junit5Version}")
+    integTestImplementation("org.junit.jupiter:junit-jupiter-params:${junit5Version}")
+    integTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junit5Version}")
+    integTestImplementation("org.testcontainers:testcontainers:${testContainersVersion}")
+}
+
+clean {
+    delete sourceSets.generated.java
+}
+
+compileJava {
+//    dependsOn clean
+    options.annotationProcessorGeneratedSourcesDirectory = project.file('src/generated/java')
+    options.annotationProcessorPath = configurations.annotationProcessor
+}
+
+springBoot {
+    mainClassName = 'fi.sangre.renesans.Application'
+}
+
+jar {
+    enabled = true
+
+    manifest {
+        attributes( "Created-By": Jvm.current(),
+                "Version": "${project.version}" )
+    }
+}

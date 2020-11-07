@@ -1,0 +1,24 @@
+package fi.sangre.renesans.repository;
+
+import fi.sangre.renesans.model.RespondentGroup;
+import fi.sangre.renesans.model.Survey;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface SurveyRepository extends JpaRepository<Survey,String> {
+
+    Optional<Survey> findByIsDefaultTrue();
+
+    Survey findByRespondentGroupsContaining(RespondentGroup respondentGroup);
+
+    @Query("SELECT s FROM Survey s, RespondentGroup g WHERE g.survey.id = s.id AND g.id = :id")
+    Survey findByRespondentGroupId(@Param("id") String id);
+
+    @Query("SELECT s FROM Survey s, RespondentGroup g, Respondent r WHERE g.survey.id = s.id AND g.id = r.respondentGroup.id AND r.id = :id")
+    Survey findByRespondentId(@Param("id") String id);
+}
