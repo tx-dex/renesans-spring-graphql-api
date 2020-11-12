@@ -1,0 +1,19 @@
+package fi.sangre.renesans.application.model;
+
+import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.util.UUID;
+
+@Data
+@EqualsAndHashCode(of = "id")
+@ToString
+@Builder
+public class OrganizationSurvey {
+    private UUID id;
+    private Long version;
+    private SurveyMetadata metadata;
+}

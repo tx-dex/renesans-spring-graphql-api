@@ -2,10 +2,8 @@ package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import fi.sangre.renesans.dto.DriverDto;
 import fi.sangre.renesans.exception.CustomerNotFoundException;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
-import fi.sangre.renesans.graphql.input.CustomerInput;
 import fi.sangre.renesans.graphql.input.DriverWeightInput;
 import fi.sangre.renesans.model.Customer;
 import fi.sangre.renesans.model.CustomerDriverWeights;
@@ -20,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,40 +63,6 @@ public class CustomerService {
         this.questionService = questionService;
     }
 
-    @CacheEvict(cacheNames = AUTH_CUSTOMER_IDS_CACHE, allEntries = true, condition = "#customerInput.id == null")
-    public Customer storeCustomer(CustomerInput customerInput) {
-
-        final Customer customer;
-        if (customerInput.getId() != null) {
-            customer = customerRepository.findById(customerInput.getId())
-                    .orElseThrow(() -> new CustomerNotFoundException(customerInput.getId()));
-
-        } else {
-            customer = Customer.builder().build();
-        }
-
-        if (customerInput.getName() != null) {
-            customer.setName(customerInput.getName());
-        }
-        if (customerInput.getDescription() != null) {
-            customer.setDescription(customerInput.getDescription());
-        }
-        if (customerInput.getSegmentId() != null) {
-            final Segment segment = segmentService.getSegmentById(customerInput.getSegmentId());
-            customer.setSegment(segment);
-            log.debug("Assigning segment id:{} to customer: id: {} '{}'", segment.getId(), customer.getId(), customer.getName());
-        }
-
-        Customer savedCustomer = customerRepository.save(customer);
-
-        if (customerInput.getId() == null) {
-            createDefaultCustomerDriverWeights(savedCustomer);
-        }
-
-        return savedCustomer;
-
-    }
-
     public List<Customer> getAllCustomers() {
         return ImmutableList.copyOf(customerRepository.findAll());
     }
@@ -120,7 +85,8 @@ public class CustomerService {
         return customer;
     }
 
-    public Segment getCustomerSegment(final Customer customer) {
+    @Transactional(readOnly = true)
+    public Segment getCustomerSegment(@NonNull final Customer customer) {
         return segmentRepository.findByCustomers(customer).orElse(null);
     }
 
@@ -134,20 +100,6 @@ public class CustomerService {
 
     public Customer getCustomer(RespondentGroup respondentGroup) {
         return customerRepository.findByGroupsContaining(respondentGroup);
-    }
-
-    private List<CustomerDriverWeights> createDefaultCustomerDriverWeights(final Customer customer) {
-
-        final List<CustomerDriverWeights> weights = Lists.newArrayList();
-        final List<DriverDto> drivers = questionService.getAllDrivers();
-
-        drivers.forEach(driver ->
-                weights.add(CustomerDriverWeights.builder()
-                        .customerId(customer.getId())
-                        .driverId(driver.getId())
-                        .build())
-        );
-        return customerDriverWeightsRepository.saveAll(weights);
     }
 
     public Customer storeCustomerDriverWeights(Long customerId, List<DriverWeightInput> driverWeights) { // TODO why returning customer here? not list of weights

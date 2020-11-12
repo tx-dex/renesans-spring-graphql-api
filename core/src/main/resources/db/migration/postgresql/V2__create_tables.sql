@@ -50,6 +50,7 @@ create table if not exists survey
 	title_id bigint
 		constraint fkeg83pbj5j3pqidoyji4hqh1tq
 			references multilingual_key,
+	metadata jsonb null,
 	ctm timestamp default CURRENT_TIMESTAMP not null,
 	mtm timestamp default CURRENT_TIMESTAMP not null,
 	archived boolean default false
@@ -156,6 +157,9 @@ create table if not exists customer
 	segment_id bigint
 		constraint customer_segment_id_fk
 			references segment,
+    survey_id char(36)
+        constraint customer_survey_id_fk
+            references survey(id),
 	ctm timestamp default CURRENT_TIMESTAMP not null,
 	mtm timestamp default CURRENT_TIMESTAMP not null
 );

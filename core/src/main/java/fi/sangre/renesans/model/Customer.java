@@ -7,11 +7,11 @@ import org.hibernate.annotations.*;
 import org.springframework.data.annotation.CreatedBy;
 
 import javax.persistence.CascadeType;
-import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.NamedQuery;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -61,6 +61,10 @@ public class Customer extends BaseModel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "segment_id")
     private Segment segment;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "survey_id", updatable = false, nullable = false)
+    private Survey survey;
 
     @Column(name = "is_default", updatable = false)
     @Builder.Default

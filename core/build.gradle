@@ -116,6 +116,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:${flywayVersion}")
     implementation("org.hibernate:hibernate-java8:${hibernateVersion}")
     implementation("org.hibernate:hibernate-ehcache:${hibernateVersion}")
+    implementation("com.vladmihalcea:hibernate-types-52:${hibernateTypesVersion}")
 
     runtime("org.postgresql:postgresql:${postgresqlVersion}")
 

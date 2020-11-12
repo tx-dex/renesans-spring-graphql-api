@@ -1,14 +1,18 @@
 package fi.sangre.renesans.model;
 
 
+import com.google.common.collect.Sets;
+import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -45,6 +49,10 @@ public class Survey extends BaseModel {
     @Column(name = "description_id", updatable = false, insertable = false)
     private Long descriptionId;
 
+    @Type(type = "jsonb")
+    @Column(name = "metadata")
+    private SurveyMetadata metadata;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "survey")
     @OrderBy("seq")
     @Builder.Default
@@ -53,6 +61,11 @@ public class Survey extends BaseModel {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "survey")
     @Builder.Default
     private List<RespondentGroup> respondentGroups = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "survey")
+    @Builder.Default
+    private Set<Customer> organisations = Sets.newHashSet();
+
 
     //TODO: check if still used and remove
     // used to return respondent for questionnaire endpoint

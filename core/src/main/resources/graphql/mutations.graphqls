@@ -50,7 +50,9 @@ type Mutation {
         weights: [WeightInput!]!
     ): [Weight]
 
-    storeCustomer(customer: CustomerInput!): Customer
+    storeCustomer(customer: CustomerInput!): Customer @deprecated(reason: "User storeOrganization")
+
+    storeOrganization(input: OrganizationInput!): Organization!
 
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
 

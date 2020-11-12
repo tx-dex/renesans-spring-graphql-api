@@ -49,6 +49,13 @@ input PhraseInput {
     languageCode: String
 }
 
+input OrganizationInput {
+    id: ID
+    name: String
+    description: String!
+    segmentId: Long
+}
+
 input CustomerInput {
     id: ID
     name: String

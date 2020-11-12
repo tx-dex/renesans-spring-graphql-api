@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipalService;
+import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.DriverDto;
 import fi.sangre.renesans.exception.CustomerNotFoundException;
@@ -16,7 +17,6 @@ import fi.sangre.renesans.graphql.input.WeightInput;
 import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,6 +84,13 @@ public class QuestionService {
         return getCatalysts(this.questionGroupRepository.findAllByParentIsNull(),
                 null,
                 survey.getSegment());
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public List<CatalystDto> getCatalysts(final Organization organization) {
+        return getCatalysts(customerRepository.findById(organization.getId())
+                .orElseThrow(() -> new CustomerNotFoundException(organization.getId())));
     }
 
     @Transactional
