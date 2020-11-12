@@ -10,7 +10,6 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(of = "id")
 @Builder
-
 public class Catalyst {
     Long id;
     String name;

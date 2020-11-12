@@ -1,7 +1,7 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.dto.CatalystDto;
+import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.model.Segment;
@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static fi.sangre.renesans.graphql.output.CatalystProxy.toProxies;
 
 @Component
 @Transactional
@@ -72,8 +74,8 @@ public class CustomerResolver implements GraphQLResolver<Customer> {
         return questionService.getOnlyCustomerQuestions(customer);
     }
 
-    public List<CatalystDto> getCatalysts(final Customer customer) {
+    public List<CatalystProxy> getCatalysts(final Customer customer) {
 
-        return questionService.getCatalysts(customer);
+        return toProxies(questionService.getCatalysts(customer));
     }
 }

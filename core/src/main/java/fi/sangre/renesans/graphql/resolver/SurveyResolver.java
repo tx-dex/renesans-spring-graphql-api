@@ -1,7 +1,7 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.dto.CatalystDto;
+import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.model.QuestionGroup;
 import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.persistence.model.Survey;
@@ -15,6 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import static fi.sangre.renesans.graphql.output.CatalystProxy.toProxies;
 
 @RequiredArgsConstructor
 
@@ -60,7 +62,7 @@ public class SurveyResolver implements GraphQLResolver<Survey> {
         return questionGroupRepository.findBySurveyAndParentIsNull(survey);
     }
 
-    public List<CatalystDto> getCatalysts(final Survey survey, final DataFetchingEnvironment environment) {
-        return questionService.getCatalysts(survey);
+    public List<CatalystProxy> getCatalysts(final Survey survey, final DataFetchingEnvironment environment) {
+        return toProxies(questionService.getCatalysts(survey));
     }
 }

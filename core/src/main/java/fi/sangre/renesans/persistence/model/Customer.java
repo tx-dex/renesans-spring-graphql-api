@@ -27,6 +27,7 @@ import java.util.Set;
 @Entity
 @Table(name = "customer")
 
+// TODO: rename to Organization when get rid of most of the stuff
 // Enable soft deletes
 // todo get schema from property file // https://hibernate.atlassian.net/browse/HHH-11028
 @SQLDelete(sql = "UPDATE dataserver.customer SET archived = true WHERE id = ?")
@@ -35,7 +36,6 @@ import java.util.Set;
 @Where(clause = "archived = false")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Customer extends BaseModel {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

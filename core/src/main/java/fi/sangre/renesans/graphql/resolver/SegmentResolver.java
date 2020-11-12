@@ -1,7 +1,7 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.dto.CatalystDto;
+import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.persistence.model.Customer;
@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import static fi.sangre.renesans.graphql.output.CatalystProxy.toProxies;
 
 @RequiredArgsConstructor
 
@@ -24,8 +26,8 @@ public class SegmentResolver implements GraphQLResolver<Segment> {
         return questionService.getOnlySegmentQuestions(segment);
     }
 
-    public List<CatalystDto> getCatalysts(final Segment segment) {
-        return questionService.getCatalysts(segment);
+    public List<CatalystProxy> getCatalysts(final Segment segment) {
+        return toProxies(questionService.getCatalysts(segment));
     }
 
     public List<Customer> getCustomers(final Segment segment) {

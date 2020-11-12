@@ -1,20 +1,20 @@
 package fi.sangre.renesans.service;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.dto.DriverDto;
+import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.CustomerNotFoundException;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.OrganizationInput;
-import fi.sangre.renesans.model.CustomerDriverWeights;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.model.Survey;
+import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
+import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
-import fi.sangre.renesans.repository.CustomerDriverWeightsRepository;
 import fi.sangre.renesans.repository.SegmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +24,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -38,7 +41,7 @@ public class OrganizationService {
     private final QuestionService questionService;
     private final SegmentRepository segmentRepository;
     private final SurveyService  surveyService;
-    private final CustomerDriverWeightsRepository customerDriverWeightsRepository;
+    private final MultilingualService multilingualService;
 
     @Transactional
     @CacheEvict(cacheNames = AUTH_CUSTOMER_IDS_CACHE, allEntries = true, condition = "#input.id == null")
@@ -70,11 +73,7 @@ public class OrganizationService {
             createOrganisationSurvey(customer, surveyService.getDefaultSurvey());
         }
 
-        final Customer savedCustomer = customerRepository.save(customer);
-
-        if (input.getId() == null) {
-            createDefaultCustomerDriverWeights(savedCustomer);
-        }
+        customerRepository.save(customer);
 
         return Organization.builder()
                 .id(customer.getId())
@@ -105,29 +104,41 @@ public class OrganizationService {
     }
 
     private void createOrganisationSurvey(@NonNull final Customer customer, @NonNull final Survey defaultSurvey) {
+        final SurveyMetadata.SurveyMetadataBuilder metadata = SurveyMetadata.builder();
+        final ImmutableList.Builder<CatalystMetadata> catalysts = ImmutableList.builder();
+
+        for (final CatalystDto catalyst : questionService.getCatalysts(customer)) {
+            final List<DriverMetadata> drivers = questionService.getAllCatalystDrivers(catalyst.getId(), customer)
+                    .stream()
+                    .map(driver -> DriverMetadata.builder()
+                            .id(driver.getId())
+                            .pdfName(driver.getPdfName())
+                            .titles(multilingualService.getPhrases(driver.getTitleId()))
+                            .descriptions(multilingualService.getPhrases(driver.getDescriptionId()))
+                            .prescriptions(multilingualService.getPhrases(driver.getPrescriptionId()))
+                            .weight(driver.getWeight())
+                            .build())
+
+                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+
+            catalysts.add(CatalystMetadata.builder()
+                    .id(catalyst.getId())
+                    .pdfName(catalyst.getPdfName())
+                    .titles(multilingualService.getPhrases(catalyst.getTitleId()))
+                    .weight(catalyst.getWeight())
+                    .drivers(drivers)
+                    .build());
+        }
+
+        metadata.titles(ImmutableMap.of("en", "Organisation Survey"))
+                .descriptions(ImmutableMap.of("en", "Organisation default survey"))
+                .catalysts(catalysts.build());
+
         final Survey organizationSurvey = Survey.builder()
                 .isDefault(false)
-                .metadata(SurveyMetadata.builder()
-                        .titles(ImmutableMap.of("en", "Organisation Survey"))
-                        .descriptions(ImmutableMap.of("en", "Organisation default survey"))
-                        .build())
+                .metadata(metadata.build())
                 .build();
 
         customer.setSurvey(organizationSurvey);
     }
-
-    private List<CustomerDriverWeights> createDefaultCustomerDriverWeights(final Customer customer) {
-
-        final List<CustomerDriverWeights> weights = Lists.newArrayList();
-        final List<DriverDto> drivers = questionService.getAllDrivers();
-
-        drivers.forEach(driver ->
-                weights.add(CustomerDriverWeights.builder()
-                        .customerId(customer.getId())
-                        .driverId(driver.getId())
-                        .build())
-        );
-        return customerDriverWeightsRepository.saveAll(weights);
-    }
-
 }

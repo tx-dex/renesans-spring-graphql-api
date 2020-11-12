@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipalService;
-import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.DriverDto;
 import fi.sangre.renesans.exception.CustomerNotFoundException;
@@ -56,6 +55,7 @@ public class QuestionService {
                 .id(catalyst.getId())
                 .titleId(catalyst.getTitleId())
                 .pdfName(catalyst.getPdfName())
+                .weight(catalyst.getWeight())
                 .build();
     }
 
@@ -66,14 +66,15 @@ public class QuestionService {
 
         final Map<Long, Long> catalystIdToTitleIdMap = getSegmentTitlesMap(segment);
 
-        catalysts.forEach(e -> {
-            final CatalystDto catalyst = getCatalyst(e);
-            catalyst.setCustomer(customer);
-            catalyst.setSegment(segment);
-            catalyst.setTitleId(catalystIdToTitleIdMap.getOrDefault(e.getId(), catalyst.getTitleId()));
-
-            builder.add(catalyst);
-        });
+        catalysts.stream()
+                .sorted(Comparator.comparingLong(QuestionGroup::getSeq))
+                .forEach(e -> {
+                    final CatalystDto catalyst = getCatalyst(e);
+                    catalyst.setCustomer(customer);
+                    catalyst.setSegment(segment);
+                    catalyst.setTitleId(catalystIdToTitleIdMap.getOrDefault(e.getId(), catalyst.getTitleId()));
+                    builder.add(catalyst);
+                });
 
         return builder.build();
     }
@@ -89,14 +90,7 @@ public class QuestionService {
                 survey.getSegment());
     }
 
-    @NonNull
     @Transactional(readOnly = true)
-    public List<CatalystDto> getCatalysts(final Organization organization) {
-        return getCatalysts(customerRepository.findById(organization.getId())
-                .orElseThrow(() -> new CustomerNotFoundException(organization.getId())));
-    }
-
-    @Transactional
     public List<CatalystDto> getCatalysts(final Customer customer) {
         return getCatalysts(this.questionGroupRepository.findAllByParentIsNull(),
                 customer,
@@ -122,7 +116,7 @@ public class QuestionService {
         return getAllCatalystDrivers(catalyst.getId(), catalyst.getSegment(), catalyst.getCustomer());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<DriverDto> getAllDrivers(final Customer customer) {
         final ImmutableList.Builder<DriverDto> builder = ImmutableList.builder();
 
@@ -133,14 +127,20 @@ public class QuestionService {
         return builder.build();
     }
 
+    @Transactional(readOnly = true)
     public List<DriverDto> getAllDrivers() {
         return questionGroupRepository.findAllByParentIsNotNull().stream()
+                .sorted(Comparator.comparingLong(QuestionGroup::getSeq))
                 .map(this::getDriver)
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
-    @Transactional
-    public List<DriverDto> getAllCatalystDrivers(final Long catalystId, final Segment segment, final Customer customer) {
+    @Transactional(readOnly = true)
+    public List<DriverDto> getAllCatalystDrivers(final Long catalystId, final Customer customer) {
+        return getAllCatalystDrivers(catalystId, customer.getSegment(), customer);
+    }
+
+    private List<DriverDto> getAllCatalystDrivers(final Long catalystId, final Segment segment, final Customer customer) {
         checkArgument(catalystId != null, "Catalyst id is required");
 
         final ImmutableList.Builder<DriverDto> builder = ImmutableList.builder();
@@ -148,13 +148,16 @@ public class QuestionService {
         final Map<Long, Long> driverIdToTitleIdMap = getSegmentTitlesMap(segment);
         final Map<Long, Double> driverIdToWeightMap = getCustomerDriverWeightMap(customer);
 
-        this.questionGroupRepository.findByParentId(catalystId).forEach(e -> {
-            final DriverDto driver = getDriver(e);
-            driver.setTitleId(driverIdToTitleIdMap.getOrDefault(e.getId(), driver.getTitleId()));
-            driver.setWeight(driverIdToWeightMap.get(e.getId()));
+        this.questionGroupRepository.findByParentId(catalystId)
+                .stream()
+                .sorted(Comparator.comparingLong(QuestionGroup::getSeq))
+                .forEach(e -> {
+                    final DriverDto driver = getDriver(e);
+                    driver.setTitleId(driverIdToTitleIdMap.getOrDefault(e.getId(), driver.getTitleId()));
+                    driver.setWeight(driverIdToWeightMap.getOrDefault(e.getId(), driver.getWeight()));
 
-            builder.add(driver);
-        });
+                    builder.add(driver);
+                });
 
         return builder.build();
     }
@@ -167,6 +170,7 @@ public class QuestionService {
                 .titleId(driver.getTitleId())
                 .descriptionId(driver.getDescriptionId())
                 .prescriptionId(driver.getPrescriptionId())
+                .weight(driver.getWeight())
                 .build();
     }
 

@@ -1,14 +1,16 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.QuestionnaireDto;
+import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.service.QuestionnaireService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import static fi.sangre.renesans.graphql.output.CatalystProxy.toProxies;
 
 @RequiredArgsConstructor
 
@@ -16,7 +18,13 @@ import java.util.List;
 public class QuestionnaireResolver implements GraphQLResolver<QuestionnaireDto> {
     private final QuestionnaireService questionnaireService;
 
-    public List<CatalystDto> getQuestionGroups(final QuestionnaireDto questionnaire) {
-        return questionnaireService.getCatalystsWithQuestions(questionnaire);
+    @Deprecated
+    public List<CatalystProxy> getQuestionGroups(final QuestionnaireDto questionnaire) {
+        return toProxies(questionnaireService.getCatalystsWithQuestions(questionnaire));
+    }
+
+    @NonNull
+    public List<CatalystProxy> getCatalysts(final QuestionnaireDto questionnaire) {
+        return toProxies(questionnaireService.getCatalystsWithQuestions(questionnaire));
     }
 }

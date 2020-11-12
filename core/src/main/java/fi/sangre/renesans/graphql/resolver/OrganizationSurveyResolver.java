@@ -1,35 +1,39 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.dto.CatalystDto;
+import fi.sangre.renesans.graphql.output.CatalystProxy;
+import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import static fi.sangre.renesans.graphql.output.CatalystProxy.toProxies;
 
 @RequiredArgsConstructor
 
 @Component
 public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationSurvey> {
+    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final ResolverHelper resolverHelper;
 
     @NonNull
-    public String getTitle(@NonNull final OrganizationSurvey survey) {
-        //TODO: implement properly for getting based on context language
-        return survey.getMetadata().getTitles().get("en");
+    public String getTitle(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
+        return metadataLanguageHelper.getRequiredText(survey.getMetadata().getTitles(),
+                resolverHelper.getLanguageCode(environment));
+    }
+
+    @Nullable
+    public String getDescription(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
+        return metadataLanguageHelper.getOptionalText(survey.getMetadata().getDescriptions(),
+                resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull
-    public String getDescription(@NonNull final OrganizationSurvey survey) {
-        //TODO: implement properly for getting based on context language
-        return survey.getMetadata().getDescriptions().get("en");
-    }
-
-    @NonNull
-    public List<CatalystDto> getCatalysts(@NonNull final OrganizationSurvey survey) {
-        //TODO: implement
-        return ImmutableList.of();
+    public List<CatalystProxy> getCatalysts(@NonNull final OrganizationSurvey survey) {
+        return toProxies(survey.getMetadata().getCatalysts());
     }
 }

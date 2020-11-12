@@ -1,7 +1,7 @@
 package fi.sangre.renesans.service;
 
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.dto.Language;
-import fi.sangre.renesans.graphql.Context;
 import fi.sangre.renesans.graphql.input.PhraseInput;
 import fi.sangre.renesans.model.Country;
 import fi.sangre.renesans.model.MultilingualKey;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.time4j.PrettyTime;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -174,6 +175,14 @@ public class MultilingualService {
         }
 
         return multilingualKey;
+    }
+
+    public Map<String, String> getPhrases(@NonNull final Long keyId) {
+        return multilingualKeyRepository.findById(keyId)
+                .map(MultilingualKey::getPhrases)
+                .orElse(ImmutableMap.<String, MultilingualPhrase>of())
+                .entrySet().stream()
+                .collect(collectingAndThen(toMap(Map.Entry::getKey, e -> e.getValue().getMessage()), Collections::unmodifiableMap));
     }
 
     public MultilingualKey copyKeyWithPhrases(MultilingualKey key){

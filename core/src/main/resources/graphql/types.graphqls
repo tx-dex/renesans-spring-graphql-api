@@ -13,15 +13,14 @@ type Organization {
     description: String
     survey: OrganizationSurvey!
     segment: Segment
-    catalysts: [Catalyst]
 }
 
 type OrganizationSurvey {
     id: ID!
     version: Long!
     title: String!
-    description: String!
-    catalysts: [Catalyst]
+    description: String
+    catalysts: [Catalyst!]!
 }
 
 type Answer {
@@ -58,6 +57,7 @@ type Respondent {
     locale: String
 }
 
+# This is deprecated
 type RespondentGroup {
     id: ID
     title: String
@@ -66,7 +66,7 @@ type RespondentGroup {
     survey: Survey!
     respondents: [Respondent]
     isDefault: Boolean
-    questionGroups: [QuestionGroup] @deprecated(reason: "Catalysts field should be used now")
+    questionGroups: [QuestionGroup] @deprecated(reason: "Catalysts field should be used now. Will be removed")
     defaultLocale: String
     respondentCount: Long
     catalysts: [Catalyst]
@@ -75,8 +75,8 @@ type RespondentGroup {
 type Segment{
     id: ID!
     name: String!
-    questions: [Question] @deprecated(reason: "Catalysts field should be used now")
-    catalysts: [Catalyst]
+    questions: [Question] @deprecated(reason: "Catalysts field should be used now. Will be remove")
+    catalysts: [Catalyst!]!
     customers: [Customer]
     customerCount: Long
 }
@@ -103,21 +103,21 @@ type Weight {
 
 type Catalyst {
     id: ID!
-    title: String
-    titleId: ID
-    description: String
+    title: String!
+    titleId: Long @deprecated(reason: "This shouldn't be exposed. It is internal data. Will be removed")
+    description: String @deprecated(reason: "There is no data for that in data table. Will be remove")
     pdfName: String
     questions: [Question]
-    drivers: [Driver]
+    drivers: [Driver!]!
 }
 
 type Driver {
     id: ID!
-    title: String
-    titleId: ID
+    title: String!
+    titleId: Long @deprecated(reason: "This shouldn't be exposed. it is internal data. Will be remove")
     description: String
     prescription: String
-    weight: Float
+    weight: Float!
 }
 
 type Question {
@@ -175,15 +175,15 @@ type Survey {
     description: String
     descriptionPhraseId: ID
     questionGroups: [QuestionGroup] @deprecated(reason: "Catalysts field should be used now")
-    catalysts: [Catalyst]
+    catalysts: [Catalyst!]!
     respondentGroups: [RespondentGroup] @deprecated(reason: "Will be removed")
     respondent: Respondent
 }
 
-
 type Questionnaire {
     id: ID!
-    questionGroups: [Catalyst]
+    questionGroups: [Catalyst] @deprecated(reason: "Catalysts field should be used now")
+    catalysts: [Catalyst!]!
     respondent: Respondent
 }
 
@@ -209,7 +209,7 @@ type Resultdetails{
     recipients: [Recipient]
 }
 
-type Customer{
+type Customer {
     id: ID!
     name: String!
     description: String

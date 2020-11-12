@@ -1,7 +1,7 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.dto.CatalystDto;
+import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.model.QuestionGroup;
 import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.RespondentGroup;
@@ -19,10 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static fi.sangre.renesans.graphql.output.CatalystProxy.toProxies;
+
 @RequiredArgsConstructor
 
 @Component
 @Transactional
+@Deprecated
 public class RespondentGroupResolver implements GraphQLResolver<RespondentGroup> {
     private final RespondentRepository respondentRepository;
     private final QuestionGroupRepository questionGroupRepository;
@@ -68,8 +71,8 @@ public class RespondentGroupResolver implements GraphQLResolver<RespondentGroup>
         return questionGroupRepository.findByRespondentGroupsContaining(respondentGroup);
     }
 
-    public List<CatalystDto> getCatalysts(final RespondentGroup respondentGroup) {
-        return questionService.getCatalysts(respondentGroup);
+    public List<CatalystProxy> getCatalysts(final RespondentGroup respondentGroup) {
+        return toProxies(questionService.getCatalysts(respondentGroup));
     }
 
     public Long getRespondentCount(RespondentGroup respondentGroup) {
