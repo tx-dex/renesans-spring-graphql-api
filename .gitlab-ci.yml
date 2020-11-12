@@ -56,7 +56,7 @@ job_publish_tagged_image:
 job_publish_master_image:
   image: docker:latest
   variables:
-    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:latest
   services:
     - docker:dind
   stage: publish_image
