@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -63,6 +62,7 @@ public class CustomErrorHandler implements GraphQLErrorHandler {
     private  GraphQLError processUnknownException(@NonNull final ExceptionWhileDataFetching error) {
         return new CustomApiError(error.getException().getMessage(),
                 ImmutableMap.of(ERROR_CODE_EXTENSION, ErrorCodes.UNKNOWN_ERROR.getValue()),
-                error.getLocations());
+                error.getLocations(),
+                error.getPath());
     }
 }

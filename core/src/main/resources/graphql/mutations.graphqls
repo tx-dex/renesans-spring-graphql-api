@@ -68,9 +68,9 @@ type Mutation {
 
     removeUser(id: ID!): User
 
-    storeRespondentGroup(respondentGroup: RespondentGroupInput!): RespondentGroup
+    storeRespondentGroup(respondentGroup: RespondentGroupInput!): RespondentGroup @deprecated(reason: "Will be removed")
 
-    removeRespondentGroup(id: ID!): RespondentGroup
+    removeRespondentGroup(id: ID!): RespondentGroup @deprecated(reason: "Will be removed")
 
     removeRespondent(id: ID!): Respondent
 
@@ -80,17 +80,17 @@ type Mutation {
         respondentGroupId: ID!,
         respondent: RespondentInput!,
         answers: [AnswerInput!]!
-    ): Respondent
+    ): Respondent @deprecated(reason: "Will be removed")
 
     moveRespondentToRespondentGroup(
         respondentId: ID!
         respondentGroupId: ID!
-    ): Respondent
+    ): Respondent @deprecated(reason: "Will be removed")
 
     copyRespondentToRespondentGroup(
         respondentId: ID!
         respondentGroupId: ID!
-    ): Respondent
+    ): Respondent @deprecated(reason: "Will be removed")
 
     login(
         username: String!

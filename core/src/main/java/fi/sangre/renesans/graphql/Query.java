@@ -1,8 +1,10 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.dto.*;
+import fi.sangre.renesans.exception.DeprecatedException;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.service.*;
@@ -14,12 +16,10 @@ import graphql.language.Selection;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -172,10 +172,9 @@ public class Query implements GraphQLQueryResolver {
         return multilingualService.getPhrases(keys, startsWith, resolverHelper.getLanguageCode(environment));
     }
 
+    @Deprecated
     public String defaultRespondentGroupId(DataFetchingEnvironment environment) {
-        RespondentGroup respondentGroup = defaultRespondentGroup("en", environment);
-
-        return respondentGroup.getId();
+        throw new DeprecatedException();
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -192,22 +191,16 @@ public class Query implements GraphQLQueryResolver {
         return surveyService.getDefaultSurvey().getId();
     }
 
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public RespondentGroup respondentGroup(String languageCode, String id, DataFetchingEnvironment environment) {
-        resolverHelper.setLanguageCode(languageCode, environment);
-
-        return respondentGroupService.getRespondentGroup(id);
+        throw new DeprecatedException();
     }
 
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public List<RespondentGroup> respondentGroups(String languageCode, Long customerId, DataFetchingEnvironment environment) {
-        resolverHelper.setLanguageCode(languageCode, environment);
-
-        if (customerId != null) {
-            Customer customer = customerService.getCustomer(customerId);
-            return respondentGroupService.getRespondentGroups(customer);
-        }
-        return respondentGroupService.getAllRespondentGroups();
+        return ImmutableList.of();
     }
 
     public List<Language> languages(String languageCode, DataFetchingEnvironment environment) {
@@ -275,20 +268,8 @@ public class Query implements GraphQLQueryResolver {
         return new ValidationDto(valid, error);
     }
 
+    @Deprecated
     public RespondentGroup defaultRespondentGroup(String languageCode, DataFetchingEnvironment environment) {
-        resolverHelper.setLanguageCode(languageCode, environment);
-
-        // TODO at some point multiple surveys
-        Survey survey = surveyService.getDefaultSurvey();
-        if (survey == null) {
-            throw new GraphQLException("Internal error: no default survey found");
-        }
-
-        RespondentGroup respondentGroup = respondentGroupService.getDefaultRespondentGroup(survey);
-        if (respondentGroup == null) {
-            throw new GraphQLException("No default respondent group found");
-        }
-
-        return respondentGroup;
+        throw new DeprecatedException();
     }
 }

@@ -4,6 +4,7 @@ import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.dto.AuthorizationDto;
 import fi.sangre.renesans.dto.ResultDetailsDto;
+import fi.sangre.renesans.exception.DeprecatedException;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.model.*;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Locale;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -158,28 +158,28 @@ public class Mutation implements GraphQLMutationResolver {
         return questionService.removeQuestion(id);
     }
 
-    // TODO refine
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public RespondentGroup storeRespondentGroup(RespondentGroupInput respondentGroupInput) {
-        return respondentGroupService.storeRespondentGroup(respondentGroupInput);
+        throw new DeprecatedException();
     }
 
-    // TODO refine
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public Respondent moveRespondentToRespondentGroup(String respondentId, String respondentGroupId) {
-        return respondentService.moveRespondentToRespondentGroup(respondentId, respondentGroupId);
+        throw new DeprecatedException();
     }
 
-    // TODO refine
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public Respondent copyRespondentToRespondentGroup(String respondentId, String respondentGroupId) {
-        return respondentService.copyRespondentToRespondentGroup(respondentId, respondentGroupId);
+        throw new DeprecatedException();
     }
 
-    // TODO refine
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public RespondentGroup removeRespondentGroup(String id) {
-        return respondentGroupService.removeRespondentGroup(id);
+        throw new DeprecatedException();
     }
 
     // TODO refine
@@ -224,8 +224,9 @@ public class Mutation implements GraphQLMutationResolver {
         return customerService.deleteCustomer(id);
     }
 
+    @Deprecated
     public Respondent submitSurvey(String respondentGroupId, RespondentInput respondentInput, List<AnswerInput> answers) {
-        return respondentService.submitSurvey(respondentGroupId, respondentInput, answers);
+        throw new DeprecatedException();
     }
 
     public AuthorizationDto login(@NotNull String username, @NotNull String password) {

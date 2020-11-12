@@ -23,17 +23,17 @@ type Query {
     respondentGroups(
         languageCode: String
         customerId: ID
-    ): [RespondentGroup]
+    ): [RespondentGroup] @deprecated(reason: "Will be removed")
 
-    defaultRespondentGroupId: String
-    defaultRespondentGroup(languageCode: String): RespondentGroup
+    defaultRespondentGroupId: String @deprecated(reason: "Will be removed")
+    defaultRespondentGroup(languageCode: String): RespondentGroup @deprecated(reason: "Will be removed")
 
     defaultSurveyId: String
 
     respondentGroup(
         languageCode: String
         id: ID!
-    ): RespondentGroup
+    ): RespondentGroup @deprecated(reason: "Will be removed")
 
     phrases(
         languageCode: String
