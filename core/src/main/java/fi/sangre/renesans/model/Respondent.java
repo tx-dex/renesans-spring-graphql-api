@@ -4,11 +4,11 @@ import lombok.*;
 import org.hibernate.annotations.*;
 
 import javax.persistence.CascadeType;
-import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 @NamedQuery(name = "findRespondentById", query = "SELECT r FROM Respondent r WHERE r.id = ?1 AND r.archived = false")
 @Where(clause = "archived = false")
 @DynamicUpdate
-@TypeDef(name = "pgsql_enum", typeClass = PostgreSQLEnumType.class)
 public class Respondent extends BaseModel {
     public enum State {
         INVITED,

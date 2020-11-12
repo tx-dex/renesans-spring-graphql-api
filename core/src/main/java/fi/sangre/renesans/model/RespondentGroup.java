@@ -1,14 +1,16 @@
 package fi.sangre.renesans.model;
 
+import fi.sangre.renesans.persistence.model.Customer;
+import fi.sangre.renesans.persistence.model.Survey;
 import lombok.*;
 import org.hibernate.annotations.*;
 
 import javax.persistence.CascadeType;
-import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.NamedQuery;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 

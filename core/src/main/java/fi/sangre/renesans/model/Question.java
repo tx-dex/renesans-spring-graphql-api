@@ -1,15 +1,16 @@
 package fi.sangre.renesans.model;
 
 import com.google.common.collect.Lists;
+import fi.sangre.renesans.persistence.model.Customer;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.*;
 
 import javax.persistence.CascadeType;
-import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
 @Getter

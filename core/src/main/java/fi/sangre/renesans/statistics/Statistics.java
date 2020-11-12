@@ -2,7 +2,7 @@ package fi.sangre.renesans.statistics;
 
 import com.google.common.collect.Lists;
 import fi.sangre.renesans.model.Respondent;
-import fi.sangre.renesans.model.Survey;
+import fi.sangre.renesans.persistence.model.Survey;
 import lombok.Builder;
 import lombok.Data;
 

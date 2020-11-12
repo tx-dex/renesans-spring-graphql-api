@@ -1,15 +1,22 @@
 package fi.sangre.renesans.service;
 
 import com.google.common.collect.*;
+import fi.sangre.renesans.application.model.Catalyst;
+import fi.sangre.renesans.application.model.Driver;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.DriverDto;
 import fi.sangre.renesans.dto.FiltersDto;
 import fi.sangre.renesans.exception.InputArgumentsValidationException;
 import fi.sangre.renesans.exception.RespondentGroupNotFoundException;
 import fi.sangre.renesans.exception.RespondentNotFoundException;
-import fi.sangre.renesans.model.*;
+import fi.sangre.renesans.model.Question;
+import fi.sangre.renesans.model.Respondent;
+import fi.sangre.renesans.model.RespondentGroup;
+import fi.sangre.renesans.model.Segment;
+import fi.sangre.renesans.persistence.model.Customer;
+import fi.sangre.renesans.persistence.model.Survey;
+import fi.sangre.renesans.persistence.repository.CustomerRepository;
 import fi.sangre.renesans.repository.AnswerRepository;
-import fi.sangre.renesans.repository.CustomerRepository;
 import fi.sangre.renesans.repository.RespondentGroupRepository;
 import fi.sangre.renesans.repository.RespondentRepository;
 import fi.sangre.renesans.statistics.*;

@@ -2,15 +2,13 @@ package fi.sangre.renesans.repository;
 
 
 import com.querydsl.core.types.Predicate;
-import fi.sangre.renesans.model.Customer;
-import fi.sangre.renesans.model.QRespondent;
 import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.RespondentGroup;
+import fi.sangre.renesans.persistence.model.Customer;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -3,6 +3,7 @@ package fi.sangre.renesans.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import fi.sangre.renesans.persistence.model.Customer;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;

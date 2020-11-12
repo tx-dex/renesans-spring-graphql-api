@@ -7,6 +7,8 @@ import fi.sangre.renesans.dto.*;
 import fi.sangre.renesans.exception.DeprecatedException;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.model.*;
+import fi.sangre.renesans.persistence.model.Customer;
+import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.service.*;
 import fi.sangre.renesans.statistics.ComparativeStatistics;
 import fi.sangre.renesans.statistics.Statistics;

@@ -25,19 +25,19 @@
             maxElementsInMemory="5000"
     />
     <cache
-            name="fi.sangre.renesans.model.Survey"
+            name="fi.sangre.renesans.persistence.model.Survey"
             timeToIdleSeconds="300"
             timeToLiveSeconds="600"
             maxElementsInMemory="100"
     />
     <cache
-            name="fi.sangre.renesans.model.Customer"
+            name="fi.sangre.renesans.persistence.model.Customer"
             timeToIdleSeconds="300"
             timeToLiveSeconds="600"
             maxElementsInMemory="1000"
     />
     <cache
-            name="fi.sangre.renesans.model.Customer.questions"
+            name="fi.sangre.renesans.persistence.model.Customer.questions"
             timeToIdleSeconds="300"
             timeToLiveSeconds="600"
             maxElementsInMemory="500"

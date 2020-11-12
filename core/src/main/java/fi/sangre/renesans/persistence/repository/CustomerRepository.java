@@ -1,9 +1,9 @@
-package fi.sangre.renesans.repository;
+package fi.sangre.renesans.persistence.repository;
 
-import fi.sangre.renesans.model.Customer;
 import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.model.User;
+import fi.sangre.renesans.persistence.model.Customer;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;

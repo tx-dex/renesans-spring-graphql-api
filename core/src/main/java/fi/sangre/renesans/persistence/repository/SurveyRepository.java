@@ -1,7 +1,7 @@
-package fi.sangre.renesans.repository;
+package fi.sangre.renesans.persistence.repository;
 
 import fi.sangre.renesans.model.RespondentGroup;
-import fi.sangre.renesans.model.Survey;
+import fi.sangre.renesans.persistence.model.Survey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,12 +10,14 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface SurveyRepository extends JpaRepository<Survey,String> {
+public interface SurveyRepository extends JpaRepository<Survey, String> {
 
     Optional<Survey> findByIsDefaultTrue();
 
+    @Deprecated
     Survey findByRespondentGroupsContaining(RespondentGroup respondentGroup);
 
+    @Deprecated
     @Query("SELECT s FROM Survey s, RespondentGroup g WHERE g.survey.id = s.id AND g.id = :id")
     Survey findByRespondentGroupId(@Param("id") String id);
 

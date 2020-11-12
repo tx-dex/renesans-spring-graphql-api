@@ -1,9 +1,9 @@
 package fi.sangre.renesans.dto;
 
 import com.google.common.collect.Lists;
-import fi.sangre.renesans.model.Customer;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.Segment;
+import fi.sangre.renesans.persistence.model.Customer;
 import lombok.Builder;
 import lombok.Data;
 

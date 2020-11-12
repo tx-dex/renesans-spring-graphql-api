@@ -1,6 +1,7 @@
-package fi.sangre.renesans.model;
+package fi.sangre.renesans.persistence.model;
 
 import com.google.api.client.util.Lists;
+import fi.sangre.renesans.model.*;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.*;

@@ -1,8 +1,10 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.model.*;
-import fi.sangre.renesans.repository.CustomerRepository;
+import fi.sangre.renesans.model.Role;
+import fi.sangre.renesans.model.User;
+import fi.sangre.renesans.persistence.model.Customer;
+import fi.sangre.renesans.persistence.repository.CustomerRepository;
 import fi.sangre.renesans.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

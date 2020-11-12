@@ -1,7 +1,7 @@
 package fi.sangre.renesans.service
 
 import fi.sangre.renesans.aaa.JwtTokenService
-import fi.sangre.renesans.repository.CustomerRepository
+import fi.sangre.renesans.persistence.repository.CustomerRepository
 import fi.sangre.renesans.repository.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import spock.lang.Specification

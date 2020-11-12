@@ -1,5 +1,6 @@
 package fi.sangre.renesans.model;
 
+import fi.sangre.renesans.persistence.model.Survey;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;

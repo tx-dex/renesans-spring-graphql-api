@@ -9,6 +9,7 @@ import fi.sangre.renesans.exception.DeprecatedException;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.model.*;
+import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.service.*;
 import graphql.GraphQLException;
 import graphql.schema.DataFetchingEnvironment;

@@ -1,6 +1,6 @@
 package fi.sangre.renesans.controllers;
 
-import fi.sangre.renesans.model.Customer;
+import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.service.CustomerService;
 import fi.sangre.renesans.service.ExcelWriterService;
 import org.apache.poi.util.IOUtils;

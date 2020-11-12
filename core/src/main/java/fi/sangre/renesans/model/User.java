@@ -1,5 +1,6 @@
 package fi.sangre.renesans.model;
 
+import fi.sangre.renesans.persistence.model.Customer;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.Email;

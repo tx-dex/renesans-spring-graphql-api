@@ -2,7 +2,11 @@ package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import fi.sangre.renesans.dto.CatalystDto;
-import fi.sangre.renesans.model.*;
+import fi.sangre.renesans.model.QuestionGroup;
+import fi.sangre.renesans.model.Respondent;
+import fi.sangre.renesans.model.RespondentGroup;
+import fi.sangre.renesans.persistence.model.Customer;
+import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.repository.QuestionGroupRepository;
 import fi.sangre.renesans.repository.RespondentRepository;
 import fi.sangre.renesans.service.CustomerService;

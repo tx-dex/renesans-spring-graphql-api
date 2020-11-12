@@ -2,10 +2,9 @@ package fi.sangre.renesans.service;
 
 import fi.sangre.renesans.exception.SurveyNotFoundException;
 import fi.sangre.renesans.model.RespondentGroup;
-import fi.sangre.renesans.model.Survey;
-import fi.sangre.renesans.repository.SurveyRepository;
+import fi.sangre.renesans.persistence.model.Survey;
+import fi.sangre.renesans.persistence.repository.SurveyRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,8 +1,8 @@
 package fi.sangre.renesans.aaa;
 
-import fi.sangre.renesans.model.Customer;
 import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.RespondentGroup;
+import fi.sangre.renesans.persistence.model.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;

@@ -2,7 +2,7 @@ package fi.sangre.renesans.repository;
 
 import fi.sangre.renesans.model.QuestionGroup;
 import fi.sangre.renesans.model.RespondentGroup;
-import fi.sangre.renesans.model.Survey;
+import fi.sangre.renesans.persistence.model.Survey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;

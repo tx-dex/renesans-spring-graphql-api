@@ -1,7 +1,8 @@
-package fi.sangre.renesans.model;
+package fi.sangre.renesans.persistence.model;
 
 
 import com.google.common.collect.Sets;
+import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import lombok.*;
 import org.hibernate.annotations.Cache;

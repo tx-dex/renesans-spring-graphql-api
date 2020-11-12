@@ -1,11 +1,11 @@
 package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.model.Catalyst;
-import fi.sangre.renesans.model.Customer;
-import fi.sangre.renesans.model.Driver;
+import fi.sangre.renesans.application.model.Catalyst;
+import fi.sangre.renesans.application.model.Driver;
 import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.excel.*;
+import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.statistics.Statistics;
 import fi.sangre.renesans.statistics.StatisticsCatalyst;
 import fi.sangre.renesans.statistics.StatisticsDriver;

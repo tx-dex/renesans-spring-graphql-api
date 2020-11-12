@@ -4,14 +4,13 @@ import com.coxautodev.graphql.tools.GraphQLResolver;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.model.QuestionGroup;
 import fi.sangre.renesans.model.RespondentGroup;
-import fi.sangre.renesans.model.Survey;
+import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.repository.QuestionGroupRepository;
 import fi.sangre.renesans.repository.RespondentGroupRepository;
 import fi.sangre.renesans.service.MultilingualService;
 import fi.sangre.renesans.service.QuestionService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 

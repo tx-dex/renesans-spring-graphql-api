@@ -2,13 +2,12 @@ package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import fi.sangre.renesans.dto.CatalystDto;
-import fi.sangre.renesans.model.Customer;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.Segment;
+import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.service.CustomerService;
 import fi.sangre.renesans.service.QuestionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
