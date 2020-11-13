@@ -4,14 +4,11 @@ import com.google.api.client.util.Lists;
 import fi.sangre.renesans.model.*;
 import lombok.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.NamedQuery;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +27,7 @@ import java.util.Set;
 // TODO: rename to Organization when get rid of most of the stuff
 // Enable soft deletes
 // todo get schema from property file // https://hibernate.atlassian.net/browse/HHH-11028
-@SQLDelete(sql = "UPDATE dataserver.customer SET archived = true WHERE id = ?")
-@Loader(namedQuery = "findCustomerById")
-@NamedQuery(name = "findCustomerById", query = "SELECT c FROM Customer c WHERE c.id = ?1 AND c.archived = false")
+@SQLDelete(sql = "UPDATE data.customer SET archived = true WHERE id = ?")
 @Where(clause = "archived = false")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Customer extends BaseModel {
@@ -70,6 +65,10 @@ public class Customer extends BaseModel {
     @Column(name = "is_default", updatable = false)
     @Builder.Default
     private Boolean isDefault = false;
+
+    @Column(name = "archived", nullable = false)
+    @Builder.Default
+    private Boolean archived = false;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
     @OrderBy("seq")

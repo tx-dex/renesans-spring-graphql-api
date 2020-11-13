@@ -6,10 +6,11 @@ import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import lombok.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.*;
 
+import javax.persistence.Entity;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,19 +25,24 @@ import java.util.Set;
 
 @Entity
 @Table(name = "survey")
+@SQLDelete(sql = "UPDATE data.survey SET archived = true, version = version + 1 WHERE id = ? and version = ?")
+@Where(clause = "archived = false")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Survey extends BaseModel {
-
+    private static final Long INITIAL_VERSION = 1L;
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    @Builder.Default
+    private Long version = INITIAL_VERSION;
+
     @Column(name = "is_default")
     @Builder.Default
     private Boolean isDefault = false;
-
-    private Long seq;
 
     @OneToOne(fetch = FetchType.LAZY)
     private MultilingualKey title;

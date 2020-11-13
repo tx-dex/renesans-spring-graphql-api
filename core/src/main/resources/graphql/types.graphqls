@@ -7,6 +7,20 @@ enum QuestionSourceType {
     ORGANISATION
 }
 
+type Customer {
+    id: ID!
+    name: String!
+    description: String
+    respondentGroups:[RespondentGroup] @deprecated(reason: "This will be remove")
+    createdBy: User
+    respondentGroupCount: Long @deprecated(reason: "This will be remove")
+    respondentCount: Long
+    isDefault: Boolean
+    segment: Segment
+    questions: [Question] @deprecated(reason: "Catalysts field should be used now")
+    catalysts: [Catalyst]
+}
+
 type Organization {
     id: ID!
     name: String!
@@ -77,8 +91,10 @@ type Segment{
     name: String!
     questions: [Question] @deprecated(reason: "Catalysts field should be used now. Will be remove")
     catalysts: [Catalyst!]!
-    customers: [Customer]
-    customerCount: Long
+    customers: [Customer!]! @deprecated(reason: "Use organizations")
+    customerCount: Long!  @deprecated(reason: "Use organizationCount")
+    organizations: [Organization!]!
+    organizationCount: Long!
 }
 
 enum QuestionType {
@@ -207,20 +223,6 @@ type Resultdetails{
     sentCount: Long
     failedCount: Long
     recipients: [Recipient]
-}
-
-type Customer {
-    id: ID!
-    name: String!
-    description: String
-    respondentGroups:[RespondentGroup]
-    createdBy: User
-    respondentGroupCount: Long
-    respondentCount: Long
-    isDefault: Boolean
-    segment: Segment
-    questions: [Question] @deprecated(reason: "Catalysts field should be used now")
-    catalysts: [Catalyst]
 }
 
 type MultiLingualPhrase{

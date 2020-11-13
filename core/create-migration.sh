@@ -18,6 +18,6 @@ MIGRATION="V${FILENAME}"
 
 echo "Creating migration file .. ${MIGRATION}"
 `echo "-- migration ${TIMESTAMP_HUMAN} / ${NAME}" >> ${TARGET_DIR}/${MIGRATION}`
-`echo "SET SCHEMA 'dataserver';" >> ${TARGET_DIR}/${MIGRATION}`
+`echo "SET SCHEMA 'data';" >> ${TARGET_DIR}/${MIGRATION}`
 `echo "" >> ${TARGET_DIR}/${MIGRATION}`
 echo ""

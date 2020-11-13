@@ -238,10 +238,16 @@ public class Mutation implements GraphQLMutationResolver {
         return customerService.storeCustomerDriverWeights(customerId, driverWeightInput);
     }
 
-    // TODO refine
+    @Deprecated
+    @PreAuthorize("isAuthenticated()")
+    public Organization removeOrganization(@NonNull final Long id) {
+        return organizationService.softDeleteOrganization(id);
+    }
+
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public Customer removeCustomer(Long id) {
-        return customerService.deleteCustomer(id);
+        throw new DeprecatedException();
     }
 
     @Deprecated

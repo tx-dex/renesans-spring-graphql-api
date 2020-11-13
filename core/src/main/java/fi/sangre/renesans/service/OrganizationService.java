@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.dto.CatalystDto;
-import fi.sangre.renesans.exception.CustomerNotFoundException;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.OrganizationInput;
 import fi.sangre.renesans.model.Segment;
@@ -27,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -49,8 +49,7 @@ public class OrganizationService {
 
         final Customer customer;
         if (input.getId() != null) {
-            customer = customerRepository.findById(input.getId())
-                    .orElseThrow(() -> new CustomerNotFoundException(input.getId()));
+            customer = getByIdOrThrow(input.getId());
 
         } else {
             customer = Customer.builder().build();
@@ -82,6 +81,17 @@ public class OrganizationService {
                 .build();
     }
 
+    @NonNull
+    @Transactional
+    @CacheEvict(cacheNames = AUTH_CUSTOMER_IDS_CACHE, allEntries = true, condition = "#id == null")
+    public Organization softDeleteOrganization(@NonNull final Long id) {
+        final Customer customer = getByIdOrThrow(id);
+
+        customerRepository.delete(customer);
+
+        return toOrganisation(customer);
+    }
+
     @Nullable
     @Transactional(readOnly = true)
     public Segment getSegment(@NonNull final Organization organization) {
@@ -93,12 +103,32 @@ public class OrganizationService {
 
     @NonNull
     @Transactional(readOnly = true)
+    public List<Organization> findAllBySegment(@NonNull final Segment segment) {
+        return findAllBySegment(segment,this::toOrganisation);
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public <T> List<T> findAllBySegment(@NonNull final Segment segment, @NonNull final Function<Customer, T> mapper) {
+        return customerRepository.findAllBySegment(segment)
+                .stream().map(mapper)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public Long countBySegment(@NonNull final Segment segment) {
+        return customerRepository.countBySegment(segment);
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
     public OrganizationSurvey getSurvey(@NonNull final Organization organization) {
         final Survey survey = customerRepository.findById(organization.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found", organization.getId())).getSurvey();
         return OrganizationSurvey.builder()
                 .id(UUID.fromString(survey.getId()))
-                .version(1L)
+                .version(survey.getVersion())
                 .metadata(survey.getMetadata())
                 .build();
     }
@@ -140,5 +170,18 @@ public class OrganizationService {
                 .build();
 
         customer.setSurvey(organizationSurvey);
+    }
+
+    private Customer getByIdOrThrow(@NonNull final Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+    }
+
+    private Organization toOrganisation(@NonNull final Customer customer) {
+        return Organization.builder()
+                .id(customer.getId())
+                .name(customer.getName())
+                .description(customer.getDescription())
+                .build();
     }
 }

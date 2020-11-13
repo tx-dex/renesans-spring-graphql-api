@@ -56,7 +56,8 @@ type Mutation {
 
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
 
-    removeCustomer(id: ID!): Customer
+    removeCustomer(id: ID!): Customer @deprecated(reason: "User removeOrganization")
+    removeOrganization(id: ID!): Organization!
 
     storeSegment(languageCode: String!, segment: SegmentInput!): Segment
 

@@ -42,8 +42,8 @@ create table if not exists respondent_option
 create table if not exists survey
 (
 	id char(36) primary key not null,
+	version bigint not null,
 	is_default boolean,
-	seq bigint,
 	description_id bigint
 		constraint fk6ud7ylb9rxnffuearyax4xv26
 			references multilingual_key,
@@ -51,9 +51,9 @@ create table if not exists survey
 		constraint fkeg83pbj5j3pqidoyji4hqh1tq
 			references multilingual_key,
 	metadata jsonb null,
+	archived boolean default false,
 	ctm timestamp default CURRENT_TIMESTAMP not null,
-	mtm timestamp default CURRENT_TIMESTAMP not null,
-	archived boolean default false
+	mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
 create table if not exists question_group

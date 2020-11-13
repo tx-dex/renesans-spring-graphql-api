@@ -4,7 +4,6 @@ import com.coxautodev.graphql.tools.GraphQLResolver;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.dto.CatalystDto;
-import fi.sangre.renesans.exception.DeprecatedException;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.graphql.output.DriverProxy;
 import fi.sangre.renesans.graphql.output.OutputProxy;
@@ -46,7 +45,7 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
 
     @Deprecated
     public Long getTitleId(@NonNull final CatalystProxy proxy) {
-        throw new DeprecatedException();
+        return null;
     }
 
     @Deprecated

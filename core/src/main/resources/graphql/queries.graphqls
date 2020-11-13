@@ -53,12 +53,12 @@ type Query {
 
     customers(
         languageCode: String
-    ): [Customer]
+    ): [Customer!]!
 
     customer(
         languageCode: String
         id: ID!
-    ): Customer
+    ): Customer!
 
     segment(
         languageCode: String

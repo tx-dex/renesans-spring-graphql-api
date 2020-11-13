@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 // Enable soft deletes
 // todo get schema from property file // https://hibernate.atlassian.net/browse/HHH-11028
-@SQLDelete(sql = "UPDATE dataserver.respondent SET archived = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE data.respondent SET archived = true WHERE id = ?")
 @Loader(namedQuery = "findRespondentById")
 @NamedQuery(name = "findRespondentById", query = "SELECT r FROM Respondent r WHERE r.id = ?1 AND r.archived = false")
 @Where(clause = "archived = false")

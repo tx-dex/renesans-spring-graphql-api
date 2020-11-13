@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
@@ -88,14 +87,6 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public Segment getCustomerSegment(@NonNull final Customer customer) {
         return segmentRepository.findByCustomers(customer).orElse(null);
-    }
-
-    public List<Customer> getCustomersAssignedToSegment(final Segment segment) {
-        return customerRepository.findAllBySegment(segment);
-    }
-
-    public Long countCustomersForSegment(final Segment segment) {
-        return Optional.ofNullable(customerRepository.countBySegment(segment)).orElse(0L);
     }
 
     public Customer getCustomer(RespondentGroup respondentGroup) {

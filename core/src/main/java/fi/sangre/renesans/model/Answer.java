@@ -18,7 +18,7 @@ import javax.persistence.*;
 
 // Enable soft deletes
 // todo get schema from property file // https://hibernate.atlassian.net/browse/HHH-11028
-@SQLDelete(sql = "UPDATE dataserver.answer SET archived = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE data.answer SET archived = true WHERE id = ?")
 @Loader(namedQuery = "findAnswerById")
 @NamedQuery(name = "findAnswerById", query = "SELECT a FROM Answer a WHERE a.id = ?1 AND a.archived = false")
 @Where(clause = "archived = false")

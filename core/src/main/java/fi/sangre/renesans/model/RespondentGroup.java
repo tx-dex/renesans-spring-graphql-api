@@ -25,7 +25,7 @@ import java.util.List;
 
 // Enable soft deletes
 // todo get schema from property file // https://hibernate.atlassian.net/browse/HHH-11028
-@SQLDelete(sql = "UPDATE dataserver.respondent_group SET archived = true, mtm = current_timestamp WHERE id = ?")
+@SQLDelete(sql = "UPDATE data.respondent_group SET archived = true, mtm = current_timestamp WHERE id = ?")
 @Loader(namedQuery = "findRespondentGroupById")
 @NamedQuery(name = "findRespondentGroupById", query = "SELECT g FROM RespondentGroup g WHERE g.id = ?1 AND g.archived = false")
 @Where(clause = "archived = false")
