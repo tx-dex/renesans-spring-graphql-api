@@ -15,9 +15,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Repository
-public interface CustomerRepository extends JpaRepository<Customer, Long> {
+public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     Sort DEFAULT_CUSTOMER_SORTING = new Sort(new Sort.Order(Sort.Direction.ASC, "name").ignoreCase());
 
     @NonNull

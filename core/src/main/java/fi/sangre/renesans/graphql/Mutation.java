@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -210,7 +211,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     @PreAuthorize("isAuthenticated()")
-    public Customer storeCustomerDriverWeights(Long customerId, List<DriverWeightInput> driverWeightInput ) {
+    public Customer storeCustomerDriverWeights(UUID customerId, List<DriverWeightInput> driverWeightInput ) {
         return customerService.storeCustomerDriverWeights(customerId, driverWeightInput);
     }
 

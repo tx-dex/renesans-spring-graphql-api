@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
 @RestController
 public class ExcelReport {
@@ -22,7 +23,7 @@ public class ExcelReport {
 
     @GetMapping("/survey/report/excel/{customerId}")
     @PreAuthorize("isAuthenticated()")
-    public void downloadExcelFile(@PathVariable Long customerId, HttpServletResponse response) throws Exception {
+    public void downloadExcelFile(@PathVariable final UUID customerId, HttpServletResponse response) throws Exception {
         final Customer customer = customerService.getCustomer(customerId);
         try {
             response.setHeader("Content-Disposition", String.format("attachment; filename=\"wecan -" + customer.getName() + ".xlsx\""));

@@ -2,7 +2,6 @@ package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import fi.sangre.renesans.exception.CustomerNotFoundException;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.DriverWeightInput;
 import fi.sangre.renesans.model.CustomerDriverWeights;
@@ -17,7 +16,6 @@ import graphql.GraphQLException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
 
@@ -66,22 +64,9 @@ public class CustomerService {
         return ImmutableList.copyOf(customerRepository.findAll());
     }
 
-    public Customer getCustomer(final Long id) {
+    public Customer getCustomer(final UUID id) {
         return customerRepository.findById(id)
-                .orElseThrow(() -> new CustomerNotFoundException(id));
-    }
-
-    @CacheEvict(cacheNames = AUTH_CUSTOMER_IDS_CACHE, allEntries = true)
-    public Customer deleteCustomer(Long id) {
-        Customer customer = getCustomer(id);
-
-        if (respondentGroupRepository.existsByCustomerAndIsDefaultTrue(customer)) {
-            throw new GraphQLException("Can't remove a customer that has a default respondent group");
-        }
-
-        customerRepository.delete(customer);
-
-        return customer;
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
     }
 
     @Transactional(readOnly = true)
@@ -93,7 +78,7 @@ public class CustomerService {
         return customerRepository.findByGroupsContaining(respondentGroup);
     }
 
-    public Customer storeCustomerDriverWeights(Long customerId, List<DriverWeightInput> driverWeights) { // TODO why returning customer here? not list of weights
+    public Customer storeCustomerDriverWeights(UUID customerId, List<DriverWeightInput> driverWeights) { // TODO why returning customer here? not list of weights
         checkArgument(customerId != null, "Customer Id is required");
 
         final Customer customer = getCustomer(customerId);

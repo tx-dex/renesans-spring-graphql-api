@@ -1,7 +1,7 @@
 package fi.sangre.renesans.persistence.model;
 
 
-import com.google.common.collect.Sets;
+import com.google.api.client.util.Lists;
 import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import lombok.*;
@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -31,9 +31,10 @@ import java.util.Set;
 public class Survey extends BaseModel {
     private static final Long INITIAL_VERSION = 1L;
     @Id
-    @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    private String id;
+    @GeneratedValue(generator = "uuid")
+    @Column(name = "id", unique = true, nullable = false, updatable = false,  columnDefinition = "uuid")
+    private UUID id;
 
     @Version
     @Column(name = "version", nullable = false)
@@ -69,9 +70,9 @@ public class Survey extends BaseModel {
     @Builder.Default
     private List<RespondentGroup> respondentGroups = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "survey")
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "surveys")
     @Builder.Default
-    private Set<Customer> organisations = Sets.newHashSet();
+    private List<Customer> organisations = Lists.newArrayList();
 
 
     //TODO: check if still used and remove

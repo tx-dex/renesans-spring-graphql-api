@@ -1,7 +1,7 @@
 package fi.sangre.renesans.service;
 
-import fi.sangre.renesans.exception.CustomerNotFoundException;
 import fi.sangre.renesans.exception.RemoveDefaultRespondentGroupException;
+import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.exception.RespondentGroupNotFoundException;
 import fi.sangre.renesans.exception.SurveyNotFoundException;
 import fi.sangre.renesans.graphql.input.RespondentGroupInput;
@@ -112,7 +112,7 @@ public class RespondentGroupService {
 
             final Customer customer = customerService.getCustomer(respondentGroupInput.getCustomerId());
             if (customer == null) {
-                throw new CustomerNotFoundException(respondentGroupInput.getCustomerId());
+                throw new ResourceNotFoundException("Organization not found");
             }
 
             final Survey survey = surveyRepository.findById(respondentGroupInput.getSurveyId())

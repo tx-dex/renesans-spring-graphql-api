@@ -41,7 +41,7 @@ create table if not exists respondent_option
 
 create table if not exists survey
 (
-	id char(36) primary key not null,
+	id uuid primary key not null,
 	version bigint not null,
 	is_default boolean,
 	description_id bigint
@@ -71,7 +71,7 @@ create table if not exists question_group
 	prescription_id bigint
 		constraint fknsavroo6wa03hokgu7mcarras
 			references multilingual_key,
-	survey_id char(36)
+	survey_id uuid
 		constraint fk547jj0p7m6ay6ydytylmf1fxa
 			references survey,
 	title_id bigint
@@ -146,9 +146,10 @@ create table if not exists segment
 	mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
+-- TODO: rename to organization
 create table if not exists customer
 (
-	id bigserial primary key not null,
+	id uuid primary key not null,
 	name text not null,
 	description text not null,
 	created_by bigint not null,
@@ -157,16 +158,23 @@ create table if not exists customer
 	segment_id bigint
 		constraint customer_segment_id_fk
 			references segment,
-    survey_id char(36)
-        constraint customer_survey_id_fk
-            references survey(id),
 	ctm timestamp default CURRENT_TIMESTAMP not null,
 	mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
+create table if not exists organizations_surveys
+(
+    organization_id uuid not null
+        constraint organization_surveys_mapping_organization_id_fk
+            references customer(id),
+    survey_id uuid not null
+        constraint organization_surveys_mapping_survey_id_fk
+            references survey(id)
+);
+
 create table if not exists customers_users
 (
-    customer_id bigint
+    customer_id uuid
       constraint customers_users_customer_id_fkey
           references customer,
     user_id bigint
@@ -194,7 +202,7 @@ create table if not exists question
 	segment_id bigint
 		constraint question_segment_id_fk
 			references segment,
-	customer_id bigint
+	customer_id uuid
 		constraint question_customer_id_fk
 			references customer,
 	source_type smallint not null,
@@ -224,10 +232,10 @@ create table if not exists respondent_group
 	description text,
 	is_default boolean,
 	title varchar(255),
-	survey_id char(36)
+	survey_id uuid
 		constraint fkex0gg1swqq1dpee2go656yqxl
 			references survey,
-	customer_id bigint
+	customer_id uuid
 		constraint fk_respondent_customer
 			references customer,
 	archived boolean default false,
@@ -348,7 +356,7 @@ create table if not exists segment_question_group_phrase
 
 create table if not exists customer_driver_weights
 (
-	customer_id bigint not null,
+	customer_id uuid not null,
 	driver_id bigint not null,
 	weight numeric default 0.5 not null,
 	constraint customer_driver_weights_customer_id_driver_id_key

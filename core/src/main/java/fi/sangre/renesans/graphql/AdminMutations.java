@@ -10,6 +10,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Slf4j
 
@@ -25,7 +27,7 @@ public class AdminMutations implements GraphQLMutationResolver {
 
     @NonNull
     @PreAuthorize("isAuthenticated()")
-    public Organization removeOrganization(@NonNull final Long id) {
+    public Organization removeOrganization(@NonNull final UUID id) {
         return organizationService.softDeleteOrganization(id);
     }
 }

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -59,7 +60,7 @@ public class Query implements GraphQLQueryResolver {
     }
 
     @PreAuthorize("isAuthenticated()")
-    public Customer customer(String languageCode, Long id, DataFetchingEnvironment environment) {
+    public Customer customer(String languageCode, UUID id, DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return customerService.getCustomer(id);
@@ -75,7 +76,7 @@ public class Query implements GraphQLQueryResolver {
     //TODO: create survey dto
     // INTERNAL QUERY - THE PUBLIC USES Query::questionnaire
     @PreAuthorize("isAuthenticated()")
-    public Survey survey(final String languageCode, final String id, final Long customerId, final DataFetchingEnvironment environment) {
+    public Survey survey(final String languageCode, final String id, final UUID customerId, final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return surveyService.getSurvey(id, customerId);
@@ -110,7 +111,7 @@ public class Query implements GraphQLQueryResolver {
     public ComparativeStatistics comparativeStatistics(
             String languageCode,
             FiltersDto filters,
-            List<Long> customerIds,
+            List<UUID> customerIds,
             List<String> respondentGroupIds,
             List<String> respondentIds,
             Boolean edit,
@@ -182,7 +183,7 @@ public class Query implements GraphQLQueryResolver {
     }
 
     public String defaultSurveyId() {
-        return surveyService.getDefaultSurvey().getId();
+        return surveyService.getDefaultSurvey().getId().toString();
     }
 
     @Deprecated

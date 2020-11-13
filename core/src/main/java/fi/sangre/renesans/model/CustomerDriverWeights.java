@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -21,9 +22,8 @@ import java.io.Serializable;
 @Table(name = "customer_driver_weights")
 @DynamicInsert
 public class CustomerDriverWeights implements Serializable {
-
     @Id
-    private Long customerId;
+    private UUID customerId;
     @Id
     private Long driverId;
     private Double weight;

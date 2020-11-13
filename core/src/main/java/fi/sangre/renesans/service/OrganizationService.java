@@ -78,7 +78,7 @@ public class OrganizationService {
     @NonNull
     @Transactional
     @CacheEvict(cacheNames = AUTH_CUSTOMER_IDS_CACHE, allEntries = true, condition = "#id == null")
-    public Organization softDeleteOrganization(@NonNull final Long id) {
+    public Organization softDeleteOrganization(@NonNull final UUID id) {
         final Customer customer = getByIdOrThrow(id);
 
         customerRepository.delete(customer);
@@ -90,7 +90,7 @@ public class OrganizationService {
     @Transactional(readOnly = true)
     public Segment getSegment(@NonNull final Organization organization) {
         final Customer customer = customerRepository.findById(organization.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found", organization.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
         return segmentRepository.findByCustomers(customer)
                 .orElseThrow(() -> new ResourceNotFoundException("Segment not found"));
     }
@@ -124,14 +124,15 @@ public class OrganizationService {
 
     @NonNull
     @Transactional(readOnly = true)
-    public OrganizationSurvey getSurvey(@NonNull final Organization organization) {
-        final Survey survey = customerRepository.findById(organization.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Organization not found", organization.getId())).getSurvey();
-        return OrganizationSurvey.builder()
-                .id(UUID.fromString(survey.getId()))
-                .version(survey.getVersion())
-                .metadata(survey.getMetadata())
-                .build();
+    public List<OrganizationSurvey> getSurveys(@NonNull final Organization organization) {
+        return ImmutableList.of();
+        //        final Survey survey = customerRepository.findById(organization.getId())
+//                .orElseThrow(() -> new ResourceNotFoundException("Organization not found", organization.getId())).getSurvey();
+//        return OrganizationSurvey.builder()
+//                .id(UUID.fromString(survey.getId()))
+//                .version(survey.getVersion())
+//                .metadata(survey.getMetadata())
+//                .build();
     }
 
     private void createOrganisationSurvey(@NonNull final Customer customer, @NonNull final Survey defaultSurvey) {
@@ -170,10 +171,10 @@ public class OrganizationService {
                 .metadata(metadata.build())
                 .build();
 
-        customer.setSurvey(organizationSurvey);
+        //customer.setSurveys(organizationSurvey);
     }
 
-    private Customer getByIdOrThrow(@NonNull final Long id) {
+    private Customer getByIdOrThrow(@NonNull final UUID id) {
         return customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
     }

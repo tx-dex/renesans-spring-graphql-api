@@ -2,7 +2,6 @@ package fi.sangre.renesans.service;
 
 import com.querydsl.core.BooleanBuilder;
 import fi.sangre.renesans.dto.FiltersDto;
-import fi.sangre.renesans.exception.NotTheSameCustomerException;
 import fi.sangre.renesans.exception.RespondentGroupNotFoundException;
 import fi.sangre.renesans.exception.RespondentNotFoundException;
 import fi.sangre.renesans.graphql.input.AnswerInput;
@@ -140,67 +139,6 @@ public class RespondentService {
 
         return respondents;
     }
-
-    public Respondent moveRespondentToRespondentGroup(String respondentId, String respondentGroupId) {
-        RespondentGroup respondentGroup = respondentGroupService.getRespondentGroup(respondentGroupId);
-        Respondent respondent = getRespondent(respondentId);
-
-        validateThatRespondentDoesNotBelongToGroup(respondentGroup, respondent);
-
-        Long currentRespondentCustomerId = respondent.getRespondentGroup().getCustomer().getId();
-        Long customerToBeMovedId = respondentGroup.getCustomer().getId();
-        if (!currentRespondentCustomerId.equals(customerToBeMovedId)) {
-            throw new NotTheSameCustomerException();
-        }
-
-        respondent.setRespondentGroup(respondentGroup);
-
-        if (respondent.getInvitationHash() != null) {
-            try {
-                invitationService.moveInvitationToGroup(respondent.getInvitationHash(), respondentGroupId);
-            } catch (Exception e) {
-                log.error("Error moving respondent = {} to the group = {}", respondent, respondentGroup);
-                log.error("Moving invitation failed");
-                e.printStackTrace();
-                throw new GraphQLException("Error while moving respondent");
-            }
-        }
-
-        return respondentRepository.save(respondent);
-    }
-
-    @Transactional
-    public Respondent copyRespondentToRespondentGroup(String respondentId, String respondentGroupId) {
-        RespondentGroup respondentGroup = respondentGroupService.getRespondentGroup(respondentGroupId);
-        Respondent respondent = getRespondent(respondentId);
-
-        validateThatRespondentDoesNotBelongToGroup(respondentGroup, respondent);
-
-        Long currentRespondentCustomerId = respondent.getRespondentGroup().getCustomer().getId();
-        Long customerToBeMovedId = respondentGroup.getCustomer().getId();
-        if (!currentRespondentCustomerId.equals(customerToBeMovedId)) {
-            throw new NotTheSameCustomerException();
-        }
-
-        Respondent newRespondent = new Respondent(respondent);
-
-        newRespondent.setId(null);
-        newRespondent.setRespondentGroup(respondentGroup);
-        newRespondent.setRespondentGroupId(respondentGroupId);
-        newRespondent.setInvitationHash(null);
-
-        Respondent savedRespondent = respondentRepository.save(newRespondent);
-
-        newRespondent.getAnswers().forEach(answer -> {
-            answer.setId(null);
-            answer.setRespondent(savedRespondent);
-        });
-
-        answerRepository.saveAll(newRespondent.getAnswers());
-
-        return savedRespondent;
-    }
-
 
     @Transactional
     public List<Respondent> removeRespondents(List<Respondent> respondents) {

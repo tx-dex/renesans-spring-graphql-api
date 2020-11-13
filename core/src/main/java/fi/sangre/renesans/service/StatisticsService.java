@@ -64,7 +64,7 @@ public class StatisticsService {
 
     @Transactional(readOnly = true)
     public ComparativeStatistics comparativeStatistics(FiltersDto filters,
-                                                       final List<Long> customerIds,
+                                                       final List<UUID> customerIds,
                                                        final List<String> respondentGroupIds,
                                                        final List<String> respondentIds,
                                                        final Boolean edit,
@@ -134,7 +134,7 @@ public class StatisticsService {
     }
 
     //Finds only intersection of  the questions that apply to all
-    private Set<Question> getQuestionsBasedOnFilter(final List<Long> segmentIds, final List<Long> customerIds, final List<String> respondentGroupIds, final List<String> respondentIds) {
+    private Set<Question> getQuestionsBasedOnFilter(final List<Long> segmentIds, final List<UUID> customerIds, final List<String> respondentGroupIds, final List<String> respondentIds) {
         Set<Question> questions = null;
 
         final Set<Customer> customers = Sets.newHashSet();
@@ -568,7 +568,7 @@ public class StatisticsService {
         return (int) list.stream().distinct().count();
     }
 
-    private List<Statistics> calculateComparativeStatisticForCustomers(final Survey survey, final Set<Question> questions, final List<Long> customerIds, final FiltersDto filters, final String languageCode) {
+    private List<Statistics> calculateComparativeStatisticForCustomers(final Survey survey, final Set<Question> questions, final List<UUID> customerIds, final FiltersDto filters, final String languageCode) {
         final ImmutableList.Builder<Statistics> builder = ImmutableList.builder();
 
 

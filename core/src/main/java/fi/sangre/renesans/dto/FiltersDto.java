@@ -22,14 +22,7 @@ public class FiltersDto extends FiltersBaseDto implements GraphQLInputType {
         return null;
     }
 
-    private List<String> copyStringList(List<String> list) {
-        if (list == null) {
-            return null;
-        }
-
-        return new ArrayList<>(list);
-    }
-    private List<Long> copyLongList(List<Long> list) {
+    private <T> List<T> copyList(List<T> list) {
         if (list == null) {
             return null;
         }
@@ -47,14 +40,14 @@ public class FiltersDto extends FiltersBaseDto implements GraphQLInputType {
         this.setExperienceMin(filters.getExperienceMin());
         this.setExperienceMax(filters.getExperienceMax());
 
-        this.setCountries(copyStringList(filters.getCountries()));
-        this.setGenders(copyStringList(filters.getGenders()));
-        this.setRespondentGroupIds(copyStringList(filters.getRespondentGroupIds()));
-        this.setRespondentIds(copyStringList(filters.getRespondentIds()));
+        this.setCountries(copyList(filters.getCountries()));
+        this.setGenders(copyList(filters.getGenders()));
+        this.setRespondentGroupIds(copyList(filters.getRespondentGroupIds()));
+        this.setRespondentIds(copyList(filters.getRespondentIds()));
 
-        this.setIndustryIds(copyLongList(filters.getIndustryIds()));
-        this.setPositionIds(copyLongList(filters.getPositionIds()));
-        this.setCustomerIds(copyLongList(filters.getCustomerIds()));
-        this.setSegmentIds(copyLongList(filters.getSegmentIds()));
+        this.setIndustryIds(copyList(filters.getIndustryIds()));
+        this.setPositionIds(copyList(filters.getPositionIds()));
+        this.setCustomerIds(copyList(filters.getCustomerIds()));
+        this.setSegmentIds(copyList(filters.getSegmentIds()));
     }
 }

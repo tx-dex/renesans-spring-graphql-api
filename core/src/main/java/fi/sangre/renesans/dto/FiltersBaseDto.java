@@ -6,13 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class FiltersBaseDto {
-    private String surveyId;
+    private UUID surveyId;
     private String respondentName;
     private Long ageMin = 0L;
     private Long ageMax = 100L;
@@ -22,7 +23,7 @@ public class FiltersBaseDto {
     private List<String> genders;
     private List<Long> industryIds;
     private List<Long> positionIds;
-    private List<Long> customerIds;
+    private List<UUID> customerIds;
     private List<String> respondentGroupIds;
     private List<String> respondentIds;
     private List<Long> segmentIds;

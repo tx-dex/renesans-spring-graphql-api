@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 
 @Service
@@ -21,7 +23,7 @@ public class SurveyService {
                 .orElseThrow(() -> new SurveyNotFoundException("Default"));
     }
 
-    public Survey getSurvey(final String id, final Long customerId) {
+    public Survey getSurvey(final String id, final UUID customerId) {
         //TODO: should never return null?
         final Survey survey = surveyRepository.findById(id).orElse(null);
         if (survey != null && customerId != null) {

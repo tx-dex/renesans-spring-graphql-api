@@ -7,6 +7,7 @@ import fi.sangre.renesans.model.Respondent;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class FilterService {
@@ -24,7 +25,7 @@ public class FilterService {
             return builder;
         }
 
-        String surveyId = filters.getSurveyId();
+        UUID surveyId = filters.getSurveyId();
         Long ageMax = filters.getAgeMax();
         Long ageMin = filters.getAgeMin();
         List<String> countries = filters.getCountries();
@@ -33,7 +34,7 @@ public class FilterService {
         List<String> genders = filters.getGenders();
         List<Long> industryIds = filters.getIndustryIds();
         List<Long> positionIds = filters.getPositionIds();
-        List<Long> customerIds = filters.getCustomerIds();
+        List<UUID> customerIds = filters.getCustomerIds();
         List<String> respondentGroupIds = filters.getRespondentGroupIds();
         List<String> respondentIds = filters.getRespondentIds();
         List<Long> segmentIds = filters.getSegmentIds();

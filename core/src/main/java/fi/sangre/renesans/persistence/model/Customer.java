@@ -4,15 +4,18 @@ import com.google.api.client.util.Lists;
 import fi.sangre.renesans.model.*;
 import lombok.*;
 import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.*;
 import org.springframework.data.annotation.CreatedBy;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -32,8 +35,10 @@ import java.util.Set;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Customer extends BaseModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GeneratedValue(generator = "uuid")
+    @Column(name = "id", unique = true, nullable = false, updatable = false,  columnDefinition = "uuid")
+    private UUID id;
     private String name;
     private String description;
 
@@ -58,9 +63,13 @@ public class Customer extends BaseModel {
     @JoinColumn(name = "segment_id")
     private Segment segment;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "survey_id", updatable = false, nullable = false)
-    private Survey survey;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "organizations_surveys",
+            joinColumns = @JoinColumn(name = "organization_id"),
+            inverseJoinColumns = @JoinColumn(name = "survey_id"))
+    @Builder.Default
+    private List<Survey> surveys = Lists.newArrayList();
 
     @Column(name = "is_default", updatable = false)
     @Builder.Default

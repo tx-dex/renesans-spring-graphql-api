@@ -7,7 +7,6 @@ import fi.sangre.renesans.model.RespondentGroup;
 import graphql.GraphQLException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +59,7 @@ public class QuestionnaireService {
         }
 
         return QuestionnaireDto.builder()
-                .id(respondentGroup.getSurvey().getId())
+                .id(respondentGroup.getSurvey().getId().toString())
                 .respondent(respondent)
                 .respondentGroup(respondentGroup)
                 .build();
