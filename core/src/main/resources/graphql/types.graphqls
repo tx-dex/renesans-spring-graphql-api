@@ -25,7 +25,7 @@ type Organization {
     id: ID!
     name: String!
     description: String
-    survey: OrganizationSurvey!
+    surveys: [OrganizationSurvey!]!
     surveyCount: Long!
     respondentCounts: RespondentCounters!
 }

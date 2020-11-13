@@ -55,7 +55,6 @@ input OrganizationInput {
     id: ID
     name: String
     description: String!
-    segmentId: Long
 }
 
 input CustomerInput {

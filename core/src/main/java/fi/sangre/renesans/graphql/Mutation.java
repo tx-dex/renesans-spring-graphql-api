@@ -2,7 +2,6 @@ package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.aaa.JwtTokenService;
-import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.dto.AuthorizationDto;
 import fi.sangre.renesans.dto.ResultDetailsDto;
 import fi.sangre.renesans.exception.DeprecatedException;
@@ -15,7 +14,6 @@ import graphql.GraphQLException;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
 import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -211,43 +209,9 @@ public class Mutation implements GraphQLMutationResolver {
         return invitationService.sendInvitation(invitation, recipients);
     }
 
-    @Deprecated
-    @PreAuthorize("isAuthenticated()")
-    public Customer storeCustomer(@NonNull final CustomerInput customer) {
-        final Organization organization = organizationService.storeOrganization(OrganizationInput.builder()
-                .id(customer.getId())
-                .name(customer.getName())
-                .description(customer.getDescription())
-                .segmentId(customer.getSegmentId())
-                .build());
-        return Customer.builder()
-                .id(organization.getId())
-                .name(organization.getName())
-                .description(organization.getDescription())
-                .build();
-    }
-
-    @NonNull
-    @PreAuthorize("isAuthenticated()")
-    public Organization storeOrganization(@NonNull final OrganizationInput input) {
-        return organizationService.storeOrganization(input);
-    }
-
     @PreAuthorize("isAuthenticated()")
     public Customer storeCustomerDriverWeights(Long customerId, List<DriverWeightInput> driverWeightInput ) {
         return customerService.storeCustomerDriverWeights(customerId, driverWeightInput);
-    }
-
-    @Deprecated
-    @PreAuthorize("isAuthenticated()")
-    public Organization removeOrganization(@NonNull final Long id) {
-        return organizationService.softDeleteOrganization(id);
-    }
-
-    @Deprecated
-    @PreAuthorize("isAuthenticated()")
-    public Customer removeCustomer(Long id) {
-        throw new DeprecatedException();
     }
 
     @Deprecated

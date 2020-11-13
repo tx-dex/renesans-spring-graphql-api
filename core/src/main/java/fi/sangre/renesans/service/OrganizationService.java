@@ -61,12 +61,6 @@ public class OrganizationService {
         if (input.getDescription() != null) {
             customer.setDescription(input.getDescription());
         }
-        if (input.getSegmentId() != null) {
-            final Segment segment = segmentRepository.findById(input.getSegmentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Segment not found", input.getId()));
-            customer.setSegment(segment);
-            log.debug("Assigning segment id:{} to customer: id: {} '{}'", segment.getId(), customer.getId(), customer.getName());
-        }
 
         if (input.getId() == null) {
             createOrganisationSurvey(customer, surveyService.getDefaultSurvey());
