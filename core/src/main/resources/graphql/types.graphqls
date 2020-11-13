@@ -26,7 +26,13 @@ type Organization {
     name: String!
     description: String
     survey: OrganizationSurvey!
-    segment: Segment
+    surveyCount: Long!
+    respondentCounts: RespondentCounters!
+}
+
+type RespondentCounters {
+    invited: Long!
+    answered: Long!
 }
 
 type OrganizationSurvey {

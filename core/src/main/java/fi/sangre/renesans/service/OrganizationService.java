@@ -103,6 +103,13 @@ public class OrganizationService {
 
     @NonNull
     @Transactional(readOnly = true)
+    // @PostFilter("hasPermission(filterObject, 'READ')") : check permission on this level, it fails when unmodifieble collection is returned
+    public List<Organization> findAll() {
+        return toOrganisations(customerRepository.findAll());
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
     public List<Organization> findAllBySegment(@NonNull final Segment segment) {
         return findAllBySegment(segment,this::toOrganisation);
     }
@@ -175,6 +182,11 @@ public class OrganizationService {
     private Customer getByIdOrThrow(@NonNull final Long id) {
         return customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+    }
+
+    private List<Organization> toOrganisations(@NonNull final List<Customer> customers) {
+        return customers.stream().map(this::toOrganisation)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     private Organization toOrganisation(@NonNull final Customer customer) {

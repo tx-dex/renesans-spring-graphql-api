@@ -25,23 +25,24 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Optional<Customer> findById(@P("id") @NonNull Long id);
 
     @NonNull
-    @PostFilter("hasPermission(filterObject, 'READ')")
-    List<Customer> findAll(@NonNull Sort sort);
-
-    @NonNull
     @Override
-    @PostFilter("hasPermission(filterObject, 'READ')")
+    @PostFilter("hasPermission(filterObject, 'READ')") //TODO: move out from here
     default List<Customer> findAll() {
         return findAll(DEFAULT_CUSTOMER_SORTING);
     }
 
-    @PostFilter("hasPermission(filterObject, 'READ')")
-    List<Customer> findAllBySegment(final Segment segment, Sort sort);
+    @NonNull
+    @PostFilter("hasPermission(filterObject, 'READ')") //TODO: move out from here
+    List<Customer> findAll(@NonNull Sort sort);
 
     @PostFilter("hasPermission(filterObject, 'READ')")
-    default List<Customer> findAllBySegment(final Segment segment) {
+    default List<Customer> findAllBySegment(@NonNull final Segment segment) {
         return findAllBySegment(segment, DEFAULT_CUSTOMER_SORTING);
     }
+
+    @NonNull
+    @PostFilter("hasPermission(filterObject, 'READ')")
+    List<Customer> findAllBySegment(@NonNull Segment segment, @NonNull Sort sort);
 
     @NonNull
     Long countBySegment(Segment segment);
@@ -52,7 +53,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     List<Customer> findAllByGroupsIdIn(Set<String> respondentGroupIds);
     Set<Customer> findByUsersContaining(User user);
     List<Customer> findByUsersContainingOrCreatedBy(User user, Long createdBy);
-
 }
 
 

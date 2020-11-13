@@ -51,9 +51,7 @@ type Query {
         status: String
     ): [InvitationDetails]
 
-    customers(
-        languageCode: String
-    ): [Customer!]!
+    organizations: [Organization!]!
 
     customer(
         languageCode: String

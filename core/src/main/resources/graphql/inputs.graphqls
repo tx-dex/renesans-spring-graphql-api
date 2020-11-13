@@ -3,6 +3,8 @@ input RecipientInput {
     email: String!
 }
 
+
+
 input SegmentInput {
     id: ID
     name: String!

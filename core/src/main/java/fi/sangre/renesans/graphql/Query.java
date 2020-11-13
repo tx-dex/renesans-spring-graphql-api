@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class Query implements GraphQLQueryResolver {
-    private final RespondentGroupService respondentGroupService;
     private final SurveyService surveyService;
     private final RespondentOptionService respondentOptionService;
     private final MultilingualService multilingualService;
@@ -46,13 +45,6 @@ public class Query implements GraphQLQueryResolver {
     private final QuestionnaireService questionnaireService;
     private final QuestionService questionService;
     private final ResolverHelper resolverHelper;
-
-    @PreAuthorize("isAuthenticated()")
-    public List<Customer> customers(String languageCode, DataFetchingEnvironment environment) {
-        resolverHelper.setLanguageCode(languageCode, environment);
-
-        return customerService.getAllCustomers();
-    }
 
     @PreAuthorize("isAuthenticated()")
     public Segment segment(String languageCode, Long id, DataFetchingEnvironment environment) {

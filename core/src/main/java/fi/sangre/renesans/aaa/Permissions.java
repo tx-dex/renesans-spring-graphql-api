@@ -1,5 +1,6 @@
 package fi.sangre.renesans.aaa;
 
+import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.persistence.model.Customer;
@@ -43,6 +44,12 @@ public class Permissions implements PermissionEvaluator {
         return (UserPrincipal) authentication.getPrincipal();
     }
 
+    private boolean permit(UserPrincipal powerUser, Organization organization, Authentication authentication, Object permission) {
+        final Set<Long> customerIds = userPrincipalService.getCustomerIdsThatPrincipalCanAccess(powerUser);
+
+        return customerIds.contains(organization.getId());
+    }
+
     private boolean permit(UserPrincipal powerUser, Customer customer, Authentication authentication, Object permission) {
             final Set<Long> customerIds = userPrincipalService.getCustomerIdsThatPrincipalCanAccess(powerUser);
 
@@ -68,16 +75,20 @@ public class Permissions implements PermissionEvaluator {
         }
 
         if (hasRole(authentication.getAuthorities(), POWER_USER)) {
-            if (targetDomainObject instanceof Customer) {
+            if (targetDomainObject instanceof Organization) {
+                return permit(principal(authentication), (Organization) targetDomainObject, authentication, permission);
+            } else if (targetDomainObject instanceof Customer) {
                 return permit(principal(authentication), (Customer) targetDomainObject, authentication, permission);
             } else if (targetDomainObject instanceof RespondentGroup) {
                 return permit(principal(authentication), (RespondentGroup) targetDomainObject, authentication, permission);
             } else if (targetDomainObject instanceof Respondent) {
                 return permit(principal(authentication), (Respondent) targetDomainObject, authentication, permission);
             } else if (targetDomainObject instanceof Optional) {
-                final Optional optionalDomainObject = (Optional) targetDomainObject;
+                final Optional<?> optionalDomainObject = (Optional<?>) targetDomainObject;
                 if (optionalDomainObject.isPresent()) {
-                    if (optionalDomainObject.get() instanceof Customer) {
+                    if (optionalDomainObject.get() instanceof Organization) {
+                        return permit(principal(authentication), (Organization) optionalDomainObject.get(), authentication, permission);
+                    } else if (optionalDomainObject.get() instanceof Customer) {
                         return permit(principal(authentication), (Customer) optionalDomainObject.get(), authentication, permission);
                     } else if (optionalDomainObject.get() instanceof RespondentGroup) {
                         return permit(principal(authentication), (RespondentGroup) optionalDomainObject.get(), authentication, permission);
