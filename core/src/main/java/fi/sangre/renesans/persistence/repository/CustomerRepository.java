@@ -27,13 +27,11 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     @NonNull
     @Override
-    @PostFilter("hasPermission(filterObject, 'READ')") //TODO: move out from here
     default List<Customer> findAll() {
         return findAll(DEFAULT_CUSTOMER_SORTING);
     }
 
     @NonNull
-    @PostFilter("hasPermission(filterObject, 'READ')") //TODO: move out from here
     List<Customer> findAll(@NonNull Sort sort);
 
     @PostFilter("hasPermission(filterObject, 'READ')")

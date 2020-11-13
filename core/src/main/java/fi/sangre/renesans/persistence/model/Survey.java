@@ -1,7 +1,7 @@
 package fi.sangre.renesans.persistence.model;
 
 
-import com.google.api.client.util.Lists;
+import com.google.api.client.util.Sets;
 import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import lombok.*;
@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -28,6 +29,9 @@ import java.util.UUID;
 @SQLDelete(sql = "UPDATE data.survey SET archived = true, version = version + 1 WHERE id = ? and version = ?")
 @Where(clause = "archived = false")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+
+@DynamicInsert
+@DynamicUpdate
 public class Survey extends BaseModel {
     private static final Long INITIAL_VERSION = 1L;
     @Id
@@ -38,8 +42,7 @@ public class Survey extends BaseModel {
 
     @Version
     @Column(name = "version", nullable = false)
-    @Builder.Default
-    private Long version = INITIAL_VERSION;
+    private Long version;
 
     @Column(name = "is_default")
     @Builder.Default
@@ -72,7 +75,7 @@ public class Survey extends BaseModel {
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "surveys")
     @Builder.Default
-    private List<Customer> organisations = Lists.newArrayList();
+    private Set<Customer> organisations = Sets.newHashSet();
 
 
     //TODO: check if still used and remove

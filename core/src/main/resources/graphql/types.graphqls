@@ -41,8 +41,8 @@ type OrganizationSurvey {
     title: String!
     description: String
     catalysts: [Catalyst!]!
+    respondentCounts: RespondentCounters!
 }
-
 type Answer {
     id: ID!
     answerValue: Long

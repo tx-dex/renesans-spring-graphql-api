@@ -8,27 +8,19 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Optional;
 
+import static fi.sangre.renesans.application.utils.MultilingualUtils.getText;
+
 @Component
 public class MetadataLanguageHelper {
-    private static final String DEFAULT_LANGUAGE_TAG = "en";
-
     @NonNull
     public String getRequiredText(@NonNull final Map<String, String> phrases, @NonNull final String languageTag) {
-        return Optional.ofNullable(phrases.get(languageTag))
-                .orElseGet(() -> Optional.ofNullable(phrases.get(DEFAULT_LANGUAGE_TAG))
-                        .orElseGet(() -> phrases.values().stream().findAny()
-                                .orElseThrow(() -> new ResourceNotFoundException("Cannot find phrase"))));
-
-
+        return Optional.ofNullable(getText(phrases, languageTag))
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot find phrase"));
     }
 
     @Nullable
     public String getOptionalText(@NonNull final Map<String, String> phrases, @NonNull final String languageTag) {
-        return Optional.ofNullable(phrases.get(languageTag))
-                .orElseGet(() -> Optional.ofNullable(phrases.get(DEFAULT_LANGUAGE_TAG))
-                        .orElseGet(() -> phrases.values().stream().findAny()
-                                .orElse(null)));
-
-
+        return Optional.ofNullable(getText(phrases, languageTag))
+                .orElse(null);
     }
 }

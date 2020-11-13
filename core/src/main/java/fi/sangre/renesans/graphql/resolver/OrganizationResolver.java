@@ -1,12 +1,12 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.RespondentCounters;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.service.OrganizationService;
+import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -21,6 +21,7 @@ import static fi.sangre.renesans.application.model.Counts.ZERO_L;
 @Component
 public class OrganizationResolver implements GraphQLResolver<Organization> {
     private final OrganizationService organizationService;
+    private final ResolverHelper resolverHelper;
 
     @Nullable
     public Segment getSegment(@NonNull final Organization organization) {
@@ -28,9 +29,9 @@ public class OrganizationResolver implements GraphQLResolver<Organization> {
     }
 
     @NonNull
-    public List<OrganizationSurvey> getSurveys(@NonNull final Organization organization) {
+    public List<OrganizationSurvey> getSurveys(@NonNull final Organization organization, @NonNull final DataFetchingEnvironment environment) {
         //TODO: implement
-        return ImmutableList.of();
+        return organizationService.getSurveys(organization, resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull

@@ -25,7 +25,7 @@ public class SurveyService {
 
     public Survey getSurvey(final String id, final UUID customerId) {
         //TODO: should never return null?
-        final Survey survey = surveyRepository.findById(id).orElse(null);
+        final Survey survey = surveyRepository.findById(UUID.fromString(id)).orElse(null);
         if (survey != null && customerId != null) {
             survey.setSegment(customerService.getCustomer(customerId).getSegment());
         }

@@ -5,6 +5,7 @@ import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.persistence.model.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,6 +15,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -21,6 +23,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class Permissions implements PermissionEvaluator {
     public static final String SUPER_USER = "ROLE_SUPER_USER";
     public static final String POWER_USER = "ROLE_POWER_USER";
+
+    public static final String ORGANIZATION_TARGET = "organization";
 
     private final UserPrincipalService userPrincipalService;
 
@@ -44,22 +48,16 @@ public class Permissions implements PermissionEvaluator {
         return (UserPrincipal) authentication.getPrincipal();
     }
 
-    private boolean permit(UserPrincipal powerUser, Organization organization, Authentication authentication, Object permission) {
-        final Set<Long> customerIds = userPrincipalService.getCustomerIdsThatPrincipalCanAccess(powerUser);
+    private boolean permitOrganization(@NonNull final UserPrincipal powerUser, @NonNull final UUID organizationId, @NonNull final  Authentication authentication, @NonNull final  Object permission) {
+        final Set<UUID> customerIds = userPrincipalService.getCustomerIdsThatPrincipalCanAccess(powerUser);
 
-        return customerIds.contains(organization.getId());
-    }
-
-    private boolean permit(UserPrincipal powerUser, Customer customer, Authentication authentication, Object permission) {
-            final Set<Long> customerIds = userPrincipalService.getCustomerIdsThatPrincipalCanAccess(powerUser);
-
-            return customerIds.contains(customer.getId());
+        return customerIds.contains(organizationId);
     }
 
     private boolean permit(UserPrincipal powerUser, RespondentGroup respondentGroup, Authentication authentication, Object permission) {
-        final Set<Long> customerIds = userPrincipalService.getCustomerIdsThatPrincipalCanAccess(powerUser);
+        final Set<UUID> customerIds = userPrincipalService.getCustomerIdsThatPrincipalCanAccess(powerUser);
 
-        return customerIds.contains(respondentGroup.getCustomerId());
+        return false;
     }
 
     private boolean permit(UserPrincipal powerUser, Respondent respondent, Authentication authentication, Object permission) {
@@ -76,9 +74,9 @@ public class Permissions implements PermissionEvaluator {
 
         if (hasRole(authentication.getAuthorities(), POWER_USER)) {
             if (targetDomainObject instanceof Organization) {
-                return permit(principal(authentication), (Organization) targetDomainObject, authentication, permission);
+                return permitOrganization(principal(authentication), ((Organization) targetDomainObject).getId(), authentication, permission);
             } else if (targetDomainObject instanceof Customer) {
-                return permit(principal(authentication), (Customer) targetDomainObject, authentication, permission);
+                return permitOrganization(principal(authentication), ((Customer) targetDomainObject).getId(), authentication, permission);
             } else if (targetDomainObject instanceof RespondentGroup) {
                 return permit(principal(authentication), (RespondentGroup) targetDomainObject, authentication, permission);
             } else if (targetDomainObject instanceof Respondent) {
@@ -87,9 +85,9 @@ public class Permissions implements PermissionEvaluator {
                 final Optional<?> optionalDomainObject = (Optional<?>) targetDomainObject;
                 if (optionalDomainObject.isPresent()) {
                     if (optionalDomainObject.get() instanceof Organization) {
-                        return permit(principal(authentication), (Organization) optionalDomainObject.get(), authentication, permission);
+                        return permitOrganization(principal(authentication), ((Organization) optionalDomainObject.get()).getId(), authentication, permission);
                     } else if (optionalDomainObject.get() instanceof Customer) {
-                        return permit(principal(authentication), (Customer) optionalDomainObject.get(), authentication, permission);
+                        return permitOrganization(principal(authentication), ((Customer) optionalDomainObject.get()).getId(), authentication, permission);
                     } else if (optionalDomainObject.get() instanceof RespondentGroup) {
                         return permit(principal(authentication), (RespondentGroup) optionalDomainObject.get(), authentication, permission);
                     } else if (optionalDomainObject.get() instanceof Respondent) {
@@ -106,6 +104,14 @@ public class Permissions implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
+        if (hasRole(authentication.getAuthorities(), SUPER_USER)) {
+            return true;
+        }
+
+        if (ORGANIZATION_TARGET.equalsIgnoreCase(targetType)) {
+            return permitOrganization(principal(authentication), (UUID) targetId, authentication, permission);
+        }
+
         return false;
     }
 }

@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -115,7 +116,7 @@ public class RespondentGroupService {
                 throw new ResourceNotFoundException("Organization not found");
             }
 
-            final Survey survey = surveyRepository.findById(respondentGroupInput.getSurveyId())
+            final Survey survey = surveyRepository.findById(UUID.fromString(respondentGroupInput.getSurveyId()))
                     .orElseThrow(() -> new SurveyNotFoundException(respondentGroupInput.getSurveyId()));
 
             if (questionGroupIds == null) {

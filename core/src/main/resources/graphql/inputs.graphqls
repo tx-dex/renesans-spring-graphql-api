@@ -57,6 +57,13 @@ input OrganizationInput {
     description: String!
 }
 
+input SurveyInput {
+    id: ID
+    version: Long
+    title: String
+    descriptions: String
+}
+
 input CustomerInput {
     id: ID
     name: String

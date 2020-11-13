@@ -5,7 +5,6 @@ import fi.sangre.renesans.model.User;
 import fi.sangre.renesans.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -19,8 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigInteger;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
@@ -63,9 +62,9 @@ public class UserPrincipalService implements UserDetailsService {
     }
 
     @Cacheable(cacheNames = AUTH_CUSTOMER_IDS_CACHE, key = "#user.id")
-    public Set<Long> getCustomerIdsThatPrincipalCanAccess(final UserPrincipal user) {
+    public Set<UUID> getCustomerIdsThatPrincipalCanAccess(final UserPrincipal user) {
         log.info("Get customer ids for principal: {}", user);
-        Set<Long> customersIds = userRepository.findCustomerIdsAccessibleByUserId(user.getId()).stream().map(BigInteger::longValue).collect(Collectors.toSet());
+        Set<UUID> customersIds = userRepository.findCustomerIdsAccessibleByUserId(user.getId()).stream().collect(Collectors.toSet());
         log.debug("Found {} customer ids for principal: {}", customersIds.size(), user.getUsername());
         return customersIds;
     }

@@ -10,11 +10,10 @@ import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
 import fi.sangre.renesans.repository.CustomerDriverWeightsRepository;
-import fi.sangre.renesans.repository.RespondentGroupRepository;
 import fi.sangre.renesans.repository.SegmentRepository;
 import graphql.GraphQLException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -29,36 +28,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
 
+@RequiredArgsConstructor
 @Slf4j
 
 @Service
 @Transactional
 @CacheConfig(cacheManager = "authorizationCacheManager")
 public class CustomerService {
-
     private final CustomerRepository customerRepository;
-    private final RespondentGroupRepository respondentGroupRepository;
     private final SegmentRepository segmentRepository;
-    private final SegmentService segmentService;
     private final CustomerDriverWeightsRepository customerDriverWeightsRepository;
-    private final QuestionService questionService;
-
-    @Autowired
-    public CustomerService(
-            final CustomerRepository customerRepository,
-            final RespondentGroupRepository respondentGroupRepository,
-            final SegmentRepository segmentRepository,
-            final SegmentService segmentService,
-            final CustomerDriverWeightsRepository customerDriverWeightsRepository,
-            final QuestionService questionService
-    ) {
-        this.customerRepository = customerRepository;
-        this.respondentGroupRepository = respondentGroupRepository;
-        this.segmentRepository = segmentRepository;
-        this.segmentService = segmentService;
-        this.customerDriverWeightsRepository = customerDriverWeightsRepository;
-        this.questionService = questionService;
-    }
 
     public List<Customer> getAllCustomers() {
         return ImmutableList.copyOf(customerRepository.findAll());

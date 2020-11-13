@@ -7,6 +7,7 @@ import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.OrganizationInput;
+import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.model.Survey;
@@ -14,12 +15,14 @@ import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
+import fi.sangre.renesans.persistence.repository.SurveyRepository;
 import fi.sangre.renesans.repository.SegmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +31,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
+import static fi.sangre.renesans.application.utils.MultilingualUtils.compare;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -41,6 +46,7 @@ public class OrganizationService {
     private final QuestionService questionService;
     private final SegmentRepository segmentRepository;
     private final SurveyService  surveyService;
+    private final SurveyRepository surveyRepository;
     private final MultilingualService multilingualService;
 
     @Transactional
@@ -62,10 +68,6 @@ public class OrganizationService {
             customer.setDescription(input.getDescription());
         }
 
-        if (input.getId() == null) {
-            createOrganisationSurvey(customer, surveyService.getDefaultSurvey());
-        }
-
         customerRepository.save(customer);
 
         return Organization.builder()
@@ -73,6 +75,29 @@ public class OrganizationService {
                 .name(customer.getName())
                 .description(customer.getDescription())
                 .build();
+    }
+
+    @NonNull
+    @Transactional
+    public OrganizationSurvey storeSurvey(@NonNull final UUID organizationId, @NonNull final SurveyInput input, @NonNull final String languageTag) {
+        final Customer customer = getByIdOrThrow(organizationId);
+        final Survey survey;
+
+        if (input.getId() == null) { // create
+            survey = createOrganisationSurvey(customer, input, surveyService.getDefaultSurvey(), languageTag);
+
+            customer.getSurveys().add(survey);
+            customerRepository.save(customer);
+        } else { // update
+            checkArgument(input.getVersion() != null, "input.version cannot be null");
+            survey = surveyRepository.findById(input.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+            survey.setVersion(input.getVersion() + 1);
+
+            surveyRepository.save(survey);
+        }
+
+        return toOrganizationSurvey(survey);
     }
 
     @NonNull
@@ -97,7 +122,13 @@ public class OrganizationService {
 
     @NonNull
     @Transactional(readOnly = true)
-    // @PostFilter("hasPermission(filterObject, 'READ')") : check permission on this level, it fails when unmodifieble collection is returned
+    public Organization findOrganization(@NonNull final UUID id) {
+        return toOrganisation(getByIdOrThrow(id));
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    @PostFilter("hasPermission(filterObject, 'READ')")
     public List<Organization> findAll() {
         return toOrganisations(customerRepository.findAll());
     }
@@ -124,18 +155,17 @@ public class OrganizationService {
 
     @NonNull
     @Transactional(readOnly = true)
-    public List<OrganizationSurvey> getSurveys(@NonNull final Organization organization) {
-        return ImmutableList.of();
-        //        final Survey survey = customerRepository.findById(organization.getId())
-//                .orElseThrow(() -> new ResourceNotFoundException("Organization not found", organization.getId())).getSurvey();
-//        return OrganizationSurvey.builder()
-//                .id(UUID.fromString(survey.getId()))
-//                .version(survey.getVersion())
-//                .metadata(survey.getMetadata())
-//                .build();
+//    @PostFilter("hasPermission(filterObject, 'READ')")
+    public List<OrganizationSurvey> getSurveys(@NonNull final Organization organization, @NonNull final String languageTag) {
+        return customerRepository.findById(organization.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"))
+                .getSurveys().stream()
+                .map(this::toOrganizationSurvey)
+                .sorted((e1,e2) -> compare(e1.getMetadata().getTitles(), e2.getMetadata().getTitles(), languageTag))
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
-    private void createOrganisationSurvey(@NonNull final Customer customer, @NonNull final Survey defaultSurvey) {
+    private Survey createOrganisationSurvey(@NonNull final Customer customer, SurveyInput input, @NonNull final Survey defaultSurvey, @NonNull final String languageTag) {
         final SurveyMetadata.SurveyMetadataBuilder metadata = SurveyMetadata.builder();
         final ImmutableList.Builder<CatalystMetadata> catalysts = ImmutableList.builder();
 
@@ -166,12 +196,10 @@ public class OrganizationService {
                 .descriptions(ImmutableMap.of("en", "Organisation default survey"))
                 .catalysts(catalysts.build());
 
-        final Survey organizationSurvey = Survey.builder()
+        return surveyRepository.save(Survey.builder()
                 .isDefault(false)
                 .metadata(metadata.build())
-                .build();
-
-        //customer.setSurveys(organizationSurvey);
+                .build());
     }
 
     private Customer getByIdOrThrow(@NonNull final UUID id) {
@@ -179,16 +207,26 @@ public class OrganizationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
     }
 
+    @NonNull
     private List<Organization> toOrganisations(@NonNull final List<Customer> customers) {
         return customers.stream().map(this::toOrganisation)
-                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+                .collect(toList());
     }
 
+    @NonNull
     private Organization toOrganisation(@NonNull final Customer customer) {
         return Organization.builder()
                 .id(customer.getId())
                 .name(customer.getName())
                 .description(customer.getDescription())
+                .build();
+    }
+
+    private OrganizationSurvey toOrganizationSurvey(@NonNull final Survey survey) {
+        return OrganizationSurvey.builder()
+                .id(survey.getId())
+                .version(survey.getVersion())
+                .metadata(survey.getMetadata())
                 .build();
     }
 }

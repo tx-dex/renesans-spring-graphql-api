@@ -1,6 +1,7 @@
 package fi.sangre.renesans.persistence.model;
 
 import com.google.api.client.util.Lists;
+import com.google.api.client.util.Sets;
 import fi.sangre.renesans.model.*;
 import lombok.*;
 import org.hibernate.annotations.Cache;
@@ -33,6 +34,7 @@ import java.util.UUID;
 @SQLDelete(sql = "UPDATE data.customer SET archived = true WHERE id = ?")
 @Where(clause = "archived = false")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@DynamicUpdate
 public class Customer extends BaseModel {
     @Id
     @GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -69,7 +71,7 @@ public class Customer extends BaseModel {
             joinColumns = @JoinColumn(name = "organization_id"),
             inverseJoinColumns = @JoinColumn(name = "survey_id"))
     @Builder.Default
-    private List<Survey> surveys = Lists.newArrayList();
+    private Set<Survey> surveys = Sets.newHashSet();
 
     @Column(name = "is_default", updatable = false)
     @Builder.Default

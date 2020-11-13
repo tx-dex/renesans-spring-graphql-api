@@ -53,6 +53,12 @@ type Mutation {
     storeOrganization(input: OrganizationInput!): Organization!
     removeOrganization(id: ID!): Organization!
 
+    storeOrganizationSurvey(
+        organizationId: ID!
+        input: SurveyInput!
+        languageCode: String
+    ): OrganizationSurvey!
+
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
 
     storeSegment(languageCode: String!, segment: SegmentInput!): Segment

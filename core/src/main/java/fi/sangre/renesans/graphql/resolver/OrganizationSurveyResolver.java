@@ -2,6 +2,7 @@ package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.RespondentCounters;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
@@ -35,5 +36,10 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
     @NonNull
     public List<CatalystProxy> getCatalysts(@NonNull final OrganizationSurvey survey) {
         return toProxies(survey.getMetadata().getCatalysts());
+    }
+
+    @NonNull
+    public RespondentCounters respondentCounts(@NonNull final OrganizationSurvey survey) {
+        return RespondentCounters.builder().build();
     }
 }

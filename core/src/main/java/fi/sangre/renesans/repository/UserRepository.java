@@ -9,10 +9,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -38,9 +38,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     }
 
     //DO NOT USE IT ANYWHERE BESIDES AUTHORIZATION
+    @NonNull
     @Query(value = "SELECT customer_id FROM data.customers_users where user_id = :id " +
             "UNION ALL SELECT id FROM data.customer WHERE created_by = :id", nativeQuery = true)
-    Set<BigInteger> findCustomerIdsAccessibleByUserId(@Param("id") Long userId);
+    Set<UUID> findCustomerIdsAccessibleByUserId(@Param("id") @NonNull Long userId);
 
     @Query(value = "SELECT DISTINCT RG.id FROM data.respondent_group RG INNER JOIN " +
             "  (SELECT customer_id FROM data.customers_users  WHERE user_id = :id " +
