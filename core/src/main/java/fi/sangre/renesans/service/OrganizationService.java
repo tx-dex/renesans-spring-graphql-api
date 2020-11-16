@@ -1,7 +1,6 @@
 package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.dto.CatalystDto;
@@ -34,6 +33,7 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
 import static fi.sangre.renesans.application.utils.MultilingualUtils.compare;
+import static fi.sangre.renesans.application.utils.MultilingualUtils.create;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -192,8 +192,9 @@ public class OrganizationService {
                     .build());
         }
 
-        metadata.titles(ImmutableMap.of("en", "Organisation Survey"))
-                .descriptions(ImmutableMap.of("en", "Organisation default survey"))
+        //TODO: throw on required
+        metadata.titles(create(input.getTitle(), languageTag))
+                .descriptions(create(input.getDescription(), languageTag))
                 .catalysts(catalysts.build());
 
         return surveyRepository.save(Survey.builder()

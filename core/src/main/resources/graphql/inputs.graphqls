@@ -54,14 +54,14 @@ input PhraseInput {
 input OrganizationInput {
     id: ID
     name: String
-    description: String!
+    description: String
 }
 
 input SurveyInput {
     id: ID
     version: Long
     title: String
-    descriptions: String
+    description: String
 }
 
 input CustomerInput {

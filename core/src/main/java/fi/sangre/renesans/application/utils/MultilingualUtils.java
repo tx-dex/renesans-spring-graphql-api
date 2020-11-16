@@ -1,5 +1,7 @@
 package fi.sangre.renesans.application.utils;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -23,5 +25,26 @@ public class MultilingualUtils {
                         .orElseGet(() -> phrases.values().stream().findAny()
                                 .orElse(null)));
 
+    }
+
+    @NonNull
+    public static Map<String, String> create(@Nullable final String phrase, @NonNull final String languageTag) {
+        return combine(null, phrase, languageTag);
+    }
+
+    @NonNull
+    public static Map<String, String> combine(@Nullable final Map<String, String> phrases, @Nullable final String phrase, @NonNull final String languageTag) {
+        final Map<String, String> combined;
+        if (phrases == null) {
+            combined = Maps.newHashMap();
+        } else {
+            combined = Maps.newHashMap(phrases);
+        }
+
+        if (phrase != null) {
+            combined.put(languageTag, phrase);
+        }
+
+        return ImmutableMap.copyOf(combined);
     }
 }
