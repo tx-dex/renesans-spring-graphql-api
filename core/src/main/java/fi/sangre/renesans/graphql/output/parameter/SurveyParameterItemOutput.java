@@ -11,7 +11,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Data
 @Builder
-public class SurveyParameterValueOutput implements SurveyParameterChildOutput {
+public class SurveyParameterItemOutput implements SurveyParameterChildOutput {
     private String value;
     private Map<String, String> labels;
 }

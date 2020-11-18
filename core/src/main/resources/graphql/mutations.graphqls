@@ -50,10 +50,11 @@ type Mutation {
         weights: [WeightInput!]!
     ): [Weight]
 
+    # Creates or updates organization
     storeOrganization(input: OrganizationInput!): Organization!
+    # Removes organization
     removeOrganization(id: ID!): Organization!
 
-    # TODO: move version from survey input out
     storeOrganizationSurvey(
         organizationId: ID!
         input: SurveyInput!
@@ -65,8 +66,9 @@ type Mutation {
         id: ID!
         # Survey version
         version: Long!
-        # List of parameters
+        # List of parameters that will be saved
         input: [SurveyParameterInput!]!
+        # Language that user is currently editing
         languageCode: String
     ): OrganizationSurvey!
 

@@ -51,7 +51,9 @@ type Query {
         status: String
     ): [InvitationDetails]
 
+    # Get list of organizations
     organizations: [Organization!]!
+    # Get organization by id, throws if not found
     organization(id: ID!): Organization!
 
     customer(

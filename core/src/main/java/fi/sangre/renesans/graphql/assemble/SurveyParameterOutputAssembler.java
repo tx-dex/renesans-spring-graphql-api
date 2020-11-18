@@ -1,9 +1,9 @@
 package fi.sangre.renesans.graphql.assemble;
 
 import com.google.common.collect.ImmutableList;
+import fi.sangre.renesans.application.model.parameter.*;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.output.parameter.*;
-import fi.sangre.renesans.persistence.model.metadata.parameters.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -22,40 +22,40 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class SurveyParameterOutputAssembler {
     @NonNull
-    public List<SurveyParameterOutput> from(@Nullable final List<ParameterMetadata> metadata) {
-        if (metadata == null) {
+    public List<SurveyParameterOutput> from(@Nullable final List<Parameter> parameters) {
+        if (parameters == null) {
             return ImmutableList.of();
         } else {
-            return metadata.stream()
+            return parameters.stream()
                     .map(this::from)
                     .collect(collectingAndThen(toList(), Collections::unmodifiableList));
         }
     }
 
     @NonNull
-    private SurveyParameterOutput from(@NonNull final ParameterMetadata metadata) {
-        if (metadata instanceof ListParameterMetadata) {
-            return from((ListParameterMetadata) metadata);
-        } else if (metadata instanceof TreeParameterMetadata) {
-            return from((TreeParameterMetadata) metadata);
+    private SurveyParameterOutput from(@NonNull final Parameter parameter) {
+        if (parameter instanceof ListParameter) {
+            return from((ListParameter) parameter);
+        } else if (parameter instanceof TreeParameter) {
+            return from((TreeParameter) parameter);
         } else {
             throw new SurveyException("Invalid parameter type");
         }
     }
 
     @NonNull
-    private SurveyListParameterOutput from(@NonNull final ListParameterMetadata metadata) {
+    private SurveyListParameterOutput from(@NonNull final ListParameter metadata) {
         return SurveyListParameterOutput.builder()
                 .value(metadata.getId().toString())
                 .labels(metadata.getLabel().getPhrases())
                 .children(metadata.getValues().stream()
-                        .map(v -> new SurveyParameterValueOutput(v.getId().toString(), v.getLabel().getPhrases()))
+                        .map(v -> new SurveyParameterItemOutput(v.getId().toString(), v.getLabel().getPhrases()))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
                 .build();
     }
 
     @NonNull
-    private SurveyTreeParameterOutput from(@NonNull final TreeParameterMetadata metadata) {
+    private SurveyTreeParameterOutput from(@NonNull final TreeParameter metadata) {
         return SurveyTreeParameterOutput.builder()
                 .value(metadata.getId().toString())
                 .labels(metadata.getLabel().getPhrases())
@@ -66,14 +66,14 @@ public class SurveyParameterOutputAssembler {
     }
 
     @NonNull
-    private SurveyParameterChildOutput from(@NonNull final ParameterChildMetadata child) {
-        if (child instanceof ParameterItemMetadata) {
-            return SurveyParameterValueOutput.builder()
+    private SurveyParameterChildOutput from(@NonNull final ParameterChild child) {
+        if (child instanceof ParameterItem) {
+            return SurveyParameterItemOutput.builder()
                     .value(child.getId().toString())
-                    .labels(((ParameterItemMetadata) child).getLabel().getPhrases())
+                    .labels(child.getLabel().getPhrases())
                     .build();
-        } else if (child instanceof TreeParameterMetadata) {
-            return null; //TODO: implement
+        } else if (child instanceof TreeParameter) {
+            return from((TreeParameter) child);
         } else {
             throw new SurveyException("Invalid type");
         }

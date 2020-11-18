@@ -2,11 +2,12 @@ package fi.sangre.renesans.application.utils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import fi.sangre.renesans.persistence.model.metadata.MultilingualMetadata;
+import fi.sangre.renesans.application.model.MultilingualText;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -50,11 +51,15 @@ public class MultilingualUtils {
     }
 
     @NonNull
-    public static MultilingualMetadata combine(@Nullable final MultilingualMetadata metadata, @Nullable final String phrase, @NonNull final String languageTag) {
-        if (metadata == null) {
-            return new MultilingualMetadata(create(phrase, languageTag));
+    public static MultilingualText combine(@Nullable final MultilingualText existing, @NonNull final MultilingualText input) {
+        final MultilingualText combined;
+        if (existing == null || existing.getPhrases() == null) {
+            combined = new MultilingualText(new LinkedHashMap<>());
         } else {
-            return new MultilingualMetadata(combine(metadata.getPhrases(), phrase, languageTag));
+            combined = new MultilingualText(new LinkedHashMap<>(existing.getPhrases()));
         }
+        combined.getPhrases().putAll(input.getPhrases());
+
+        return combined;
     }
 }

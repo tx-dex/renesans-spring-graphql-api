@@ -17,5 +17,5 @@ public class SurveyListParameterOutput implements SurveyParameterOutput {
     private final SurveyParameterTypes type = SurveyParameterTypes.LIST;
     private Map<String, String> labels;
     private String value;
-    private List<SurveyParameterValueOutput> children;
+    private List<SurveyParameterItemOutput> children;
 }

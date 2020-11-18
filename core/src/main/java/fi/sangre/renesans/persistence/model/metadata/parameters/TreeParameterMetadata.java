@@ -1,9 +1,9 @@
 package fi.sangre.renesans.persistence.model.metadata.parameters;
 
-import fi.sangre.renesans.persistence.model.metadata.MultilingualMetadata;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -13,6 +13,6 @@ import java.util.UUID;
 @Builder
 public class TreeParameterMetadata implements ParameterMetadata, ParameterChildMetadata {
     private UUID id;
-    private MultilingualMetadata label;
+    private Map<String,String> titles;
     private List<ParameterChildMetadata> children;
 }

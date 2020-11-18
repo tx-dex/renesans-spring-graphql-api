@@ -3,8 +3,6 @@ input RecipientInput {
     email: String!
 }
 
-
-
 input SegmentInput {
     id: ID
     name: String!
@@ -52,13 +50,16 @@ input PhraseInput {
 }
 
 input OrganizationInput {
+    # New organization will be created if id is not provided
     id: ID
     name: String
     description: String
 }
 
 input SurveyInput {
+    # New survey will be created if id is not provided
     id: ID
+    # Current version of the survey, required if id is provided
     version: Long
     title: String
     description: String

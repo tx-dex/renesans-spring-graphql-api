@@ -43,7 +43,7 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
 
     @NonNull
     public List<SurveyParameterOutput> getParameters(@NonNull final OrganizationSurvey survey) {
-        return surveyParameterOutputAssembler.from(survey.getMetadata().getParameters());
+        return surveyParameterOutputAssembler.from(survey.getParameters());
     }
 
     @NonNull
