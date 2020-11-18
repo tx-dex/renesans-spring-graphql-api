@@ -41,6 +41,13 @@ public class OrganizationSurveyService {
 
     @NonNull
     @Transactional(readOnly = true)
+    public OrganizationSurvey getSurvey(@NonNull final UUID id) {
+        return organizationSurveyAssembler.from(surveyRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Survey not found")));
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
 //    @PostFilter("hasPermission(filterObject, 'READ')")
     public List<OrganizationSurvey> getSurveys(@NonNull final Organization organization, @NonNull final String languageTag) {
         return customerRepository.findById(organization.getId())

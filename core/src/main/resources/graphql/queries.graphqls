@@ -55,6 +55,8 @@ type Query {
     organizations: [Organization!]!
     # Get organization by id, throws if not found
     organization(id: ID!): Organization!
+    # Get the survey by id, throws if not found
+    organizationSurvey(id: ID!): OrganizationSurvey!
 
     customer(
         languageCode: String
