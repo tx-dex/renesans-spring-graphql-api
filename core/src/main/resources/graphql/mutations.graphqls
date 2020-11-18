@@ -53,9 +53,20 @@ type Mutation {
     storeOrganization(input: OrganizationInput!): Organization!
     removeOrganization(id: ID!): Organization!
 
+    # TODO: move version from survey input out
     storeOrganizationSurvey(
         organizationId: ID!
         input: SurveyInput!
+        languageCode: String
+    ): OrganizationSurvey!
+
+    storeOrganizationSurveyParameters(
+        # Survey id
+        id: ID!
+        # Survey version
+        version: Long!
+        # List of parameters
+        input: [SurveyParameterInput!]!
         languageCode: String
     ): OrganizationSurvey!
 

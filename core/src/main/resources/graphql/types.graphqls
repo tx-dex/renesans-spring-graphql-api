@@ -7,6 +7,11 @@ enum QuestionSourceType {
     ORGANISATION
 }
 
+enum SurveyParameterType {
+    LIST
+    TREE
+}
+
 type Customer {
     id: ID!
     name: String!
@@ -41,8 +46,33 @@ type OrganizationSurvey {
     title: String!
     description: String
     catalysts: [Catalyst!]!
+    parameters: [SurveyParameter!]!
     respondentCounts: RespondentCounters!
 }
+
+union SurveyParameter = SurveyListParameter | SurveyTreeParameter
+
+type SurveyParameterValue {
+    label: String!
+    value: String!
+}
+
+type SurveyListParameter {
+    type: SurveyParameterType!
+    label: String!
+    value: String!
+    children: [SurveyParameterValue!]!
+}
+
+union SurveyParameterChild = SurveyParameterValue | SurveyTreeParameter
+
+type SurveyTreeParameter {
+    type: SurveyParameterType!
+    label: String!
+    value: String!
+    children: [SurveyParameterChild!]!
+}
+
 type Answer {
     id: ID!
     answerValue: Long

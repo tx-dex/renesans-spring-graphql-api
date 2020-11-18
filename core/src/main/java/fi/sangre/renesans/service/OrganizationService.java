@@ -1,6 +1,7 @@
 package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
+import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.dto.CatalystDto;
@@ -32,7 +33,6 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
-import static fi.sangre.renesans.application.utils.MultilingualUtils.compare;
 import static fi.sangre.renesans.application.utils.MultilingualUtils.create;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -47,6 +47,7 @@ public class OrganizationService {
     private final SegmentRepository segmentRepository;
     private final SurveyService  surveyService;
     private final SurveyRepository surveyRepository;
+    private final OrganizationSurveyAssembler organizationSurveyAssembler;
     private final MultilingualService multilingualService;
 
     @Transactional
@@ -97,8 +98,10 @@ public class OrganizationService {
             surveyRepository.save(survey);
         }
 
-        return toOrganizationSurvey(survey);
+        return organizationSurveyAssembler.from(survey);
     }
+
+
 
     @NonNull
     @Transactional
@@ -151,18 +154,6 @@ public class OrganizationService {
     @Transactional(readOnly = true)
     public Long countBySegment(@NonNull final Segment segment) {
         return customerRepository.countBySegment(segment);
-    }
-
-    @NonNull
-    @Transactional(readOnly = true)
-//    @PostFilter("hasPermission(filterObject, 'READ')")
-    public List<OrganizationSurvey> getSurveys(@NonNull final Organization organization, @NonNull final String languageTag) {
-        return customerRepository.findById(organization.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"))
-                .getSurveys().stream()
-                .map(this::toOrganizationSurvey)
-                .sorted((e1,e2) -> compare(e1.getMetadata().getTitles(), e2.getMetadata().getTitles(), languageTag))
-                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     private Survey createOrganisationSurvey(@NonNull final Customer customer, SurveyInput input, @NonNull final Survey defaultSurvey, @NonNull final String languageTag) {
@@ -220,14 +211,6 @@ public class OrganizationService {
                 .id(customer.getId())
                 .name(customer.getName())
                 .description(customer.getDescription())
-                .build();
-    }
-
-    private OrganizationSurvey toOrganizationSurvey(@NonNull final Survey survey) {
-        return OrganizationSurvey.builder()
-                .id(survey.getId())
-                .version(survey.getVersion())
-                .metadata(survey.getMetadata())
                 .build();
     }
 }

@@ -1,5 +1,9 @@
 package fi.sangre.renesans.persistence.model.metadata;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import fi.sangre.renesans.persistence.model.metadata.parameters.ParameterMetadata;
 import lombok.*;
 
 import java.io.Serializable;
@@ -11,8 +15,12 @@ import java.util.Map;
 @Data
 @ToString
 @Builder
+
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SurveyMetadata implements Serializable {
     private Map<String, String> titles;
     private Map<String, String> descriptions;
     private List<CatalystMetadata> catalysts;
+    private List<ParameterMetadata> parameters;
 }

@@ -2,6 +2,7 @@ package fi.sangre.renesans.application.utils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import fi.sangre.renesans.persistence.model.metadata.MultilingualMetadata;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -13,8 +14,8 @@ public class MultilingualUtils {
     private static final String DEFAULT_LANGUAGE_TAG = "en";
 
     public static int compare(@NonNull final Map<String, String> e1,
-                       @NonNull final Map<String, String> e2,
-                       @NonNull final String languageTag) {
+                              @NonNull final Map<String, String> e2,
+                              @NonNull final String languageTag) {
         return StringUtils.compare(getText(e1, languageTag), getText(e2, languageTag), true);
     }
 
@@ -29,7 +30,7 @@ public class MultilingualUtils {
 
     @NonNull
     public static Map<String, String> create(@Nullable final String phrase, @NonNull final String languageTag) {
-        return combine(null, phrase, languageTag);
+        return combine((Map<String, String>) null, phrase, languageTag);
     }
 
     @NonNull
@@ -46,5 +47,14 @@ public class MultilingualUtils {
         }
 
         return ImmutableMap.copyOf(combined);
+    }
+
+    @NonNull
+    public static MultilingualMetadata combine(@Nullable final MultilingualMetadata metadata, @Nullable final String phrase, @NonNull final String languageTag) {
+        if (metadata == null) {
+            return new MultilingualMetadata(create(phrase, languageTag));
+        } else {
+            return new MultilingualMetadata(combine(metadata.getPhrases(), phrase, languageTag));
+        }
     }
 }

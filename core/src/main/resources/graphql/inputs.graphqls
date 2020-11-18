@@ -64,6 +64,13 @@ input SurveyInput {
     description: String
 }
 
+input SurveyParameterInput {
+    type: SurveyParameterType
+    label: String
+    value: String
+    children: [SurveyParameterInput!]
+}
+
 input CustomerInput {
     id: ID
     name: String

@@ -6,6 +6,7 @@ import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.RespondentCounters;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.service.OrganizationService;
+import fi.sangre.renesans.service.OrganizationSurveyService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -21,6 +22,7 @@ import static fi.sangre.renesans.application.model.Counts.ZERO_L;
 @Component
 public class OrganizationResolver implements GraphQLResolver<Organization> {
     private final OrganizationService organizationService;
+    private final OrganizationSurveyService organizationSurveyService;
     private final ResolverHelper resolverHelper;
 
     @Nullable
@@ -30,8 +32,7 @@ public class OrganizationResolver implements GraphQLResolver<Organization> {
 
     @NonNull
     public List<OrganizationSurvey> getSurveys(@NonNull final Organization organization, @NonNull final DataFetchingEnvironment environment) {
-        //TODO: implement
-        return organizationService.getSurveys(organization, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.getSurveys(organization, resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull
