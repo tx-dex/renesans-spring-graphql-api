@@ -1,8 +1,8 @@
 package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.application.model.Catalyst;
-import fi.sangre.renesans.application.model.Driver;
+import fi.sangre.renesans.application.model.LocalizedCatalyst;
+import fi.sangre.renesans.application.model.LocalizedDriver;
 import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.excel.*;
 import fi.sangre.renesans.persistence.model.Customer;
@@ -75,14 +75,14 @@ public class ExcelWriterService {
         builder.add(new ExcelFieldColumn(columnIndex++, SEGMENT_HEADER));
         builder.add(new ExcelFieldColumn(columnIndex++, LOCATION_HEADER));
 
-        final List<Catalyst> catalysts = statisticsService.getCatalysts(customer, EXCEL_LANGUAGE);
+        final List<LocalizedCatalyst> catalysts = statisticsService.getCatalysts(customer, EXCEL_LANGUAGE);
 
-        for (final Catalyst catalyst : catalysts) {
+        for (final LocalizedCatalyst catalyst : catalysts) {
             builder.add(new ExcelCatalystColumn(columnIndex++, catalyst.getName(), catalyst.getId()));
         }
 
-        for (final Catalyst catalyst : catalysts) {
-            for (final Driver driver : catalyst.getDrivers()) {
+        for (final LocalizedCatalyst catalyst : catalysts) {
+            for (final LocalizedDriver driver : catalyst.getDrivers()) {
                 builder.add(new ExcelDriverColumn(columnIndex++, driver.getName(), driver.getId()));
             }
         }

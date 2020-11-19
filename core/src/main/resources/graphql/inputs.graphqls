@@ -63,6 +63,7 @@ input SurveyInput {
     version: Long
     title: String
     description: String
+    templateId: ID
 }
 
 input SurveyParameterInput {
@@ -77,6 +78,25 @@ input SurveyStaticTextInput {
     id: ID!
     text: String!
 }
+
+input SurveyCatalystInput {
+    # Catalyst id, there should never be a null as we do not allow for creating catalysts now
+    id: ID!
+    questions: [LikertQuestionInput!]
+}
+
+input LikertQuestionInput {
+    # Question Id, if null the question is created and generated id is returned
+    id: ID
+    title: String!
+    driverWeights: [QuestionDriverWeightInput!]
+}
+
+input QuestionDriverWeightInput {
+    driverId: ID!
+    weight: Float!
+}
+
 
 input CustomerInput {
     id: ID

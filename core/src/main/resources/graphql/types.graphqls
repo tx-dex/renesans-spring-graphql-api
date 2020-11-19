@@ -83,6 +83,17 @@ type SurveyStaticText {
     text: String!
 }
 
+type LikertQuestion {
+    id: ID!
+    title: String!
+    weights: [QuestionDriverWeight]!
+}
+
+type QuestionDriverWeight {
+    driver: Driver!
+    weight: Float!
+}
+
 type Answer {
     id: ID!
     answerValue: Long
@@ -167,9 +178,9 @@ type Catalyst {
     id: ID!
     title: String!
     titleId: Long @deprecated(reason: "This shouldn't be exposed. It is internal data. Will be removed")
-    description: String @deprecated(reason: "There is no data for that in data table. Will be remove")
+    description: String @deprecated(reason: "There is no data for that in data table. Will be removed")
     pdfName: String
-    questions: [Question]
+    questions: [LikertQuestion!]!
     drivers: [Driver!]!
 }
 

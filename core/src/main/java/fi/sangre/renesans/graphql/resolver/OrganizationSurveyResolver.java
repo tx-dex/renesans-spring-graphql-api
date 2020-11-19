@@ -39,7 +39,7 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
 
     @NonNull
     public List<CatalystProxy> getCatalysts(@NonNull final OrganizationSurvey survey) {
-        return toProxies(survey.getMetadata().getCatalysts());
+        return toProxies(survey.getCatalysts());
     }
 
     @NonNull

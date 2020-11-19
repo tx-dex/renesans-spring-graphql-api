@@ -43,7 +43,6 @@ public class Mutation implements GraphQLMutationResolver {
     private final UserService userService;
     private final SegmentService segmentService;
     private final QuestionService questionService;
-    private final OrganizationService organizationService;
     private final ResolverHelper resolverHelper;
 
     @PreAuthorize("hasRole('SUPER_USER') or (hasRole('POWER_USER') and authentication.principal.id == #id)")

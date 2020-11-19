@@ -3,12 +3,12 @@ package fi.sangre.renesans.graphql.resolver;
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.Catalyst;
+import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.graphql.output.DriverProxy;
 import fi.sangre.renesans.graphql.output.OutputProxy;
-import fi.sangre.renesans.model.Question;
-import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import fi.sangre.renesans.service.MultilingualService;
 import fi.sangre.renesans.service.QuestionService;
 import graphql.schema.DataFetchingEnvironment;
@@ -27,10 +27,11 @@ import static fi.sangre.renesans.graphql.output.DriverProxy.toProxies;
 public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
     private final MultilingualService multilingualService;
     private final QuestionService questionService;
+    private final MetadataLanguageHelper metadataLanguageHelper;
     private final ResolverHelper resolverHelper;
     private final Map<Class<?>, CatalystStrategy<CatalystProxy>> strategies = ImmutableMap.<Class<?>, CatalystStrategy<CatalystProxy>>builder()
+            .put(Catalyst.class, new CatalystModelStrategy())
             .put(CatalystDto.class, new CatalystDtoStrategy())
-            .put(CatalystMetadata.class, new CatalystMetadataStrategy())
             .build();
 
     @NonNull
@@ -54,7 +55,7 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
     }
 
     @NonNull
-    public List<Question> getQuestions(final CatalystProxy proxy) {
+    public List<LikertQuestion> getQuestions(final CatalystProxy proxy) {
         return strategies.get(proxy.getObject().getClass()).getQuestions(proxy);
     }
 
@@ -66,7 +67,7 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
     private interface CatalystStrategy<T extends OutputProxy<?>> {
         @NonNull String getTitle(@NonNull T output, @NonNull String languageTag);
         @NonNull List<DriverProxy> getDrivers(@NonNull T output);
-        @NonNull List<Question> getQuestions(@NonNull T output);
+        @NonNull List<LikertQuestion> getQuestions(@NonNull T output);
     }
 
     private class CatalystDtoStrategy implements CatalystStrategy<CatalystProxy> {
@@ -86,32 +87,31 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
 
         @NonNull
         @Override
-        public List<Question> getQuestions(@NonNull final CatalystProxy proxy) {
-            final CatalystDto catalyst = (CatalystDto) proxy.getObject();
-            return questionService.getAllCatalystQuestions(catalyst.getId(), catalyst.getCustomer(), catalyst.getSegment());
+        public List<LikertQuestion> getQuestions(@NonNull final CatalystProxy proxy) {
+            return ImmutableList.of();
         }
     }
 
-    private static class CatalystMetadataStrategy implements CatalystStrategy<CatalystProxy> {
+    private class CatalystModelStrategy implements CatalystStrategy<CatalystProxy> {
         @NonNull
         @Override
         public String getTitle(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
-            final CatalystMetadata metadata = (CatalystMetadata) proxy.getObject();
-            return metadata.getTitles().get(languageTag);
+            final Catalyst catalyst = (Catalyst) proxy.getObject();
+            return metadataLanguageHelper.getRequiredText(catalyst.getTitles().getPhrases(), languageTag);
         }
 
         @NonNull
         @Override
         public List<DriverProxy> getDrivers(@NonNull final CatalystProxy proxy) {
-            final CatalystMetadata metadata = (CatalystMetadata) proxy.getObject();
-            return toProxies(metadata.getDrivers());
+            final Catalyst catalyst = (Catalyst) proxy.getObject();
+            return toProxies(catalyst.getDrivers());
         }
 
         @NonNull
         @Override
-        public List<Question> getQuestions(@NonNull final CatalystProxy proxy) {
-            //TODO: implement
-            return ImmutableList.of();
+        public List<LikertQuestion> getQuestions(@NonNull final CatalystProxy proxy) {
+            final Catalyst catalyst = (Catalyst) proxy.getObject();
+            return catalyst.getQuestions();
         }
     }
 }

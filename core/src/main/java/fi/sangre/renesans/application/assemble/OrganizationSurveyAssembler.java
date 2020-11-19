@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class OrganizationSurveyAssembler {
     private final ParameterAssembler parameterAssembler;
     private final StaticTextAssembler staticTextAssembler;
+    private final CatalystAssembler catalystAssembler;
 
     @NonNull
     public OrganizationSurvey from(@NonNull final Survey survey) {
@@ -21,6 +22,7 @@ public class OrganizationSurveyAssembler {
                 .id(survey.getId())
                 .version(survey.getVersion())
                 .metadata(survey.getMetadata())
+                .catalysts(catalystAssembler.fromMetadata(survey.getMetadata().getCatalysts()))
                 .parameters(parameterAssembler.fromMetadata(survey.getMetadata().getParameters()))
                 .staticTexts(staticTextAssembler.fromMetadata(survey.getMetadata().getStaticTexts()))
                 .build();

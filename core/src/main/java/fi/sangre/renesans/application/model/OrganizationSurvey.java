@@ -17,6 +17,7 @@ import java.util.UUID;
 public class OrganizationSurvey {
     private UUID id;
     private Long version;
+    private List<Catalyst> catalysts;
     private List<Parameter> parameters;
     private List<StaticText> staticTexts;
     private SurveyMetadata metadata;

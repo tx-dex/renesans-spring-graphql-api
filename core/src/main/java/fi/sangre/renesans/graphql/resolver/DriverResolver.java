@@ -2,10 +2,10 @@ package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.Driver;
 import fi.sangre.renesans.dto.DriverDto;
 import fi.sangre.renesans.graphql.output.DriverProxy;
 import fi.sangre.renesans.graphql.output.OutputProxy;
-import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
 import fi.sangre.renesans.service.MultilingualService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +24,8 @@ public class DriverResolver implements GraphQLResolver<DriverProxy> {
     private final ResolverHelper resolverHelper;
     private final MetadataLanguageHelper metadataLanguageHelper;
     private final Map<Class<?>, DriverStrategy<DriverProxy>> strategies = ImmutableMap.<Class<?>, DriverStrategy<DriverProxy>>builder()
+            .put(Driver.class, new DriverModelStrategy())
             .put(DriverDto.class, new DriverDtoStrategy())
-            .put(DriverMetadata.class, new DriverMetadataStrategy())
             .build();
 
     @NonNull
@@ -91,26 +91,26 @@ public class DriverResolver implements GraphQLResolver<DriverProxy> {
         }
     }
 
-    private class DriverMetadataStrategy implements DriverStrategy<DriverProxy> {
+    private class DriverModelStrategy implements DriverStrategy<DriverProxy> {
         @NonNull
         @Override
         public String getTitle(@NonNull final DriverProxy proxy, @NonNull final String languageTag) {
-            final DriverMetadata metadata = (DriverMetadata) proxy.getObject();
-            return metadataLanguageHelper.getRequiredText(metadata.getTitles(), languageTag);
+            final Driver driver = (Driver) proxy.getObject();
+            return metadataLanguageHelper.getRequiredText(driver.getTitles().getPhrases(), languageTag);
         }
 
         @Nullable
         @Override
         public String getDescription(@NonNull final DriverProxy proxy, @NonNull final String languageTag) {
-            final DriverMetadata metadata = (DriverMetadata) proxy.getObject();
-            return metadataLanguageHelper.getOptionalText(metadata.getDescriptions(), languageTag);
+            final Driver driver = (Driver) proxy.getObject();
+            return metadataLanguageHelper.getOptionalText(driver.getDescriptions().getPhrases(), languageTag);
         }
 
         @Nullable
         @Override
         public String getPrescription(@NonNull final DriverProxy proxy, @NonNull final String languageTag) {
-            final DriverMetadata metadata = (DriverMetadata) proxy.getObject();
-            return metadataLanguageHelper.getOptionalText(metadata.getPrescriptions(), languageTag);
+            final Driver driver = (Driver) proxy.getObject();
+            return metadataLanguageHelper.getOptionalText(driver.getPrescriptions().getPhrases(), languageTag);
         }
     }
 }

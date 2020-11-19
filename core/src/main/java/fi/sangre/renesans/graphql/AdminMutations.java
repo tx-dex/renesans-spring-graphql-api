@@ -1,12 +1,15 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import fi.sangre.renesans.application.assemble.CatalystAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.assemble.StaticTextAssembler;
+import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.StaticText;
 import fi.sangre.renesans.application.model.parameter.Parameter;
+import fi.sangre.renesans.graphql.input.CatalystInput;
 import fi.sangre.renesans.graphql.input.OrganizationInput;
 import fi.sangre.renesans.graphql.input.StaticTextInput;
 import fi.sangre.renesans.graphql.input.SurveyInput;
@@ -34,6 +37,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     private final OrganizationSurveyService organizationSurveyService;
     private final ParameterAssembler parameterAssembler;
     private final StaticTextAssembler staticTextAssembler;
+    private final CatalystAssembler catalystAssembler;
     private final ResolverHelper resolverHelper;
 
     @NonNull
@@ -88,5 +92,17 @@ public class AdminMutations implements GraphQLMutationResolver {
 
         final StaticText text = staticTextAssembler.from(input, resolverHelper.getLanguageCode(environment));
         return organizationSurveyService.storeSurveyStaticText(id, version, text);
+    }
+
+    @NonNull
+    public OrganizationSurvey storeOrganizationSurveyQuestions(@NonNull final UUID id,
+                                                                 @NonNull final Long version,
+                                                                 @NonNull final List<CatalystInput> input,
+                                                                 @Nullable final String languageCode,
+                                                                 @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        final List<Catalyst> catalysts = catalystAssembler.fromInput(input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.storeSurveyQuestions(id, version, catalysts);
     }
 }

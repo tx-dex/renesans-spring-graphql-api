@@ -18,7 +18,7 @@ import java.util.UUID;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class ListParameterMetadata implements ParameterMetadata {
     private UUID id;
-    private Map<String,String> titles;
+    private Map<String, String> titles;
     @Builder.Default
     private List<ParameterItemMetadata> values = Lists.newArrayList();
 }

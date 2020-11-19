@@ -207,10 +207,19 @@ public class QuestionService {
         return questionRepository.findAllBySourceType(Question.SourceType.GENERIC);
     }
 
+    @NonNull
+    @Transactional(readOnly = true)
     public List<Question> getCatalystGenericQuestions(final Long catalystId) {
         checkArgument(catalystId != null, "CatalystId is required");
 
         return questionRepository.findAllBySourceTypeAndQuestionGroupId(Question.SourceType.GENERIC, catalystId);
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public List<Question> getCatalystSegmentQuestions(final Long catalystId, final Long segmentId) {
+        return questionRepository.findAllByQuestionGroupIdAndSegment(catalystId, segmentRepository.findById(segmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Segment not found")));
     }
 
     private List<Question> getCatalystSegmentQuestions(final Long catalystId, final Segment segment) {

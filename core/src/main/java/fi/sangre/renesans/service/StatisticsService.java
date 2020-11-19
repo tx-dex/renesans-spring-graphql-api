@@ -1,8 +1,8 @@
 package fi.sangre.renesans.service;
 
 import com.google.common.collect.*;
-import fi.sangre.renesans.application.model.Catalyst;
-import fi.sangre.renesans.application.model.Driver;
+import fi.sangre.renesans.application.model.LocalizedCatalyst;
+import fi.sangre.renesans.application.model.LocalizedDriver;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.DriverDto;
 import fi.sangre.renesans.dto.FiltersDto;
@@ -107,8 +107,8 @@ public class StatisticsService {
         return calculateStatistics(survey, questions, newFilters, null);
     }
 
-    public List<Catalyst> getCatalysts(final Customer customer, final String languageCode) {
-        return questionService.getCatalysts(customer).stream().map(e -> Catalyst.builder()
+    public List<LocalizedCatalyst> getCatalysts(final Customer customer, final String languageCode) {
+        return questionService.getCatalysts(customer).stream().map(e -> LocalizedCatalyst.builder()
                     .id(e.getId())
                     .name(multilingualService.lookupPhrase(e.getTitleId(), languageCode))
                     .drivers(getDrivers(e, languageCode))
@@ -116,8 +116,8 @@ public class StatisticsService {
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
-    public List<Catalyst> getCatalysts(final Segment segment, final String languageCode) {
-        return questionService.getCatalysts(segment).stream().map(e -> Catalyst.builder()
+    public List<LocalizedCatalyst> getCatalysts(final Segment segment, final String languageCode) {
+        return questionService.getCatalysts(segment).stream().map(e -> LocalizedCatalyst.builder()
                 .id(e.getId())
                 .name(multilingualService.lookupPhrase(e.getTitleId(), languageCode))
                 .drivers(getDrivers(e, languageCode))
@@ -125,8 +125,8 @@ public class StatisticsService {
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
-    private List<Driver> getDrivers(final CatalystDto catalyst, final String languageCode) {
-        return questionService.getAllCatalystDrivers(catalyst).stream().map(e -> Driver.builder()
+    private List<LocalizedDriver> getDrivers(final CatalystDto catalyst, final String languageCode) {
+        return questionService.getAllCatalystDrivers(catalyst).stream().map(e -> LocalizedDriver.builder()
                 .id(e.getId())
                 .name(multilingualService.lookupPhrase(e.getTitleId(), languageCode))
                 .build())

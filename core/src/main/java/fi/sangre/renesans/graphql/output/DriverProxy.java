@@ -21,9 +21,13 @@ public class DriverProxy implements OutputProxy<DriverOutput> {
         return object.getId();
     }
 
+    public static <T extends DriverOutput> DriverProxy toProxy(@NonNull final T driver) {
+        return new DriverProxy(driver);
+    }
+
     public static <T extends DriverOutput> List<DriverProxy> toProxies(@NonNull final List<T> drivers) {
         return drivers.stream()
-                .map(DriverProxy::new)
+                .map(DriverProxy::toProxy)
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 }

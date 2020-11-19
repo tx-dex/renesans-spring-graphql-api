@@ -7,6 +7,7 @@ import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.assemble.StaticTextAssembler;
 import fi.sangre.renesans.application.merge.ParameterMerger;
 import fi.sangre.renesans.application.merge.StaticTextMerger;
+import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.StaticText;
@@ -14,14 +15,19 @@ import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
+import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.persistence.assemble.ParameterMetadataAssembler;
 import fi.sangre.renesans.persistence.assemble.StaticTextsMetadataAssembler;
 import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.model.Survey;
+import fi.sangre.renesans.persistence.model.TemplateId;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
 import fi.sangre.renesans.persistence.model.metadata.LocalisationMetadata;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
+import fi.sangre.renesans.persistence.model.metadata.questions.LikertQuestionMetadata;
+import fi.sangre.renesans.persistence.model.metadata.questions.QuestionMetadata;
+import fi.sangre.renesans.persistence.model.metadata.references.TemplateReference;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
 import fi.sangre.renesans.persistence.repository.SurveyRepository;
 import lombok.RequiredArgsConstructor;
@@ -136,6 +142,19 @@ public class OrganizationSurveyService {
 
     @NonNull
     @Transactional
+    public OrganizationSurvey storeSurveyQuestions(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Catalyst> questions) {
+        final Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+
+        final SurveyMetadata metadata = copy(survey.getMetadata());
+        survey.setMetadata(metadata);
+        //TODO: implement saving questions
+
+        return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
+    }
+
+        @NonNull
+    @Transactional
     public OrganizationSurvey softDeleteSurvey(@NonNull final UUID surveyId) {
         final Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
@@ -180,6 +199,7 @@ public class OrganizationSurveyService {
                     .titles(multilingualService.getPhrases(catalyst.getTitleId()))
                     .weight(catalyst.getWeight())
                     .drivers(drivers)
+                    .questions(copyGenericAndSegmentQuestions(catalyst.getId(), input.getTemplateId()))
                     .build());
         }
 
@@ -217,5 +237,38 @@ public class OrganizationSurveyService {
         });
 
         return texts.build();
+    }
+
+    @NonNull
+    private List<QuestionMetadata> copyGenericAndSegmentQuestions(@NonNull final Long catalystId, @Nullable final Long segmentId) {
+        final ImmutableList.Builder<QuestionMetadata> questions = ImmutableList.<QuestionMetadata>builder()
+                .addAll(questionService.getCatalystGenericQuestions(catalystId)
+                .stream()
+                .map(this::fromGenericQuestion)
+                .collect(toList()));
+
+        if (segmentId != null) {
+                questions.addAll(questionService.getCatalystSegmentQuestions(catalystId, segmentId)
+                        .stream()
+                        .map(e -> fromSegmentQuestion(e, segmentId))
+                        .collect(toList()));
+        }
+
+        return questions.build();
+    }
+
+    private QuestionMetadata fromGenericQuestion(@NonNull final Question question) {
+        return LikertQuestionMetadata.builder()
+                .id(UUID.randomUUID())
+                .titles(multilingualService.getPhrases(question.getTitleId()))
+                .build();
+    }
+
+    private QuestionMetadata fromSegmentQuestion(@NonNull final Question question, @NonNull final Long segmentId) {
+        return LikertQuestionMetadata.builder()
+                .id(UUID.randomUUID())
+                .titles(multilingualService.getPhrases(question.getTitleId()))
+                .reference( new TemplateReference(new TemplateId(segmentId), 1L))
+                .build();
     }
 }
