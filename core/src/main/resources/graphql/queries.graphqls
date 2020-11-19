@@ -28,7 +28,7 @@ type Query {
     defaultRespondentGroupId: String @deprecated(reason: "Will be removed")
     defaultRespondentGroup(languageCode: String): RespondentGroup @deprecated(reason: "Will be removed")
 
-    defaultSurveyId: String
+    defaultSurveyId: String @deprecated(reason: "Will be removed")
 
     respondentGroup(
         languageCode: String

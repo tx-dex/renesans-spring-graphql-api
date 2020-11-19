@@ -72,6 +72,11 @@ type Mutation {
         languageCode: String
     ): OrganizationSurvey!
 
+    removeOrganizationSurvey(
+        # Survey id
+        id: ID!
+    ) : OrganizationSurvey!
+
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
 
     storeSegment(languageCode: String!, segment: SegmentInput!): Segment

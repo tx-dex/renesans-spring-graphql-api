@@ -63,4 +63,10 @@ public class AdminMutations implements GraphQLMutationResolver {
 
         return organizationSurveyService.storeSurveyParameters(id, version, input, resolverHelper.getLanguageCode(environment));
     }
+
+    @NonNull
+    @PreAuthorize("isAuthenticated()")
+    public OrganizationSurvey removeOrganizationSurvey(@NonNull final UUID id) {
+        return organizationSurveyService.softDeleteSurvey(id);
+    }
 }

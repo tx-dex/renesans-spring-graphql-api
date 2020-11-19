@@ -16,6 +16,7 @@ import fi.sangre.renesans.persistence.repository.SurveyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,15 +65,43 @@ public class OrganizationSurveyService {
         final Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
 
-        final SurveyMetadata metadata = survey.getMetadata();
+        final SurveyMetadata metadata = copy(survey.getMetadata());
 
         final List<Parameter> existing = parameterAssembler.fromMetadata(metadata.getParameters());
         final List<Parameter> inputs = parameterAssembler.fromInputs(input, languageTag);
         final List<Parameter> combined = parameterMerger.combine(existing, inputs);
         metadata.setParameters(parameterMetadataAssembler.from(combined));
+        survey.setMetadata(metadata);
 
-        return organizationSurveyAssembler.from(surveyRepository.save(survey));
+        return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
     }
 
+    @NonNull
+    @Transactional
+    public OrganizationSurvey softDeleteSurvey(@NonNull final UUID surveyId) {
+        final Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
 
+        surveyRepository.delete(survey);
+
+        final OrganizationSurvey organizationSurvey = organizationSurveyAssembler.from(survey);
+        organizationSurvey.setVersion(survey.getVersion() + 1); // This only done so incremented version is returned to frontend
+        organizationSurvey.setDeleted(true);
+
+        return organizationSurvey;
+    }
+
+    @NonNull
+    private SurveyMetadata copy(@Nullable final SurveyMetadata metadata) {
+        if (metadata == null) {
+            return SurveyMetadata.builder().build();
+        } else {
+            return SurveyMetadata.builder()
+                    .titles(metadata.getTitles())
+                    .descriptions(metadata.getDescriptions())
+                    .catalysts(metadata.getCatalysts())
+                    .parameters(metadata.getParameters())
+                    .build();
+        }
+    }
 }

@@ -19,4 +19,6 @@ public class OrganizationSurvey {
     private Long version;
     private List<Parameter> parameters;
     private SurveyMetadata metadata;
+    @Builder.Default
+    private boolean deleted = false;
 }

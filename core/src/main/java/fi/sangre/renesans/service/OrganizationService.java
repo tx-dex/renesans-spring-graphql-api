@@ -189,6 +189,7 @@ public class OrganizationService {
                 .catalysts(catalysts.build());
 
         return surveyRepository.save(Survey.builder()
+                .version(1L)
                 .isDefault(false)
                 .metadata(metadata.build())
                 .build());
