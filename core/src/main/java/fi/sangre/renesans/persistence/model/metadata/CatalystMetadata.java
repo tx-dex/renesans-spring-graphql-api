@@ -1,5 +1,7 @@
 package fi.sangre.renesans.persistence.model.metadata;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import fi.sangre.renesans.graphql.output.CatalystOutput;
 import lombok.*;
 
@@ -13,6 +15,8 @@ import java.util.Map;
 @EqualsAndHashCode(of = "pdfName")
 @ToString
 @Builder
+
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class CatalystMetadata implements Serializable, CatalystOutput {
     private Long id;
     private String pdfName;

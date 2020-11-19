@@ -1,21 +1,11 @@
 package fi.sangre.renesans.service;
 
-import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.model.Organization;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.OrganizationInput;
-import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.persistence.model.Customer;
-import fi.sangre.renesans.persistence.model.Survey;
-import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
-import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
-import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
-import fi.sangre.renesans.persistence.repository.SurveyRepository;
 import fi.sangre.renesans.repository.SegmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,9 +21,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
-import static fi.sangre.renesans.application.utils.MultilingualUtils.create;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -43,12 +31,7 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class OrganizationService {
     private final CustomerRepository customerRepository;
-    private final QuestionService questionService;
     private final SegmentRepository segmentRepository;
-    private final SurveyService  surveyService;
-    private final SurveyRepository surveyRepository;
-    private final OrganizationSurveyAssembler organizationSurveyAssembler;
-    private final MultilingualService multilingualService;
 
     @Transactional
     @CacheEvict(cacheNames = AUTH_CUSTOMER_IDS_CACHE, allEntries = true, condition = "#input.id == null")
@@ -77,31 +60,6 @@ public class OrganizationService {
                 .description(customer.getDescription())
                 .build();
     }
-
-    @NonNull
-    @Transactional
-    public OrganizationSurvey storeSurvey(@NonNull final UUID organizationId, @NonNull final SurveyInput input, @NonNull final String languageTag) {
-        final Customer customer = getByIdOrThrow(organizationId);
-        final Survey survey;
-
-        if (input.getId() == null) { // create
-            survey = createOrganisationSurvey(customer, input, surveyService.getDefaultSurvey(), languageTag);
-
-            customer.getSurveys().add(survey);
-            customerRepository.save(customer);
-        } else { // update
-            checkArgument(input.getVersion() != null, "input.version cannot be null");
-            survey = surveyRepository.findById(input.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
-            survey.setVersion(input.getVersion() + 1);
-
-            surveyRepository.save(survey);
-        }
-
-        return organizationSurveyAssembler.from(survey);
-    }
-
-
 
     @NonNull
     @Transactional
@@ -154,45 +112,6 @@ public class OrganizationService {
     @Transactional(readOnly = true)
     public Long countBySegment(@NonNull final Segment segment) {
         return customerRepository.countBySegment(segment);
-    }
-
-    private Survey createOrganisationSurvey(@NonNull final Customer customer, SurveyInput input, @NonNull final Survey defaultSurvey, @NonNull final String languageTag) {
-        final SurveyMetadata.SurveyMetadataBuilder metadata = SurveyMetadata.builder();
-        final ImmutableList.Builder<CatalystMetadata> catalysts = ImmutableList.builder();
-
-        for (final CatalystDto catalyst : questionService.getCatalysts(customer)) {
-            final List<DriverMetadata> drivers = questionService.getAllCatalystDrivers(catalyst.getId(), customer)
-                    .stream()
-                    .map(driver -> DriverMetadata.builder()
-                            .id(driver.getId())
-                            .pdfName(driver.getPdfName())
-                            .titles(multilingualService.getPhrases(driver.getTitleId()))
-                            .descriptions(multilingualService.getPhrases(driver.getDescriptionId()))
-                            .prescriptions(multilingualService.getPhrases(driver.getPrescriptionId()))
-                            .weight(driver.getWeight())
-                            .build())
-
-                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
-
-            catalysts.add(CatalystMetadata.builder()
-                    .id(catalyst.getId())
-                    .pdfName(catalyst.getPdfName())
-                    .titles(multilingualService.getPhrases(catalyst.getTitleId()))
-                    .weight(catalyst.getWeight())
-                    .drivers(drivers)
-                    .build());
-        }
-
-        //TODO: throw on required
-        metadata.titles(create(input.getTitle(), languageTag))
-                .descriptions(create(input.getDescription(), languageTag))
-                .catalysts(catalysts.build());
-
-        return surveyRepository.save(Survey.builder()
-                .version(1L)
-                .isDefault(false)
-                .metadata(metadata.build())
-                .build());
     }
 
     private Customer getByIdOrThrow(@NonNull final UUID id) {
