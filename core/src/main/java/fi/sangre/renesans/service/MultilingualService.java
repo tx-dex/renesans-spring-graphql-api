@@ -51,12 +51,18 @@ public class MultilingualService {
         } else if (keys != null && keys.size() > 0 && StringUtils.isEmpty(startsWith)) {
             multilingualKeys = multilingualKeyRepository.findAllByKeyIn(keys);
         } else if (!StringUtils.isEmpty(startsWith)) {
-            multilingualKeys = multilingualKeyRepository.findAllByKeyStartsWith(startsWith);
+            multilingualKeys = getKeys(startsWith);
         } else {
             multilingualKeys = new ArrayList<>();
         }
 
         return multilingualKeys;
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public List<MultilingualKey> getKeys(@NonNull final String startsWith) {
+        return multilingualKeyRepository.findAllByKeyStartsWith(startsWith);
     }
 
     /**

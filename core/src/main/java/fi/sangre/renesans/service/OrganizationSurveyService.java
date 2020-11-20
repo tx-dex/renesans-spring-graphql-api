@@ -1,6 +1,7 @@
 package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.assemble.StaticTextAssembler;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -153,7 +155,8 @@ public class OrganizationSurveyService {
                 .builder()
                 .titles(create(input.getTitle(), languageTag))
                 .descriptions(create(input.getDescription(), languageTag))
-                .localisation(LocalisationMetadata.builder().build());
+                .localisation(LocalisationMetadata.builder().build())
+                .staticTexts(copyDefaultQuestionnaireTexts());
 
         final ImmutableList.Builder<CatalystMetadata> catalysts = ImmutableList.builder();
 
@@ -205,5 +208,14 @@ public class OrganizationSurveyService {
                     .staticTexts(metadata.getStaticTexts())
                     .build();
         }
+    }
+
+    private Map<String, Map<String, String>> copyDefaultQuestionnaireTexts() {
+        final ImmutableMap.Builder<String, Map<String, String>> texts = ImmutableMap.builder();
+        multilingualService.getKeys("questionnaire").forEach(key -> {
+            texts.put(key.getKey(), multilingualService.getPhrases(key.getId()));
+        });
+
+        return texts.build();
     }
 }
