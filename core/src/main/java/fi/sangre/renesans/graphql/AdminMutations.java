@@ -1,9 +1,14 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import fi.sangre.renesans.application.assemble.ParameterAssembler;
+import fi.sangre.renesans.application.assemble.StaticTextAssembler;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.StaticText;
+import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.graphql.input.OrganizationInput;
+import fi.sangre.renesans.graphql.input.StaticTextInput;
 import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
@@ -27,6 +32,8 @@ import java.util.UUID;
 public class AdminMutations implements GraphQLMutationResolver {
     private final OrganizationService organizationService;
     private final OrganizationSurveyService organizationSurveyService;
+    private final ParameterAssembler parameterAssembler;
+    private final StaticTextAssembler staticTextAssembler;
     private final ResolverHelper resolverHelper;
 
     @NonNull
@@ -61,12 +68,25 @@ public class AdminMutations implements GraphQLMutationResolver {
                                                                 @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-        return organizationSurveyService.storeSurveyParameters(id, version, input, resolverHelper.getLanguageCode(environment));
+        final List<Parameter> parameters = parameterAssembler.fromInputs(input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.storeSurveyParameters(id, version, parameters);
     }
 
     @NonNull
     @PreAuthorize("isAuthenticated()")
     public OrganizationSurvey removeOrganizationSurvey(@NonNull final UUID id) {
         return organizationSurveyService.softDeleteSurvey(id);
+    }
+
+    @NonNull
+    public OrganizationSurvey storeOrganizationSurveyStaticText(@NonNull final UUID id,
+                                                                @NonNull final Long version,
+                                                                @NonNull final StaticTextInput input,
+                                                                @Nullable final String languageCode,
+                                                                @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        final StaticText text = staticTextAssembler.from(input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.storeSurveyStaticText(id, version, text);
     }
 }

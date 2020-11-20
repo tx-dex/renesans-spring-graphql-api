@@ -1,5 +1,7 @@
 package fi.sangre.renesans.persistence.model.metadata;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import fi.sangre.renesans.graphql.output.CatalystOutput;
@@ -17,6 +19,8 @@ import java.util.Map;
 @Builder
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CatalystMetadata implements Serializable, CatalystOutput {
     private Long id;
     private String pdfName;

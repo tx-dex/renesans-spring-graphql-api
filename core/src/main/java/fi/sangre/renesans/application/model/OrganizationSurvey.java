@@ -18,6 +18,7 @@ public class OrganizationSurvey {
     private UUID id;
     private Long version;
     private List<Parameter> parameters;
+    private List<StaticText> staticTexts;
     private SurveyMetadata metadata;
     @Builder.Default
     private boolean deleted = false;

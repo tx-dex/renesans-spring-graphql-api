@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -99,13 +100,11 @@ public class ParameterAssembler {
 
     @NonNull
     public List<Parameter> fromMetadata(@Nullable final List<ParameterMetadata> metadata) {
-        if (metadata == null) {
-            return ImmutableList.of();
-        } else {
-            return metadata.stream()
-                    .map(this::from)
-                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
-        }
+        return Optional.ofNullable(metadata)
+                .orElse(ImmutableList.of())
+                .stream()
+                .map(this::from)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull

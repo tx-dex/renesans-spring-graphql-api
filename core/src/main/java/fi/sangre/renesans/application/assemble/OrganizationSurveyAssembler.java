@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrganizationSurveyAssembler {
     private final ParameterAssembler parameterAssembler;
+    private final StaticTextAssembler staticTextAssembler;
+
     @NonNull
     public OrganizationSurvey from(@NonNull final Survey survey) {
         return OrganizationSurvey.builder()
@@ -20,6 +22,7 @@ public class OrganizationSurveyAssembler {
                 .version(survey.getVersion())
                 .metadata(survey.getMetadata())
                 .parameters(parameterAssembler.fromMetadata(survey.getMetadata().getParameters()))
+                .staticTexts(staticTextAssembler.fromMetadata(survey.getMetadata().getStaticTexts()))
                 .build();
     }
 }

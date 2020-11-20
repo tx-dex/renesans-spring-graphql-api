@@ -1,5 +1,7 @@
 package fi.sangre.renesans.persistence.model.metadata;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.api.client.util.Lists;
@@ -16,6 +18,8 @@ import java.util.List;
 @ToString
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LocalisationMetadata implements Serializable {
     private static final String DEFAULT_LANGUAGE = "fi";
     private static final List<String> DEFAULT_LANGUAGES = ImmutableList.of("fi", "en");

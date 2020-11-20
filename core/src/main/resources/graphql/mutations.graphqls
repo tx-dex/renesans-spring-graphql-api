@@ -72,6 +72,18 @@ type Mutation {
         languageCode: String
     ): OrganizationSurvey!
 
+    # Use for updating static texts that show up in the survey app
+    storeOrganizationSurveyStaticText(
+        # Survey id
+        id: ID!
+        # Survey version
+        version: Long!
+        # Static text to be saved
+        input: SurveyStaticTextInput!
+        # Language that user is currently editing
+        languageCode: String
+    ): OrganizationSurvey!
+
     removeOrganizationSurvey(
         # Survey id
         id: ID!

@@ -72,6 +72,12 @@ input SurveyParameterInput {
     children: [SurveyParameterInput!]
 }
 
+input SurveyStaticTextInput {
+    # the key of the text that is displayed in the frontend
+    id: ID!
+    text: String!
+}
+
 input CustomerInput {
     id: ID
     name: String

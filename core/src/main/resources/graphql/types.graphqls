@@ -48,6 +48,7 @@ type OrganizationSurvey {
     title: String!
     description: String
     catalysts: [Catalyst!]!
+    staticTexts: [SurveyStaticText!]!
     # List of parameters
     parameters: [SurveyParameter!]!
     respondentCounts: RespondentCounters!
@@ -74,6 +75,12 @@ type SurveyTreeParameter {
     label: String!
     value: String!
     children: [SurveyParameterChild!]!
+}
+
+type SurveyStaticText {
+    # Static key for using in the frontend
+    id: ID!
+    text: String!
 }
 
 type Answer {

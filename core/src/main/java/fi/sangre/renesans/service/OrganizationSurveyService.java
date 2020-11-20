@@ -3,15 +3,18 @@ package fi.sangre.renesans.service;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
+import fi.sangre.renesans.application.assemble.StaticTextAssembler;
 import fi.sangre.renesans.application.merge.ParameterMerger;
+import fi.sangre.renesans.application.merge.StaticTextMerger;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.StaticText;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
-import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
 import fi.sangre.renesans.persistence.assemble.ParameterMetadataAssembler;
+import fi.sangre.renesans.persistence.assemble.StaticTextsMetadataAssembler;
 import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
@@ -49,6 +52,9 @@ public class OrganizationSurveyService {
     private final ParameterAssembler parameterAssembler;
     private final ParameterMetadataAssembler parameterMetadataAssembler;
     private final ParameterMerger parameterMerger;
+    private final StaticTextAssembler staticTextAssembler;
+    private final StaticTextMerger staticTextMerger;
+    private final StaticTextsMetadataAssembler staticTextsMetadataAssembler;
     private final QuestionService questionService;
     private final MultilingualService multilingualService;
 
@@ -97,16 +103,30 @@ public class OrganizationSurveyService {
 
     @NonNull
     @Transactional
-    public OrganizationSurvey storeSurveyParameters(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<SurveyParameterInput> input, @NonNull final String languageTag) {
+    public OrganizationSurvey storeSurveyParameters(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Parameter> inputs) {
         final Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
 
         final SurveyMetadata metadata = copy(survey.getMetadata());
 
         final List<Parameter> existing = parameterAssembler.fromMetadata(metadata.getParameters());
-        final List<Parameter> inputs = parameterAssembler.fromInputs(input, languageTag);
         final List<Parameter> combined = parameterMerger.combine(existing, inputs);
         metadata.setParameters(parameterMetadataAssembler.from(combined));
+        survey.setMetadata(metadata);
+
+        return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
+    }
+
+    @NonNull
+    @Transactional
+    public OrganizationSurvey storeSurveyStaticText(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final StaticText input) {
+        final Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+
+        final SurveyMetadata metadata = copy(survey.getMetadata());
+        final List<StaticText> existing = staticTextAssembler.fromMetadata(metadata.getStaticTexts());
+        final List<StaticText> combined = staticTextMerger.combine(existing, input);
+        metadata.setStaticTexts(staticTextsMetadataAssembler.from(combined));
         survey.setMetadata(metadata);
 
         return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
@@ -182,6 +202,7 @@ public class OrganizationSurveyService {
                     .catalysts(metadata.getCatalysts())
                     .parameters(metadata.getParameters())
                     .localisation(metadata.getLocalisation())
+                    .staticTexts(metadata.getStaticTexts())
                     .build();
         }
     }

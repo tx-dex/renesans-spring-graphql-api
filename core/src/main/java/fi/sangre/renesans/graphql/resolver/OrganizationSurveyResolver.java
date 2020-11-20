@@ -3,6 +3,7 @@ package fi.sangre.renesans.graphql.resolver;
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.RespondentCounters;
+import fi.sangre.renesans.application.model.StaticText;
 import fi.sangre.renesans.graphql.assemble.SurveyParameterOutputAssembler;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.graphql.output.parameter.SurveyParameterOutput;
@@ -44,6 +45,11 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
     @NonNull
     public List<SurveyParameterOutput> getParameters(@NonNull final OrganizationSurvey survey) {
         return surveyParameterOutputAssembler.from(survey.getParameters());
+    }
+
+    @NonNull
+    public List<StaticText> getStaticTexts(@NonNull final OrganizationSurvey survey) {
+        return survey.getStaticTexts();
     }
 
     @NonNull
