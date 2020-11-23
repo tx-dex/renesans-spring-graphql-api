@@ -27,11 +27,24 @@ import static java.util.stream.Collectors.toList;
 public class CatalystAssembler {
     private final QuestionAssembler questionAssembler;
     private final DriverAssembler driverAssembler;
+    private final MultilingualTextAssembler multilingualTextAssembler;
 
     @NonNull
     public List<Catalyst> fromInput(@NonNull List<CatalystInput> inputs, @NonNull final String languageTag) {
-        //TODO: implement
-        return ImmutableList.of();
+        return inputs.stream()
+                .map(e -> from(e, languageTag))
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
+
+    @NonNull
+    public Catalyst from(@NonNull CatalystInput input, @NonNull final String languageTag) {
+        return Catalyst.builder()
+                .id(input.getId())
+                .titles(multilingualTextAssembler.fromOptional(input.getTitle(), languageTag)) // This is optional as it may not be provided when updating questions
+                .descriptions(multilingualTextAssembler.fromOptional(input.getDescription(), languageTag))
+                .drivers(driverAssembler.fromInput(input.getDrivers(), languageTag))
+                .questions(questionAssembler.fromInput(input.getQuestions(), languageTag))
+                .build();
     }
 
     @NonNull

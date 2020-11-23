@@ -12,5 +12,6 @@ import java.util.UUID;
 @Data
 public class LikertQuestionInput {
     private UUID id;
+    private String title;
     private List<QuestionDriverWeightInput> driverWeights;
 }

@@ -82,7 +82,22 @@ input SurveyStaticTextInput {
 input SurveyCatalystInput {
     # Catalyst id, there should never be a null as we do not allow for creating catalysts now
     id: ID!
+    # Catalyst title, should not be null if updating catalysts
+    title: String
+    description: String
+    # Use when storing catalyst and drivers, otherwise should be null
+    drivers: [SurveyDriverInput!]
+    # Use when storing questions, otherise should be null
     questions: [LikertQuestionInput!]
+}
+
+input SurveyDriverInput {
+    # Driver id, there should never be a null as we do not allow for creating catalysts now
+    id: ID!
+    title: String!
+    description: String
+    prescription: String
+    weight: Float!
 }
 
 input LikertQuestionInput {

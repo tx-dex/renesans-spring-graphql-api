@@ -84,6 +84,17 @@ type Mutation {
         languageCode: String
     ): OrganizationSurvey!
 
+    storeOrganizationSurveyCatalysts(
+        # Survey id
+        id: ID!
+        # Survey version
+        version: Long!
+        # Static text to be saved
+        input: [SurveyCatalystInput]!
+        # Language that user is currently editing
+        languageCode: String
+    ) : OrganizationSurvey!
+
     storeOrganizationSurveyQuestions(
         # Survey id
         id: ID!

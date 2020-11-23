@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.Driver;
 import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.exception.MissingIdException;
+import fi.sangre.renesans.graphql.input.DriverInput;
 import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,30 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class DriverAssembler {
+    private final MultilingualTextAssembler multilingualTextAssembler;
+
+    @Nullable
+    public List<Driver> fromInput(@Nullable List<DriverInput> inputs, @NonNull final String languageTag) {
+        if (inputs != null) {
+            return inputs.stream()
+                    .map(e -> from(e, languageTag))
+                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+        } else {
+            return null;
+        }
+    }
+
+    @NonNull
+    public Driver from(@NonNull final DriverInput input, @NonNull final String languageTag) {
+        return Driver.builder()
+                .id(input.getId())
+                .titles(multilingualTextAssembler.fromRequired(input.getTitle(), languageTag))
+                .descriptions(multilingualTextAssembler.fromOptional(input.getDescription(), languageTag))
+                .prescriptions(multilingualTextAssembler.fromOptional(input.getPrescription(), languageTag))
+                .weight(input.getWeight())
+                .build();
+    }
+
     @NonNull
     public List<Driver> fromMetadata(@Nullable final List<DriverMetadata> metadata) {
         return Optional.ofNullable(metadata)

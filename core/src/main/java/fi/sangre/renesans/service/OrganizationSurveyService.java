@@ -142,6 +142,19 @@ public class OrganizationSurveyService {
 
     @NonNull
     @Transactional
+    public OrganizationSurvey storeSurveyCatalysts(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Catalyst> questions) {
+        final Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+
+        final SurveyMetadata metadata = copy(survey.getMetadata());
+        survey.setMetadata(metadata);
+        //TODO: implement saving catalysts
+
+        return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
+    }
+
+    @NonNull
+    @Transactional
     public OrganizationSurvey storeSurveyQuestions(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Catalyst> questions) {
         final Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));

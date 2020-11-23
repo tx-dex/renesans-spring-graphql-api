@@ -1,10 +1,12 @@
 package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.input.question.LikertQuestionInput;
 import fi.sangre.renesans.persistence.model.metadata.questions.LikertQuestionMetadata;
 import fi.sangre.renesans.persistence.model.metadata.questions.QuestionMetadata;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,25 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class QuestionAssembler {
+    @Nullable
+    public List<LikertQuestion> fromInput(@Nullable final List<LikertQuestionInput> inputs, @NonNull final String languageTag) {
+        if (inputs != null) {
+            return inputs.stream()
+                    .map(e -> from(e, languageTag))
+                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+        } else {
+            return null;
+        }
+    }
+
+    @NonNull
+    public LikertQuestion from(@NonNull final LikertQuestionInput input, @NonNull final String languageTag) {
+        return LikertQuestion.builder()
+                .id(new QuestionId(input.getId()))
+                .title(new MultilingualText(ImmutableMap.of(languageTag, input.getTitle())))
+                .build();
+    }
+
     @NonNull
     public List<LikertQuestion> fromMetadata(@Nullable final List<QuestionMetadata> metadata) {
         return Optional.ofNullable(metadata)

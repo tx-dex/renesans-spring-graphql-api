@@ -186,7 +186,7 @@ type Catalyst {
     title: String!
     titleId: Long @deprecated(reason: "This shouldn't be exposed. It is internal data. Will be removed")
     description: String @deprecated(reason: "There is no data for that in data table. Will be removed")
-    pdfName: String
+    pdfName: String @deprecated(reason: "This was static text used for displayin it on the reports. Will be removed")
     questions: [LikertQuestion!]!
     drivers: [Driver!]!
 }

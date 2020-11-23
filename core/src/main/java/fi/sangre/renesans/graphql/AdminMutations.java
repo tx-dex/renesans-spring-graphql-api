@@ -83,6 +83,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
+    @PreAuthorize("isAuthenticated()")
     public OrganizationSurvey storeOrganizationSurveyStaticText(@NonNull final UUID id,
                                                                 @NonNull final Long version,
                                                                 @NonNull final StaticTextInput input,
@@ -95,11 +96,25 @@ public class AdminMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
+    @PreAuthorize("isAuthenticated()")
+    public OrganizationSurvey storeOrganizationSurveyCatalysts(@NonNull final UUID id,
+                                                               @NonNull final Long version,
+                                                               @NonNull final List<CatalystInput> input,
+                                                               @Nullable final String languageCode,
+                                                               @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        final List<Catalyst> catalysts = catalystAssembler.fromInput(input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.storeSurveyQuestions(id, version, catalysts);
+    }
+
+    @NonNull
+    @PreAuthorize("isAuthenticated()")
     public OrganizationSurvey storeOrganizationSurveyQuestions(@NonNull final UUID id,
-                                                                 @NonNull final Long version,
-                                                                 @NonNull final List<CatalystInput> input,
-                                                                 @Nullable final String languageCode,
-                                                                 @NonNull final DataFetchingEnvironment environment) {
+                                                               @NonNull final Long version,
+                                                               @NonNull final List<CatalystInput> input,
+                                                               @Nullable final String languageCode,
+                                                               @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         final List<Catalyst> catalysts = catalystAssembler.fromInput(input, resolverHelper.getLanguageCode(environment));
