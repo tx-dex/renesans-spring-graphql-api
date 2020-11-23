@@ -3,9 +3,11 @@ package fi.sangre.renesans.graphql;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.SurveyTemplate;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
+import fi.sangre.renesans.service.TemplateService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class AdminQueries implements GraphQLQueryResolver {
     private final OrganizationService organizationService;
     private final OrganizationSurveyService organizationSurveyService;
+    private final TemplateService templateService;
     private final ResolverHelper resolverHelper;
 
     @NonNull
@@ -36,6 +39,14 @@ public class AdminQueries implements GraphQLQueryResolver {
     @PreAuthorize("hasPermission(#id, 'organization', 'READ')") //TODO: fix in the permission resolver
     public Organization getOrganization(@NonNull final UUID id) {
         return organizationService.findOrganization(id);
+    }
+
+    @NonNull
+    // TODO: authorize
+    public List<SurveyTemplate> getSurveyTemplates(@Nullable final String languageCode, @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return templateService.getTemplates(resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull
