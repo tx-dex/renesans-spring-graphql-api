@@ -13,6 +13,6 @@ import java.util.List;
 @Builder
 public class LikertQuestion {
     private QuestionId id;
-    private MultilingualText title;
+    private MultilingualText titles;
     private List<DriverWeight> weights;
 }

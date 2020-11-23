@@ -105,7 +105,7 @@ public class AdminMutations implements GraphQLMutationResolver {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         final List<Catalyst> catalysts = catalystAssembler.fromInput(input, resolverHelper.getLanguageCode(environment));
-        return organizationSurveyService.storeSurveyQuestions(id, version, catalysts);
+        return organizationSurveyService.storeSurveyCatalysts(id, version, catalysts);
     }
 
     @NonNull

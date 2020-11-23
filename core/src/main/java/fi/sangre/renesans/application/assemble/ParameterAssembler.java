@@ -15,6 +15,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,10 @@ public class ParameterAssembler {
 
     @NonNull
     public List<Parameter> fromInputs(@NonNull final List<SurveyParameterInput> inputs, @NonNull final String languageTag) {
+        if (new HashSet<>(inputs).size() != inputs.size()) {
+            throw new SurveyException("Duplicated parameters' keys in the input");
+        }
+
         return inputs.stream()
                 .map(e -> from(e, languageTag))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));

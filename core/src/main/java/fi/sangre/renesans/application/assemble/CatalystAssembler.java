@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.exception.MissingIdException;
+import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.CatalystInput;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +13,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -30,7 +28,11 @@ public class CatalystAssembler {
     private final MultilingualTextAssembler multilingualTextAssembler;
 
     @NonNull
-    public List<Catalyst> fromInput(@NonNull List<CatalystInput> inputs, @NonNull final String languageTag) {
+    public List<Catalyst> fromInput(@NonNull final List<CatalystInput> inputs, @NonNull final String languageTag) {
+        if (new HashSet<>(inputs).size() != inputs.size()) {
+            throw new SurveyException("Duplicated catalysts' keys in the input");
+        }
+
         return inputs.stream()
                 .map(e -> from(e, languageTag))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));

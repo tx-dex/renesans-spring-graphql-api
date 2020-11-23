@@ -6,7 +6,6 @@ import fi.sangre.renesans.persistence.model.metadata.parameters.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -20,7 +19,7 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class ParameterMetadataAssembler {
-    @Nullable
+    @NonNull
     public List<ParameterMetadata> from(@NonNull final List<Parameter> parameters) {
         return parameters.stream()
                 .map(this::from)

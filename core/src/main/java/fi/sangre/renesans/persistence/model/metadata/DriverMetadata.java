@@ -13,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@EqualsAndHashCode(of = "pdfName")
+@EqualsAndHashCode(of = "id")
 @ToString
 @Builder
 
@@ -22,6 +22,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DriverMetadata implements Serializable, DriverOutput {
     private Long id;
+    @Deprecated
     private String pdfName;
     private Map<String, String> titles;
     private Map<String, String> descriptions;

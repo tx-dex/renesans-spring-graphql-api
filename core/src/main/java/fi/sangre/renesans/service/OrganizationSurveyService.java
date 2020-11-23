@@ -2,9 +2,11 @@ package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.assemble.CatalystAssembler;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.assemble.StaticTextAssembler;
+import fi.sangre.renesans.application.merge.CatalystMerger;
 import fi.sangre.renesans.application.merge.ParameterMerger;
 import fi.sangre.renesans.application.merge.StaticTextMerger;
 import fi.sangre.renesans.application.model.Catalyst;
@@ -16,6 +18,7 @@ import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.model.Question;
+import fi.sangre.renesans.persistence.assemble.CatalystMetadataAssembler;
 import fi.sangre.renesans.persistence.assemble.ParameterMetadataAssembler;
 import fi.sangre.renesans.persistence.assemble.StaticTextsMetadataAssembler;
 import fi.sangre.renesans.persistence.model.Customer;
@@ -63,14 +66,16 @@ public class OrganizationSurveyService {
     private final StaticTextAssembler staticTextAssembler;
     private final StaticTextMerger staticTextMerger;
     private final StaticTextsMetadataAssembler staticTextsMetadataAssembler;
+    private final CatalystAssembler catalystAssembler;
+    private final CatalystMerger catalystMerger;
+    private final CatalystMetadataAssembler catalystMetadataAssembler;
     private final QuestionService questionService;
     private final MultilingualService multilingualService;
 
     @NonNull
     @Transactional(readOnly = true)
     public OrganizationSurvey getSurvey(@NonNull final UUID id) {
-        return organizationSurveyAssembler.from(surveyRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Survey not found")));
+        return organizationSurveyAssembler.from(getSurveyOrThrow(id));
     }
 
     @NonNull
@@ -112,8 +117,7 @@ public class OrganizationSurveyService {
     @NonNull
     @Transactional
     public OrganizationSurvey storeSurveyParameters(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Parameter> inputs) {
-        final Survey survey = surveyRepository.findById(surveyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+        final Survey survey = getSurveyOrThrow(surveyId);
 
         final SurveyMetadata metadata = copy(survey.getMetadata());
 
@@ -128,8 +132,7 @@ public class OrganizationSurveyService {
     @NonNull
     @Transactional
     public OrganizationSurvey storeSurveyStaticText(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final StaticText input) {
-        final Survey survey = surveyRepository.findById(surveyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+        final Survey survey = getSurveyOrThrow(surveyId);
 
         final SurveyMetadata metadata = copy(survey.getMetadata());
         final List<StaticText> existing = staticTextAssembler.fromMetadata(metadata.getStaticTexts());
@@ -142,26 +145,32 @@ public class OrganizationSurveyService {
 
     @NonNull
     @Transactional
-    public OrganizationSurvey storeSurveyCatalysts(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Catalyst> questions) {
-        final Survey survey = surveyRepository.findById(surveyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+    public OrganizationSurvey storeSurveyCatalysts(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Catalyst> input) {
+        final Survey survey = getSurveyOrThrow(surveyId);
 
         final SurveyMetadata metadata = copy(survey.getMetadata());
         survey.setMetadata(metadata);
-        //TODO: implement saving catalysts
+        final List<Catalyst> existing = catalystAssembler.fromMetadata(metadata.getCatalysts());
+        input.forEach(catalyst ->  catalyst.setQuestions(null)); // make sure that it will not update questions
+        final List<Catalyst> combined = catalystMerger.combine(existing, input);
+        metadata.setCatalysts(catalystMetadataAssembler.from(combined));
+        survey.setMetadata(metadata);
 
         return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
     }
 
     @NonNull
     @Transactional
-    public OrganizationSurvey storeSurveyQuestions(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Catalyst> questions) {
-        final Survey survey = surveyRepository.findById(surveyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+    public OrganizationSurvey storeSurveyQuestions(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Catalyst> input) {
+        final Survey survey = getSurveyOrThrow(surveyId);
 
         final SurveyMetadata metadata = copy(survey.getMetadata());
         survey.setMetadata(metadata);
-        //TODO: implement saving questions
+        final List<Catalyst> existing = catalystAssembler.fromMetadata(metadata.getCatalysts());
+        input.forEach(catalyst ->  catalyst.setDrivers(null)); // make sure that it will not update drivers
+        final List<Catalyst> combined = catalystMerger.combine(existing, input);
+        metadata.setCatalysts(catalystMetadataAssembler.from(combined));
+        survey.setMetadata(metadata);
 
         return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
     }
@@ -169,8 +178,7 @@ public class OrganizationSurveyService {
         @NonNull
     @Transactional
     public OrganizationSurvey softDeleteSurvey(@NonNull final UUID surveyId) {
-        final Survey survey = surveyRepository.findById(surveyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+        final Survey survey = getSurveyOrThrow(surveyId);
 
         surveyRepository.delete(survey);
 
@@ -226,6 +234,11 @@ public class OrganizationSurveyService {
                 .build());
     }
 
+    @NonNull
+    private Survey getSurveyOrThrow(@NonNull final UUID id) {
+        return surveyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+    }
 
     @NonNull
     private SurveyMetadata copy(@Nullable final SurveyMetadata metadata) {

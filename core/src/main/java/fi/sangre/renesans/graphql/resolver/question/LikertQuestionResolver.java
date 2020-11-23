@@ -29,7 +29,7 @@ public class LikertQuestionResolver implements GraphQLResolver<LikertQuestion> {
 
     @NonNull
     public String getTitle(@NonNull final LikertQuestion output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(output.getTitle().getPhrases(), resolverHelper.getLanguageCode(environment));
+        return metadataLanguageHelper.getRequiredText(output.getTitles().getPhrases(), resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull

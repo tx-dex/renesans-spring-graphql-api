@@ -1,15 +1,13 @@
 package fi.sangre.renesans.graphql.input.parameter;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@EqualsAndHashCode(of = "value")
 @Builder
 public class SurveyTreeParameterInput implements SurveyParameterInput {
     private String label;

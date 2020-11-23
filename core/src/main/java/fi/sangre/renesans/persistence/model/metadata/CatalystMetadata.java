@@ -15,7 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@EqualsAndHashCode(of = "pdfName")
+@EqualsAndHashCode(of = "id")
 @ToString
 @Builder
 
@@ -24,6 +24,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CatalystMetadata implements Serializable, CatalystOutput {
     private Long id;
+    @Deprecated
     private String pdfName;
     private Map<String, String> titles;
     private List<DriverMetadata> drivers;

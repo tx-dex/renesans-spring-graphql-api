@@ -16,6 +16,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,10 @@ public class QuestionAssembler {
     @Nullable
     public List<LikertQuestion> fromInput(@Nullable final List<LikertQuestionInput> inputs, @NonNull final String languageTag) {
         if (inputs != null) {
+            if (new HashSet<>(inputs).size() != inputs.size()) {
+                throw new SurveyException("Duplicated questions keys in the input");
+            }
+
             return inputs.stream()
                     .map(e -> from(e, languageTag))
                     .collect(collectingAndThen(toList(), Collections::unmodifiableList));
@@ -42,7 +47,7 @@ public class QuestionAssembler {
     public LikertQuestion from(@NonNull final LikertQuestionInput input, @NonNull final String languageTag) {
         return LikertQuestion.builder()
                 .id(new QuestionId(input.getId()))
-                .title(new MultilingualText(ImmutableMap.of(languageTag, input.getTitle())))
+                .titles(new MultilingualText(ImmutableMap.of(languageTag, input.getTitle())))
                 .build();
     }
 
@@ -69,7 +74,7 @@ public class QuestionAssembler {
     private LikertQuestion from(@NonNull final LikertQuestionMetadata metadata) {
         return LikertQuestion.builder()
                 .id(new QuestionId(metadata.getId()))
-                .title(new MultilingualText((metadata).getTitles()))
+                .titles(new MultilingualText((metadata).getTitles()))
                 .build();
     }
 }
