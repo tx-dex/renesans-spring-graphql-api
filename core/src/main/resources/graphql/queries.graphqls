@@ -59,6 +59,14 @@ type Query {
     organizationSurvey(id: ID!, languageCode: String): OrganizationSurvey!
     # Get list of survey templates
     surveyTemplates(languageCode: String): [SurveyTemplate!]!
+    # Get list of respondents based on provided filters
+    surveyRespondents(
+        surveyId: ID!
+        # List of filters for filtering respondents
+        filters: [FilterInput!]
+        # Should be used for selecting the language
+        languageCode: String
+    ): [SurveyRespondent!]!
 
     customer(
         languageCode: String

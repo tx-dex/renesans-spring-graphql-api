@@ -9,10 +9,7 @@ import fi.sangre.renesans.application.assemble.StaticTextAssembler;
 import fi.sangre.renesans.application.merge.CatalystMerger;
 import fi.sangre.renesans.application.merge.ParameterMerger;
 import fi.sangre.renesans.application.merge.StaticTextMerger;
-import fi.sangre.renesans.application.model.Catalyst;
-import fi.sangre.renesans.application.model.Organization;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.StaticText;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
@@ -40,10 +37,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.application.utils.MultilingualUtils.compare;
@@ -175,7 +169,14 @@ public class OrganizationSurveyService {
         return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
     }
 
-        @NonNull
+    @NonNull
+    public Collection<SurveyRespondent> findRespondents(@NonNull final UUID surveyId) {
+        final Survey survey = getSurveyOrThrow(surveyId);
+        // TODO: implement
+        return ImmutableList.of();
+    }
+
+    @NonNull
     @Transactional
     public OrganizationSurvey softDeleteSurvey(@NonNull final UUID surveyId) {
         final Survey survey = getSurveyOrThrow(surveyId);

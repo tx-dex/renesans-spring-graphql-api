@@ -84,6 +84,7 @@ type Mutation {
         languageCode: String
     ): OrganizationSurvey!
 
+    # Stores survey catalysts and drivers with their names and descriptions.
     storeOrganizationSurveyCatalysts(
         # Survey id
         id: ID!
@@ -95,6 +96,7 @@ type Mutation {
         languageCode: String
     ) : OrganizationSurvey!
 
+    # Stores survey catalysts questions
     storeOrganizationSurveyQuestions(
         # Survey id
         id: ID!

@@ -12,6 +12,15 @@ enum SurveyParameterType {
     TREE
 }
 
+# The status of the respondent
+# This still may be extended
+enum SurveyRespondentState {
+    INVITING
+    INVITED
+    ANSWERING
+    ANSWERED
+}
+
 type Customer {
     id: ID!
     name: String!
@@ -99,6 +108,25 @@ type LikertQuestion {
 type QuestionDriverWeight {
     driver: Driver!
     weight: Float!
+}
+
+
+type SurveyRespondent {
+    id: ID!
+    email: String!
+    parameterAnswers: [RespondentParameterAnswer!]!
+    state: SurveyRespondentState!
+}
+
+# Answers values for SurveyParameters
+# This may be used for displaynig the respondent answers in respondent list view in columns
+type RespondentParameterAnswer {
+    # The parameter id from the table header/filter
+    # If TREE or LIST parameter is used this is the root value (SurveyParameter.value) and it should be used to match the column
+    id: ID!
+    # Actual user answer value to display
+    # If TREE or LIST parameter is used this is the SurveyParameter.label field
+    answer: String
 }
 
 type Answer {
