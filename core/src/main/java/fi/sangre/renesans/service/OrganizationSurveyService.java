@@ -11,6 +11,7 @@ import fi.sangre.renesans.application.merge.ParameterMerger;
 import fi.sangre.renesans.application.merge.StaticTextMerger;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.parameter.Parameter;
+import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
@@ -167,6 +168,11 @@ public class OrganizationSurveyService {
         survey.setMetadata(metadata);
 
         return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
+    }
+
+    public void inviteRespondents(@NonNull final UUID surveyId, @NonNull final Collection<Invitation> invitations) {
+        final Survey survey = getSurveyOrThrow(surveyId);
+        // TODO: implement
     }
 
     @NonNull

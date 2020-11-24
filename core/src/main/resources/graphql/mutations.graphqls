@@ -113,6 +113,16 @@ type Mutation {
         id: ID!
     ) : OrganizationSurvey!
 
+    # invite respondents from invitations list and returns the list of all the respondents
+    inviteRespondents(
+        surveyId: ID!
+        invitations: [RespondentInvitationInput!]!
+        # List of filters for filtering respondents for the output
+        filters: [FilterInput!]
+        # Should be used for selecting the language for the output
+        languageCode: String
+    ): [SurveyRespondent!]!
+
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
 
     storeSegment(languageCode: String!, segment: SegmentInput!): Segment

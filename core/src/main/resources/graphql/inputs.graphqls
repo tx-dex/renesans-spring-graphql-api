@@ -112,13 +112,18 @@ input QuestionDriverWeightInput {
     weight: Float!
 }
 
-# type for filtering respondents or statistics
+# input for filtering respondents or statistics
 input FilterInput {
     # Parameter id from the column header that is chosen for filtering
     id: ID!
     # Selected values or ids
     # for TREE and LIST parameter it should be selected children (SurveyParameter.value field)
     values: [String!]!
+}
+
+# input for sending invitations to respondents
+input RespondentInvitationInput {
+    email: String!
 }
 
 input CustomerInput {
