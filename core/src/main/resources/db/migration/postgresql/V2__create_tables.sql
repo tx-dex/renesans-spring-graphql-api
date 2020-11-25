@@ -56,6 +56,34 @@ create table if not exists survey
 	mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
+create table if not exists survey_respondent
+(
+    id uuid primary key not null,
+    survey_id uuid not null,
+    email text not null,
+    invitation_hash text not null,
+    consent boolean default false not null,
+    state varchar(20) default 'INVITING' not null,
+    archived boolean default false not null,
+    ctm timestamp default CURRENT_TIMESTAMP not null,
+    mtm timestamp default CURRENT_TIMESTAMP not null
+);
+
+create unique index if not exists survey_respondent_survey_id_id_uidx
+    on survey_respondent(survey_id, id);
+
+create unique index if not exists survey_respondent_survey_id_email_uidx
+    on survey_respondent(survey_id, email) where archived is false;
+
+create index if not exists survey_respondent_id_archived_idx
+    on survey_respondent(id, archived);
+
+create index if not exists survey_respondent_survey_id_archived_idx
+    on survey_respondent(survey_id, archived);
+
+create index if not exists survey_respondent_invitation_hash_archived_idx
+    on survey_respondent(invitation_hash, archived);
+
 create table if not exists question_group
 (
 	id bigserial primary key not null,

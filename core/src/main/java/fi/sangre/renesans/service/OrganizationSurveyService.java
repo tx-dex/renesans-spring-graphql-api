@@ -2,10 +2,8 @@ package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import fi.sangre.renesans.application.assemble.CatalystAssembler;
-import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
-import fi.sangre.renesans.application.assemble.ParameterAssembler;
-import fi.sangre.renesans.application.assemble.StaticTextAssembler;
+import com.google.common.hash.Hashing;
+import fi.sangre.renesans.application.assemble.*;
 import fi.sangre.renesans.application.merge.CatalystMerger;
 import fi.sangre.renesans.application.merge.ParameterMerger;
 import fi.sangre.renesans.application.merge.StaticTextMerger;
@@ -19,9 +17,8 @@ import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.persistence.assemble.CatalystMetadataAssembler;
 import fi.sangre.renesans.persistence.assemble.ParameterMetadataAssembler;
 import fi.sangre.renesans.persistence.assemble.StaticTextsMetadataAssembler;
-import fi.sangre.renesans.persistence.model.Customer;
-import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.TemplateId;
+import fi.sangre.renesans.persistence.model.*;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
 import fi.sangre.renesans.persistence.model.metadata.LocalisationMetadata;
@@ -31,6 +28,7 @@ import fi.sangre.renesans.persistence.model.metadata.questions.QuestionMetadata;
 import fi.sangre.renesans.persistence.model.metadata.references.TemplateReference;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
 import fi.sangre.renesans.persistence.repository.SurveyRepository;
+import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -38,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -66,6 +65,8 @@ public class OrganizationSurveyService {
     private final CatalystMetadataAssembler catalystMetadataAssembler;
     private final QuestionService questionService;
     private final MultilingualService multilingualService;
+    private final SurveyRespondentRepository surveyRespondentRepository;
+    private final RespondentAssembler respondentAssembler;
 
     @NonNull
     @Transactional(readOnly = true)
@@ -170,16 +171,32 @@ public class OrganizationSurveyService {
         return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
     }
 
+    @Transactional
     public void inviteRespondents(@NonNull final UUID surveyId, @NonNull final Collection<Invitation> invitations) {
         final Survey survey = getSurveyOrThrow(surveyId);
-        // TODO: implement
+
+        //TODO: trim email
+        surveyRespondentRepository.saveAll(new HashSet<>(invitations).stream()
+                .map(e -> SurveyRespondent.builder()
+                .state(SurveyRespondentState.INVITING)
+                        .surveyId(surveyId)
+                        .email(e.getEmail())
+                        //TODO: change hashing
+                        .invitationHash(Hashing.sha512().hashString(String.format("%s-%s", survey, UUID.randomUUID()), StandardCharsets.UTF_8).toString())
+                        .state(SurveyRespondentState.INVITING)
+                        .consent(false)
+                        .archived(false)
+                .build())
+        .collect(toList()));
     }
 
     @NonNull
-    public Collection<SurveyRespondent> findRespondents(@NonNull final UUID surveyId) {
+    @Transactional(readOnly = true)
+    public Collection<Respondent> findRespondents(@NonNull final UUID surveyId) {
         final Survey survey = getSurveyOrThrow(surveyId);
-        // TODO: implement
-        return ImmutableList.of();
+
+        //TODO: sort
+        return respondentAssembler.from(surveyRespondentRepository.findAllBySurveyId(surveyId));
     }
 
     @NonNull

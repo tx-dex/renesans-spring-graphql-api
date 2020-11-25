@@ -1,6 +1,6 @@
 package fi.sangre.renesans.graphql.facade;
 
-import fi.sangre.renesans.application.model.SurveyRespondent;
+import fi.sangre.renesans.application.model.Respondent;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.graphql.input.FilterInput;
 import fi.sangre.renesans.graphql.input.RespondentInvitationInput;
@@ -27,19 +27,19 @@ public class SurveyRespondentsFacade {
     private final OrganizationSurveyService organizationSurveyService;
 
     @NonNull
-    public Collection<SurveyRespondent> getSurveyRespondents(@NonNull final UUID surveyId,
-                                                             @Nullable final List<FilterInput> filters,
-                                                             @NonNull final String languageCode) {
+    public Collection<Respondent> getSurveyRespondents(@NonNull final UUID surveyId,
+                                                       @Nullable final List<FilterInput> filters,
+                                                       @NonNull final String languageCode) {
 
         // TODO: combine with mail Service data
         return organizationSurveyService.findRespondents(surveyId);
     }
 
     @NonNull
-    public Collection<SurveyRespondent> inviteRespondents(@NonNull final UUID surveyId,
-                                                          @NonNull final List<RespondentInvitationInput> invitations,
-                                                          @Nullable final List<FilterInput> filters,
-                                                          @NonNull final String languageCode) {
+    public Collection<Respondent> inviteRespondents(@NonNull final UUID surveyId,
+                                                    @NonNull final List<RespondentInvitationInput> invitations,
+                                                    @Nullable final List<FilterInput> filters,
+                                                    @NonNull final String languageCode) {
         organizationSurveyService.inviteRespondents(surveyId, invitations.stream()
                 .map(e -> Invitation.builder()
                         .email(e.getEmail())

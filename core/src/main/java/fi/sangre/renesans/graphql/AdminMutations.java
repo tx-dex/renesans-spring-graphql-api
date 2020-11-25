@@ -120,11 +120,11 @@ public class AdminMutations implements GraphQLMutationResolver {
 
     @NonNull
     @PreAuthorize("isAuthenticated()")
-    public Collection<SurveyRespondent> inviteRespondents(@NonNull final UUID surveyId,
-                                                          @NonNull final List<RespondentInvitationInput> invitations,
-                                                          @Nullable final List<FilterInput> filters,
-                                                          @NonNull final String languageCode,
-                                                          @NonNull final DataFetchingEnvironment environment) {
+    public Collection<Respondent> inviteRespondents(@NonNull final UUID surveyId,
+                                                    @NonNull final List<RespondentInvitationInput> invitations,
+                                                    @Nullable final List<FilterInput> filters,
+                                                    @NonNull final String languageCode,
+                                                    @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return surveyRespondentsFacade.inviteRespondents(surveyId, invitations, filters, resolverHelper.getLanguageCode(environment));

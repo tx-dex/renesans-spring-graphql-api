@@ -1,5 +1,6 @@
-package fi.sangre.renesans.application.model;
+package fi.sangre.renesans.application.model.respondent;
 
+import fi.sangre.renesans.application.model.IdValueObject;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

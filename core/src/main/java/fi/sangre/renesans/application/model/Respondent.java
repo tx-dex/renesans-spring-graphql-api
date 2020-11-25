@@ -1,10 +1,9 @@
 package fi.sangre.renesans.application.model;
 
 import fi.sangre.renesans.application.model.parameter.ParameterAnswer;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.application.model.respondent.RespondentState;
+import lombok.*;
 
 import java.util.Set;
 
@@ -12,9 +11,10 @@ import java.util.Set;
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(of = "id")
-public class SurveyRespondent {
+@Builder
+public class Respondent {
     private RespondentId id;
     private String email;
     private Set<ParameterAnswer> parameterAnswers;
-    private SurveyRespondentState state;
+    private RespondentState state;
 }
