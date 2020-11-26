@@ -42,7 +42,7 @@ public class AdminQueries implements GraphQLQueryResolver {
     }
 
     @NonNull
-    @PreAuthorize("hasPermission(#id, 'organization', 'READ')") //TODO: fix in the permission resolver
+    @PreAuthorize("hasPermission(#id, 'organization', 'READ')")
     public Organization getOrganization(@NonNull final UUID id) {
         return organizationService.findOrganization(id);
     }
@@ -57,8 +57,7 @@ public class AdminQueries implements GraphQLQueryResolver {
     }
 
     @NonNull
-    // TODO: authorize
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#id, 'survey', 'READ')")
     public OrganizationSurvey getOrganizationSurvey(@NonNull final UUID id, @Nullable final String languageCode, @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
@@ -66,8 +65,7 @@ public class AdminQueries implements GraphQLQueryResolver {
     }
 
     @NonNull
-    // TODO: authorize
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'READ')")
     public Collection<Respondent> getSurveyRespondents(@NonNull final UUID surveyId,
                                                        @Nullable final List<FilterInput> filters,
                                                        @Nullable final String languageCode,

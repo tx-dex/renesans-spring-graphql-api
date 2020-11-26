@@ -9,6 +9,7 @@ import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,14 +30,15 @@ import java.util.Optional;
 @Slf4j
 
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenService tokenService;
     private final OrganizationSurveyService organizationSurveyService;
     private final UserPrincipalService userPrincipalService;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull final HttpServletResponse response, @NonNull final FilterChain filterChain) throws ServletException, IOException {
+        AuthenticationException authenticationError = null;
 
         try {
             final Jws<Claims> token = Optional.ofNullable(getTokenFromRequest(request))
@@ -61,12 +63,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (final AuthenticationException ex) {
             log.warn("Can't set security context. {}", ex.getMessage());
-            jwtAuthenticationEntryPoint.commence(request, response, ex); //TODO: Fix CORS headers when getting 401 there are no CORS headers in the response
+            authenticationError = ex;
         } catch (final Exception ex) {
             log.warn("Can't set security context. Unknown exception. Should verify it", ex);
+            authenticationError = new AuthenticationServiceException("Unknown exception", ex);
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            if (authenticationError != null) {
+                customAuthenticationEntryPoint.commence(request, response, authenticationError);
+            } else {
+                filterChain.doFilter(request, response);
+            }
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {

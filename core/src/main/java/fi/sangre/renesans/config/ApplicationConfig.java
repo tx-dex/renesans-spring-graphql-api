@@ -2,9 +2,11 @@ package fi.sangre.renesans.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
 @Configuration
+@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class ApplicationConfig {
     @Bean
     public CommonsRequestLoggingFilter logFilter() {

@@ -23,7 +23,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
-import static fi.sangre.renesans.aaa.CacheConfig.AUTH_RESPONDENT_GROUP_IDS_CACHE;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -34,7 +33,7 @@ public class UserPrincipalService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     // This method is used in the built in Spring Authentication provider
     public UserDetails loadUserByUsername(final String username)
             throws UsernameNotFoundException {
@@ -47,7 +46,7 @@ public class UserPrincipalService implements UserDetailsService {
 
     // This method is used by JWTAuthenticationFilter
     @NotNull
-    @Transactional
+    @Transactional(readOnly = true)
     public UserDetails loadUserById(final Long id) {
 
         final User user = userRepository.findById(id)
@@ -69,14 +68,7 @@ public class UserPrincipalService implements UserDetailsService {
         return customersIds;
     }
 
-    @Cacheable(cacheNames = AUTH_RESPONDENT_GROUP_IDS_CACHE, key = "#user.id")
-    public Set<String> getRespondentGroupIdsThatPrincipalCanAccess(final UserPrincipal user) {
-        log.info("Get respondent group ids for principal: {}", user);
-        Set<String> respondentGroupIds = userRepository.findRespondentGroupIdsAccessibleByUserId(user.getId());
-        log.debug("Found {} respondent group ids for principal: {}", respondentGroupIds.size(), user.getUsername());
-        return respondentGroupIds;
-    }
-
+    @Deprecated
     public UserPrincipal getLoggedInPrincipal() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -87,6 +79,7 @@ public class UserPrincipalService implements UserDetailsService {
         return (UserPrincipal) authentication.getPrincipal();
     }
 
+    @Deprecated
     public User getLoggedInUser() { //This maybe use as a implementation of AuditorAware<User>
         final UserPrincipal user = getLoggedInPrincipal();
         if (user != null) {

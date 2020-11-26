@@ -23,8 +23,7 @@ public class AppQueries implements GraphQLQueryResolver {
     private final ResolverHelper resolverHelper;
 
     @NonNull
-    // TODO: authorize
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#id, 'survey', 'READ')")
     public QuestionnaireOutput questionnaire(@NonNull final UUID id, @Nullable final String languageCode, @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 

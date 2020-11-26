@@ -38,19 +38,19 @@ public class AdminMutations implements GraphQLMutationResolver {
     private final ResolverHelper resolverHelper;
 
     @NonNull
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()") //TODO: implement it properly
     public Organization storeOrganization(@NonNull final OrganizationInput input) {
         return organizationService.storeOrganization(input);
     }
 
     @NonNull
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#id, 'organization', 'DELETE')")
     public Organization removeOrganization(@NonNull final UUID id) {
         return organizationService.softDeleteOrganization(id);
     }
 
     @NonNull
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#organizationId, 'organization', 'WRITE')")
     public OrganizationSurvey storeOrganizationSurvey(@NonNull final UUID organizationId,
                                                       @NonNull final SurveyInput input,
                                                       @Nullable final String languageCode,
@@ -60,8 +60,15 @@ public class AdminMutations implements GraphQLMutationResolver {
         return organizationSurveyService.storeSurvey(organizationId, input, resolverHelper.getLanguageCode(environment));
     }
 
+
     @NonNull
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#id, 'survey', 'DELETE')")
+    public OrganizationSurvey removeOrganizationSurvey(@NonNull final UUID id) {
+        return organizationSurveyService.softDeleteSurvey(id);
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
     public OrganizationSurvey storeOrganizationSurveyParameters(@NonNull final UUID id,
                                                                 @NonNull final Long version,
                                                                 @NonNull final List<SurveyParameterInput> input,
@@ -74,13 +81,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
-    @PreAuthorize("isAuthenticated()")
-    public OrganizationSurvey removeOrganizationSurvey(@NonNull final UUID id) {
-        return organizationSurveyService.softDeleteSurvey(id);
-    }
-
-    @NonNull
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
     public OrganizationSurvey storeOrganizationSurveyStaticText(@NonNull final UUID id,
                                                                 @NonNull final Long version,
                                                                 @NonNull final StaticTextInput input,
@@ -93,7 +94,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
     public OrganizationSurvey storeOrganizationSurveyCatalysts(@NonNull final UUID id,
                                                                @NonNull final Long version,
                                                                @NonNull final List<CatalystInput> input,
@@ -106,7 +107,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
     public OrganizationSurvey storeOrganizationSurveyQuestions(@NonNull final UUID id,
                                                                @NonNull final Long version,
                                                                @NonNull final List<CatalystInput> input,
@@ -119,7 +120,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'INVITE')")
     public Collection<Respondent> inviteRespondents(@NonNull final UUID surveyId,
                                                     @NonNull final List<RespondentInvitationInput> invitations,
                                                     @Nullable final List<FilterInput> filters,

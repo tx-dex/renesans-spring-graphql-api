@@ -1,13 +1,12 @@
 package fi.sangre.renesans.aaa;
 
 import com.google.common.collect.ImmutableList;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,20 +20,16 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+@RequiredArgsConstructor
 @Slf4j
 @Configuration
 @EnableWebSecurity
-@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${fi.sangre.security.corsEnabled}")
     private boolean corsEnabled;
 
-    @Autowired
-    private UserPrincipalService userPrincipalService;
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final UserPrincipalService userPrincipalService;
+    private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
     @Bean
     public AuditorAware<Long> auditorAware() {
@@ -69,9 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests().anyRequest().permitAll()
                 .and()
-                .addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
-                .exceptionHandling()
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .addFilterAfter(tokenAuthenticationFilter, CorsFilter.class)
         ;
     }
 

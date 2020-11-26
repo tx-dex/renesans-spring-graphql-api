@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -78,16 +79,21 @@ public class JwtTokenService {
         if (StringUtils.hasText(token)) {
             try {
                 return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
-            } catch (SignatureException ex) {
-                log.error("Invalid JWT signature");
-            } catch (MalformedJwtException ex) {
+            } catch (final SignatureException ex) {
+                log.error("Invalid JWT signature", ex);
+                throw new AuthenticationServiceException("Cannot read token claims");
+            } catch (final MalformedJwtException ex) {
                 log.error("Invalid JWT token");
-            } catch (ExpiredJwtException ex) {
+                throw new AuthenticationServiceException("Cannot read token claims");
+            } catch (final ExpiredJwtException ex) {
                 log.error("Expired JWT token");
-            } catch (UnsupportedJwtException ex) {
+                throw new AuthenticationServiceException("Cannot read token claims");
+            } catch (final UnsupportedJwtException ex) {
                 log.error("Unsupported JWT token");
-            } catch (IllegalArgumentException ex) {
+                throw new AuthenticationServiceException("Cannot read token claims");
+            } catch (final IllegalArgumentException ex) {
                 log.error("JWT claims string is empty.");
+                throw new AuthenticationServiceException("Cannot read token claims");
             }
         }
 
