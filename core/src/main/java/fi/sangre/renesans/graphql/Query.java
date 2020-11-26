@@ -209,13 +209,6 @@ public class Query implements GraphQLQueryResolver {
         return imageUploadService.getUploadUrl(fileName);
     }
 
-    // PUBLIC QUERY FOR SURVEY
-    public QuestionnaireDto questionnaire(String languageCode, String respondentGroupId, String respondentId, DataFetchingEnvironment environment) {
-        resolverHelper.setLanguageCode(languageCode, environment);
-
-        return questionnaireService.getQuestionnaire(respondentGroupId, respondentId);
-    }
-
     @PreAuthorize("isAuthenticated() and (hasRole('SUPER_USER') or (#id == null or #id == authentication.principal.id))")
     public User user(Long id) {
         return id == null ? userService.findLoggedInUser() : userService.findById(id);

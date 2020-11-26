@@ -129,6 +129,22 @@ type RespondentParameterAnswer {
     answer: String
 }
 
+# type for the app
+type Questionnaire {
+    id: ID!
+    catalysts: [QuestionnaireCatalyst!]!
+    finished: Boolean!
+}
+
+# type for the app
+type QuestionnaireCatalyst {
+    id: ID!
+    title: String!
+#    description: String @deprecated(reason: "There is no data for that in data table. Will be removed")
+#    questions: [LikertQuestion!]!
+#    drivers: [Driver!]!
+}
+
 type Answer {
     id: ID!
     answerValue: Long
@@ -288,13 +304,6 @@ type Survey {
     respondent: Respondent
 }
 
-type Questionnaire {
-    id: ID!
-    questionGroups: [Catalyst] @deprecated(reason: "Catalysts field should be used now")
-    catalysts: [Catalyst!]!
-    respondent: Respondent
-}
-
 type InvitationDetails {
     id: ID!
     respondentGroupId: String!
@@ -402,7 +411,7 @@ type Locale{
 }
 
 type Authorization {
-    token: String
+    token: String!
 }
 
 type StatisticsQuestion {

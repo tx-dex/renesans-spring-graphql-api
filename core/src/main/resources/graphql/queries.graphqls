@@ -101,10 +101,10 @@ type Query {
 
     imageUploadUrl(fileName: String!): ImageUpload
 
+    # Used in the app
     questionnaire(
+        id: ID!
         languageCode: String
-        respondentGroupId: ID
-        respondentId: ID
     ): Questionnaire
 
     users: [User]

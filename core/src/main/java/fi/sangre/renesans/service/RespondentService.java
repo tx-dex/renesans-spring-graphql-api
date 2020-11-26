@@ -11,7 +11,6 @@ import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.model.RespondentOption;
 import fi.sangre.renesans.persistence.model.Customer;
-import fi.sangre.renesans.repository.AnswerRepository;
 import fi.sangre.renesans.repository.RespondentRepository;
 import graphql.GraphQLException;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +28,6 @@ import java.util.*;
 @Service
 public class RespondentService {
     @Autowired
-    private CustomerService customerService;
-    @Autowired
     private RespondentRepository respondentRepository;
     @Autowired
     private RespondentGroupService respondentGroupService;
@@ -38,10 +35,6 @@ public class RespondentService {
     private RespondentOptionService respondentOptionService;
     @Autowired
     private AnswerService answerService;
-    @Autowired
-    private AnswerRepository answerRepository;
-    @Autowired
-    private InvitationService invitationService;
     @Autowired
     private FilterService filterService;
 

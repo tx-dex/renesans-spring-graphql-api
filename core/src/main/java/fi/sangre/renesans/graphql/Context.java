@@ -2,25 +2,22 @@ package fi.sangre.renesans.graphql;
 
 import graphql.servlet.context.GraphQLContext;
 import graphql.servlet.context.GraphQLServletContext;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.dataloader.DataLoaderRegistry;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.security.auth.Subject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
+@AllArgsConstructor
 @Setter
 @Getter
 public class Context implements GraphQLContext {
     private final GraphQLServletContext context;
+    private final UserDetails principal;
     private String languageCode;
-
-    public Context(final GraphQLServletContext context, final String languageCode) {
-        this.context = context;
-        this.languageCode = languageCode;
-    }
 
     @Override
     public Optional<Subject> getSubject() {

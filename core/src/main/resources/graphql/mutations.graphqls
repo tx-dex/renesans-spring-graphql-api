@@ -123,6 +123,8 @@ type Mutation {
         languageCode: String
     ): [SurveyRespondent!]!
 
+    openQuestionnaire(id: ID!, invitationHash: String!): Authorization!
+
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
 
     storeSegment(languageCode: String!, segment: SegmentInput!): Segment

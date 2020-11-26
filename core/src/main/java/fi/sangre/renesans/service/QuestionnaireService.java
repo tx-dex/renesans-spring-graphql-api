@@ -1,7 +1,8 @@
 package fi.sangre.renesans.service;
 
+import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.dto.CatalystDto;
-import fi.sangre.renesans.dto.QuestionnaireDto;
+import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.RespondentGroup;
 import graphql.GraphQLException;
@@ -23,7 +24,7 @@ public class QuestionnaireService {
     private final QuestionService questionService;
 
     @Transactional(readOnly = true)
-    public QuestionnaireDto getQuestionnaire(final String respondentGroupId, final String respondentId) {
+    public QuestionnaireOutput getQuestionnaire(final String respondentGroupId, final String respondentId) {
         if (respondentGroupId != null && respondentId != null) {
             throw new GraphQLException("Bad request: use only respondentGroupId or respondentId");
         } else if (respondentGroupId == null && respondentId == null) {
@@ -58,15 +59,13 @@ public class QuestionnaireService {
             throw new GraphQLException("Invalid identifier");
         }
 
-        return QuestionnaireDto.builder()
-                .id(respondentGroup.getSurvey().getId().toString())
-                .respondent(respondent)
-                .respondentGroup(respondentGroup)
+        return QuestionnaireOutput.builder()
+                .id(respondentGroup.getSurvey().getId())
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public List<CatalystDto> getCatalystsWithQuestions(final QuestionnaireDto questionnaire) {
-        return questionService.getCatalysts(questionnaire.getRespondentGroup());
+    public List<CatalystDto> getCatalystsWithQuestions(final QuestionnaireOutput questionnaire) {
+        return ImmutableList.of();
     }
 }

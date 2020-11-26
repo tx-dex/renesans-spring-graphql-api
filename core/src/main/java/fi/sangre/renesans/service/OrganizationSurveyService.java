@@ -10,8 +10,10 @@ import fi.sangre.renesans.application.merge.StaticTextMerger;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.respondent.Invitation;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
+import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.persistence.assemble.CatalystMetadataAssembler;
@@ -67,6 +69,12 @@ public class OrganizationSurveyService {
     private final MultilingualService multilingualService;
     private final SurveyRespondentRepository surveyRespondentRepository;
     private final RespondentAssembler respondentAssembler;
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public OrganizationSurvey getSurvey(@NonNull final SurveyId id) {
+        return organizationSurveyAssembler.from(getSurveyOrThrow(id.getValue()));
+    }
 
     @NonNull
     @Transactional(readOnly = true)
@@ -197,6 +205,20 @@ public class OrganizationSurveyService {
 
         //TODO: sort
         return respondentAssembler.from(surveyRespondentRepository.findAllBySurveyId(surveyId));
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public Respondent getRespondent(@NonNull final RespondentId respondentId, @NonNull final String invitationHash) {
+        return respondentAssembler.from(surveyRespondentRepository.findByIdAndInvitationHash(respondentId.getValue(), invitationHash)
+                .orElseThrow(() -> new SurveyException("Respondent not found")));
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public Respondent getRespondent(@NonNull final RespondentId respondentId) {
+        return respondentAssembler.from(surveyRespondentRepository.findById(respondentId.getValue())
+                .orElseThrow(() -> new SurveyException("Respondent not found")));
     }
 
     @NonNull

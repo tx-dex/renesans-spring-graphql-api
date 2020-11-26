@@ -2,6 +2,7 @@ package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.application.model.Respondent;
+import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.model.respondent.RespondentState;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
@@ -30,9 +31,10 @@ public class RespondentAssembler {
     }
 
     @NonNull
-    private Respondent from(@NonNull final SurveyRespondent respondent) {
+    public Respondent from(@NonNull final SurveyRespondent respondent) {
         return Respondent.builder()
                 .id(new RespondentId(respondent.getId()))
+                .surveyId(new SurveyId(respondent.getSurveyId()))
                 .email(respondent.getEmail())
                 .state(RespondentState.INVITING)
                 .parameterAnswers(ImmutableSet.of())

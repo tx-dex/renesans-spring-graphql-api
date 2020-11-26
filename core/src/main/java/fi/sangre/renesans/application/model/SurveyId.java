@@ -1,6 +1,5 @@
-package fi.sangre.renesans.application.model.respondent;
+package fi.sangre.renesans.application.model;
 
-import fi.sangre.renesans.application.model.IdValueObject;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -10,10 +9,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 @Getter
 @EqualsAndHashCode(of = "value")
-public class RespondentId implements IdValueObject<UUID> {
+public class SurveyId implements IdValueObject<UUID> {
     private final UUID value;
 
-    public RespondentId(UUID value) {
+    public SurveyId(UUID value) {
         checkArgument(value != null, "Id is required");
 
         this.value = value;

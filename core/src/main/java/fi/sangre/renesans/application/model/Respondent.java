@@ -14,6 +14,7 @@ import java.util.Set;
 @Builder
 public class Respondent {
     private RespondentId id;
+    private SurveyId surveyId;
     private String email;
     private Set<ParameterAnswer> parameterAnswers;
     private RespondentState state;

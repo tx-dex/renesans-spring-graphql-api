@@ -1,4 +1,4 @@
-package fi.sangre.renesans.dto;
+package fi.sangre.renesans.graphql.output;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +7,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class AuthorizationDto {
+public class AuthorizationOutput {
     private String token;
 }

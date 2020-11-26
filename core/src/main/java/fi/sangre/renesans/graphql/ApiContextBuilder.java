@@ -6,6 +6,11 @@ import graphql.servlet.context.GraphQLContext;
 import graphql.servlet.context.GraphQLServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,7 +54,9 @@ public class ApiContextBuilder extends DefaultGraphQLContextBuilder {
                 .map(this::getLanguageTag)
                 .orElse(DEFAULT_LANGUAGE);
 
-        return new Context((GraphQLServletContext) super.build(request, response), languageCode);
+        return new Context((GraphQLServletContext) super.build(request, response)
+                , getUserDetails()
+                , languageCode);
     }
 
     @Override
@@ -60,5 +67,18 @@ public class ApiContextBuilder extends DefaultGraphQLContextBuilder {
     @Override
     public GraphQLContext build() {
         return null;
+    }
+
+    @Nullable
+    private UserDetails getUserDetails() {
+        final Object principal = Optional.ofNullable(SecurityContextHolder.getContext())
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getPrincipal)
+                .orElse(null);
+        if (principal instanceof UserDetails) {
+            return (UserDetails) principal;
+        } else {
+            return null;
+        }
     }
 }

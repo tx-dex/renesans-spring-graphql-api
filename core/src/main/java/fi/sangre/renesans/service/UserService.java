@@ -2,6 +2,7 @@ package fi.sangre.renesans.service;
 
 import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.utils.TokenUtils;
 import fi.sangre.renesans.exception.CurrentUserDeleteException;
 import fi.sangre.renesans.exception.UserNotFoundException;
 import fi.sangre.renesans.model.Role;
@@ -10,8 +11,10 @@ import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
 import fi.sangre.renesans.repository.UserRepository;
 import graphql.GraphQLException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,43 +28,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_RESPONDENT_GROUP_IDS_CACHE;
 
-@Service
+@RequiredArgsConstructor
 @Slf4j
+
+@Service
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenService tokenService;
+    private final JwtTokenService jwtTokenService;
+    private final TokenService tokenService;
     private final MailService mailService;
     private final RoleService roleService;
     private final CustomerRepository customerRepository;
-
-    @Autowired
-    public UserService(
-            final UserRepository userRepository,
-            final PasswordEncoder passwordEncoder,
-            final JwtTokenService tokenService,
-            final MailService mailService,
-            final RoleService roleService,
-            final CustomerRepository customerRepository
-    ) {
-        checkArgument(userRepository != null, "UserRepository is required");
-        checkArgument(passwordEncoder != null, "PasswordEncoder is required");
-        checkArgument(tokenService != null, "`tokenService is required");
-        checkArgument(mailService != null, "MailService is required");
-        checkArgument(roleService != null, "RoleService is required");
-        checkArgument(customerRepository != null, "CustomerService is required");
-
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenService = tokenService;
-        this.mailService = mailService;
-        this.roleService = roleService;
-        this.customerRepository = customerRepository;
-    }
 
     public User storeUser(Long id, String firstName, String lastName, String email, String password, String username, Boolean enabled, List<String> roleNames, final String locale) {
         User user;
@@ -206,16 +187,19 @@ public class UserService {
 
     @Transactional
     public void resetPassword(final String token, final String newPassword) {
-        if (!tokenService.validateResetPasswordToken(token)) {
+        final Jws<Claims> claims = Optional.ofNullable(token)
+                .map(jwtTokenService::getClaims)
+                .orElseThrow(() -> new RuntimeException("Reset token is empty"));
+        if (!TokenUtils.isPasswordResetToken(claims.getBody())) {
             throw new GraphQLException("Not a reset token");
         }
 
-        final Long userId = tokenService.getUserIdFromJWT(token);
+        final Long userId = TokenUtils.getUserId(claims.getBody());
         final User user = findById(userId);
 
         user.setPassword(passwordEncoder.encode(newPassword));
 
-        if (tokenService.isActivationToken(token)) {
+        if (TokenUtils.isUserActivationToken(claims.getBody())) {
             user.setEnabled(true);
         }
 

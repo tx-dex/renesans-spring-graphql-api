@@ -2,10 +2,10 @@ package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.aaa.JwtTokenService;
-import fi.sangre.renesans.dto.AuthorizationDto;
 import fi.sangre.renesans.dto.ResultDetailsDto;
 import fi.sangre.renesans.exception.DeprecatedException;
 import fi.sangre.renesans.graphql.input.*;
+import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.persistence.model.Customer;
@@ -219,7 +219,7 @@ public class Mutation implements GraphQLMutationResolver {
         throw new DeprecatedException();
     }
 
-    public AuthorizationDto login(@NotNull String username, @NotNull String password) {
+    public AuthorizationOutput login(@NotNull String username, @NotNull String password) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         username,
@@ -229,7 +229,7 @@ public class Mutation implements GraphQLMutationResolver {
 
         final String jwt = tokenService.generateToken(authentication);
 
-        return AuthorizationDto.builder()
+        return AuthorizationOutput.builder()
                 .token(jwt)
                 .build();
     }

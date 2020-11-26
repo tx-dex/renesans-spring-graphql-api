@@ -16,7 +16,6 @@ import java.util.List;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
-//@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @ToString(doNotUseGetters = true, exclude = "password")
 @EqualsAndHashCode(of = "id")

@@ -3,7 +3,6 @@ package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.dto.InvitationDto;
 import fi.sangre.renesans.dto.RecipientDto;
 import fi.sangre.renesans.dto.ResultDetailsDto;
@@ -35,7 +34,7 @@ public class MailService {
     private static final String ACTIVATION_MAIL_BODY_MULTILINGUAL_KEY = "user_activation_mail_body";
     private static final String DEFAULT_ACTIVATION_MAIL_SUBJECT = "Account activation for WeCan";
     private static final String DEFAULT_ACTIVATION_MAIL_BODY = "<h2>Greetings from weCan!</h2><p>A weCan Key User account has been created for you with username: {{ username }}. To start using the account you need to set up a password. You can do that here:</p><p><a href=\"{{ reset_link }}\">Activate account</a></p><p>The link will be valid for {{ reset_link_expiration_time }}.</p><p>Best,<br/>weCan<br/>www.wecan5.com</p>";
-    private final JwtTokenService tokenService;
+    private final TokenService tokenService;
     private final MultilingualService multilingualService;
     private final OkHttpClient client;
 
@@ -53,7 +52,7 @@ public class MailService {
 
     @Autowired
     public MailService(
-            final JwtTokenService tokenService,
+            final TokenService tokenService,
             final MultilingualService multilingualService
     ) {
         checkArgument(tokenService != null, "TokenService is required");
@@ -105,7 +104,7 @@ public class MailService {
     public void sendResetPasswordEmail(final User user, final String locale) {
         log.debug("Will send reset password email for user: {}", user.getUsername());
 
-        final String token = tokenService.generateResetPasswordToken(user.getId());
+        final String token = tokenService.generatePasswordResetToken(user.getId());
         final String expirationTimeText = multilingualService.prettyTextOf(tokenService.getResetTokenExpirationDuration(), locale);
 
         final String resetLink = UriComponentsBuilder
@@ -122,7 +121,7 @@ public class MailService {
     public void sendActivationEmail(final User user, final String locale) {
         log.debug("Will send activation email for user: {}", user.getUsername());
 
-        final String token = tokenService.generateAccountActivationToken(user.getId());
+        final String token = tokenService.generateUserActivationToken(user.getId());
         final String expirationTimeText = multilingualService.prettyTextOf(tokenService.getActivationTokenDuration(), locale);
 
         final String resetLink = UriComponentsBuilder
