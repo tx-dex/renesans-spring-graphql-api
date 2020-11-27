@@ -132,17 +132,50 @@ type RespondentParameterAnswer {
 # type for the app
 type Questionnaire {
     id: ID!
+    staticTexts: [SurveyStaticText!]!
     catalysts: [QuestionnaireCatalyst!]!
-    finished: Boolean!
+    isFinished: Boolean!
+    isAnswerable: Boolean!
 }
 
 # type for the app
 type QuestionnaireCatalyst {
     id: ID!
     title: String!
-#    description: String @deprecated(reason: "There is no data for that in data table. Will be removed")
-#    questions: [LikertQuestion!]!
-#    drivers: [Driver!]!
+    questions: [QuestionnaireQuestion!]!
+    drivers: [QuestionnaireDriver!]!
+}
+
+# type for the app
+type QuestionnaireDriver {
+    id: ID!
+    title: String!
+    description: String
+}
+
+union QuestionnaireQuestion = QuestionnaireLikertQuestion | QuestionnaireOpenQuestion
+
+interface IQuestionnaireQuestion {
+    id: ID!
+    title: String!
+    answered: Boolean!
+    skipped: Boolean!
+}
+
+type QuestionnaireLikertQuestion implements IQuestionnaireQuestion {
+    id: ID!
+    title: String!
+    answered: Boolean!
+    skipped: Boolean!
+    index: Long
+}
+
+type QuestionnaireOpenQuestion implements IQuestionnaireQuestion{
+    id: ID!
+    title: String!
+    answered: Boolean!
+    skipped: Boolean!
+    response: String
 }
 
 type Answer {

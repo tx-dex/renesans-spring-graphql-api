@@ -26,7 +26,6 @@ public class QuestionnaireFacade {
     private final TokenService tokenService;
 
     @NonNull
-    // get user from the ApiContext
     public QuestionnaireOutput getQuestionnaire(@NonNull final UUID id, @NonNull final UserDetails principal) {
         if (principal instanceof RespondentPrincipal) {
             final RespondentPrincipal respondent = (RespondentPrincipal) principal;
