@@ -8,6 +8,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,7 +24,11 @@ public class QuestionGroup extends BaseModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Deprecated
     private Long id;
+
+    @Column(name = "uuid", updatable = false, insertable = false, nullable = false)
+    private UUID uuid;
 
     private Long seq;
 

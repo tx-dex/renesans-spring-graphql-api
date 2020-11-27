@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
+import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.graphql.Context;
 import fi.sangre.renesans.model.Answer;
 import fi.sangre.renesans.model.Respondent;
@@ -27,14 +28,11 @@ public class RespondentResolver implements GraphQLResolver<Respondent> {
     private RespondentGroupService respondentGroupService;
 
     public List<Answer> getAnswers(Respondent respondent) {
-        return answerService.getAnswers(respondent);
+        return ImmutableList.of();
     }
 
     public Date answerTime(Respondent r) {
-        Date answerTime = r.getAnswerTime();
-        return answerTime != null
-                ? answerTime
-                : answerService.getAnswerTime(r);
+        return null;
     }
 
     public String getOfficeLocation(Respondent respondent, DataFetchingEnvironment environment) {

@@ -142,8 +142,13 @@ type Questionnaire {
 type QuestionnaireCatalyst {
     id: ID!
     title: String!
-    questions: [QuestionnaireQuestion!]!
+    questions: [QuestionnaireLikertQuestion!]!
     drivers: [QuestionnaireDriver!]!
+    # The open question to be displayed by the end of the catalyst answers
+    # now it may be null as we don't have it in the db yet.
+    # and there is not support for editing/saving it in the admin
+    # TODO: verify if it always must be displayed
+    catalystQuestion: QuestionnaireOpenQuestion
 }
 
 # type for the app
@@ -167,7 +172,7 @@ type QuestionnaireLikertQuestion implements IQuestionnaireQuestion {
     title: String!
     answered: Boolean!
     skipped: Boolean!
-    index: Long
+    response: Long
 }
 
 type QuestionnaireOpenQuestion implements IQuestionnaireQuestion{

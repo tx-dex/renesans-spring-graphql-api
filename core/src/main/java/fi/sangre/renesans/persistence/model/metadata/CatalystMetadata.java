@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import fi.sangre.renesans.graphql.output.CatalystOutput;
 import fi.sangre.renesans.persistence.model.metadata.questions.QuestionMetadata;
 import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,8 +22,8 @@ import java.util.Map;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CatalystMetadata implements Serializable, CatalystOutput {
-    private Long id;
+public class CatalystMetadata implements Serializable {
+    private UUID id;
     @Deprecated
     private String pdfName;
     private Map<String, String> titles;

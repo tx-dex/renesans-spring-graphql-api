@@ -7,13 +7,14 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(of = "id")
 public class CatalystInput {
-    private Long id;
+    private UUID id;
     private String title;
     private String description;
     private List<DriverInput> drivers;

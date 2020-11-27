@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,11 +29,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserPrincipalService userPrincipalService;
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
-
-    @Bean
-    public AuditorAware<Long> auditorAware() {
-        return new SecurityAuditorAware();
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

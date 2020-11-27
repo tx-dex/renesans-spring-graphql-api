@@ -125,6 +125,10 @@ type Mutation {
 
     openQuestionnaire(id: ID!, invitationHash: String!): Authorization!
 
+    answerOrSkipLikertQuestion(answer: LikertQuestionAnswerInput!, languageCode: String): Questionnaire
+
+    answerOrSkipCatalystQuestion(answer: CatalystOpenQuestionAnswerInput!, languageCode: String): Questionnaire
+
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
 
     storeSegment(languageCode: String!, segment: SegmentInput!): Segment

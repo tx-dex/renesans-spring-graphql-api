@@ -25,6 +25,7 @@ public class AppQueries implements GraphQLQueryResolver {
     @NonNull
     @PreAuthorize("hasPermission(#id, 'survey', 'READ')")
     public QuestionnaireOutput questionnaire(@NonNull final UUID id, @Nullable final String languageCode, @NonNull final DataFetchingEnvironment environment) {
+        log.debug("Getting questionnaire(id={})", id);
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return questionnaireFacade.getQuestionnaire(id, resolverHelper.getRequiredPrincipal(environment));

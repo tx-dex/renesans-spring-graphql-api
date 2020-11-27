@@ -1,62 +1,51 @@
 package fi.sangre.renesans.service;
 
 
-import fi.sangre.renesans.graphql.input.AnswerInput;
-import fi.sangre.renesans.model.Answer;
-import fi.sangre.renesans.model.Question;
-import fi.sangre.renesans.model.Respondent;
-import fi.sangre.renesans.repository.AnswerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import fi.sangre.renesans.application.dao.AnswerDao;
+import fi.sangre.renesans.application.model.CatalystId;
+import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
+import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+
+import static fi.sangre.renesans.config.ApplicationConfig.DAO_EXECUTOR_NAME;
+import static java.util.stream.Collectors.*;
+
+@RequiredArgsConstructor
+@Slf4j
 
 @Service
 public class AnswerService {
-    @Autowired
-    private AnswerRepository answerRepository;
-    @Autowired
-    private QuestionService questionService;
-    @Autowired
-    private AnswerOptionService answerOptionService;
+    private final AnswerDao answerDao;
 
-    public List<Answer> addAnswers(List<AnswerInput> answers, Respondent respondent) {
-        List<Answer> answersList = new ArrayList<>();
-        for (AnswerInput answerInput : answers) {
-            Question question = questionService.getQuestion(answerInput.getQuestionId());
-
-            Answer answer = Answer.builder()
-                    .id(answerInput.getId())
-                    .answerIndex(answerInput.getAnswerIndex())
-                    .answerValue(answerOptionService.getAnswerValue(answerInput.getAnswerIndex(), question))
-                    .respondent(respondent)
-                    .question(question)
-                    .build();
-
-            answersList.add(answer);
-        }
-        return answerRepository.saveAll(answersList);
+    @NonNull
+    @Async(DAO_EXECUTOR_NAME)
+    public Future<Map<CatalystId, OpenQuestionAnswer>> getCatalystsQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+        log.debug("Getting list of catalyst open questions answers for respondent(id={})", respondentId);
+        return new AsyncResult<>(answerDao.getCatalystsQuestionsAnswers(surveyId, respondentId)
+                .stream()
+                .collect(collectingAndThen(toMap(OpenQuestionAnswer::getCatalystId, e -> e), Collections::unmodifiableMap)));
     }
 
-    public List<Answer> getAnswers(Respondent respondent) {
-        if (respondent != null) {
-            return answerRepository.findByRespondent(respondent);
-        }
-
-        return new ArrayList<>();
+    @NonNull
+    @Async(DAO_EXECUTOR_NAME)
+    public Future<Map<CatalystId, List<LikertQuestionAnswer>>> getQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+        log.debug("Getting list of likert questions answers for respondent(id={})", respondentId);
+        return new AsyncResult<>(answerDao.getQuestionsAnswers(surveyId, respondentId)
+                .stream()
+                .collect(groupingBy(LikertQuestionAnswer::getCatalystId)));
     }
 
-    public Date getAnswerTime(Respondent respondent) {
-        if (respondent != null) {
-            Answer answer = answerRepository.findOneByRespondent(respondent);
-            if (answer != null) {
-                return answer.getCreated();
-            }
-        }
-
-        return null;
-    }
 }
 

@@ -1,5 +1,6 @@
 package fi.sangre.renesans.persistence.model;
 
+import fi.sangre.renesans.persistence.auditing.SecurityAuditorAware;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
@@ -26,7 +27,7 @@ import java.util.UUID;
 @SQLDelete(sql = "UPDATE data.respondent SET archived = true WHERE id = ?")
 @Where(clause = "archived = false")
 @DynamicUpdate
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners({ AuditingEntityListener.class, SecurityAuditorAware.class })
 public class SurveyRespondent {
     @Id
     @GeneratedValue(generator = "uuid")

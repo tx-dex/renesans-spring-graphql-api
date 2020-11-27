@@ -31,7 +31,7 @@ public class CatalystMetadataAssembler {
     @NonNull
     public CatalystMetadata from(@NonNull final Catalyst catalyst) {
         return CatalystMetadata.builder()
-                .id(catalyst.getId())
+                .id(catalyst.getId().getValue())
                 .titles(catalyst.getTitles().getPhrases())
                 .drivers(driverMetadataAssembler.from(catalyst.getDrivers()))
                 .questions(questionMetadataAssembler.from(catalyst.getQuestions()))

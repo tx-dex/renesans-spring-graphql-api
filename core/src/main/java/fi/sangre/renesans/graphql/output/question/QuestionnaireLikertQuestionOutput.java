@@ -15,5 +15,5 @@ public class QuestionnaireLikertQuestionOutput implements QuestionnaireQuestionO
     private Map<String, String> titles;
     private boolean skipped;
     private boolean answered;
-    private Long index;
+    private Integer response;
 }

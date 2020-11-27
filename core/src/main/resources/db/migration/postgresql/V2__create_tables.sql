@@ -59,7 +59,9 @@ create table if not exists survey
 create table if not exists survey_respondent
 (
     id uuid primary key not null,
-    survey_id uuid not null,
+    survey_id uuid not null
+        constraint respondent_survey_id_fkey
+          references survey,
     email text not null,
     invitation_hash text not null,
     consent boolean default false not null,
@@ -87,6 +89,9 @@ create index if not exists survey_respondent_invitation_hash_archived_idx
 create table if not exists question_group
 (
 	id bigserial primary key not null,
+	uuid uuid default gen_random_uuid() not null
+        constraint catalyst_id_uidx
+            unique,
 	pdfname varchar(255),
 	seq bigint,
 	weight double precision,
@@ -109,6 +114,44 @@ create table if not exists question_group
 	ctm timestamp default CURRENT_TIMESTAMP not null,
 	mtm timestamp default CURRENT_TIMESTAMP not null
 );
+
+create table if not exists question_answer
+(
+    survey_id uuid not null
+        constraint question_answer_survey_id_fkey
+            references survey,
+    respondent_id uuid not null
+        constraint question_answer_respondent_id_fkey
+            references survey_respondent,
+    question_id uuid not null,
+    catalyst_id uuid
+        constraint question_answer_catalyst_id_fkey
+            references question_group(uuid),
+    status integer not null,
+    likert_response integer null,
+    open_response text,
+    answer_time timestamp default CURRENT_TIMESTAMP not null
+);
+
+create table if not exists catalyst_answer
+(
+    survey_id uuid not null
+        constraint catalyst_answer_survey_id_fkey
+            references survey,
+    respondent_id uuid not null
+        constraint catalyst_answer_respondent_id_fkey
+            references survey_respondent,
+    catalyst_id uuid not null
+        constraint catalyst_answer_catalyst_id_fkey
+            references question_group(uuid),
+    status integer not null,
+    likert_response integer null,
+    open_response text,
+    answer_time timestamp default CURRENT_TIMESTAMP not null
+);
+
+--TODO: create indexes
+
 
 create table if not exists "user"
 (

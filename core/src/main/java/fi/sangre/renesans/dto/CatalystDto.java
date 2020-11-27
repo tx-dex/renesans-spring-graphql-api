@@ -1,6 +1,7 @@
 package fi.sangre.renesans.dto;
 
 import com.google.common.collect.Lists;
+import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.graphql.output.CatalystOutput;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.Segment;
@@ -13,7 +14,9 @@ import java.util.List;
 @Data
 @Builder
 public class CatalystDto implements CatalystOutput {
-    private Long id;
+    private CatalystId id;
+    @Deprecated
+    private Long oldId;
     private Long titleId;
     private String pdfName;
     private Customer customer;

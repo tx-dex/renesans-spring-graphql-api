@@ -1,5 +1,6 @@
 package fi.sangre.renesans.model;
 
+import fi.sangre.renesans.persistence.auditing.SecurityAuditorAware;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -10,7 +11,7 @@ import java.util.Date;
 
 @Data
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners({ AuditingEntityListener.class, SecurityAuditorAware.class })
 public class BaseModel {
     private Boolean archived = false;
 

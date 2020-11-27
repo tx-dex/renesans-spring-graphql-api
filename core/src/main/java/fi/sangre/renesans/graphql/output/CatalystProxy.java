@@ -7,6 +7,7 @@ import org.springframework.lang.NonNull;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -17,8 +18,8 @@ import static java.util.stream.Collectors.toList;
 public class CatalystProxy implements OutputProxy<CatalystOutput> {
     private final CatalystOutput object;
 
-    public Long getId() {
-        return object.getId();
+    public UUID getId() {
+        return object.getId().getValue();
     }
 
     public static  <T extends CatalystOutput> List<CatalystProxy> toProxies(@NonNull final List<T> catalysts) {

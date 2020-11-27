@@ -109,7 +109,7 @@ public class StatisticsService {
 
     public List<LocalizedCatalyst> getCatalysts(final Customer customer, final String languageCode) {
         return questionService.getCatalysts(customer).stream().map(e -> LocalizedCatalyst.builder()
-                    .id(e.getId())
+                    .id(e.getOldId())
                     .name(multilingualService.lookupPhrase(e.getTitleId(), languageCode))
                     .drivers(getDrivers(e, languageCode))
                 .build())
@@ -118,7 +118,7 @@ public class StatisticsService {
 
     public List<LocalizedCatalyst> getCatalysts(final Segment segment, final String languageCode) {
         return questionService.getCatalysts(segment).stream().map(e -> LocalizedCatalyst.builder()
-                .id(e.getId())
+                .id(e.getOldId())
                 .name(multilingualService.lookupPhrase(e.getTitleId(), languageCode))
                 .drivers(getDrivers(e, languageCode))
                 .build())
@@ -440,14 +440,14 @@ public class StatisticsService {
             final Double catalystResult = catalystDriversStatistics.stream().mapToDouble(e -> e.getResult() != null ? e.getResult() : 0d).sum() / catalystDriversStatistics.size();
             final Double catalystWeighedResult = catalystDriversStatistics.stream().mapToDouble(e -> e.getWeighedResult() != null ? e.getWeighedResult() : 0d).sum() / catalystDriversStatistics.size();
             final List<StatisticsQuestion> catalystQuestionsStatistics = questionsStatistics.stream()
-                    .filter(e -> e.getCatalystId().equals(catalyst.getId()))
+                    .filter(e -> e.getCatalystId().equals(catalyst.getOldId()))
                     .sorted(QUESTION_COMPARATOR.reversed())
                     .collect(collectingAndThen(toList(), Collections::unmodifiableList));
 
             builder.add(StatisticsCatalyst.builder()
-                    .id(catalyst.getId())
+                    .id(catalyst.getOldId())
                     .pdfName(catalyst.getPdfName())
-                    .title(catalystsNames.get(catalyst.getId()))
+                    .title(catalystsNames.get(catalyst.getOldId()))
                     .developmentTrackIndices(catalystDriversStatistics)
                     .questions(catalystQuestionsStatistics)
                     .result(catalystResult)

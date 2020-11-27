@@ -112,6 +112,20 @@ input QuestionDriverWeightInput {
     weight: Float!
 }
 
+input LikertQuestionAnswerInput {
+    questionId: ID!
+    # Selected index
+    # Set null for skipping the question
+    response: Int
+}
+
+input CatalystOpenQuestionAnswerInput {
+    catalystId: ID!
+    # Free text
+    # Set null for skipping the question
+    response: String
+}
+
 # input for filtering respondents or statistics
 input FilterInput {
     # Parameter id from the column header that is chosen for filtering

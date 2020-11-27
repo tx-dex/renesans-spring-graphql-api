@@ -1,17 +1,14 @@
 package fi.sangre.renesans.graphql.assemble;
 
-import com.google.common.collect.ImmutableMap;
-import fi.sangre.renesans.application.model.Catalyst;
-import fi.sangre.renesans.application.model.Driver;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.Respondent;
-import fi.sangre.renesans.application.model.questions.LikertQuestion;
-import fi.sangre.renesans.application.model.questions.QuestionId;
+import com.google.common.collect.ImmutableList;
+import fi.sangre.renesans.application.model.*;
+import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
+import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.graphql.output.QuestionnaireCatalystOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireDriverOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
-import fi.sangre.renesans.graphql.output.question.QuestionnaireLikertQuestionOutput;
-import fi.sangre.renesans.graphql.output.question.QuestionnaireQuestionOutput;
+import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +19,8 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -31,9 +30,10 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class QuestionnaireAssembler {
-    private static final Map<QuestionId, Object> EMPTY_ANSWERS = ImmutableMap.of();
-
     private final OrganizationSurveyService organizationSurveyService;
+    private final AnswerService answerService;
+    private final QuestionnaireLikertQuestionAssembler questionnaireLikertQuestionAssembler;
+    private final QuestionnaireOpenQuestionAssembler questionnaireOpenQuestionAssembler;
 
     @NonNull
     public QuestionnaireOutput from(@NonNull final OrganizationSurvey survey) {
@@ -43,15 +43,22 @@ public class QuestionnaireAssembler {
     }
 
     @NonNull
-    public QuestionnaireOutput from(@NonNull final Respondent respondent) {
-        final OrganizationSurvey survey = organizationSurveyService.getSurvey(respondent.getSurveyId());
+    public QuestionnaireOutput from(@NonNull final RespondentId respondentId, @NonNull final SurveyId surveyId) throws InterruptedException, ExecutionException {
+        return from(respondentId, organizationSurveyService.getSurvey(surveyId));
+    }
+
+    @NonNull
+    public QuestionnaireOutput from(@NonNull final RespondentId respondentId, @NonNull final OrganizationSurvey survey) throws InterruptedException, ExecutionException {
+        final SurveyId surveyId = new SurveyId(survey.getId());
+        final Future<Map<CatalystId, List<LikertQuestionAnswer>>> questionsAnswers = answerService.getQuestionsAnswersAsync(surveyId, respondentId);
+        final Future<Map<CatalystId, OpenQuestionAnswer>> catalystAnswers = answerService.getCatalystsQuestionsAnswersAsync(surveyId, respondentId);
+
         final QuestionnaireOutput.QuestionnaireOutputBuilder builder = builder(survey)
-                .id(respondent.getId().getValue()) // overwrite the id with the respondend one
+                .id(respondentId.getValue()) // overwrite the id with the respondent one
                 .answerable(true);
 
-        final Map<Long, Map<QuestionId, Object>> answers = ImmutableMap.of(); //TODO: get list of answers
 
-        builder.catalysts(fromCatalysts(survey.getCatalysts(), answers));
+        builder.catalysts(fromCatalysts(survey.getCatalysts(), catalystAnswers.get(), questionsAnswers.get()));
 
         return builder.build();
     }
@@ -72,29 +79,35 @@ public class QuestionnaireAssembler {
     }
 
     @NonNull
-    private List<QuestionnaireCatalystOutput> fromCatalysts(@NonNull final List<Catalyst> catalysts, @NonNull final Map<Long, Map<QuestionId, Object>> answers) {
+    private List<QuestionnaireCatalystOutput> fromCatalysts(@NonNull final List<Catalyst> catalysts,
+                                                            @NonNull final Map<CatalystId, OpenQuestionAnswer> catalystAnswers,
+                                                            @NonNull final Map<CatalystId, List<LikertQuestionAnswer>> questionAnswers) {
         return catalysts.stream()
-                .map(e -> from(e, answers.getOrDefault(e.getId(), EMPTY_ANSWERS)))
+                .map(e -> from(e, catalystAnswers.get(e.getId()), questionAnswers.getOrDefault(e.getId(), ImmutableList.of())))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull
     private QuestionnaireCatalystOutput from(@NonNull final Catalyst catalyst) {
         return QuestionnaireCatalystOutput.builder()
-                .id(catalyst.getId())
+                .id(catalyst.getId().getValue())
                 .titles(catalyst.getTitles())
                 .drivers(fromDrivers(catalyst.getDrivers()))
-                .questions(fromQuestions(catalyst.getQuestions()))
+                .questions(questionnaireLikertQuestionAssembler.from(catalyst.getQuestions()))
+                .catalystQuestion(questionnaireOpenQuestionAssembler.from(catalyst, null))
                 .build();
     }
 
     @NonNull
-    private QuestionnaireCatalystOutput from(@NonNull final Catalyst catalyst, @NonNull final Map<QuestionId, Object> answers) {
+    private QuestionnaireCatalystOutput from(@NonNull final Catalyst catalyst,
+                                             @Nullable final OpenQuestionAnswer catalystAnswer,
+                                             @NonNull final List<LikertQuestionAnswer> questionAnswers) {
         return QuestionnaireCatalystOutput.builder()
-                .id(catalyst.getId())
+                .id(catalyst.getId().getValue())
                 .titles(catalyst.getTitles())
                 .drivers(fromDrivers(catalyst.getDrivers()))
-                .questions(fromQuestions(catalyst.getQuestions(), answers))
+                .questions(questionnaireLikertQuestionAssembler.from(catalyst.getQuestions(), questionAnswers))
+                .catalystQuestion(questionnaireOpenQuestionAssembler.from(catalyst, catalystAnswer))
                 .build();
     }
 
@@ -107,46 +120,5 @@ public class QuestionnaireAssembler {
                         .descriptions(driver.getDescriptions())
                         .build())
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
-    }
-
-    @NonNull
-    private List<QuestionnaireQuestionOutput> fromQuestions(@NonNull final List<LikertQuestion> questions) {
-        return questions.stream()
-                .map(question -> QuestionnaireLikertQuestionOutput.builder()
-                        .id(question.getId())
-                        .titles(question.getTitles().getPhrases())
-                        .answered(false)
-                        .skipped(false)
-                        .index(null)
-                        .build())
-                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
-    }
-
-    @NonNull
-    private List<QuestionnaireQuestionOutput> fromQuestions(@NonNull final List<LikertQuestion> questions, @NonNull final Map<QuestionId, Object> answers) {
-        return questions.stream()
-                .map(question -> from(question, answers.get(question.getId())))
-                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
-    }
-
-    @NonNull
-    private QuestionnaireQuestionOutput from(@NonNull final LikertQuestion question, @Nullable final Object answer) {
-        if (answer != null) {
-            return QuestionnaireLikertQuestionOutput.builder()
-                    .id(question.getId())
-                    .titles(question.getTitles().getPhrases())
-                    .answered(false) // TODO: answer.isAnswered
-                    .skipped(false)  // TODO: answer.isSkipped
-                    .index(null)
-                    .build();
-        } else {
-            return QuestionnaireLikertQuestionOutput.builder()
-                    .id(question.getId())
-                    .titles(question.getTitles().getPhrases())
-                    .answered(false)
-                    .skipped(false)
-                    .index(null)
-                    .build();
-        }
     }
 }

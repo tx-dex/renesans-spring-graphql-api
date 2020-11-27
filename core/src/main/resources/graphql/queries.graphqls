@@ -39,17 +39,17 @@ type Query {
         languageCode: String
         names: [String]
         startsWith: String
-    ): [MultiLingualPhrase]
+    ): [MultiLingualPhrase] @deprecated(reason: "Will be removed")
 
-    phrase(languageCode: String, name: String): MultiLingualPhrase
+    phrase(languageCode: String, name: String): MultiLingualPhrase @deprecated(reason: "Will be removed")
 
-    invitations(respondentGroupId: ID!): [InvitationDetails]
+    invitations(respondentGroupId: ID!): [InvitationDetails] @deprecated(reason: "Will be removed")
 
     invitationsByEmail(
         respondentGroupId: ID!
         email: String!
         status: String
-    ): [InvitationDetails]
+    ): [InvitationDetails] @deprecated(reason: "Will be removed")
 
     # Get list of organizations
     organizations: [Organization!]!

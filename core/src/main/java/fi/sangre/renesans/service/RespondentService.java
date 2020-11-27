@@ -85,7 +85,7 @@ public class RespondentService {
     public Respondent submitSurvey(String respondentGroupId, RespondentInput respondentInput, List<AnswerInput> answers) {
         Respondent respondent = createRespondent(respondentGroupId, respondentInput);
         respondent.setAnswerTime(LocalDateTime.now(DateTimeZone.UTC).toDate());
-        answerService.addAnswers(answers, respondent);
+
         return respondent;
     }
 

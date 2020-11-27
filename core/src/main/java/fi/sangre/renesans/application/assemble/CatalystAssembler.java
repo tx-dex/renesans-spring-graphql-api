@@ -2,6 +2,7 @@ package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.Catalyst;
+import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.exception.MissingIdException;
 import fi.sangre.renesans.exception.SurveyException;
@@ -41,7 +42,7 @@ public class CatalystAssembler {
     @NonNull
     public Catalyst from(@NonNull CatalystInput input, @NonNull final String languageTag) {
         return Catalyst.builder()
-                .id(input.getId())
+                .id(new CatalystId(input.getId()))
                 .titles(multilingualTextAssembler.fromOptional(input.getTitle(), languageTag)) // This is optional as it may not be provided when updating questions
                 .descriptions(multilingualTextAssembler.fromOptional(input.getDescription(), languageTag))
                 .drivers(driverAssembler.fromInput(input.getDrivers(), languageTag))
@@ -61,7 +62,7 @@ public class CatalystAssembler {
     @NonNull
     private Catalyst from(@NonNull final CatalystMetadata metadata) {
         return Catalyst.builder()
-                .id(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER))
+                .id(new CatalystId(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER)))
                 .pdfName(metadata.getPdfName())
                 .titles(new MultilingualText(metadata.getTitles()))
                 .drivers(driverAssembler.fromMetadata(metadata.getDrivers()))

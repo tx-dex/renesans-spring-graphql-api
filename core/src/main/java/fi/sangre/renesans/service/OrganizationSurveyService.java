@@ -247,7 +247,7 @@ public class OrganizationSurveyService {
         final ImmutableList.Builder<CatalystMetadata> catalysts = ImmutableList.builder();
 
         for (final CatalystDto catalyst : questionService.getCatalysts(customer)) {
-            final List<DriverMetadata> drivers = questionService.getAllCatalystDrivers(catalyst.getId(), customer)
+            final List<DriverMetadata> drivers = questionService.getAllCatalystDrivers(catalyst.getOldId(), customer)
                     .stream()
                     .map(driver -> DriverMetadata.builder()
                             .id(driver.getId())
@@ -261,12 +261,12 @@ public class OrganizationSurveyService {
                     .collect(collectingAndThen(toList(), Collections::unmodifiableList));
 
             catalysts.add(CatalystMetadata.builder()
-                    .id(catalyst.getId())
+                    .id(catalyst.getId().getValue())
                     .pdfName(catalyst.getPdfName())
                     .titles(multilingualService.getPhrases(catalyst.getTitleId()))
                     .weight(catalyst.getWeight())
                     .drivers(drivers)
-                    .questions(copyGenericAndSegmentQuestions(catalyst.getId(), input.getTemplateId()))
+                    .questions(copyGenericAndSegmentQuestions(catalyst, input.getTemplateId()))
                     .build());
         }
 
@@ -312,15 +312,15 @@ public class OrganizationSurveyService {
     }
 
     @NonNull
-    private List<QuestionMetadata> copyGenericAndSegmentQuestions(@NonNull final Long catalystId, @Nullable final Long segmentId) {
+    private List<QuestionMetadata> copyGenericAndSegmentQuestions(@NonNull final CatalystDto catalyst, @Nullable final Long segmentId) {
         final ImmutableList.Builder<QuestionMetadata> questions = ImmutableList.<QuestionMetadata>builder()
-                .addAll(questionService.getCatalystGenericQuestions(catalystId)
+                .addAll(questionService.getCatalystGenericQuestions(catalyst.getOldId())
                 .stream()
                 .map(this::fromGenericQuestion)
                 .collect(toList()));
 
         if (segmentId != null) {
-                questions.addAll(questionService.getCatalystSegmentQuestions(catalystId, segmentId)
+                questions.addAll(questionService.getCatalystSegmentQuestions(catalyst.getOldId(), segmentId)
                         .stream()
                         .map(e -> fromSegmentQuestion(e, segmentId))
                         .collect(toList()));

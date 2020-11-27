@@ -2,6 +2,7 @@ package fi.sangre.renesans.application.merge;
 
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.Catalyst;
+import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.exception.SurveyException;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class CatalystMerger {
     public List<Catalyst> combine(@NonNull final List<Catalyst> existing, @NonNull final List<Catalyst> inputs) {
         final ImmutableList.Builder<Catalyst> builder = ImmutableList.builder();
 
-        final Map<Long, Catalyst> existingCatalysts = existing.stream()
+        final Map<CatalystId, Catalyst> existingCatalysts = existing.stream()
                 .collect(collectingAndThen(toMap(Catalyst::getId, v -> v), Collections::unmodifiableMap));
         for (final Catalyst input : inputs) {
             builder.add(combine(existingCatalysts, input));
@@ -45,7 +46,7 @@ public class CatalystMerger {
     }
 
     @NonNull
-    private Catalyst combine(@NonNull final Map<Long, Catalyst> existing, @NonNull final Catalyst input) {
+    private Catalyst combine(@NonNull final Map<CatalystId, Catalyst> existing, @NonNull final Catalyst input) {
         return combine(Objects.requireNonNull(existing.get(input.getId()), "Not existing catalyst in the input"),
                 input);
     }

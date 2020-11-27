@@ -13,11 +13,12 @@ import java.util.List;
 @EqualsAndHashCode(of = "id")
 @Builder
 public class Catalyst implements CatalystOutput {
-    private Long id;
+    private CatalystId id;
     private String pdfName;
     private MultilingualText titles;
     private MultilingualText descriptions;
     private List<Driver> drivers;
     private List<LikertQuestion> questions;
+    private MultilingualText question;
     private Double weight;
 }

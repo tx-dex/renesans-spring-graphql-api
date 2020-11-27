@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipalService;
+import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.DriverDto;
 import fi.sangre.renesans.exception.CustomerNotFoundException;
@@ -52,7 +53,8 @@ public class QuestionService {
 
     private CatalystDto getCatalyst(final QuestionGroup catalyst) {
         return CatalystDto.builder()
-                .id(catalyst.getId())
+                .id(new CatalystId(catalyst.getUuid()))
+                .oldId(catalyst.getId())
                 .titleId(catalyst.getTitleId())
                 .pdfName(catalyst.getPdfName())
                 .weight(catalyst.getWeight())
@@ -113,7 +115,7 @@ public class QuestionService {
 
     @Transactional
     public List<DriverDto> getAllCatalystDrivers(final CatalystDto catalyst) {
-        return getAllCatalystDrivers(catalyst.getId(), catalyst.getSegment(), catalyst.getCustomer());
+        return getAllCatalystDrivers(catalyst.getOldId(), catalyst.getSegment(), catalyst.getCustomer());
     }
 
     @Transactional(readOnly = true)
@@ -121,7 +123,7 @@ public class QuestionService {
         final ImmutableList.Builder<DriverDto> builder = ImmutableList.builder();
 
         getCatalysts(customer).forEach(catalyst -> {
-            builder.addAll(getAllCatalystDrivers(catalyst.getId(), segmentRepository.findByCustomers(customer).orElse(null), customer));
+            builder.addAll(getAllCatalystDrivers(catalyst.getOldId(), segmentRepository.findByCustomers(customer).orElse(null), customer));
         });
 
         return builder.build();
