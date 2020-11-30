@@ -9,12 +9,13 @@ import spock.lang.Specification
 class UserServiceTest extends Specification {
     final userRepository = Mock(UserRepository)
     final passwordEncoder = Mock(PasswordEncoder)
-    final tokenService = Mock(JwtTokenService)
+    final jwtTokenService = Mock(JwtTokenService)
+    final tokenService = Mock(TokenService)
     final mailService = Mock(MailService)
     final roleService = Mock(RoleService)
     final customerRepository = Mock(CustomerRepository)
 
-    def instance = new UserService(userRepository, passwordEncoder, tokenService, mailService, roleService, customerRepository)
+    def instance = new UserService(userRepository, passwordEncoder, jwtTokenService, tokenService, mailService, roleService, customerRepository)
 
     def "should not throw on requesting password reset when user not found"() {
         given:
