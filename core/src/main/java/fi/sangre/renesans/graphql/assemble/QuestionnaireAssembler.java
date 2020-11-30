@@ -34,11 +34,13 @@ public class QuestionnaireAssembler {
     private final AnswerService answerService;
     private final QuestionnaireLikertQuestionAssembler questionnaireLikertQuestionAssembler;
     private final QuestionnaireOpenQuestionAssembler questionnaireOpenQuestionAssembler;
+    private final QuestionnaireParameterOutputAssembler questionnaireParameterOutputAssembler;
 
     @NonNull
     public QuestionnaireOutput from(@NonNull final OrganizationSurvey survey) {
         return builder(survey)
                 .catalysts(fromCatalysts(survey.getCatalysts()))
+                .parameters(questionnaireParameterOutputAssembler.from(survey.getParameters()))
                 .build();
     }
 

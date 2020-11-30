@@ -1,7 +1,7 @@
 package fi.sangre.renesans.graphql.resolver.parameter;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.graphql.output.parameter.SurveyListParameterOutput;
+import fi.sangre.renesans.graphql.output.parameter.QuestionnaireTreeParameterOutput;
 import fi.sangre.renesans.graphql.resolver.MetadataLanguageHelper;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import graphql.schema.DataFetchingEnvironment;
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 
 @Component
-public class SurveyListParameterOutputResolver implements GraphQLResolver<SurveyListParameterOutput> {
+public class QuestionnaireTreeParameterResolver implements GraphQLResolver<QuestionnaireTreeParameterOutput> {
     private final MetadataLanguageHelper metadataLanguageHelper;
     private final ResolverHelper resolverHelper;
 
     @NonNull
-    public String getLabel(@NonNull final SurveyListParameterOutput output, @NonNull final DataFetchingEnvironment environment) {
+    public String getLabel(@NonNull final QuestionnaireTreeParameterOutput output, @NonNull final DataFetchingEnvironment environment) {
         return metadataLanguageHelper.getRequiredText(output.getLabels(), resolverHelper.getLanguageCode(environment));
     }
 }

@@ -134,6 +134,7 @@ type Questionnaire {
     id: ID!
     staticTexts: [SurveyStaticText!]!
     catalysts: [QuestionnaireCatalyst!]!
+    parameters: [QuestionnaireParameter!]!
     isFinished: Boolean!
     isAnswerable: Boolean!
 }
@@ -182,6 +183,36 @@ type QuestionnaireOpenQuestion implements IQuestionnaireQuestion{
     skipped: Boolean!
     response: String
 }
+
+union QuestionnaireParameter = QuestionnaireListParameter | QuestionnaireTreeParameter
+
+type QuestionnaireParameterItem {
+    label: String!
+    value: String!
+}
+
+type QuestionnaireListParameter {
+    type: SurveyParameterType!
+    label: String!
+    value: String!
+    children: [QuestionnaireParameterItem!]!
+    answered: Boolean!
+}
+
+union QuestionnaireParameterChild = QuestionnaireParameterItem | QuestionnaireTreeParameter
+
+type QuestionnaireTreeParameter {
+    type: SurveyParameterType!
+    label: String!
+    value: String!
+    children: [QuestionnaireParameterChild!]!
+    answered: Boolean!
+}
+
+
+
+
+
 
 type Answer {
     id: ID!
