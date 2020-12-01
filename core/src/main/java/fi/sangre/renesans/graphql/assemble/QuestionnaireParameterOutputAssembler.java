@@ -1,6 +1,9 @@
 package fi.sangre.renesans.graphql.assemble;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.ParameterId;
+import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.parameter.*;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.output.parameter.*;
@@ -12,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -23,59 +28,73 @@ import static java.util.stream.Collectors.toList;
 public class QuestionnaireParameterOutputAssembler {
     @NonNull
     public List<QuestionnaireParameterOutput> from(@Nullable final List<Parameter> parameters) {
-        if (parameters == null) {
-            return ImmutableList.of();
-        } else {
-            return parameters.stream()
-                    .map(this::from)
-                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
-        }
+        return Optional.ofNullable(parameters)
+                .orElse(ImmutableList.of()).stream()
+                .map(e -> from(e, ImmutableMap.of()))
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull
-    private QuestionnaireParameterOutput from(@NonNull final Parameter parameter) {
+    public List<QuestionnaireParameterOutput> from(@Nullable final List<Parameter> parameters, @NonNull final Map<ParameterId, ParameterItemAnswer> answers) {
+        return Optional.ofNullable(parameters)
+                .orElse(ImmutableList.of()).stream()
+                .map(e -> from(e, answers))
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
+
+    @NonNull
+    private QuestionnaireParameterOutput from(@NonNull final Parameter parameter, @NonNull final Map<ParameterId, ParameterItemAnswer> answers) {
+        final ParameterId answerId = Optional.ofNullable(answers.get(parameter.getId()))
+                .map(ParameterItemAnswer::getResponse)
+                .orElse(null);
+
         if (parameter instanceof ListParameter) {
-            return from((ListParameter) parameter);
+            return from((ListParameter) parameter, answerId);
         } else if (parameter instanceof TreeParameter) {
-            return from((TreeParameter) parameter);
+            return from((TreeParameter) parameter, answerId);
         } else {
             throw new SurveyException("Invalid parameter type");
         }
     }
 
     @NonNull
-    private QuestionnaireListParameterOutput from(@NonNull final ListParameter metadata) {
+    private QuestionnaireListParameterOutput from(@NonNull final ListParameter parameter, @Nullable final ParameterId answerId) {
         return QuestionnaireListParameterOutput.builder()
-                .value(metadata.getId().toString())
-                .labels(metadata.getLabel().getPhrases())
-                .children(metadata.getValues().stream()
-                        .map(v -> new QuestionnaireParameterItemOutput(v.getId().toString(), v.getLabel().getPhrases()))
+                .value(parameter.getId().toString())
+                .labels(parameter.getLabel().getPhrases())
+                .children(parameter.getValues().stream()
+                        .map(v -> QuestionnaireParameterItemOutput.builder()
+                                .value(v.getId().toString())
+                                .labels(v.getLabel().getPhrases())
+                                .checked(v.getId().equals(answerId))
+                        .build())
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
-                .answered(false)
+                .answered(answerId != null)
                 .build();
     }
 
     @NonNull
-    private QuestionnaireTreeParameterOutput from(@NonNull final TreeParameter metadata) {
+    private QuestionnaireTreeParameterOutput from(@NonNull final TreeParameter parameter, @Nullable final ParameterId answerId) {
         return QuestionnaireTreeParameterOutput.builder()
-                .value(metadata.getId().toString())
-                .labels(metadata.getLabel().getPhrases())
-                .children(metadata.getChildren().stream()
-                        .map(this::from)
+                .value(parameter.getId().toString())
+                .labels(parameter.getLabel().getPhrases())
+                .children(parameter.getChildren().stream()
+                        .map(e -> from(e, answerId))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
-                .answered(false)
+                .answered(answerId != null)
                 .build();
     }
 
     @NonNull
-    private QuestionnaireParameterChildOutput from(@NonNull final ParameterChild child) {
+    private QuestionnaireParameterChildOutput from(@NonNull final ParameterChild child, @Nullable final ParameterId answerId) {
         if (child instanceof ParameterItem) {
             return QuestionnaireParameterItemOutput.builder()
                     .value(child.getId().toString())
                     .labels(child.getLabel().getPhrases())
+                    .checked(child.getId().equals(answerId))
                     .build();
         } else if (child instanceof TreeParameter) {
-            return from((TreeParameter) child);
+            return from((TreeParameter) child, answerId);
         } else {
             throw new SurveyException("Invalid type");
         }

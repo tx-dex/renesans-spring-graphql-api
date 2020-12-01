@@ -20,6 +20,7 @@ import java.util.Locale;
 
 @Component
 @Transactional
+@Deprecated
 public class RespondentResolver implements GraphQLResolver<Respondent> {
     @Autowired
     private AnswerService answerService;

@@ -3,15 +3,18 @@ package fi.sangre.renesans.graphql.facade;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.LikertAnswerAssembler;
-import fi.sangre.renesans.application.dao.AnswerDao;
+import fi.sangre.renesans.application.assemble.ParameterAnswerAssembler;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
+import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;
+import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
-import fi.sangre.renesans.persistence.model.answer.CatalystOpenQuestionAnswer;
+import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +34,8 @@ public class QuestionnaireFacade {
     private final OrganizationSurveyService organizationSurveyService;
     private final QuestionnaireAssembler questionnaireAssembler;
     private final LikertAnswerAssembler likertAnswerAssembler;
-    private final AnswerDao answerDao;
+    private final ParameterAnswerAssembler parameterAnswerAssembler;
+    private final AnswerService answerService;
     private final TokenService tokenService;
 
     @NonNull
@@ -71,7 +75,7 @@ public class QuestionnaireFacade {
             try {
                 final OrganizationSurvey survey = organizationSurveyService.getSurvey(respondent.getSurveyId());
 
-                answerDao.answerQuestion(likertAnswerAssembler.from(answer, survey), respondent.getSurveyId(), respondent.getId());
+                answerService.answerQuestion(likertAnswerAssembler.from(answer, survey), respondent.getSurveyId(), respondent.getId());
 
                 return questionnaireAssembler.from(respondent.getId(), survey);
             } catch (final InterruptedException | ExecutionException ex) {
@@ -84,10 +88,30 @@ public class QuestionnaireFacade {
     }
 
     @NonNull
-    public QuestionnaireOutput answerCatalystQuestion(@NonNull final CatalystOpenQuestionAnswer answer, @NonNull final UserDetails principal) {
+    public QuestionnaireOutput answerCatalystQuestion(@NonNull final CatalystOpenQuestionAnswerInput answer, @NonNull final UserDetails principal) {
         if (principal instanceof RespondentPrincipal) {
             //TODO: implement
             return getQuestionnaire((RespondentPrincipal) principal);
+        } else {
+            throw new SurveyException("Only respondent can answer");
+        }
+    }
+
+    @NonNull
+    public QuestionnaireOutput answerParameter(@NonNull final ParameterAnswerInput input, @NonNull final UserDetails principal) {
+        if (principal instanceof RespondentPrincipal) {
+            final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+            try {
+                final OrganizationSurvey survey = organizationSurveyService.getSurvey(respondent.getSurveyId());
+
+                final Parameter answer = parameterAnswerAssembler.fromInput(input, survey);
+                answerService.answerParameter(answer, respondent.getSurveyId(), respondent.getId());
+
+                return questionnaireAssembler.from(respondent.getId(), survey);
+            } catch (final InterruptedException | ExecutionException ex) {
+                log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
+                throw new InternalServiceException("Internal Server Error. Cannot get questionnaire");
+            }
         } else {
             throw new SurveyException("Only respondent can answer");
         }

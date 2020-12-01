@@ -18,6 +18,7 @@ import java.util.Locale;
 @RequiredArgsConstructor
 
 @Component
+@Deprecated
 public class QuestionGroupResolver implements GraphQLResolver<QuestionGroup> {
 
     private final QuestionGroupRepository questionGroupRepository;

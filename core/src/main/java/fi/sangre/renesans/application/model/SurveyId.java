@@ -13,7 +13,7 @@ public class SurveyId implements IdValueObject<UUID> {
     private final UUID value;
 
     public SurveyId(UUID value) {
-        checkArgument(value != null, "Id is required");
+        checkArgument(value != null, "value is required");
 
         this.value = value;
     }

@@ -14,4 +14,5 @@ import java.util.Map;
 public class QuestionnaireParameterItemOutput implements QuestionnaireParameterChildOutput {
     private String value;
     private Map<String, String> labels;
+    private boolean checked;
 }

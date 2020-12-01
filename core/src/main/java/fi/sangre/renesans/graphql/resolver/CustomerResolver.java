@@ -23,6 +23,7 @@ import static fi.sangre.renesans.graphql.output.CatalystProxy.toProxies;
 
 @Component
 @Transactional
+@Deprecated
 public class CustomerResolver implements GraphQLResolver<Customer> {
 
     private final RespondentGroupService respondentGroupService;

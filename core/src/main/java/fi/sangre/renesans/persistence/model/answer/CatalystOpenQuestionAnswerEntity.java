@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of = "id")
 
 @NamedEntityGraph(
-        name = "open-catalyst-answer-graph",
+        name = "catalyst-answer-graph",
         attributeNodes = {
                 @NamedAttributeNode(value = "survey"),
                 @NamedAttributeNode(value = "respondent"),
@@ -33,7 +33,7 @@ import java.time.LocalDateTime;
 @Table(name = "catalyst_answer")
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
-public class CatalystOpenQuestionAnswer {
+public class CatalystOpenQuestionAnswerEntity {
     @EmbeddedId
     protected CatalystAnswerId id;
 

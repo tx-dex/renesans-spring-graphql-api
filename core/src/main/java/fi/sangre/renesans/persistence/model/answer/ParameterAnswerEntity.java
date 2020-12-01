@@ -1,7 +1,5 @@
 package fi.sangre.renesans.persistence.model.answer;
 
-import fi.sangre.renesans.application.model.QuestionType;
-import fi.sangre.renesans.application.model.answer.AnswerStatus;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import lombok.*;
@@ -20,7 +18,7 @@ import java.util.UUID;
 @Builder
 
 @NamedEntityGraph(
-        name = "question-answer-graph",
+        name = "parameter-answer-graph",
         attributeNodes = {
                 @NamedAttributeNode(value = "survey"),
                 @NamedAttributeNode(value = "respondent"),
@@ -28,12 +26,12 @@ import java.util.UUID;
 )
 
 @Entity
-@Table(name = "question_answer")
+@Table(name = "parameter_answer")
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
-public class LikertQuestionAnswerEntity {
+public class ParameterAnswerEntity {
     @EmbeddedId
-    protected QuestionAnswerId id;
+    protected ParameterAnswerId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "survey_id", updatable = false, insertable = false)
@@ -43,22 +41,17 @@ public class LikertQuestionAnswerEntity {
     @JoinColumn(name = "respondent_id", updatable = false, insertable = false)
     private SurveyRespondent respondent;
 
-    @Column(name = "catalyst_id", updatable = false, nullable = false)
-    private UUID catalystId;
+    @Column(name = "root_id", updatable = false)
+    private UUID rootId;
 
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.ORDINAL)
-    private AnswerStatus status;
+    @Column(name = "parent_id")
+    private UUID parentId;
 
-    @Column(name = "likert_response")
-    private Integer response;
+    @Column(name = "type", updatable = false, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ParameterAnswerType type;
 
     @CreatedDate
-    @Column(name="answer_time", nullable=false, updatable=false)
+    @Column(name = "answer_time", nullable = false, updatable = false)
     private LocalDateTime answerTime;
-
-    @Transient
-    public QuestionType getQuestionType() {
-        return QuestionType.LIKERT;
-    }
 }

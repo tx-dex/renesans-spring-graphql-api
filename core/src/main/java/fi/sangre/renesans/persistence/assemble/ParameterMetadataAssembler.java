@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -40,11 +41,11 @@ public class ParameterMetadataAssembler {
     @NonNull
     private ParameterMetadata from(@NonNull final ListParameter parameter) {
         return ListParameterMetadata.builder()
-                .id(parameter.getId())
+                .id(requireNonNull(parameter.getId()).getValue())
                 .titles(parameter.getLabel().getPhrases())
                 .values(parameter.getValues().stream()
                         .map(v -> ParameterItemMetadata.builder()
-                                .id(v.getId())
+                                .id(requireNonNull(v.getId()).getValue())
                                 .titles(v.getLabel().getPhrases())
                                 .build())
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
@@ -54,7 +55,7 @@ public class ParameterMetadataAssembler {
     @NonNull
     private ParameterMetadata from(@NonNull final TreeParameter parameter) {
         return TreeParameterMetadata.builder()
-                .id(parameter.getId())
+                .id(requireNonNull(parameter.getId()).getValue())
                 .titles(parameter.getLabel().getPhrases())
                 .children(parameter.getChildren().stream()
                 .map(this::from)
@@ -66,7 +67,7 @@ public class ParameterMetadataAssembler {
     private ParameterChildMetadata from(@NonNull final ParameterChild child) {
         if (child instanceof ParameterItem) {
             return ParameterItemMetadata.builder()
-                    .id(child.getId())
+                    .id(requireNonNull(child.getId()).getValue())
                     .titles(child.getLabel().getPhrases())
                     .build();
         } else if (child instanceof TreeParameter) {

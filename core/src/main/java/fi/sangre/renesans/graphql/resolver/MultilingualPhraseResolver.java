@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 @Component
+@Deprecated
 public class MultilingualPhraseResolver implements GraphQLResolver<MultilingualPhrase> {
 
 

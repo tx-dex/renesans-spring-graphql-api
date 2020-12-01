@@ -13,6 +13,6 @@ import java.util.UUID;
 @Repository
 public interface LikerQuestionAnswerRepository extends JpaRepository<LikertQuestionAnswerEntity, QuestionAnswerId> {
     @NonNull
-    @EntityGraph("likert-question-answer-graph")
+    @EntityGraph("question-answer-graph")
     List<LikertQuestionAnswerEntity> findAllByIdSurveyIdAndIdRespondentId(@NonNull UUID surveyId, @NonNull UUID respondentId);
 }

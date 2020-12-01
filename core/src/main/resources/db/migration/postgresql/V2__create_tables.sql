@@ -133,6 +133,13 @@ create table if not exists question_answer
     answer_time timestamp default CURRENT_TIMESTAMP not null
 );
 
+create unique index if not exists question_answer__survey_id_respondent_id_question_id_uidx
+    on question_answer(survey_id, respondent_id, question_id);
+
+create index if not exists question_answer__survey_id_respondent_id_idx
+    on question_answer(survey_id, respondent_id);
+
+
 create table if not exists catalyst_answer
 (
     survey_id uuid not null
@@ -146,11 +153,39 @@ create table if not exists catalyst_answer
             references question_group(uuid),
     status integer not null,
     likert_response integer null,
-    open_response text,
+    open_response text null,
     answer_time timestamp default CURRENT_TIMESTAMP not null
 );
 
---TODO: create indexes
+create unique index if not exists catalyst_answer_survey_id_respondent_id_catalyst_id_uidx
+    on catalyst_answer(survey_id, respondent_id, catalyst_id);
+
+create index if not exists catalyst_answer_survey_id_respondent_id_idx
+    on catalyst_answer(survey_id, respondent_id);
+
+create table if not exists parameter_answer
+(
+    survey_id uuid not null
+        constraint question_answer_survey_id_fkey
+            references survey,
+    respondent_id uuid not null
+        constraint question_answer_respondent_id_fkey
+            references survey_respondent,
+    parameter_id uuid not null,
+    type VARCHAR(10) not null,
+    parent_id uuid null,
+    root_id uuid null,
+    answer_time timestamp default CURRENT_TIMESTAMP not null
+);
+
+create unique index if not exists parameter_answer_survey_id_respondent_id_parameter_id_uidx
+    on parameter_answer(survey_id, respondent_id, parameter_id);
+
+create index if not exists parameter_answer_survey_id_respondent_id_idx
+    on parameter_answer(survey_id, respondent_id);
+
+create index if not exists parameter_answer_survey_id_respondent_id_type_idx
+    on parameter_answer(survey_id, respondent_id, type);
 
 
 create table if not exists "user"

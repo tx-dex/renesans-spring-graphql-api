@@ -1,6 +1,6 @@
 package fi.sangre.renesans.application.model;
 
-import fi.sangre.renesans.application.model.parameter.ParameterAnswer;
+import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.model.respondent.RespondentState;
 import lombok.*;
@@ -16,6 +16,6 @@ public class Respondent {
     private RespondentId id;
     private SurveyId surveyId;
     private String email;
-    private Set<ParameterAnswer> parameterAnswers;
+    private Set<ParameterItemAnswer> parameterAnswers;
     private RespondentState state;
 }

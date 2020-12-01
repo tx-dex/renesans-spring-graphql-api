@@ -2,11 +2,12 @@ package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
+import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;
+import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
-import fi.sangre.renesans.persistence.model.answer.CatalystOpenQuestionAnswer;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,12 +45,23 @@ public class AppMutations implements GraphQLMutationResolver {
 
     @NonNull
     @PreAuthorize("hasRole('RESPONDENT')")
-    public QuestionnaireOutput answerOrSkipCatalystQuestion(@NonNull final CatalystOpenQuestionAnswer answer,
+    public QuestionnaireOutput answerOrSkipCatalystQuestion(@NonNull final CatalystOpenQuestionAnswerInput answer,
                                                             @Nullable final String languageCode,
                                                             @NonNull final DataFetchingEnvironment environment) {
         log.debug("Answering question: {}", answer);
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return questionnaireFacade.answerCatalystQuestion(answer, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasRole('RESPONDENT')")
+    public QuestionnaireOutput answerParameter(@NonNull final ParameterAnswerInput answer,
+                                               @Nullable final String languageCode,
+                                               @NonNull final DataFetchingEnvironment environment) {
+        log.debug("Answering parameter: {}", answer);
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return questionnaireFacade.answerParameter(answer, resolverHelper.getRequiredPrincipal(environment));
     }
 }

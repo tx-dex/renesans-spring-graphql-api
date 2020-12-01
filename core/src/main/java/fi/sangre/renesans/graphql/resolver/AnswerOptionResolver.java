@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Locale;
 
 @Component
+@Deprecated
 public class AnswerOptionResolver implements GraphQLResolver<AnswerOption> {
 
     private final MultilingualService multilingualService;

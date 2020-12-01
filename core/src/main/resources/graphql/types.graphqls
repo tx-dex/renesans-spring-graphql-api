@@ -125,8 +125,8 @@ type RespondentParameterAnswer {
     # If TREE or LIST parameter is used this is the root value (SurveyParameter.value) and it should be used to match the column
     id: ID!
     # Actual user answer value to display
-    # If TREE or LIST parameter is used this is the SurveyParameter.label field
-    answer: String
+    # when TREE or LIST parameter is used, it is the SurveyParameter.label field
+    response: String
 }
 
 # type for the app
@@ -189,6 +189,7 @@ union QuestionnaireParameter = QuestionnaireListParameter | QuestionnaireTreePar
 type QuestionnaireParameterItem {
     label: String!
     value: String!
+    checked: Boolean!
 }
 
 type QuestionnaireListParameter {

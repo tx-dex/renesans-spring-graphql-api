@@ -129,6 +129,8 @@ type Mutation {
 
     answerOrSkipCatalystQuestion(answer: CatalystOpenQuestionAnswerInput!, languageCode: String): Questionnaire
 
+    answerParameter(answer: ParameterAnswerInput!, languageCode: String): Questionnaire
+
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
 
     storeSegment(languageCode: String!, segment: SegmentInput!): Segment

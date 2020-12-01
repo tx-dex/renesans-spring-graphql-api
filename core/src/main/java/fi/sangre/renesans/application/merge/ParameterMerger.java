@@ -2,6 +2,7 @@ package fi.sangre.renesans.application.merge;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.ParameterId;
 import fi.sangre.renesans.application.model.parameter.*;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.exception.SurveyException;
@@ -25,7 +26,7 @@ public class ParameterMerger {
     @NonNull
     public List<Parameter> combine(@Nullable final List<Parameter> existing, @NonNull final List<Parameter> inputs) {
         final ImmutableList.Builder<Parameter> combined = ImmutableList.builder();
-        final Map<UUID, Parameter> existingParameters;
+        final Map<ParameterId, Parameter> existingParameters;
         if (existing == null) {
             existingParameters = ImmutableMap.of();
         } else {
@@ -47,14 +48,14 @@ public class ParameterMerger {
     }
 
     @NonNull
-    private Parameter combine(@NonNull final Map<UUID, Parameter> existing, @NonNull final ListParameter input) {
-        final UUID id;
+    private Parameter combine(@NonNull final Map<ParameterId, Parameter> existing, @NonNull final ListParameter input) {
+        final ParameterId id;
         final Parameter combined;
         if (input.getId() == null) {
-            id = UUID.randomUUID();
+            id = new ParameterId(UUID.randomUUID());
             combined = ListParameter.builder().id(id).build();
         } else {
-            id = input.getId();
+            id = new ParameterId(input.getId());
             combined = Optional.ofNullable(existing.get(id))
                     .orElse(ListParameter.builder().id(id).build());
         }
@@ -71,7 +72,7 @@ public class ParameterMerger {
         existing.setLabel(MultilingualUtils.combine(existing.getLabel(), input.getLabel()));
 
         final ImmutableList.Builder<ParameterItem> values = ImmutableList.builder();
-        final Map<UUID, ParameterItem> existingItems = Optional.ofNullable(existing.getValues())
+        final Map<ParameterId, ParameterItem> existingItems = Optional.ofNullable(existing.getValues())
                 .orElse(ImmutableList.of())
                 .stream()
                 .collect(collectingAndThen(toMap(ParameterItem::getId, v -> v), Collections::unmodifiableMap));
@@ -86,14 +87,14 @@ public class ParameterMerger {
     }
 
     @NonNull
-    private ParameterItem combineItem(@NonNull final Map<UUID, ParameterItem> existing, @NonNull final ParameterItem input) {
-        final UUID id;
+    private ParameterItem combineItem(@NonNull final Map<ParameterId, ParameterItem> existing, @NonNull final ParameterItem input) {
+        final ParameterId id;
         final ParameterItem combined;
         if (input.getId() == null) {
-            id = UUID.randomUUID();
+            id = new ParameterId(UUID.randomUUID());
             combined = ParameterItem.builder().id(id).build();
         } else {
-            id = input.getId();
+            id = new ParameterId(input.getId());
             combined = Optional.ofNullable(existing.get(id))
                     .orElse(ParameterItem.builder().id(id).build());
         }
@@ -109,14 +110,14 @@ public class ParameterMerger {
     }
 
     @NonNull
-    private Parameter combine(@NonNull final Map<UUID, Parameter> existing, @NonNull final TreeParameter input) {
-        final UUID id;
+    private Parameter combine(@NonNull final Map<ParameterId, Parameter> existing, @NonNull final TreeParameter input) {
+        final ParameterId id;
         final Parameter combined;
         if (input.getId() == null) {
-            id = UUID.randomUUID();
+            id = new ParameterId(UUID.randomUUID());
             combined = TreeParameter.builder().id(id).build();
         } else {
-            id = input.getId();
+            id = new ParameterId(input.getId());
             combined = Optional.ofNullable(existing.get(id))
                     .orElse(TreeParameter.builder().id(id).build());
         }
@@ -133,7 +134,7 @@ public class ParameterMerger {
         existing.setLabel(MultilingualUtils.combine(existing.getLabel(), input.getLabel()));
 
         final ImmutableList.Builder<ParameterChild> children = ImmutableList.builder();
-        final Map<UUID, ParameterChild> existingItems = Optional.ofNullable(existing.getChildren())
+        final Map<ParameterId, ParameterChild> existingItems = Optional.ofNullable(existing.getChildren())
                 .orElse(ImmutableList.of()).stream()
                 .collect(collectingAndThen(toMap(ParameterChild::getId, v -> v), Collections::unmodifiableMap));
 
@@ -147,15 +148,15 @@ public class ParameterMerger {
     }
 
     @NonNull
-    private ParameterChild combineChild(@NonNull final Map<UUID, ParameterChild> existing, @NonNull final ParameterChild input) {
+    private ParameterChild combineChild(@NonNull final Map<ParameterId, ParameterChild> existing, @NonNull final ParameterChild input) {
         if (input instanceof ParameterItem) {
-            final UUID id;
+            final ParameterId id;
             final ParameterChild combined;
             if (input.getId() == null) {
-                id = UUID.randomUUID();
+                id = new ParameterId(UUID.randomUUID());
                 combined = ParameterItem.builder().id(id).build();
             } else {
-                id = input.getId();
+                id = new ParameterId(input.getId());
                 combined = Optional.ofNullable(existing.get(id))
                         .orElse(ParameterItem.builder().id(id).build());
             }
@@ -166,13 +167,13 @@ public class ParameterMerger {
                 return combineItem(ParameterItem.builder().id(id).build(), (ParameterItem) input);
             }
         } else if (input instanceof TreeParameter)  {
-            final UUID id;
+            final ParameterId id;
             final ParameterChild combined;
             if (input.getId() == null) {
-                id = UUID.randomUUID();
+                id = new ParameterId(UUID.randomUUID());
                 combined = TreeParameter.builder().id(id).build();
             } else {
-                id = input.getId();
+                id = new ParameterId(input.getId());
                 combined = Optional.ofNullable(existing.get(id))
                         .orElse(TreeParameter.builder().id(id).build());
             }

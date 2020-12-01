@@ -126,6 +126,11 @@ input CatalystOpenQuestionAnswerInput {
     response: String
 }
 
+input ParameterAnswerInput {
+    parameterId: ID!
+    value: ID!
+}
+
 # input for filtering respondents or statistics
 input FilterInput {
     # Parameter id from the column header that is chosen for filtering

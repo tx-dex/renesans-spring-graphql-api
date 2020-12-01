@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
+import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.graphql.output.QuestionnaireCatalystOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireDriverOutput;
@@ -54,15 +55,14 @@ public class QuestionnaireAssembler {
         final SurveyId surveyId = new SurveyId(survey.getId());
         final Future<Map<CatalystId, List<LikertQuestionAnswer>>> questionsAnswers = answerService.getQuestionsAnswersAsync(surveyId, respondentId);
         final Future<Map<CatalystId, OpenQuestionAnswer>> catalystAnswers = answerService.getCatalystsQuestionsAnswersAsync(surveyId, respondentId);
+        final Future<Map<ParameterId, ParameterItemAnswer>> parameterAnswers = answerService.getParametersAnswersAsync(surveyId, respondentId);
 
-        final QuestionnaireOutput.QuestionnaireOutputBuilder builder = builder(survey)
+        return builder(survey)
                 .id(respondentId.getValue()) // overwrite the id with the respondent one
-                .answerable(true);
-
-
-        builder.catalysts(fromCatalysts(survey.getCatalysts(), catalystAnswers.get(), questionsAnswers.get()));
-
-        return builder.build();
+                .answerable(true)
+                .catalysts(fromCatalysts(survey.getCatalysts(), catalystAnswers.get(), questionsAnswers.get()))
+                .parameters(questionnaireParameterOutputAssembler.from(survey.getParameters(), parameterAnswers.get()))
+                .build();
     }
 
     private QuestionnaireOutput.QuestionnaireOutputBuilder builder(@NonNull final OrganizationSurvey survey) {
