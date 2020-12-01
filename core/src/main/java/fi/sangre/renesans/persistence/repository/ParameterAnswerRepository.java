@@ -15,6 +15,11 @@ import java.util.UUID;
 public interface ParameterAnswerRepository extends JpaRepository<ParameterAnswerEntity, ParameterAnswerId> {
     @NonNull
     @EntityGraph("parameter-answer-graph")
+    List<ParameterAnswerEntity> findAllByIdSurveyIdAndTypeIs(@NonNull UUID surveyId,
+                                                             @NonNull ParameterAnswerType type);
+
+    @NonNull
+    @EntityGraph("parameter-answer-graph")
     List<ParameterAnswerEntity> findAllByIdSurveyIdAndIdRespondentIdAndTypeIs(@NonNull UUID surveyId,
                                                                               @NonNull UUID respondentId,
                                                                               @NonNull ParameterAnswerType type);

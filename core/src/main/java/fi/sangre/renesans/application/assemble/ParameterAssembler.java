@@ -3,10 +3,16 @@ package fi.sangre.renesans.application.assemble;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.MultilingualText;
+import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.ParameterId;
 import fi.sangre.renesans.application.model.parameter.*;
+import fi.sangre.renesans.application.utils.ParameterUtils;
+import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
 import fi.sangre.renesans.graphql.input.parameter.*;
+import fi.sangre.renesans.persistence.model.answer.ParameterAnswerEntity;
+import fi.sangre.renesans.persistence.model.answer.ParameterAnswerType;
 import fi.sangre.renesans.persistence.model.metadata.parameters.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +20,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -27,6 +31,44 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class ParameterAssembler {
+    private final SurveyUtils surveyUtils;
+    private final ParameterUtils parameterUtils;
+
+    @NonNull
+    public Parameter fromInput(@NonNull final ParameterAnswerInput input, @NonNull final OrganizationSurvey survey) {
+        checkArgument(input.getParameterId() != null, "input.parameterId is required");
+
+        final ParameterId parameterId = new ParameterId(input.getParameterId());
+        final Parameter parameter = surveyUtils.findParameter(parameterId, survey);
+
+        if (parameter != null) {
+            final ParameterId childId = new ParameterId(input.getValue());
+            final ParameterChild child = parameterUtils.findChild(childId, parameter);
+
+            if (child != null) {
+                return child;
+            } else {
+                throw new SurveyException("Child not found in the parameter");
+            }
+        } else {
+            throw new SurveyException("Parameter not found in the survey");
+        }
+    }
+
+    @NonNull
+    public Parameter fromEntity(@NonNull final List<ParameterAnswerEntity> answers, @NonNull final OrganizationSurvey survey) {
+        final ParameterAnswerEntity item = answers.stream()
+                .filter(e -> ParameterAnswerType.ITEM.equals(e.getType()))
+                .findFirst()
+                .orElseThrow(() -> new SurveyException("Parameter answer not found"));
+
+        final ParameterId childId = new ParameterId(item.getId().getParameterId());
+        final ParameterId rootId = new ParameterId(item.getRootId());
+        final Parameter root = Objects.requireNonNull(surveyUtils.findParameter(rootId, survey), "Parameter not found in the survey");
+
+        return Objects.requireNonNull(parameterUtils.findChild(childId, root), "Child not found in the root parameter");
+    }
+
     @NonNull
     public List<Parameter> fromInputs(@NonNull final List<SurveyParameterInput> inputs, @NonNull final String languageTag) {
         if (new HashSet<>(inputs).size() != inputs.size()) {

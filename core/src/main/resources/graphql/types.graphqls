@@ -114,18 +114,20 @@ type QuestionDriverWeight {
 type SurveyRespondent {
     id: ID!
     email: String!
+    # List of <ID, String> values
     parameterAnswers: [RespondentParameterAnswer!]!
     state: SurveyRespondentState!
 }
 
 # Answers values for SurveyParameters
-# This may be used for displaynig the respondent answers in respondent list view in columns
+# This may be used for displaying the respondent answers in respondent list view in columns
 type RespondentParameterAnswer {
     # The parameter id from the table header/filter
-    # If TREE or LIST parameter is used this is the root value (SurveyParameter.value) and it should be used to match the column
+    # This is the root value (SurveyParameter.value) when TREE or LIST parameter is used
+    # this should be used to match the proper column in the frontend
     id: ID!
     # Actual user answer value to display
-    # when TREE or LIST parameter is used, it is the SurveyParameter.label field
+    # when TREE or LIST parameter is used, it is the SurveyParameter.label value from checked child
     response: String
 }
 

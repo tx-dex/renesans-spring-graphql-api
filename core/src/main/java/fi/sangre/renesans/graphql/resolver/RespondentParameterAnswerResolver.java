@@ -1,7 +1,7 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
+import fi.sangre.renesans.graphql.output.parameter.RespondentParameterAnswerOutput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -13,15 +13,9 @@ import java.util.UUID;
 @Slf4j
 
 @Component
-public class RespondentParameterAnswerResolver implements GraphQLResolver<ParameterItemAnswer> {
-
+public class RespondentParameterAnswerResolver implements GraphQLResolver<RespondentParameterAnswerOutput> {
     @NonNull
-    public UUID getId(@NonNull final ParameterItemAnswer output) {
-        return output.getRootId().getParameterId().getValue();
-    }
-
-    @NonNull
-    public String getResponse(@NonNull final ParameterItemAnswer output) {
-        return "empty"; //TODO: implement
+    public UUID getId(@NonNull final RespondentParameterAnswerOutput output) {
+        return output.getId().getValue();
     }
 }

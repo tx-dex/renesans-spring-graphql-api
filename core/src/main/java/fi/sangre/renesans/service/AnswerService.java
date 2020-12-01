@@ -4,6 +4,7 @@ package fi.sangre.renesans.service;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.ParameterId;
+import fi.sangre.renesans.application.model.Respondent;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
@@ -17,6 +18,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +56,14 @@ public class AnswerService {
 
     public void answerQuestion(@NonNull final LikertQuestionAnswer answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
         answerDao.saveAnswer(answer, surveyId, respondentId);
+    }
+
+    @NonNull
+    @Async(DAO_EXECUTOR_NAME)
+    public Future<Collection<Respondent>> getRespondentsParametersAnswersAsync(@NonNull final SurveyId surveyId) {
+        log.debug("Getting list of parameters answers for survey(id={})", surveyId);
+
+        return new AsyncResult<>(answerDao.getParametersAnswers(surveyId));
     }
 
     @NonNull

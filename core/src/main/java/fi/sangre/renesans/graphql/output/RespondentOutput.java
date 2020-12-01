@@ -1,8 +1,8 @@
-package fi.sangre.renesans.application.model;
+package fi.sangre.renesans.graphql.output;
 
-import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.model.respondent.RespondentState;
+import fi.sangre.renesans.graphql.output.parameter.RespondentParameterAnswerOutput;
 import lombok.*;
 
 import java.util.List;
@@ -12,10 +12,10 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(of = "id")
 @Builder
-public class Respondent {
+public class RespondentOutput {
     private RespondentId id;
-    private SurveyId surveyId;
     private String email;
-    private List<ParameterItemAnswer> parameterAnswers;
+    private List<RespondentParameterAnswerOutput> parameterAnswers;
     private RespondentState state;
 }
+

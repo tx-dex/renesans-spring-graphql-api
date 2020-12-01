@@ -3,10 +3,10 @@ package fi.sangre.renesans.graphql;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.Respondent;
 import fi.sangre.renesans.application.model.SurveyTemplate;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.FilterInput;
+import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
@@ -66,10 +66,10 @@ public class AdminQueries implements GraphQLQueryResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#surveyId, 'survey', 'READ')")
-    public Collection<Respondent> getSurveyRespondents(@NonNull final UUID surveyId,
-                                                       @Nullable final List<FilterInput> filters,
-                                                       @Nullable final String languageCode,
-                                                       @NonNull final DataFetchingEnvironment environment) {
+    public Collection<RespondentOutput> getSurveyRespondents(@NonNull final UUID surveyId,
+                                                             @Nullable final List<FilterInput> filters,
+                                                             @Nullable final String languageCode,
+                                                             @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return surveyRespondentsFacade.getSurveyRespondents(surveyId, filters, resolverHelper.getLanguageCode(environment));

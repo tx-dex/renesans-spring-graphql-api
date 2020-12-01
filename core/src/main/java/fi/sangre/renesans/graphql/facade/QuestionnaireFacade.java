@@ -3,7 +3,7 @@ package fi.sangre.renesans.graphql.facade;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.LikertAnswerAssembler;
-import fi.sangre.renesans.application.assemble.ParameterAnswerAssembler;
+import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.exception.InternalServiceException;
@@ -34,7 +34,7 @@ public class QuestionnaireFacade {
     private final OrganizationSurveyService organizationSurveyService;
     private final QuestionnaireAssembler questionnaireAssembler;
     private final LikertAnswerAssembler likertAnswerAssembler;
-    private final ParameterAnswerAssembler parameterAnswerAssembler;
+    private final ParameterAssembler parameterAssembler;
     private final AnswerService answerService;
     private final TokenService tokenService;
 
@@ -104,7 +104,7 @@ public class QuestionnaireFacade {
             try {
                 final OrganizationSurvey survey = organizationSurveyService.getSurvey(respondent.getSurveyId());
 
-                final Parameter answer = parameterAnswerAssembler.fromInput(input, survey);
+                final Parameter answer = parameterAssembler.fromInput(input, survey);
                 answerService.answerParameter(answer, respondent.getSurveyId(), respondent.getId());
 
                 return questionnaireAssembler.from(respondent.getId(), survey);

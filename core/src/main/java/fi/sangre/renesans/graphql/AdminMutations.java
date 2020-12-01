@@ -4,11 +4,15 @@ import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.application.assemble.CatalystAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.assemble.StaticTextAssembler;
-import fi.sangre.renesans.application.model.*;
+import fi.sangre.renesans.application.model.Catalyst;
+import fi.sangre.renesans.application.model.Organization;
+import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.StaticText;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
+import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
@@ -121,11 +125,11 @@ public class AdminMutations implements GraphQLMutationResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#surveyId, 'survey', 'INVITE')")
-    public Collection<Respondent> inviteRespondents(@NonNull final UUID surveyId,
-                                                    @NonNull final List<RespondentInvitationInput> invitations,
-                                                    @Nullable final List<FilterInput> filters,
-                                                    @NonNull final String languageCode,
-                                                    @NonNull final DataFetchingEnvironment environment) {
+    public Collection<RespondentOutput> inviteRespondents(@NonNull final UUID surveyId,
+                                                          @NonNull final List<RespondentInvitationInput> invitations,
+                                                          @Nullable final List<FilterInput> filters,
+                                                          @NonNull final String languageCode,
+                                                          @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return surveyRespondentsFacade.inviteRespondents(surveyId, invitations, filters, resolverHelper.getLanguageCode(environment));

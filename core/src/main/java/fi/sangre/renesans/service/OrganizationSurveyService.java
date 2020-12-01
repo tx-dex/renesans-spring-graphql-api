@@ -69,6 +69,7 @@ public class OrganizationSurveyService {
     private final MultilingualService multilingualService;
     private final SurveyRespondentRepository surveyRespondentRepository;
     private final RespondentAssembler respondentAssembler;
+    private final AnswerService answerService;
 
     @NonNull
     @Transactional(readOnly = true)
@@ -200,11 +201,8 @@ public class OrganizationSurveyService {
 
     @NonNull
     @Transactional(readOnly = true)
-    public Collection<Respondent> findRespondents(@NonNull final UUID surveyId) {
-        final Survey survey = getSurveyOrThrow(surveyId);
-
-        //TODO: sort
-        return respondentAssembler.from(surveyRespondentRepository.findAllBySurveyId(surveyId));
+    public Collection<Respondent> getAllRespondents(@NonNull final SurveyId surveyId) {
+        return respondentAssembler.from(surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()));
     }
 
     @NonNull
@@ -278,6 +276,11 @@ public class OrganizationSurveyService {
                 .isDefault(false)
                 .metadata(metadata.build())
                 .build());
+    }
+
+    @NonNull
+    private Survey getSurveyOrThrow(@NonNull final SurveyId id) {
+        return getSurveyOrThrow(id.getValue());
     }
 
     @NonNull

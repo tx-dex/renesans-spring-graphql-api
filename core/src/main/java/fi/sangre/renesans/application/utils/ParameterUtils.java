@@ -13,13 +13,42 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
 @Slf4j
 
 @Component
 public class ParameterUtils {
+    @NonNull
+    public List<ParameterChild> getChildren(@NonNull final List<Parameter> parameters) {
+        return parameters.stream()
+                .map(this::getChildren)
+                .flatMap(Collection::stream)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
+
+    @NonNull
+    public List<ParameterChild> getChildren(@NonNull final Parameter parameter) {
+        if (parameter instanceof ParentParameter) {
+            final ParentParameter parent = (ParentParameter) parameter;
+            return ImmutableList.copyOf(Optional.ofNullable(parent.getLeaves())
+                    .orElse(ImmutableList.of()));
+        } else if (parameter instanceof ListParameter) {
+            final ListParameter list = (ListParameter) parameter;
+            return ImmutableList.copyOf(Optional.ofNullable(list.getValues())
+                    .orElse(ImmutableList.of()));
+        } else {
+            throw new SurveyException("Invalid parameter type");
+        }
+    }
+
     @Nullable
     public ParameterChild findChild(@NonNull final ParameterId childId, @NonNull final Parameter parameter) {
         if (parameter instanceof ParentParameter) {

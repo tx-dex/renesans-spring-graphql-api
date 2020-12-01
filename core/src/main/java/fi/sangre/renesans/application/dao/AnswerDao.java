@@ -1,10 +1,12 @@
 package fi.sangre.renesans.application.dao;
 
 import com.google.common.collect.ImmutableList;
+import fi.sangre.renesans.application.assemble.ParameterAnswerAssembler;
+import fi.sangre.renesans.application.assemble.RespondentAssembler;
 import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.ParameterId;
+import fi.sangre.renesans.application.model.Respondent;
 import fi.sangre.renesans.application.model.SurveyId;
-import fi.sangre.renesans.application.model.SurveyParameterId;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
@@ -26,8 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -37,7 +38,10 @@ public class AnswerDao {
     private final CatalystOpenQuestionAnswerRepository catalystOpenQuestionAnswerRepository;
     private final LikerQuestionAnswerRepository likerQuestionAnswerRepository;
     private final ParameterAnswerRepository parameterAnswerRepository;
+    private final RespondentAssembler respondentAssembler;
+    private final ParameterAnswerAssembler parameterAnswerAssembler;
     private final ParameterUtils parameterUtils;
+
 
     @NonNull
     @Transactional(readOnly = true)
@@ -83,16 +87,21 @@ public class AnswerDao {
 
     @NonNull
     @Transactional(readOnly = true)
+    public Collection<Respondent> getParametersAnswers(@NonNull final SurveyId surveyId) {
+        return respondentAssembler.from(
+                parameterAnswerRepository.findAllByIdSurveyIdAndTypeIs(surveyId.getValue(),
+                        ParameterAnswerType.ITEM) // There always should be only one last child selected with ITEM tipe
+                        .stream()
+                        .collect(groupingBy(ParameterAnswerEntity::getRespondent)));
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
     public Collection<ParameterItemAnswer> getParametersAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
-        return parameterAnswerRepository.findAllByIdSurveyIdAndIdRespondentIdAndTypeIs(surveyId.getValue(),
-                respondentId.getValue(),
-                ParameterAnswerType.ITEM) // There always should be only one last child selected with ITEM tipe
-                .stream()
-                .map(e -> ParameterItemAnswer.builder()
-                        .rootId(new SurveyParameterId(surveyId, new ParameterId(e.getRootId())))
-                        .response(new ParameterId(e.getId().getParameterId()))
-                        .build())
-                .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+        return parameterAnswerAssembler.fromEntities(
+                parameterAnswerRepository.findAllByIdSurveyIdAndIdRespondentIdAndTypeIs(surveyId.getValue(),
+                        respondentId.getValue(),
+                        ParameterAnswerType.ITEM));
     }
 
     @Transactional
