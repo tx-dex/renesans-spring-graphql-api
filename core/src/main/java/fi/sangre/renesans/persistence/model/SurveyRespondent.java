@@ -44,6 +44,9 @@ public class SurveyRespondent {
     @Column(name = "invitation_hash", nullable = false)
     private String invitationHash;
 
+    @Column(name = "invitation_error")
+    private String invitationError;
+
     @Builder.Default
     @Column(name = "consent", nullable = false)
     private Boolean consent = false;

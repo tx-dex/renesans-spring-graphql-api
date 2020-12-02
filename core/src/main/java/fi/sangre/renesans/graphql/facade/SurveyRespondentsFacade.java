@@ -1,9 +1,9 @@
 package fi.sangre.renesans.graphql.facade;
 
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.ParameterId;
-import fi.sangre.renesans.application.model.Respondent;
-import fi.sangre.renesans.application.model.SurveyId;
+import com.google.common.collect.ImmutableList;
+import com.sangre.mail.dto.MailStatus;
+import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -14,11 +14,13 @@ import fi.sangre.renesans.graphql.input.FilterInput;
 import fi.sangre.renesans.graphql.input.RespondentInvitationInput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.service.AnswerService;
+import fi.sangre.renesans.service.InvitationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.map.LazyMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.*;
 
 @RequiredArgsConstructor
@@ -40,14 +43,16 @@ public class SurveyRespondentsFacade {
     private final AnswerService answerService;
     private final RespondentOutputAssembler respondentOutputAssembler;
     private final ParameterUtils parameterUtils;
+    private final InvitationService invitationService;
 
     @NonNull
-    public Collection<RespondentOutput> getSurveyRespondents(@NonNull final UUID surveyId,
+    public Collection<RespondentOutput> getSurveyRespondents(@NonNull final SurveyId surveyId,
                                                              @Nullable final List<FilterInput> filters,
                                                              @NonNull final String languageCode) {
-        final SurveyId id = new SurveyId(surveyId);
         try {
             final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
+            final Future<Collection<Respondent>> answers;
+            final Future<Map<RespondentEmail, MailStatus>> invitations = invitationService.getInvitationStatuses(surveyId);
             final List<ParameterChild> allChildren = parameterUtils.getChildren(survey.getParameters());
             final Map<ParameterId, String> parameters = LazyMap.lazyMap(new HashMap<>(), parameterId -> allChildren.stream()
                     .filter(e -> parameterId.equals(e.getId()))
@@ -55,23 +60,21 @@ public class SurveyRespondentsFacade {
                     .map(e -> MultilingualUtils.getText(e.getLabel().getPhrases(), languageCode))
                     .orElse(EMPTY));
 
-            // TODO: combine with mail Service data
-            final Future<Collection<Respondent>> answers;
             if (filters == null || filters.isEmpty()) {
-                answers = answerService.getRespondentsParametersAnswersAsync(id);
+                answers = answerService.getRespondentsParametersAnswersAsync(surveyId);
 
-                return Stream.concat(
-                        organizationSurveyService.getAllRespondents(id).stream(),
+                return respondentOutputAssembler.from(Stream.concat(
+                        organizationSurveyService.getAllRespondents(surveyId).stream(),
                         answers.get().stream())
-                        .collect(toMap(Respondent::getId, e -> e, (e1, e2) -> e2))
-                        .values().stream()
-                        .map(e -> respondentOutputAssembler.from(e, parameters))
+                                .collect(toMap(Respondent::getId, e -> e, (e1, e2) -> e2))
+                                .values().stream(),
+                        parameters,
+                        invitations)
                         .sorted((e1, e2) -> StringUtils.compareIgnoreCase(e1.getEmail(), e2.getEmail()))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList));
             } else {
-                answers = answerService.getRespondentsParametersAnswersAsync(id); //TODO: filter
-                return answers.get().stream()
-                        .map(e -> respondentOutputAssembler.from(e, parameters))
+                answers = answerService.getRespondentsParametersAnswersAsync(surveyId); //TODO: filter
+                return respondentOutputAssembler.from( answers.get().stream(), parameters, invitations)
                         .sorted((e1, e2) -> StringUtils.compareIgnoreCase(e1.getEmail(), e2.getEmail()))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList));
             }
@@ -82,15 +85,29 @@ public class SurveyRespondentsFacade {
     }
 
     @NonNull
-    public Collection<RespondentOutput> inviteRespondents(@NonNull final UUID surveyId,
-                                                          @NonNull final List<RespondentInvitationInput> invitations,
+    public Collection<RespondentOutput> inviteRespondents(@NonNull final SurveyId surveyId,
+                                                          @NonNull final RespondentInvitationInput invitation,
                                                           @Nullable final List<FilterInput> filters,
-                                                          @NonNull final String languageCode) {
-        organizationSurveyService.inviteRespondents(surveyId, invitations.stream()
-                .map(e -> Invitation.builder()
-                        .email(e.getEmail())
-                        .build())
-                .collect(collectingAndThen(toSet(), Collections::unmodifiableSet)));
+                                                          @NonNull final String languageCode,
+                                                          @NonNull final UserPrincipal principal) {
+        final Set<String> emails = Optional.ofNullable(invitation.getEmails())
+                .orElse(ImmutableList.of())
+                .stream()
+                .map(StringUtils::trimToNull)
+                .filter(Objects::nonNull)
+                .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+
+        checkArgument(!emails.isEmpty(), "Non empty list of emails is required");
+        checkArgument(StringUtils.isNotBlank(invitation.getSubject()), "Subject is required");
+        checkArgument(StringUtils.isNotBlank(invitation.getBody()), "Email body is required");
+        checkArgument(StringUtils.contains(invitation.getBody(), "{{ invitation_link }}"), "Email body must contain {{ invitation_link }} placeholder"); //TODO: constant
+
+        organizationSurveyService.inviteRespondents(surveyId, Invitation.builder()
+                        .subject(StringUtils.trim(invitation.getSubject()))
+                        .body(StringUtils.trim(invitation.getBody()))
+                        .emails(emails)
+                        .build(),
+                Pair.of(principal.getName(), principal.getEmail()));
 
         return getSurveyRespondents(surveyId, filters, languageCode);
     }

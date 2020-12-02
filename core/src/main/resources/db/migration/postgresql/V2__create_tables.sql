@@ -64,6 +64,7 @@ create table if not exists survey_respondent
           references survey,
     email text not null,
     invitation_hash text not null,
+    invitation_error text null,
     consent boolean default false not null,
     state varchar(20) default 'INVITING' not null,
     archived boolean default false not null,

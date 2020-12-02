@@ -142,7 +142,9 @@ input FilterInput {
 
 # input for sending invitations to respondents
 input RespondentInvitationInput {
-    email: String!
+    subject: String!
+    body: String!
+    emails: [String!]!
 }
 
 input CustomerInput {

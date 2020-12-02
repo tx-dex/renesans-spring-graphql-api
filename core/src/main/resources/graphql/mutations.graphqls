@@ -116,13 +116,14 @@ type Mutation {
     # invite respondents from invitations list and returns the list of all the respondents
     inviteRespondents(
         surveyId: ID!
-        invitations: [RespondentInvitationInput!]!
+        invitation: RespondentInvitationInput!
         # List of filters for filtering respondents for the output
         filters: [FilterInput!]
         # Should be used for selecting the language for the output
         languageCode: String
     ): [SurveyRespondent!]!
 
+    # Do not send Authorization header with this mustation!!!
     openQuestionnaire(id: ID!, invitationHash: String!): Authorization!
 
     answerOrSkipLikertQuestion(answer: LikertQuestionAnswerInput!, languageCode: String): Questionnaire
@@ -169,6 +170,7 @@ type Mutation {
         respondentGroupId: ID!
     ): Respondent @deprecated(reason: "Will be removed")
 
+    # Do not send Authorization header with this mustation!!!
     login(
         username: String!
         password: String!

@@ -3,6 +3,7 @@ package fi.sangre.renesans.graphql;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.SurveyTemplate;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.FilterInput;
@@ -72,6 +73,6 @@ public class AdminQueries implements GraphQLQueryResolver {
                                                              @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-        return surveyRespondentsFacade.getSurveyRespondents(surveyId, filters, resolverHelper.getLanguageCode(environment));
+        return surveyRespondentsFacade.getSurveyRespondents(new SurveyId(surveyId), filters, resolverHelper.getLanguageCode(environment));
     }
 }

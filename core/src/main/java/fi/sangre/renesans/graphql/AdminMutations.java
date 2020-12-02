@@ -1,14 +1,13 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.CatalystAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.assemble.StaticTextAssembler;
-import fi.sangre.renesans.application.model.Catalyst;
-import fi.sangre.renesans.application.model.Organization;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.StaticText;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.parameter.Parameter;
+import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
@@ -22,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -126,12 +126,21 @@ public class AdminMutations implements GraphQLMutationResolver {
     @NonNull
     @PreAuthorize("hasPermission(#surveyId, 'survey', 'INVITE')")
     public Collection<RespondentOutput> inviteRespondents(@NonNull final UUID surveyId,
-                                                          @NonNull final List<RespondentInvitationInput> invitations,
+                                                          @NonNull final RespondentInvitationInput invitation,
                                                           @Nullable final List<FilterInput> filters,
                                                           @NonNull final String languageCode,
                                                           @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
+        final UserDetails principal = resolverHelper.getRequiredPrincipal(environment);
 
-        return surveyRespondentsFacade.inviteRespondents(surveyId, invitations, filters, resolverHelper.getLanguageCode(environment));
+        if (principal instanceof UserPrincipal) {
+            return surveyRespondentsFacade.inviteRespondents(new SurveyId(surveyId),
+                    invitation,
+                    filters,
+                    resolverHelper.getLanguageCode(environment),
+                    (UserPrincipal ) principal);
+        } else {
+            throw new SurveyException("Only user can invite respondents");
+        }
     }
 }

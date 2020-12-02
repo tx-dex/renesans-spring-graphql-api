@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
 import fi.sangre.renesans.application.assemble.*;
+import fi.sangre.renesans.application.event.InviteRespondentsEvent;
 import fi.sangre.renesans.application.merge.CatalystMerger;
 import fi.sangre.renesans.application.merge.ParameterMerger;
 import fi.sangre.renesans.application.merge.StaticTextMerger;
@@ -33,6 +34,9 @@ import fi.sangre.renesans.persistence.repository.SurveyRepository;
 import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -44,8 +48,7 @@ import java.util.*;
 import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.application.utils.MultilingualUtils.compare;
 import static fi.sangre.renesans.application.utils.MultilingualUtils.create;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 
 @RequiredArgsConstructor
@@ -69,7 +72,7 @@ public class OrganizationSurveyService {
     private final MultilingualService multilingualService;
     private final SurveyRespondentRepository surveyRespondentRepository;
     private final RespondentAssembler respondentAssembler;
-    private final AnswerService answerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @NonNull
     @Transactional(readOnly = true)
@@ -181,22 +184,41 @@ public class OrganizationSurveyService {
     }
 
     @Transactional
-    public void inviteRespondents(@NonNull final UUID surveyId, @NonNull final Collection<Invitation> invitations) {
+    public void inviteRespondents(@NonNull final SurveyId surveyId
+            , @NonNull final Invitation invitation
+            , @NonNull final Pair<String, String> replyTo) {
         final Survey survey = getSurveyOrThrow(surveyId);
 
-        //TODO: trim email
-        surveyRespondentRepository.saveAll(new HashSet<>(invitations).stream()
-                .map(e -> SurveyRespondent.builder()
-                .state(SurveyRespondentState.INVITING)
-                        .surveyId(surveyId)
-                        .email(e.getEmail())
-                        //TODO: change hashing
-                        .invitationHash(Hashing.sha512().hashString(String.format("%s-%s", survey, UUID.randomUUID()), StandardCharsets.UTF_8).toString())
+        final Map<String, SurveyRespondent> existing = surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()).stream()
+                .filter(e -> invitation.getEmails().contains(e.getEmail()))
+                .collect(toMap(SurveyRespondent::getEmail, e -> e));
+
+        final List<SurveyRespondent> respondents = invitation.getEmails().stream()
+                .map(e -> existing.getOrDefault(e, SurveyRespondent.builder()
+                        .surveyId(surveyId.getValue())
+                        .email(StringUtils.trim(e))
                         .state(SurveyRespondentState.INVITING)
                         .consent(false)
                         .archived(false)
-                .build())
-        .collect(toList()));
+                        .build()))
+                .collect(toList());
+
+        respondents.forEach(respondent -> {
+            respondent.setState(SurveyRespondentState.INVITING);
+            respondent.setInvitationError(null);
+            //TODO: change hashing to nullable
+            respondent.setInvitationHash(
+                    Hashing.sha512().hashString(String.format("%s-%s", survey, UUID.randomUUID()), StandardCharsets.UTF_8).toString());
+        });
+
+        applicationEventPublisher.publishEvent(new InviteRespondentsEvent(
+                surveyId,
+                invitation.getSubject(),
+                invitation.getBody(),
+                surveyRespondentRepository.saveAll(respondents).stream()
+                        .map(e -> new RespondentId(e.getId()))
+                        .collect(collectingAndThen(toSet(), Collections::unmodifiableSet)),
+                replyTo));
     }
 
     @NonNull
