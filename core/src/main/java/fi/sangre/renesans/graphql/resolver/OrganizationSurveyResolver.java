@@ -27,13 +27,13 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
 
     @NonNull
     public String getTitle(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(survey.getMetadata().getTitles(),
+        return metadataLanguageHelper.getRequiredText(survey.getTitles().getPhrases(),
                 resolverHelper.getLanguageCode(environment));
     }
 
     @Nullable
     public String getDescription(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getOptionalText(survey.getMetadata().getDescriptions(),
+        return metadataLanguageHelper.getOptionalText(survey.getDescriptions().getPhrases(),
                 resolverHelper.getLanguageCode(environment));
     }
 

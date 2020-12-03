@@ -10,6 +10,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -29,5 +31,14 @@ public class MultilingualTextAssembler {
         return new MultilingualText(Optional.ofNullable(StringUtils.trim(phrase))
                 .map(v -> ImmutableMap.of(languageTag, phrase))
                 .orElseThrow(() -> new SurveyException("Text is required")));
+    }
+
+    @NonNull
+    public MultilingualText from(@Nullable final Map<String, String> input) {
+        if (input == null) {
+            return new MultilingualText(new HashMap<>());
+        } else {
+            return new MultilingualText(new HashMap<>(input));
+        }
     }
 }

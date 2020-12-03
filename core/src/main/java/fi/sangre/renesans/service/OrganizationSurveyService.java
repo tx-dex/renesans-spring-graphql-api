@@ -12,6 +12,7 @@ import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.exception.SurveyException;
@@ -94,7 +95,7 @@ public class OrganizationSurveyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found"))
                 .getSurveys().stream()
                 .map(organizationSurveyAssembler::from)
-                .sorted((e1,e2) -> compare(e1.getMetadata().getTitles(), e2.getMetadata().getTitles(), languageTag))
+                .sorted((e1,e2) -> compare(e1.getTitles().getPhrases(), e2.getTitles().getPhrases(), languageTag))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
@@ -115,6 +116,11 @@ public class OrganizationSurveyService {
             checkArgument(input.getVersion() != null, "input.version cannot be null");
             survey = surveyRepository.findById(input.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+
+            final SurveyMetadata metadata = copy(survey.getMetadata());
+            metadata.setTitles(MultilingualUtils.combine(metadata.getTitles(), input.getTitle(), languageTag));
+            metadata.setDescriptions(MultilingualUtils.combine(metadata.getDescriptions(), input.getDescription(), languageTag));
+            survey.setMetadata(metadata);
 
             surveyRepository.saveAndFlush(survey);
         }

@@ -1,7 +1,6 @@
 package fi.sangre.renesans.application.model;
 
 import fi.sangre.renesans.application.model.parameter.Parameter;
-import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,10 +16,11 @@ import java.util.UUID;
 public class OrganizationSurvey {
     private UUID id;
     private Long version;
+    private MultilingualText titles;
+    private MultilingualText descriptions;
     private List<Catalyst> catalysts;
     private List<Parameter> parameters;
     private List<StaticText> staticTexts;
-    private SurveyMetadata metadata;
     @Builder.Default
     private boolean deleted = false;
 }
