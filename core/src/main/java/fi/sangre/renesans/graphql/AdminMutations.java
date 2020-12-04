@@ -7,6 +7,7 @@ import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.assemble.StaticTextAssembler;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.parameter.Parameter;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
@@ -63,7 +64,6 @@ public class AdminMutations implements GraphQLMutationResolver {
 
         return organizationSurveyService.storeSurvey(organizationId, input, resolverHelper.getLanguageCode(environment));
     }
-
 
     @NonNull
     @PreAuthorize("hasPermission(#id, 'survey', 'DELETE')")
@@ -143,4 +143,11 @@ public class AdminMutations implements GraphQLMutationResolver {
             throw new SurveyException("Only user can invite respondents");
         }
     }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'INVITE')")
+    public RespondentOutput removeRespondent(@NonNull final UUID surveyId, @NonNull final UUID id) {
+        return surveyRespondentsFacade.softDeleteRespondent(new RespondentId(id));
+    }
+
 }

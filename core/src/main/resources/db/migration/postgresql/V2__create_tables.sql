@@ -1,5 +1,13 @@
 create sequence if not exists multilingual_phrase_key_seq;
 
+create sequence if not exists  hibernate_sequence;
+
+CREATE TABLE revinfo
+(
+    rev bigint primary key,
+    revtstmp bigint
+);
+
 create table if not exists multilingual_key
 (
 	id bigserial primary key not null,
@@ -52,13 +60,29 @@ create table if not exists survey
 			references multilingual_key,
 	metadata jsonb null,
 	archived boolean default false,
+    cuser bigint not null,
+    muser bigint not null,
 	ctm timestamp default CURRENT_TIMESTAMP not null,
 	mtm timestamp default CURRENT_TIMESTAMP not null
+);
+
+create table if not exists survey_history
+(
+    rev bigint not null,
+    rev_type smallint not null,
+    id uuid not null,
+    version bigint null,
+    metadata jsonb null,
+    muser bigint null,
+    mtm timestamp null,
+    constraint survey_history_pk
+        primary key (rev, id)
 );
 
 create table if not exists survey_respondent
 (
     id uuid primary key not null,
+    version bigint not null,
     survey_id uuid not null
         constraint respondent_survey_id_fkey
           references survey,

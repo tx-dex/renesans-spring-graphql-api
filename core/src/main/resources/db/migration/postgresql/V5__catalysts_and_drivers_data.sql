@@ -1,4 +1,4 @@
-INSERT INTO survey (id, version, is_default, description_id, title_id, ctm, mtm, archived) VALUES ('ef205c55-db66-415d-8b2f-2b8355edf83c', 1, true, 235, 236, '2018-08-30 08:13:47.162354', '2018-08-30 08:13:47.162354', false);
+INSERT INTO survey (id, version, is_default, description_id, title_id, ctm, mtm, archived, cuser, muser) VALUES ('ef205c55-db66-415d-8b2f-2b8355edf83c', 1, true, 235, 236, '2018-08-30 08:13:47.162354', '2018-08-30 08:13:47.162354', false, 0, 0);
 
 INSERT INTO question_group (id, pdfname, seq, weight, description_id, parent_id, prescription_id, survey_id, title_id, ctm, mtm, archived) VALUES (4, 'humanPerformance', 4, 0.25, null, null, null, 'ef205c55-db66-415d-8b2f-2b8355edf83c', 154, '2018-08-30 08:13:47.162354', '2018-08-30 08:13:47.162354', false);
 INSERT INTO question_group (id, pdfname, seq, weight, description_id, parent_id, prescription_id, survey_id, title_id, ctm, mtm, archived) VALUES (8, 'teamExcellence', 8, 0.25, null, null, null, 'ef205c55-db66-415d-8b2f-2b8355edf83c', 174, '2018-08-30 08:13:47.162354', '2018-08-30 08:13:47.162354', false);

@@ -7,6 +7,7 @@ import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.model.respondent.RespondentState;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
+import fi.sangre.renesans.persistence.model.SurveyRespondentState;
 import fi.sangre.renesans.persistence.model.answer.ParameterAnswerEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,8 +53,18 @@ public class RespondentAssembler {
                 .id(new RespondentId(respondent.getId()))
                 .surveyId(new SurveyId(respondent.getSurveyId()))
                 .email(respondent.getEmail())
-                .state(RespondentState.INVITING)
+                .state(from(respondent.getState()))
                 .parameterAnswers(answers)
                 .build();
+    }
+
+    @NonNull
+    private RespondentState from(@NonNull final SurveyRespondentState respondentState) {
+        switch (respondentState) {
+            case INVITING:
+                return RespondentState.INVITING;
+            default:
+                return RespondentState.INVITED;
+        }
     }
 }

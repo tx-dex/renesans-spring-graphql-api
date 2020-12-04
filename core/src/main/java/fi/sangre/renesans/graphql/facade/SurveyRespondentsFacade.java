@@ -6,9 +6,11 @@ import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.respondent.Invitation;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
+import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.RespondentOutputAssembler;
 import fi.sangre.renesans.graphql.input.FilterInput;
 import fi.sangre.renesans.graphql.input.RespondentInvitationInput;
@@ -110,5 +112,22 @@ public class SurveyRespondentsFacade {
                 Pair.of(principal.getName(), principal.getEmail()));
 
         return getSurveyRespondents(surveyId, filters, languageCode);
+    }
+
+    @NonNull
+    public RespondentOutput softDeleteRespondent(@NonNull final RespondentId id) {
+        try {
+            final Respondent respondent = organizationSurveyService.softDeleteRespondent(id);
+
+            return RespondentOutput.builder()
+                    .id(id)
+                    .email(respondent.getEmail())
+                    .state(respondent.getState())
+                    .parameterAnswers(ImmutableList.of())
+                    .build();
+        } catch (final Exception ex) {
+            log.warn("Cannot soft delete respondent(id={})", id, ex);
+            throw new SurveyException("Internal Server Error. Cannot delete respondent");
+        }
     }
 }

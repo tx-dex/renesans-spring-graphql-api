@@ -183,12 +183,6 @@ public class Mutation implements GraphQLMutationResolver {
         throw new DeprecatedException();
     }
 
-    // TODO refine
-    @PreAuthorize("isAuthenticated()")
-    public Respondent removeRespondent(String id) {
-        return respondentService.removeRespondent(id);
-    }
-
     @PreAuthorize("hasRole('SUPER_USER')")
     public MultilingualPhrase storeNamedPhrase(PhraseInput phraseInput, DataFetchingEnvironment environment) {
         // if input does not have a set languageCode, set it from the request context

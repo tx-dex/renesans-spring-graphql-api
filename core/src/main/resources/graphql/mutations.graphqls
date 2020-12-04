@@ -123,6 +123,11 @@ type Mutation {
         languageCode: String
     ): [SurveyRespondent!]!
 
+    removeRespondent(
+        surveyId: ID!
+        id: ID!
+    ): SurveyRespondent!
+
     # Do not send Authorization header with this mustation!!!
     openQuestionnaire(id: ID!, invitationHash: String!): Authorization!
 
@@ -132,17 +137,17 @@ type Mutation {
 
     answerParameter(answer: ParameterAnswerInput!, languageCode: String): Questionnaire
 
-    storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer
+    storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer  @deprecated(reason: "Will be removed")
 
-    storeSegment(languageCode: String!, segment: SegmentInput!): Segment
+    storeSegment(languageCode: String!, segment: SegmentInput!): Segment @deprecated(reason: "Will be removed")
 
-    storeSegmentQuestion(languageCode: String!, segmentId: ID!, question: QuestionInput!): Question
+    storeSegmentQuestion(languageCode: String!, segmentId: ID!, question: QuestionInput!): Question  @deprecated(reason: "Will be removed")
 
-    storeQuestion(languageCode: String!, question: QuestionInput!): Question
+    storeQuestion(languageCode: String!, question: QuestionInput!): Question  @deprecated(reason: "Will be removed")
 
-    storeCustomerQuestion(languageCode: String!, customerId: ID!, question: QuestionInput!): Question
+    storeCustomerQuestion(languageCode: String!, customerId: ID!, question: QuestionInput!): Question  @deprecated(reason: "Will be removed")
 
-    removeQuestion(id: ID!): Question
+    removeQuestion(id: ID!): Question  @deprecated(reason: "Will be removed")
 
     removeUser(id: ID!): User
 
@@ -150,9 +155,7 @@ type Mutation {
 
     removeRespondentGroup(id: ID!): RespondentGroup @deprecated(reason: "Will be removed")
 
-    removeRespondent(id: ID!): Respondent
-
-    storeNamedPhrase(phrase: PhraseInput!): MultiLingualPhrase
+    storeNamedPhrase(phrase: PhraseInput!): MultiLingualPhrase @deprecated(reason: "Will be removed")
 
     submitSurvey(
         respondentGroupId: ID!,
