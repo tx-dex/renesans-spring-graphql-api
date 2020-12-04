@@ -23,7 +23,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "survey_respondent")
 
-@SQLDelete(sql = "UPDATE data.respondent SET archived = true WHERE id = ? and version = ?")
+@SQLDelete(sql = "UPDATE data.survey_respondent SET archived = true WHERE id = ?")
 @Where(clause = "archived = false")
 
 @DynamicInsert
@@ -36,10 +36,6 @@ public class SurveyRespondent {
     @GeneratedValue(generator = "uuid")
     @Column(name = "id", unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
     private UUID id;
-
-    @Version
-    @Column(name = "version", nullable = false)
-    private Long version;
 
     @Column(name = "survey_id", nullable = false, updatable = false)
     private UUID surveyId;

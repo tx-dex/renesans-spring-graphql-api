@@ -82,7 +82,6 @@ create table if not exists survey_history
 create table if not exists survey_respondent
 (
     id uuid primary key not null,
-    version bigint not null,
     survey_id uuid not null
         constraint respondent_survey_id_fkey
           references survey,
