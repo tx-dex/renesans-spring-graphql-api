@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.CatalystAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
@@ -12,19 +13,27 @@ import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
+import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
+import fi.sangre.renesans.model.User;
 import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
+import fi.sangre.renesans.service.UserService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +50,68 @@ public class AdminMutations implements GraphQLMutationResolver {
     private final StaticTextAssembler staticTextAssembler;
     private final CatalystAssembler catalystAssembler;
     private final ResolverHelper resolverHelper;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenService jwtTokenService;
+    private final UserService userService;
+
+    public AuthorizationOutput login(@NotNull String username, @NotNull String password) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        username,
+                        password
+                )
+        );
+
+        final String jwt = jwtTokenService.generateToken(authentication);
+
+        return AuthorizationOutput.builder()
+                .token(jwt)
+                .build();
+    }
+
+    // TODO refine
+    @PreAuthorize("isAuthenticated()")
+    public Boolean logout(String token) {
+        // TODO handle token invalidation immediately
+        return true;
+    }
+
+    @PreAuthorize("hasRole('SUPER_USER') or (hasRole('POWER_USER') and authentication.principal.id == #id)")
+    public User storeUser(
+            @P("id") Long id,
+            String firstName,
+            String lastName,
+            String email,
+            String password,
+            String username,
+            Boolean enabled,
+            List<String> roles,
+            DataFetchingEnvironment environment
+    ) {
+        final String locale = resolverHelper.getLanguageCode(environment);
+        return userService.storeUser(id, firstName, lastName, email, password, username, enabled, roles, locale);
+    }
+
+    @PreAuthorize("hasRole('SUPER_USER')")
+    public User removeUser(@P("id") Long id) {
+        return userService.removeUser(id);
+    }
+
+    @PreAuthorize("hasRole('SUPER_USER')")
+    public User allowUserCustomerAccess(
+            Long id,
+            Long customerId
+    ) {
+        return userService.setUserAccess(id, customerId, true);
+    }
+
+    @PreAuthorize("hasRole('SUPER_USER')")
+    public User revokeUserCustomerAccess(
+            Long id,
+            Long customerId
+    ) {
+        return userService.setUserAccess(id, customerId, false);
+    }
 
     @NonNull
     @PreAuthorize("isAuthenticated()") //TODO: implement it properly

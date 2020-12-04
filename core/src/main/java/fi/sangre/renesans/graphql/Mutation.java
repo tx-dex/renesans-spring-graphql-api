@@ -2,10 +2,8 @@ package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.aaa.JwtTokenService;
-import fi.sangre.renesans.dto.ResultDetailsDto;
 import fi.sangre.renesans.exception.DeprecatedException;
 import fi.sangre.renesans.graphql.input.*;
-import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.persistence.model.Customer;
@@ -14,14 +12,10 @@ import graphql.GraphQLException;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,43 +38,6 @@ public class Mutation implements GraphQLMutationResolver {
     private final SegmentService segmentService;
     private final QuestionService questionService;
     private final ResolverHelper resolverHelper;
-
-    @PreAuthorize("hasRole('SUPER_USER') or (hasRole('POWER_USER') and authentication.principal.id == #id)")
-    public User storeUser(
-            @P("id") Long id,
-            String firstName,
-            String lastName,
-            String email,
-            String password,
-            String username,
-            Boolean enabled,
-            List<String> roles,
-            DataFetchingEnvironment environment
-    ) {
-        final String locale = resolverHelper.getLanguageCode(environment);
-        return userService.storeUser(id, firstName, lastName, email, password, username, enabled, roles, locale);
-    }
-
-    @PreAuthorize("hasRole('SUPER_USER')")
-    public User removeUser(@P("id") Long id) {
-        return userService.removeUser(id);
-    }
-
-    @PreAuthorize("hasRole('SUPER_USER')")
-    public User allowUserCustomerAccess(
-            Long id,
-            Long customerId
-    ) {
-        return userService.setUserAccess(id, customerId, true);
-    }
-
-    @PreAuthorize("hasRole('SUPER_USER')")
-    public User revokeUserCustomerAccess(
-            Long id,
-            Long customerId
-    ) {
-        return userService.setUserAccess(id, customerId, false);
-    }
 
     @PreAuthorize("isAuthenticated() and authentication.principal.id == #id") // whatever role user has it can update it's password
     public boolean updatePassword(final Long id, final String oldPassword, final String newPassword) {
@@ -197,12 +154,6 @@ public class Mutation implements GraphQLMutationResolver {
         return weightService.storeWeights(weights);
     }
 
-    // TODO refine
-    @PreAuthorize("isAuthenticated()")
-    public ResultDetailsDto sendInvitation(InvitationInput invitation, List<RecipientInput> recipients) {
-        return invitationService.sendInvitation(invitation, recipients);
-    }
-
     @PreAuthorize("isAuthenticated()")
     public Customer storeCustomerDriverWeights(UUID customerId, List<DriverWeightInput> driverWeightInput ) {
         return customerService.storeCustomerDriverWeights(customerId, driverWeightInput);
@@ -211,27 +162,5 @@ public class Mutation implements GraphQLMutationResolver {
     @Deprecated
     public Respondent submitSurvey(String respondentGroupId, RespondentInput respondentInput, List<AnswerInput> answers) {
         throw new DeprecatedException();
-    }
-
-    public AuthorizationOutput login(@NotNull String username, @NotNull String password) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        username,
-                        password
-                )
-        );
-
-        final String jwt = tokenService.generateToken(authentication);
-
-        return AuthorizationOutput.builder()
-                .token(jwt)
-                .build();
-    }
-
-    // TODO refine
-    @PreAuthorize("isAuthenticated()")
-    public Boolean logout(String token) {
-        // TODO handle token invalidation immediately
-        return true;
     }
 }

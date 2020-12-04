@@ -172,14 +172,16 @@ public class Query implements GraphQLQueryResolver {
         throw new DeprecatedException();
     }
 
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public List<InvitationDetailsDto> invitations(String respondentGroupId) {
-        return invitationService.getInvitationsByRespondentGroup(respondentGroupId);
+        return ImmutableList.of();
     }
 
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public List<InvitationDetailsDto> invitationsByEmail(String respondentGroupId, String email, String status) {
-        return invitationService.getInvitationsByEmail(respondentGroupId, email, status);
+        return ImmutableList.of();
     }
 
     public String defaultSurveyId() {

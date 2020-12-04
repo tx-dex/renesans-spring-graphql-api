@@ -2,6 +2,8 @@ package fi.sangre.renesans.service;
 
 import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.event.ActivateUserEvent;
+import fi.sangre.renesans.application.event.RequestUserPasswordResetEvent;
 import fi.sangre.renesans.application.utils.TokenUtils;
 import fi.sangre.renesans.exception.CurrentUserDeleteException;
 import fi.sangre.renesans.exception.UserNotFoundException;
@@ -16,6 +18,8 @@ import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -40,10 +44,11 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
     private final TokenService tokenService;
-    private final MailService mailService;
     private final RoleService roleService;
     private final CustomerRepository customerRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
+    @Transactional
     public User storeUser(Long id, String firstName, String lastName, String email, String password, String username, Boolean enabled, List<String> roleNames, final String locale) {
         User user;
         UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -111,7 +116,12 @@ public class UserService {
         user = userRepository.save(user);
 
         if (sendActivationEmail) {
-            mailService.sendActivationEmail(user, locale);
+            applicationEventPublisher.publishEvent(new ActivateUserEvent(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    locale
+            ));
         }
 
         return user;
@@ -173,13 +183,19 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void requestPasswordReset(final String email, final String locale) {
+    @Transactional(readOnly = true)
+    public void requestPasswordReset(@NonNull final String email, @NonNull final String languageTag) {
         //TODO: validate email
 
-        final Optional<User> user = userRepository.findByEmail(email);
+        final User user = userRepository.findByEmail(email)
+                .orElse(null);
 
-        if (user.isPresent()) {
-            mailService.sendResetPasswordEmail(user.get(), locale);
+        if (user != null) {
+            applicationEventPublisher.publishEvent(new RequestUserPasswordResetEvent(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    languageTag));
         } else {
             log.debug("Cannot request password for email='{}', user does not exist", email);
         }

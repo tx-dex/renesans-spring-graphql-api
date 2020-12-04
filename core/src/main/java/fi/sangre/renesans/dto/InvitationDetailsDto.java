@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
+@Deprecated
 public class InvitationDetailsDto {
 
     private long id;

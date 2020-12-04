@@ -1,4 +1,13 @@
 type Mutation {
+    # Do not send Authorization header with this mustation!!!
+    login(
+        username: String!
+        password: String!
+    ): Authorization
+
+    logout(
+        token: String!
+    ): Boolean
 
     storeUser(
         id: ID
@@ -10,6 +19,8 @@ type Mutation {
         enabled: Boolean
         roles: [String]
     ): User
+
+    removeUser(id: ID!): User
 
     allowUserCustomerAccess(
         id: ID
@@ -40,11 +51,6 @@ type Mutation {
         token: String!
         newPassword: String!
     ): Boolean
-
-    sendInvitation(
-        invitation: InvitationInput
-        recipients: [RecipientInput!]!
-    ): Resultdetails
 
     storeWeights(
         weights: [WeightInput!]!
@@ -149,8 +155,6 @@ type Mutation {
 
     removeQuestion(id: ID!): Question  @deprecated(reason: "Will be removed")
 
-    removeUser(id: ID!): User
-
     storeRespondentGroup(respondentGroup: RespondentGroupInput!): RespondentGroup @deprecated(reason: "Will be removed")
 
     removeRespondentGroup(id: ID!): RespondentGroup @deprecated(reason: "Will be removed")
@@ -172,14 +176,4 @@ type Mutation {
         respondentId: ID!
         respondentGroupId: ID!
     ): Respondent @deprecated(reason: "Will be removed")
-
-    # Do not send Authorization header with this mustation!!!
-    login(
-        username: String!
-        password: String!
-    ): Authorization
-
-    logout(
-        token: String!
-    ): Boolean
 }
