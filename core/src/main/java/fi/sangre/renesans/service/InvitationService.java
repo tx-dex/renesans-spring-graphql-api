@@ -86,12 +86,16 @@ public class InvitationService {
         final SurveyRespondent respondent = surveyRespondentRepository.findById(respondentId.getValue())
                 .orElseThrow(() -> new InternalServiceException("Cannot get respondent"));
 
+        final String senderName = replyTo.getLeft() + " | Engager";
         final MailDto message = MailDto.builder()
                 .recipient(respondent.getEmail())
                 .subject(subject)
-                .body(composeMail(respondent, body))
+                .body(composeBody(respondent, body))
+                .sender(NameEmailPairDto.builder()
+                        .name(senderName)
+                        .build())
                 .replyTo(NameEmailPairDto.builder()
-                        .name(replyTo.getLeft())
+                        .name(senderName)
                         .email(replyTo.getRight())
                         .build())
                 .tags(ImmutableMap.of("email-type", "survey-invitation",
@@ -102,7 +106,7 @@ public class InvitationService {
     }
 
     @NonNull
-    private String composeMail(@NonNull final SurveyRespondent respondent, @NonNull final String bodyTemplate) {
+    private String composeBody(@NonNull final SurveyRespondent respondent, @NonNull final String bodyTemplate) {
         final String invitationLink = UriComponentsBuilder.fromUriString(surveyUrl)
                 .pathSegment(respondent.getId().toString(), "invitation", respondent.getInvitationHash())
                 .toUriString();
