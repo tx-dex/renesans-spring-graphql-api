@@ -1,82 +1,53 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
+import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.model.User;
 import fi.sangre.renesans.persistence.model.Customer;
-import fi.sangre.renesans.repository.RespondentGroupRepository;
-import fi.sangre.renesans.repository.RespondentRepository;
-import fi.sangre.renesans.service.CustomerService;
-import fi.sangre.renesans.service.QuestionService;
-import fi.sangre.renesans.service.RespondentGroupService;
-import fi.sangre.renesans.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static fi.sangre.renesans.graphql.output.CatalystProxy.toProxies;
+@RequiredArgsConstructor
+@Slf4j
 
 @Component
 @Transactional
 @Deprecated
 public class CustomerResolver implements GraphQLResolver<Customer> {
 
-    private final RespondentGroupService respondentGroupService;
-    private final UserService userService;
-    private final RespondentRepository respondentRepository;
-    private final RespondentGroupRepository respondentGroupRepository;
-    private final CustomerService customerService;
-    private final QuestionService questionService;
-
-    @Autowired
-    public CustomerResolver(
-            RespondentGroupService respondentGroupService,
-            UserService userService,
-            RespondentRepository respondentRepository,
-            RespondentGroupRepository respondentGroupRepository,
-            CustomerService customerService,
-            QuestionService questionService
-    ) {
-        this.respondentGroupService = respondentGroupService;
-        this.userService = userService;
-        this.respondentRepository = respondentRepository;
-        this.respondentGroupRepository = respondentGroupRepository;
-        this.customerService = customerService;
-        this.questionService =questionService;
-    }
-
     public List<RespondentGroup> getRespondentGroups(Customer customer) {
-        return respondentGroupService.getRespondentGroups(customer);
+        return ImmutableList.of();
     }
 
     public User getCreatedBy(Customer customer) {
-        return userService.findById(customer.getCreatedBy());
+        return null;
     }
 
     public Long getRespondentCount(Customer customer) {
-        return respondentRepository.countByRespondentGroup_Customer(customer);
+        return 0L;
     }
 
     public Long getRespondentGroupCount(Customer customer) {
-        return respondentGroupRepository.countByCustomer(customer);
+        return 0L;
     }
 
     public Segment getSegment(Customer customer) {
-        return customerService.getCustomerSegment(customer);
+        return null;
     }
 
-    @Deprecated
     public List<Question> getQuestions(Customer customer) {
-        return questionService.getOnlyCustomerQuestions(customer);
+        return ImmutableList.of();
     }
 
     public List<CatalystProxy> getCatalysts(final Customer customer) {
-
-        return toProxies(questionService.getCatalysts(customer));
+        return ImmutableList.of();
     }
 }

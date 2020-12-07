@@ -57,6 +57,7 @@ public class CustomerService {
         return customerRepository.findByGroupsContaining(respondentGroup);
     }
 
+    @Deprecated
     public Customer storeCustomerDriverWeights(UUID customerId, List<DriverWeightInput> driverWeights) { // TODO why returning customer here? not list of weights
         checkArgument(customerId != null, "Customer Id is required");
 

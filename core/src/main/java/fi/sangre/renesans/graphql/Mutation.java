@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.exception.DeprecatedException;
 import fi.sangre.renesans.graphql.input.*;
@@ -149,14 +150,16 @@ public class Mutation implements GraphQLMutationResolver {
         return multilingualService.saveNamedPhrase(phraseInput);
     }
 
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public List<Weight> storeWeights(List<WeightInput> weights) {
-        return weightService.storeWeights(weights);
+        return ImmutableList.of();
     }
 
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public Customer storeCustomerDriverWeights(UUID customerId, List<DriverWeightInput> driverWeightInput ) {
-        return customerService.storeCustomerDriverWeights(customerId, driverWeightInput);
+        throw new DeprecatedException();
     }
 
     @Deprecated

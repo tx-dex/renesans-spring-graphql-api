@@ -1,7 +1,6 @@
 package fi.sangre.renesans.application.merge;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.ParameterId;
 import fi.sangre.renesans.application.model.parameter.*;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -24,27 +23,26 @@ import static java.util.stream.Collectors.toMap;
 public class ParameterMerger {
 
     @NonNull
-    public List<Parameter> combine(@Nullable final List<Parameter> existing, @NonNull final List<Parameter> inputs) {
-        final ImmutableList.Builder<Parameter> combined = ImmutableList.builder();
-        final Map<ParameterId, Parameter> existingParameters;
-        if (existing == null) {
-            existingParameters = ImmutableMap.of();
+    public List<Parameter> combine(@NonNull final List<Parameter> existing, @Nullable final List<Parameter> inputs) {
+        if (inputs == null) {
+            return ImmutableList.copyOf(existing);
         } else {
-            existingParameters = existing.stream()
-                    .collect(collectingAndThen(toMap(Parameter::getId, v -> v), Collections::unmodifiableMap));
-        }
+            final ImmutableList.Builder<Parameter> combined = ImmutableList.builder();
+            final Map<ParameterId, Parameter> existingParameters = existing.stream()
+                        .collect(collectingAndThen(toMap(Parameter::getId, v -> v), Collections::unmodifiableMap));
 
-        for(final Parameter input : inputs) {
-            if (input instanceof ListParameter) {
-                combined.add(combine(existingParameters, (ListParameter) input));
-            } else if (input instanceof TreeParameter) {
-                combined.add(combine(existingParameters, (TreeParameter) input));
-            } else {
-                throw new SurveyException("Invalid input parameter type");
+            for (final Parameter input : inputs) {
+                if (input instanceof ListParameter) {
+                    combined.add(combine(existingParameters, (ListParameter) input));
+                } else if (input instanceof TreeParameter) {
+                    combined.add(combine(existingParameters, (TreeParameter) input));
+                } else {
+                    throw new SurveyException("Invalid input parameter type");
+                }
             }
-        }
 
-        return combined.build();
+            return combined.build();
+        }
     }
 
     @NonNull

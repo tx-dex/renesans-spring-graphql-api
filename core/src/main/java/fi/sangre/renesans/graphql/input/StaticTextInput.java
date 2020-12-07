@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class StaticTextInput {
     private String id;
+    private String textGroupId;
     private String text;
 }

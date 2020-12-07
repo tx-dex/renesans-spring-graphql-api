@@ -1,24 +1,24 @@
 type Query {
-    locale(languageCode: String): Locale
+    locale(languageCode: String): Locale @deprecated(reason: "Will be removed")
 
     survey(
         languageCode: String
         id: ID!
         customerId: ID
-    ): Survey!
+    ): Survey! @deprecated(reason: "Will be removed")
 
     respondentOptions(
         languageCode: String
         optionType: String!
-    ): [RespondentOption]
+    ): [RespondentOption] @deprecated(reason: "Will be removed")
 
-    countries(languageCode: String): [Country]
+    countries(languageCode: String): [Country] @deprecated(reason: "Will be removed")
 
-    languages(languageCode: String): [Language]
+    languages(languageCode: String): [Language] @deprecated(reason: "Will be removed")
 
     respondents(
         filters: Filters
-    ): [Respondent]
+    ): [Respondent] @deprecated(reason: "Will be removed")
 
     respondentGroups(
         languageCode: String
@@ -71,19 +71,19 @@ type Query {
     customer(
         languageCode: String
         id: ID!
-    ): Customer!
+    ): Customer! @deprecated(reason: "Will be removed")
 
     segment(
         languageCode: String
         id: ID!
-    ): Segment
+    ): Segment @deprecated(reason: "Will be removed")
 
-    segments: [Segment]
+    segments: [Segment] @deprecated(reason: "Will be removed")
 
     question(
         languageCode: String
         id: ID!
-    ): Question
+    ): Question @deprecated(reason: "Will be removed")
 
     statistics(
         languageCode: String

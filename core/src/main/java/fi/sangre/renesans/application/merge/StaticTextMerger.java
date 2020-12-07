@@ -3,14 +3,15 @@ package fi.sangre.renesans.application.merge;
 
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.StaticText;
+import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -18,27 +19,49 @@ import java.util.Optional;
 @Component
 public class StaticTextMerger {
     @NonNull
-    public List<StaticText> combine(@NonNull final List<StaticText> existing, @NonNull final StaticText input) {
-        final ImmutableList.Builder<StaticText> combined = ImmutableList.builder();
-        combined.addAll(existing);
+    public List<StaticTextGroup> combine(@NonNull final List<StaticTextGroup> existing, @Nullable final List<StaticTextGroup> input) {
+        if (input == null) {
+            return ImmutableList.copyOf(existing);
+        } else {
+            final ImmutableList.Builder<StaticTextGroup> builder = ImmutableList.builder();
+            builder.addAll(existing);
 
-        final Optional<StaticText> found = existing.stream()
-                .filter(e -> e.equals(input))
-                .findAny()
-                .map(e -> {
-                    e.setTexts(MultilingualUtils.combine(e.getTexts(), input.getTexts()));
-                    return e;
-                });
+            for(final StaticTextGroup group : input) {
+                final StaticTextGroup found = existing.stream()
+                        .filter(e -> e.getId().equals(group.getId()))
+                        .findAny()
+                        .orElse(null);
 
-        if (!found.isPresent()) {
-            combined.add(StaticText.builder()
-                    .id(input.getId())
-                    .texts(input.getTexts())
-                    .build());
+                if (found == null) {
+                    builder.add(group);
+                } else {
+                    combineGroup(found, group);
+                }
+
+
+            }
+
+            return builder.build();
         }
-
-        return combined.build();
     }
 
+    private void combineGroup(@NonNull final StaticTextGroup existing, @NonNull final StaticTextGroup input) {
+        final ImmutableList.Builder<StaticText> builder = ImmutableList.builder();
+        builder.addAll(existing.getTexts());
 
+        for (final StaticText text : input.getTexts()) {
+            final StaticText found = existing.getTexts().stream()
+                    .filter(e -> e.getId().equals(text.getId()))
+                    .findAny()
+                    .orElse(null);
+
+            if (found == null) {
+                builder.add(text);
+            } else {
+                found.setTexts(MultilingualUtils.combine(found.getTexts(), text.getTexts()));
+            }
+        }
+
+        existing.setTexts(builder.build());
+    }
 }

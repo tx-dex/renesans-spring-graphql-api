@@ -20,7 +20,7 @@ public class OrganizationSurvey {
     private MultilingualText descriptions;
     private List<Catalyst> catalysts;
     private List<Parameter> parameters;
-    private List<StaticText> staticTexts;
+    private List<StaticTextGroup> staticTexts;
     @Builder.Default
     private boolean deleted = false;
 }

@@ -54,7 +54,7 @@ type Mutation {
 
     storeWeights(
         weights: [WeightInput!]!
-    ): [Weight]
+    ): [Weight] @deprecated(reason: "Will be removed")
 
     # Creates or updates organization
     storeOrganization(input: OrganizationInput!): Organization!

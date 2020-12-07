@@ -3,13 +3,14 @@ package fi.sangre.renesans.service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
-import fi.sangre.renesans.application.assemble.*;
+import fi.sangre.renesans.application.assemble.CatalystAssembler;
+import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
+import fi.sangre.renesans.application.assemble.RespondentAssembler;
+import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.event.InviteRespondentsEvent;
 import fi.sangre.renesans.application.merge.CatalystMerger;
-import fi.sangre.renesans.application.merge.ParameterMerger;
-import fi.sangre.renesans.application.merge.StaticTextMerger;
+import fi.sangre.renesans.application.merge.OrganizationSurveyMerger;
 import fi.sangre.renesans.application.model.*;
-import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -19,14 +20,9 @@ import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.persistence.assemble.CatalystMetadataAssembler;
-import fi.sangre.renesans.persistence.assemble.ParameterMetadataAssembler;
-import fi.sangre.renesans.persistence.assemble.StaticTextsMetadataAssembler;
 import fi.sangre.renesans.persistence.model.TemplateId;
 import fi.sangre.renesans.persistence.model.*;
-import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
-import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
-import fi.sangre.renesans.persistence.model.metadata.LocalisationMetadata;
-import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
+import fi.sangre.renesans.persistence.model.metadata.*;
 import fi.sangre.renesans.persistence.model.metadata.questions.LikertQuestionMetadata;
 import fi.sangre.renesans.persistence.model.metadata.questions.QuestionMetadata;
 import fi.sangre.renesans.persistence.model.metadata.references.TemplateReference;
@@ -40,6 +36,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,13 +56,9 @@ import static java.util.stream.Collectors.*;
 public class OrganizationSurveyService {
     private final SurveyRepository surveyRepository;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
+    private final OrganizationSurveyMerger organizationSurveyMerger;
+    private final SurveyDao surveyDao;
     private final CustomerRepository customerRepository;
-    private final ParameterAssembler parameterAssembler;
-    private final ParameterMetadataAssembler parameterMetadataAssembler;
-    private final ParameterMerger parameterMerger;
-    private final StaticTextAssembler staticTextAssembler;
-    private final StaticTextMerger staticTextMerger;
-    private final StaticTextsMetadataAssembler staticTextsMetadataAssembler;
     private final CatalystAssembler catalystAssembler;
     private final CatalystMerger catalystMerger;
     private final CatalystMetadataAssembler catalystMetadataAssembler;
@@ -129,32 +122,27 @@ public class OrganizationSurveyService {
     }
 
     @NonNull
-    @Transactional
-    public OrganizationSurvey storeSurveyParameters(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Parameter> inputs) {
-        final Survey survey = getSurveyOrThrow(surveyId);
+    public OrganizationSurvey storeSurveyParameters(@NonNull final OrganizationSurvey input) {
+        final OrganizationSurvey updated = organizationSurveyMerger.combine(input);
 
-        final SurveyMetadata metadata = copy(survey.getMetadata());
-
-        final List<Parameter> existing = parameterAssembler.fromMetadata(metadata.getParameters());
-        final List<Parameter> combined = parameterMerger.combine(existing, inputs);
-        metadata.setParameters(parameterMetadataAssembler.from(combined));
-        survey.setMetadata(metadata);
-
-        return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
+        try {
+            return surveyDao.store(updated);
+        } catch (final ObjectOptimisticLockingFailureException ex) {
+            log.warn("Survey was updated already by someone else.", ex);
+            throw new SurveyException("Survey was updated already by someone else");
+        }
     }
 
     @NonNull
-    @Transactional
-    public OrganizationSurvey storeSurveyStaticText(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final StaticText input) {
-        final Survey survey = getSurveyOrThrow(surveyId);
+    public OrganizationSurvey storeSurveyStaticText(@NonNull final OrganizationSurvey input) {
+        final OrganizationSurvey updated = organizationSurveyMerger.combine(input);
 
-        final SurveyMetadata metadata = copy(survey.getMetadata());
-        final List<StaticText> existing = staticTextAssembler.fromMetadata(metadata.getStaticTexts());
-        final List<StaticText> combined = staticTextMerger.combine(existing, input);
-        metadata.setStaticTexts(staticTextsMetadataAssembler.from(combined));
-        survey.setMetadata(metadata);
-
-        return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
+        try {
+            return surveyDao.store(updated);
+        } catch (final ObjectOptimisticLockingFailureException ex) {
+            log.warn("Survey was updated already by someone else.", ex);
+            throw new SurveyException("Survey was updated already by someone else");
+        }
     }
 
     @NonNull
@@ -170,7 +158,7 @@ public class OrganizationSurveyService {
         metadata.setCatalysts(catalystMetadataAssembler.from(combined));
         survey.setMetadata(metadata);
 
-        return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
+        return surveyDao.store(survey);
     }
 
     @NonNull
@@ -186,7 +174,7 @@ public class OrganizationSurveyService {
         metadata.setCatalysts(catalystMetadataAssembler.from(combined));
         survey.setMetadata(metadata);
 
-        return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
+        return surveyDao.store(survey);
     }
 
     @Transactional
@@ -279,7 +267,7 @@ public class OrganizationSurveyService {
                 .titles(create(input.getTitle(), languageTag))
                 .descriptions(create(input.getDescription(), languageTag))
                 .localisation(LocalisationMetadata.builder().build())
-                .staticTexts(copyDefaultQuestionnaireTexts());
+                .translations(copyDefaultQuestionnaireTexts());
 
         final ImmutableList.Builder<CatalystMetadata> catalysts = ImmutableList.builder();
 
@@ -339,18 +327,25 @@ public class OrganizationSurveyService {
                     .catalysts(metadata.getCatalysts())
                     .parameters(metadata.getParameters())
                     .localisation(metadata.getLocalisation())
-                    .staticTexts(metadata.getStaticTexts())
+                    .translations(metadata.getTranslations())
                     .build();
         }
     }
 
-    private Map<String, Map<String, String>> copyDefaultQuestionnaireTexts() {
-        final ImmutableMap.Builder<String, Map<String, String>> texts = ImmutableMap.builder();
+    private Map<String, PhrasesGroupMetadata> copyDefaultQuestionnaireTexts() {
+        final ImmutableMap.Builder<String, PhrasesMetadata> texts = ImmutableMap.builder();
         multilingualService.getKeys("questionnaire").forEach(key -> {
-            texts.put(key.getKey(), multilingualService.getPhrases(key.getId()));
+            texts.put(key.getKey(), PhrasesMetadata.builder()
+                    .html(false)
+                    .phrases(multilingualService.getPhrases(key.getId()))
+                    .build());
         });
 
-        return texts.build();
+        return ImmutableMap.of("questionnaire", PhrasesGroupMetadata.builder()
+                .title("Questionnaire")
+                .description("Text on questionnaire page")
+                .phrases(texts.build())
+                .build());
     }
 
     @NonNull

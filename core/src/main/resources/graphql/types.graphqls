@@ -1,6 +1,17 @@
 scalar Date
 scalar Long
 
+# A json map containg translations data
+# e.g.
+# {
+#   "landing_page": {
+#     "header": "some title",
+#     "some_text_displayed_somewhere": "some text",
+#     "some_other_text": "some other text"
+#   }
+# }
+scalar Translation
+
 enum QuestionSourceType {
     GENERIC
     SEGMENT
@@ -33,6 +44,7 @@ enum SurveyRespondentState {
     ERROR
 }
 
+# This will be removed
 type Customer {
     id: ID!
     name: String!
@@ -76,7 +88,7 @@ type OrganizationSurvey {
     title: String!
     description: String
     catalysts: [Catalyst!]!
-    staticTexts: [SurveyStaticText!]!
+    staticTexts: [SurveyStaticTextGroup!]!
     # List of parameters
     parameters: [SurveyParameter!]!
     respondentCounts: RespondentCounters!
@@ -108,7 +120,18 @@ type SurveyTreeParameter {
 type SurveyStaticText {
     # Static key for using in the frontend
     id: ID!
+    title: String
+    description: String
+    isHtml: Boolean!
     text: String!
+}
+
+type SurveyStaticTextGroup {
+    # Static key for using in the frontend
+    id: ID!
+    title: String
+    description: String
+    texts: [SurveyStaticText!]!
 }
 
 type LikertQuestion {
@@ -146,7 +169,7 @@ type RespondentParameterAnswer {
 # type for the app
 type Questionnaire {
     id: ID!
-    staticTexts: [SurveyStaticText!]!
+    staticTexts: Translation!
     catalysts: [QuestionnaireCatalyst!]!
     parameters: [QuestionnaireParameter!]!
     isFinished: Boolean!

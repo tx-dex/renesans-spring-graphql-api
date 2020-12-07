@@ -116,6 +116,7 @@ dependencies {
 
     implementation("com.graphql-java-kickstart:graphql-spring-boot-starter:${graphqlVersion}")
     implementation("com.graphql-java-kickstart:graphql-java-tools:${graphqlToolsVersion}")
+    implementation("com.graphql-java:graphql-java-extended-scalars:${graphqlScalarsVersion}")
 
     implementation("org.flywaydb:flyway-core:${flywayVersion}")
     implementation("org.hibernate:hibernate-java8:${hibernateVersion}")

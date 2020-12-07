@@ -76,6 +76,7 @@ input SurveyParameterInput {
 input SurveyStaticTextInput {
     # the key of the text that is displayed in the frontend
     id: ID!
+    textGroupId: ID!
     text: String!
 }
 

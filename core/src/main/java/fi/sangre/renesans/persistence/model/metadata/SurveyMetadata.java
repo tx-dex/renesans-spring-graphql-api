@@ -27,5 +27,5 @@ public class SurveyMetadata implements Serializable {
     private List<CatalystMetadata> catalysts;
     private List<ParameterMetadata> parameters;
     private LocalisationMetadata localisation;
-    private Map<String, Map<String, String>> staticTexts;
+    private Map<String, PhrasesGroupMetadata> translations;
 }
