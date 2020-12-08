@@ -22,7 +22,10 @@ import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.persistence.assemble.CatalystMetadataAssembler;
 import fi.sangre.renesans.persistence.model.TemplateId;
 import fi.sangre.renesans.persistence.model.*;
-import fi.sangre.renesans.persistence.model.metadata.*;
+import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
+import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
+import fi.sangre.renesans.persistence.model.metadata.LocalisationMetadata;
+import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import fi.sangre.renesans.persistence.model.metadata.questions.LikertQuestionMetadata;
 import fi.sangre.renesans.persistence.model.metadata.questions.QuestionMetadata;
 import fi.sangre.renesans.persistence.model.metadata.references.TemplateReference;
@@ -267,7 +270,7 @@ public class OrganizationSurveyService {
                 .titles(create(input.getTitle(), languageTag))
                 .descriptions(create(input.getDescription(), languageTag))
                 .localisation(LocalisationMetadata.builder().build())
-                .translations(copyDefaultQuestionnaireTexts());
+                .translations(ImmutableMap.of());
 
         final ImmutableList.Builder<CatalystMetadata> catalysts = ImmutableList.builder();
 
@@ -330,22 +333,6 @@ public class OrganizationSurveyService {
                     .translations(metadata.getTranslations())
                     .build();
         }
-    }
-
-    private Map<String, PhrasesGroupMetadata> copyDefaultQuestionnaireTexts() {
-        final ImmutableMap.Builder<String, PhrasesMetadata> texts = ImmutableMap.builder();
-        multilingualService.getKeys("questionnaire").forEach(key -> {
-            texts.put(key.getKey(), PhrasesMetadata.builder()
-                    .html(false)
-                    .phrases(multilingualService.getPhrases(key.getId()))
-                    .build());
-        });
-
-        return ImmutableMap.of("questionnaire", PhrasesGroupMetadata.builder()
-                .title("Questionnaire")
-                .description("Text on questionnaire page")
-                .phrases(texts.build())
-                .build());
     }
 
     @NonNull

@@ -1,16 +1,20 @@
 package fi.sangre.renesans.persistence.model.metadata;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.ToString;
+import org.springframework.lang.NonNull;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
 @Builder
 @ToString
@@ -19,8 +23,23 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PhrasesMetadata implements Serializable {
-    private String title;
-    private String description;
-    private boolean html;
-    private Map<String, String> phrases;
+    private final Map<String, String> phrases;
+
+    public PhrasesMetadata() {
+        phrases = new LinkedHashMap<>();
+    }
+
+    public PhrasesMetadata(@NonNull final Map<String, String> phrases) {
+        this.phrases = new LinkedHashMap<>(phrases);
+    }
+
+    @JsonAnyGetter
+    public Map<String, String> getPhrases() {
+        return phrases;
+    }
+
+    @JsonAnySetter
+    public void setPhrase(@NonNull final String key, @NonNull final String value) {
+        phrases.put(key, value);
+    }
 }

@@ -1,10 +1,12 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.application.model.StaticText;
+import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireTranslationOutput;
+import fi.sangre.renesans.service.TranslationService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,19 +24,26 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class QuestionnaireResolver implements GraphQLResolver<QuestionnaireOutput> {
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final TranslationService translationService;
     private final ResolverHelper resolverHelper;
 
     public QuestionnaireTranslationOutput getStaticTexts(@NonNull final QuestionnaireOutput output, @NonNull final DataFetchingEnvironment environment) {
         final String languageTag = resolverHelper.getLanguageCode(environment);
+        final StaticTextGroup emptyGroup = StaticTextGroup.builder()
+                .texts(ImmutableMap.of())
+                .build();
+        final MultilingualText emptyText = new MultilingualText(ImmutableMap.of());
 
-        final Map<String, Map<String, String>> translations = output.getStaticTexts().stream()
+        final Map<String, Map<String, String>> translations = translationService.getTranslations(languageTag).entrySet().stream()
                 .collect(collectingAndThen(toMap(
-                        StaticTextGroup::getId,
-                        group -> group.getTexts().stream()
+                        Map.Entry::getKey,
+                        group -> group.getValue().entrySet().stream()
                                 .collect(collectingAndThen(toMap(
-                                        StaticText::getId,
-                                        text -> metadataLanguageHelper.getOptionalText(text.getTexts().getPhrases(), languageTag)), Collections::unmodifiableMap)))
+                                        Map.Entry::getKey,
+                                        text -> output.getStaticTexts().getOrDefault(group.getKey(), emptyGroup)
+                                                .getTexts().getOrDefault(text.getKey(), emptyText)
+                                                .getPhrases().getOrDefault(languageTag, text.getValue().getText()))
+                                        , Collections::unmodifiableMap)))
                         , Collections::unmodifiableMap));
 
         return new QuestionnaireTranslationOutput(translations);

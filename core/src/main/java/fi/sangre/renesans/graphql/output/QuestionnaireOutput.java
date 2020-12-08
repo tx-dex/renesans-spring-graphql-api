@@ -5,6 +5,7 @@ import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Setter
@@ -16,7 +17,7 @@ public class QuestionnaireOutput {
     private UUID id;
     private List<QuestionnaireCatalystOutput> catalysts;
     private List<QuestionnaireParameterOutput> parameters;
-    private List<StaticTextGroup> staticTexts;
+    private Map<String, StaticTextGroup> staticTexts;
     boolean finished;
     boolean answerable;
 }

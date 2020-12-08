@@ -5,12 +5,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "title")
 @Builder
-public class StaticText {
-    private String id;
+public class TranslationText {
     private String title;
     private String description;
-    private boolean html;
-    private MultilingualText texts;
+    private String text;
 }

@@ -120,9 +120,11 @@ type SurveyTreeParameter {
 type SurveyStaticText {
     # Static key for using in the frontend
     id: ID!
+    # Display text for the admin, returns id when title is not provided
     title: String
+    # Display description for the admin
     description: String
-    isHtml: Boolean!
+    # Text that will be displayed in the frontend when id is used
     text: String!
 }
 

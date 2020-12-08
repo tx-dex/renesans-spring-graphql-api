@@ -1,6 +1,5 @@
 package fi.sangre.renesans.persistence.assemble;
 
-import fi.sangre.renesans.application.model.StaticText;
 import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.persistence.model.metadata.PhrasesGroupMetadata;
 import fi.sangre.renesans.persistence.model.metadata.PhrasesMetadata;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.collectingAndThen;
@@ -23,18 +21,16 @@ import static java.util.stream.Collectors.toMap;
 @Component
 public class TranslationMetadataAssembler {
     @NonNull
-    public Map<String, PhrasesGroupMetadata> from(@NonNull final List<StaticTextGroup> groups) {
-        return groups.stream()
+    public Map<String, PhrasesGroupMetadata> from(@NonNull final Map<String, StaticTextGroup> groups) {
+        return groups.entrySet().stream()
                 .collect(collectingAndThen(toMap(
-                        StaticTextGroup::getId,
+                        Map.Entry::getKey,
                         e -> PhrasesGroupMetadata.builder()
-                                .title(e.getTitle())
-                                .description(e.getDescription())
-                                .phrases(e.getTexts().stream().collect(
+                                .phrases(e.getValue().getTexts().entrySet().stream().collect(
                                         collectingAndThen(toMap(
-                                                StaticText::getId,
+                                                Map.Entry::getKey,
                                                 text -> PhrasesMetadata.builder()
-                                                        .phrases(text.getTexts().getPhrases())
+                                                        .phrases(text.getValue().getPhrases())
                                                         .build(),
                                                 (e1, e2) -> e1,
                                                 LinkedHashMap::new), Collections::unmodifiableMap)))

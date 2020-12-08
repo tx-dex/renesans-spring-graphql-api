@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -20,7 +21,7 @@ public class OrganizationSurvey {
     private MultilingualText descriptions;
     private List<Catalyst> catalysts;
     private List<Parameter> parameters;
-    private List<StaticTextGroup> staticTexts;
+    private Map<String, StaticTextGroup> staticTexts;
     @Builder.Default
     private boolean deleted = false;
 }

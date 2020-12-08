@@ -1,0 +1,111 @@
+{
+  "landing": {
+    "about": {
+      "title": "About",
+      "description": "About placeholder",
+      "text": "About"
+    },
+    "rules": {
+      "text": "Rules"
+    },
+    "welcome": {
+      "text": "Welcome !"
+    },
+    "title": {
+      "text": "Engager"
+    },
+    "subtitle": {
+      "text": "An innovative tool for future companies and organization"
+    },
+    "start_btn": {
+      "text": "Start Engager"
+    },
+    "about_title": {
+      "text": "Context within your organisation"
+    },
+    "about_paragraph_1": {
+      "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. Exercitation veniam consequat sunt nostrud amet."
+    },
+    "about_paragraph_2": {
+      "text": "Velit officia consequat duis enim velit mollit. Exercitation veniam consequat sunt nostrud amet"
+    },
+    "contribute_btn": {
+      "text": "Ready to contribute"
+    },
+    "rules_welcome": {
+      "text": "General rules of engager"
+    },
+    "rules_title": {
+      "text": "Easy to follow and fun to answer"
+    },
+    "rule_1_title": {
+      "text": "Well-defined organisational themes"
+    },
+    "rule_1_text": {
+      "text": "In the first phase you are asked to map yourself inside the organisation. After that you will find themed statements or questions about typical scenes at work."
+    },
+    "rule_2_title": {
+      "text": "Your viewpoint and opinions matter"
+    },
+    "rule_2_text": {
+      "text": "The viewpoints are yourself, your team and the whole organisation. If not otherwise specified in the statement, please use yourself as the viewpoint."
+    },
+    "rule_3_title": {
+      "text": "Create value within your community"
+    },
+    "rule_3_text": {
+      "text": "It will take less than 20 minutes to indicate your opinion on the tool. After that you will be able to review your own and other’s answers and that’s when you get to participate within your community."
+    },
+    "rules_btn": {
+      "text": "Take a stand"
+    },
+    "trademark": {
+      "text": "©2020 by Renesans"
+    },
+    "privacy_policy": {
+      "text": "Privacy policy"
+    },
+    "cookie_policy": {
+      "text": "Cookie policy"
+    }
+  },
+  "parameters": {
+    "title": {
+      "text": "Tell us about yourself"
+    },
+    "description": {
+      "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation."
+    },
+    "submit": {
+      "text": "Submit and start Engager"
+    }
+  },
+  "privacy_policy": {
+    "title": {
+      "text": "Privacy policy"
+    },
+    "text": {
+      "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation."
+    },
+    "accept": {
+      "text": "Accept"
+    },
+    "label": {
+      "text": "I agree and consent to the"
+    },
+    "read_more": {
+      "text": "Privacy Policy"
+    },
+    "name": {
+      "text": "Name"
+    }
+  },
+  "catalyst": {
+    "submit": {
+      "text": "Respond to questions"
+    },
+    "theme": {
+      "text": "THEMES"
+    }
+  }
+}

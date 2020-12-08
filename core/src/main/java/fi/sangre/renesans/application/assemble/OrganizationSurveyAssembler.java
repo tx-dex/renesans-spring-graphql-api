@@ -1,6 +1,6 @@
 package fi.sangre.renesans.application.assemble;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.graphql.input.StaticTextInput;
@@ -47,16 +47,15 @@ public class OrganizationSurveyAssembler {
             return OrganizationSurvey.builder()
                     .id(id)
                     .version(version)
-                    .staticTexts(ImmutableList.of(StaticTextGroup.builder()
-                            .id(input.getTextGroupId())
-                            .texts(ImmutableList.of(staticTextAssembler.from(input, languageTag)))
+                    .staticTexts(ImmutableMap.of(input.getTextGroupId(), StaticTextGroup.builder()
+                            .texts(ImmutableMap.of(input.getId(), staticTextAssembler.from(input, languageTag)))
                             .build()))
                     .build();
         } else {
             return OrganizationSurvey.builder()
                     .id(id)
                     .version(version)
-                    .staticTexts(ImmutableList.of())
+                    .staticTexts(ImmutableMap.of())
                     .build();
         }
     }
