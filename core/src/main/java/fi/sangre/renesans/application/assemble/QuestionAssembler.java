@@ -2,6 +2,7 @@ package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
@@ -29,14 +30,14 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class QuestionAssembler {
     @Nullable
-    public List<LikertQuestion> fromInput(@Nullable final List<LikertQuestionInput> inputs, @NonNull final String languageTag) {
+    public List<LikertQuestion> fromInput(@NonNull final CatalystId catalystId, @Nullable final List<LikertQuestionInput> inputs, @NonNull final String languageTag) {
         if (inputs != null) {
             if (new HashSet<>(inputs).size() != inputs.size()) {
                 throw new SurveyException("Duplicated questions keys in the input");
             }
 
             return inputs.stream()
-                    .map(e -> from(e, languageTag))
+                    .map(e -> from(catalystId, e, languageTag))
                     .collect(collectingAndThen(toList(), Collections::unmodifiableList));
         } else {
             return null;
@@ -44,9 +45,14 @@ public class QuestionAssembler {
     }
 
     @NonNull
-    public LikertQuestion from(@NonNull final LikertQuestionInput input, @NonNull final String languageTag) {
+    public LikertQuestion from(@NonNull final CatalystId catalystId, @NonNull final LikertQuestionInput input, @NonNull final String languageTag) {
+        final QuestionId questionId = Optional.ofNullable(input.getId())
+                .map(QuestionId::new)
+                .orElse(null);
+
         return LikertQuestion.builder()
-                .id(new QuestionId(input.getId()))
+                .id(questionId)
+                .catalystId(catalystId)
                 .titles(new MultilingualText(ImmutableMap.of(languageTag, input.getTitle())))
                 .build();
     }

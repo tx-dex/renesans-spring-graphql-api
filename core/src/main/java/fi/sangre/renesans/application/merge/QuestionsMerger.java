@@ -1,7 +1,9 @@
 package fi.sangre.renesans.application.merge;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.DriverWeight;
+import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -11,10 +13,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.collectingAndThen;
@@ -44,8 +43,19 @@ public class QuestionsMerger {
 
     @NonNull
     private LikertQuestion combine(@NonNull final Map<QuestionId, LikertQuestion> existing, @NonNull final LikertQuestion input) {
-        return combine(Objects.requireNonNull(existing.get(input.getId()), "Not existing driver in the input"),
-                input);
+        final LikertQuestion newOrExisting;
+        if (input.getId() == null) {
+            newOrExisting = LikertQuestion.builder()
+                    .id(new QuestionId(UUID.randomUUID()))
+                    .catalystId(input.getCatalystId())
+                    .weights(ImmutableList.of())
+                    .titles(new MultilingualText(ImmutableMap.of()))
+                    .build();
+        } else {
+            newOrExisting = Objects.requireNonNull(existing.get(input.getId()), "Not existing question in the input");
+        }
+
+        return combine(newOrExisting, input);
 
     }
 
@@ -59,10 +69,10 @@ public class QuestionsMerger {
     }
 
     @NonNull
-    private List<DriverWeight> combineWeights(@NonNull final List<DriverWeight> existing, @NonNull final List<DriverWeight> inputs) {
+    private List<DriverWeight> combineWeights(@Nullable final List<DriverWeight> existing, @Nullable final List<DriverWeight> inputs) {
         return ImmutableList.copyOf(Stream.concat(
-                existing.stream(),
-                inputs.stream())
+                Optional.ofNullable(existing).orElse(ImmutableList.of()).stream(),
+                Optional.ofNullable(inputs).orElse(ImmutableList.of()).stream())
                 .collect(toMap(
                         e -> e.getDriver().getId(),
                         e -> e,

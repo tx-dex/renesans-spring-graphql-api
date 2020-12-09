@@ -41,12 +41,14 @@ public class CatalystAssembler {
 
     @NonNull
     public Catalyst from(@NonNull CatalystInput input, @NonNull final String languageTag) {
+        final CatalystId catalystId = new CatalystId(Objects.requireNonNull(input.getId(), "Catalyst id not provided in the input"));
+
         return Catalyst.builder()
-                .id(new CatalystId(input.getId()))
+                .id(catalystId)
                 .titles(multilingualTextAssembler.fromOptional(input.getTitle(), languageTag)) // This is optional as it may not be provided when updating questions
                 .descriptions(multilingualTextAssembler.fromOptional(input.getDescription(), languageTag))
                 .drivers(driverAssembler.fromInput(input.getDrivers(), languageTag))
-                .questions(questionAssembler.fromInput(input.getQuestions(), languageTag))
+                .questions(questionAssembler.fromInput(catalystId, input.getQuestions(), languageTag))
                 .build();
     }
 
