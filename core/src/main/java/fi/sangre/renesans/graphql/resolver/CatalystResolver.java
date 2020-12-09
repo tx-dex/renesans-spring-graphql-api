@@ -14,10 +14,12 @@ import fi.sangre.renesans.service.QuestionService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static fi.sangre.renesans.graphql.output.DriverProxy.toProxies;
 
@@ -50,14 +52,20 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
     }
 
     @Deprecated
-    public String getDescription(final CatalystProxy proxy) {
+    public String getDescription(@NonNull final CatalystProxy proxy) {
         return null;
     }
 
     @NonNull
-    public List<LikertQuestion> getQuestions(final CatalystProxy proxy) {
+    public List<LikertQuestion> getQuestions(@NonNull final CatalystProxy proxy) {
         return strategies.get(proxy.getObject().getClass()).getQuestions(proxy);
     }
+
+    @Nullable
+    public String getCatalystQuestion(@NonNull final CatalystProxy proxy, @NonNull final DataFetchingEnvironment environment) {
+        return strategies.get(proxy.getObject().getClass()).getCatalystQuestion(proxy, resolverHelper.getLanguageCode(environment));
+    }
+
 
     @NonNull
     public List<DriverProxy> getDrivers(@NonNull final CatalystProxy proxy) {
@@ -68,6 +76,7 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         @NonNull String getTitle(@NonNull T output, @NonNull String languageTag);
         @NonNull List<DriverProxy> getDrivers(@NonNull T output);
         @NonNull List<LikertQuestion> getQuestions(@NonNull T output);
+        @Nullable String getCatalystQuestion(@NonNull T output, @NonNull String languageTag);
     }
 
     private class CatalystDtoStrategy implements CatalystStrategy<CatalystProxy> {
@@ -89,6 +98,12 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         @Override
         public List<LikertQuestion> getQuestions(@NonNull final CatalystProxy proxy) {
             return ImmutableList.of();
+        }
+
+        @Nullable
+        @Override
+        public String getCatalystQuestion(@NonNull final CatalystProxy proxy, @NonNull final  String languageTag) {
+            return null;
         }
     }
 
@@ -112,6 +127,15 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         public List<LikertQuestion> getQuestions(@NonNull final CatalystProxy proxy) {
             final Catalyst catalyst = (Catalyst) proxy.getObject();
             return catalyst.getQuestions();
+        }
+
+        @Nullable
+        @Override
+        public String getCatalystQuestion(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
+            final Catalyst catalyst = (Catalyst) proxy.getObject();
+            return Optional.ofNullable(catalyst.getQuestion())
+                    .map(e -> metadataLanguageHelper.getOptionalText(e.getPhrases(), languageTag))
+                    .orElse(null);
         }
     }
 }

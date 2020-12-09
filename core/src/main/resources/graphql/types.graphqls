@@ -147,7 +147,6 @@ type QuestionDriverWeight {
     weight: Float!
 }
 
-
 type SurveyRespondent {
     id: ID!
     email: String!
@@ -341,6 +340,8 @@ type Catalyst {
     description: String @deprecated(reason: "There is no data for that in data table. Will be removed")
     pdfName: String @deprecated(reason: "This was static text used for displayin it on the reports. Will be removed")
     questions: [LikertQuestion!]!
+    # Catalyst/Theme open question displayed at the end
+    catalystQuestion: String
     drivers: [Driver!]!
 }
 

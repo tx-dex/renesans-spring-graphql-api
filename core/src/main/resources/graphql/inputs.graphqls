@@ -90,6 +90,9 @@ input SurveyCatalystInput {
     drivers: [SurveyDriverInput!]
     # Use when storing questions, otherise should be null
     questions: [LikertQuestionInput!]
+    # Open question at the end of catalyst questions
+    # if null it will be removed
+    catalystQuestion: String
 }
 
 input SurveyDriverInput {

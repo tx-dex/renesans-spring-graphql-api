@@ -19,4 +19,5 @@ public class CatalystInput {
     private String description;
     private List<DriverInput> drivers;
     private List<LikertQuestionInput> questions;
+    private String catalystQuestion;
 }
