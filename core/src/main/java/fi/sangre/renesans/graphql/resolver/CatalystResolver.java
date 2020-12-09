@@ -133,7 +133,7 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         @Override
         public String getCatalystQuestion(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
             final Catalyst catalyst = (Catalyst) proxy.getObject();
-            return Optional.ofNullable(catalyst.getQuestion())
+            return Optional.ofNullable(catalyst.getOpenQuestion())
                     .map(e -> metadataLanguageHelper.getOptionalText(e.getPhrases(), languageTag))
                     .orElse(null);
         }

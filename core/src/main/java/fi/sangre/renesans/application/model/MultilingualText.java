@@ -1,16 +1,24 @@
 package fi.sangre.renesans.application.model;
 
-import lombok.AllArgsConstructor;
+import com.google.common.collect.ImmutableMap;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
 @Builder
 public class MultilingualText {
-    private Map<String, String> phrases;
+    private final Map<String, String> phrases;
+
+    public MultilingualText(final Map<String, String> phrases) {
+        //TODO: should never set null
+        this.phrases = phrases;
+    }
+
+    public boolean isEmpty() {
+        return phrases == null || phrases.isEmpty();
+    }
+
+    public static MultilingualText EMPTY = new MultilingualText(ImmutableMap.of());
 }

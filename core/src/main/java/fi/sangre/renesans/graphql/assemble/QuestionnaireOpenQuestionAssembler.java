@@ -18,10 +18,10 @@ import org.springframework.stereotype.Component;
 public class QuestionnaireOpenQuestionAssembler {
     @Nullable
     public QuestionnaireOpenQuestionOutput from(@NonNull final Catalyst catalyst, @Nullable final OpenQuestionAnswer answer) {
-        if (catalyst.getQuestion() != null) {
+        if (catalyst.getOpenQuestion() != null) {
             final QuestionnaireOpenQuestionOutput.QuestionnaireOpenQuestionOutputBuilder output = QuestionnaireOpenQuestionOutput.builder()
                     .id(new QuestionId(catalyst.getId().getValue()))
-                    .titles(catalyst.getQuestion().getPhrases())
+                    .titles(catalyst.getOpenQuestion().getPhrases())
                     .answered(false)
                     .skipped(false)
                     .response(null);

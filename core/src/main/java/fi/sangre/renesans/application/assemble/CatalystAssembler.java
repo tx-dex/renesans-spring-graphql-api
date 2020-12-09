@@ -1,6 +1,7 @@
 package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.MultilingualText;
@@ -10,6 +11,7 @@ import fi.sangre.renesans.graphql.input.CatalystInput;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -29,7 +31,7 @@ public class CatalystAssembler {
     private final MultilingualTextAssembler multilingualTextAssembler;
 
     @NonNull
-    public List<Catalyst> fromInput(@NonNull final List<CatalystInput> inputs, @NonNull final String languageTag) {
+    public List<Catalyst> fromInputs(@NonNull final List<CatalystInput> inputs, @NonNull final String languageTag) {
         if (new HashSet<>(inputs).size() != inputs.size()) {
             throw new SurveyException("Duplicated catalysts' keys in the input");
         }
@@ -49,6 +51,9 @@ public class CatalystAssembler {
                 .descriptions(multilingualTextAssembler.fromOptional(input.getDescription(), languageTag))
                 .drivers(driverAssembler.fromInput(input.getDrivers(), languageTag))
                 .questions(questionAssembler.fromInput(catalystId, input.getQuestions(), languageTag))
+                .openQuestion(Optional.ofNullable(StringUtils.trimToNull(input.getCatalystQuestion()))
+                        .map(e -> new MultilingualText(ImmutableMap.of(languageTag, e)))
+                        .orElse(null))
                 .build();
     }
 
@@ -69,6 +74,9 @@ public class CatalystAssembler {
                 .titles(new MultilingualText(metadata.getTitles()))
                 .drivers(driverAssembler.fromMetadata(metadata.getDrivers()))
                 .questions(questionAssembler.fromMetadata(metadata.getQuestions()))
+                .openQuestion(Optional.ofNullable(metadata.getOpenQuestion())
+                        .map(MultilingualText::new)
+                        .orElse(null))
                 .weight(metadata.getWeight())
                 .build();
     }

@@ -3,14 +3,15 @@ package fi.sangre.renesans.service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
-import fi.sangre.renesans.application.assemble.CatalystAssembler;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.assemble.RespondentAssembler;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.event.InviteRespondentsEvent;
-import fi.sangre.renesans.application.merge.CatalystMerger;
 import fi.sangre.renesans.application.merge.OrganizationSurveyMerger;
-import fi.sangre.renesans.application.model.*;
+import fi.sangre.renesans.application.model.Organization;
+import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.Respondent;
+import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -19,8 +20,6 @@ import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.model.Question;
-import fi.sangre.renesans.persistence.assemble.CatalystMetadataAssembler;
-import fi.sangre.renesans.persistence.model.TemplateId;
 import fi.sangre.renesans.persistence.model.*;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
@@ -62,9 +61,6 @@ public class OrganizationSurveyService {
     private final OrganizationSurveyMerger organizationSurveyMerger;
     private final SurveyDao surveyDao;
     private final CustomerRepository customerRepository;
-    private final CatalystAssembler catalystAssembler;
-    private final CatalystMerger catalystMerger;
-    private final CatalystMetadataAssembler catalystMetadataAssembler;
     private final QuestionService questionService;
     private final MultilingualService multilingualService;
     private final SurveyRespondentRepository surveyRespondentRepository;
@@ -125,7 +121,7 @@ public class OrganizationSurveyService {
     }
 
     @NonNull
-    public OrganizationSurvey storeSurveyParameters(@NonNull final OrganizationSurvey input) {
+    public OrganizationSurvey updateMetadata(@NonNull final OrganizationSurvey input) {
         final OrganizationSurvey updated = organizationSurveyMerger.combine(input);
 
         try {
@@ -134,50 +130,6 @@ public class OrganizationSurveyService {
             log.warn("Survey was updated already by someone else.", ex);
             throw new SurveyException("Survey was updated already by someone else");
         }
-    }
-
-    @NonNull
-    public OrganizationSurvey storeSurveyStaticText(@NonNull final OrganizationSurvey input) {
-        final OrganizationSurvey updated = organizationSurveyMerger.combine(input);
-
-        try {
-            return surveyDao.store(updated);
-        } catch (final ObjectOptimisticLockingFailureException ex) {
-            log.warn("Survey was updated already by someone else.", ex);
-            throw new SurveyException("Survey was updated already by someone else");
-        }
-    }
-
-    @NonNull
-    @Transactional
-    public OrganizationSurvey storeSurveyCatalysts(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Catalyst> input) {
-        final Survey survey = getSurveyOrThrow(surveyId);
-
-        final SurveyMetadata metadata = copy(survey.getMetadata());
-        survey.setMetadata(metadata);
-        final List<Catalyst> existing = catalystAssembler.fromMetadata(metadata.getCatalysts());
-        input.forEach(catalyst ->  catalyst.setQuestions(null)); // make sure that it will not update questions
-        final List<Catalyst> combined = catalystMerger.combine(existing, input);
-        metadata.setCatalysts(catalystMetadataAssembler.from(combined));
-        survey.setMetadata(metadata);
-
-        return surveyDao.store(survey);
-    }
-
-    @NonNull
-    @Transactional
-    public OrganizationSurvey storeSurveyQuestions(@NonNull final UUID surveyId, @NonNull final Long surveyVersion, @NonNull final List<Catalyst> input) {
-        final Survey survey = getSurveyOrThrow(surveyId);
-
-        final SurveyMetadata metadata = copy(survey.getMetadata());
-        survey.setMetadata(metadata);
-        final List<Catalyst> existing = catalystAssembler.fromMetadata(metadata.getCatalysts());
-        input.forEach(catalyst ->  catalyst.setDrivers(null)); // make sure that it will not update drivers
-        final List<Catalyst> combined = catalystMerger.combine(existing, input);
-        metadata.setCatalysts(catalystMetadataAssembler.from(combined));
-        survey.setMetadata(metadata);
-
-        return surveyDao.store(survey);
     }
 
     @Transactional

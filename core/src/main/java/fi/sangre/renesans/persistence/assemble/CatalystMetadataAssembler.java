@@ -1,6 +1,7 @@
 package fi.sangre.renesans.persistence.assemble;
 
 import fi.sangre.renesans.application.model.Catalyst;
+import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -35,6 +37,9 @@ public class CatalystMetadataAssembler {
                 .titles(catalyst.getTitles().getPhrases())
                 .drivers(driverMetadataAssembler.from(catalyst.getDrivers()))
                 .questions(questionMetadataAssembler.from(catalyst.getQuestions()))
+                .openQuestion(Optional.ofNullable(catalyst.getOpenQuestion())
+                        .map(MultilingualText::getPhrases)
+                        .orElse(null))
                 .weight(catalyst.getWeight())
                 .build();
     }

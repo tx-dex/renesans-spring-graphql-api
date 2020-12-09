@@ -18,6 +18,7 @@ public class OrganizationSurveyMerger {
     private final SurveyRepository surveyRepository;
     private final StaticTextMerger staticTextMerger;
     private final ParameterMerger parameterMerger;
+    private final CatalystMerger catalystMerger;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
 
     @NonNull
@@ -29,6 +30,7 @@ public class OrganizationSurveyMerger {
 
         //TODO: check version here
         existing.setVersion(input.getVersion());
+        existing.setCatalysts(catalystMerger.combine(existing.getCatalysts(), input.getCatalysts()));
         existing.setParameters(parameterMerger.combine(existing.getParameters(), input.getParameters()));
         existing.setStaticTexts(staticTextMerger.combine(existing.getStaticTexts(), input.getStaticTexts()));
 

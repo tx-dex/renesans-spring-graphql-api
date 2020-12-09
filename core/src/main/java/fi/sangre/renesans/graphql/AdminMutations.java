@@ -3,10 +3,7 @@ package fi.sangre.renesans.graphql;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.aaa.UserPrincipal;
-import fi.sangre.renesans.application.assemble.CatalystAssembler;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
-import fi.sangre.renesans.application.assemble.ParameterAssembler;
-import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.SurveyId;
@@ -49,8 +46,6 @@ public class AdminMutations implements GraphQLMutationResolver {
     private final OrganizationSurveyService organizationSurveyService;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
     private final SurveyRespondentsFacade surveyRespondentsFacade;
-    private final ParameterAssembler parameterAssembler;
-    private final CatalystAssembler catalystAssembler;
     private final ResolverHelper resolverHelper;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtTokenService;
@@ -153,8 +148,9 @@ public class AdminMutations implements GraphQLMutationResolver {
                                                                 @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-        final OrganizationSurvey inputSurvey = organizationSurveyAssembler.fromParametersInput(id, version, input, resolverHelper.getLanguageCode(environment));
-        return organizationSurveyService.storeSurveyParameters(inputSurvey);
+        final OrganizationSurvey inputSurvey = organizationSurveyAssembler
+                .fromParametersInput(id, version, input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.updateMetadata(inputSurvey);
     }
 
     @NonNull
@@ -166,11 +162,9 @@ public class AdminMutations implements GraphQLMutationResolver {
                                                                 @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-        return organizationSurveyService.storeSurveyStaticText(
-                organizationSurveyAssembler.fromStaticTextInput(id,
-                        version,
-                        input,
-                        resolverHelper.getLanguageCode(environment)));
+        final OrganizationSurvey inputSurvey = organizationSurveyAssembler
+                .fromStaticTextInput(id, version, input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.updateMetadata(inputSurvey);
     }
 
     @NonNull
@@ -182,8 +176,9 @@ public class AdminMutations implements GraphQLMutationResolver {
                                                                @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-        final List<Catalyst> catalysts = catalystAssembler.fromInput(input, resolverHelper.getLanguageCode(environment));
-        return organizationSurveyService.storeSurveyCatalysts(id, version, catalysts);
+        final OrganizationSurvey inputSurvey = organizationSurveyAssembler
+                .fromCatalystAndDriversInput(id, version, input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.updateMetadata(inputSurvey);
     }
 
     @NonNull
@@ -195,8 +190,9 @@ public class AdminMutations implements GraphQLMutationResolver {
                                                                @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-        final List<Catalyst> catalysts = catalystAssembler.fromInput(input, resolverHelper.getLanguageCode(environment));
-        return organizationSurveyService.storeSurveyQuestions(id, version, catalysts);
+        final OrganizationSurvey inputSurvey = organizationSurveyAssembler
+                .fromQuestionsInput(id, version, input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.updateMetadata(inputSurvey);
     }
 
     @NonNull

@@ -19,6 +19,6 @@ public class Catalyst implements CatalystOutput {
     private MultilingualText descriptions;
     private List<Driver> drivers;
     private List<LikertQuestion> questions;
-    private MultilingualText question;
+    private MultilingualText openQuestion;
     private Double weight;
 }
