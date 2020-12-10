@@ -22,4 +22,9 @@ public class SurveyId implements IdValueObject<UUID> {
     public String toString() {
         return value.toString();
     }
+
+    @Override
+    public String asString() {
+        return value.toString();
+    }
 }

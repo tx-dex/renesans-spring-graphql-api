@@ -1,7 +1,6 @@
 package fi.sangre.renesans.persistence.assemble;
 
-import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.application.model.DriverWeight;
+import fi.sangre.renesans.application.model.DriverId;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.persistence.model.metadata.questions.LikertQuestionMetadata;
 import fi.sangre.renesans.persistence.model.metadata.questions.QuestionMetadata;
@@ -11,10 +10,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
@@ -41,12 +37,17 @@ public class QuestionMetadataAssembler {
                 .build();
     }
 
-    @NonNull
-    private Map<Long, Double> fromWeights(@Nullable final List<DriverWeight> weights) {
+    @Nullable
+    private Map<String, Double> fromWeights(@Nullable final Map<DriverId, Double> weights) {
         return Optional.ofNullable(weights)
-                .orElse(ImmutableList.of())
-                .stream()
-                .filter(e -> !DEFAULT_QUESTION_DRIVER_WEIGHT.equals(e.getWeight()))
-                .collect(collectingAndThen(toMap(e -> e.getDriver().getId(), DriverWeight::getWeight), Collections::unmodifiableMap));
+                .map(map -> map.entrySet().stream()
+                        .filter(e ->  DEFAULT_QUESTION_DRIVER_WEIGHT.equals(e.getValue()))
+                        .collect(collectingAndThen(toMap(
+                                e -> e.getKey().asString(),
+                                Map.Entry::getValue,
+                                (e1, e2) -> e1,
+                                LinkedHashMap::new
+                        ), Collections::unmodifiableMap)))
+                .orElse(null);
     }
 }

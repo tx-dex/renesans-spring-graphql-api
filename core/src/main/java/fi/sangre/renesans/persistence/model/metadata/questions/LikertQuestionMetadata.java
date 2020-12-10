@@ -22,6 +22,6 @@ import java.util.UUID;
 public class LikertQuestionMetadata implements QuestionMetadata {
     private UUID id;
     private Map<String,String> titles;
-    private Map<Long, Double> driverWeights;
+    private Map<String, Double> driverWeights;
     private MetadataReference reference;
 }

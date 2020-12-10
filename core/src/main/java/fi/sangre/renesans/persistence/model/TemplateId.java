@@ -12,4 +12,9 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(of = "value")
 public class TemplateId implements IdValueObject<Long> {
     private  Long value;
+
+    @Override
+    public String asString() {
+        return value.toString();
+    }
 }

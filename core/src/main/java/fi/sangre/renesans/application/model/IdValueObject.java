@@ -4,4 +4,5 @@ import java.io.Serializable;
 
 public interface IdValueObject<T> extends Serializable {
     T getValue();
+    String asString();
 }

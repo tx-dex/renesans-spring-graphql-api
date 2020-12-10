@@ -1,7 +1,9 @@
 package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.CatalystId;
+import fi.sangre.renesans.application.model.DriverId;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -15,13 +17,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -55,6 +53,7 @@ public class QuestionAssembler {
                 .id(questionId)
                 .catalystId(catalystId)
                 .titles(multilingualUtils.create(input.getTitle(), languageTag))
+                //TODO: get weights from input
                 .build();
     }
 
@@ -72,7 +71,7 @@ public class QuestionAssembler {
         if (metadata instanceof LikertQuestionMetadata) {
             return from((LikertQuestionMetadata) metadata);
         } else {
-            // TODO: implement later
+            // TODO: implement later if needed
             throw new SurveyException("Invalid question type");
         }
     }
@@ -82,6 +81,14 @@ public class QuestionAssembler {
         return LikertQuestion.builder()
                 .id(new QuestionId(metadata.getId()))
                 .titles(multilingualUtils.create(metadata.getTitles()))
+                .weights(Optional.ofNullable(metadata.getDriverWeights())
+                        .orElse(ImmutableMap.of()).entrySet().stream()
+                        .collect(collectingAndThen(toMap(
+                                e -> new DriverId(Long.parseLong(e.getKey())),
+                                Map.Entry::getValue,
+                                (e1, e2) -> e1,
+                                LinkedHashMap::new
+                        ), Collections::unmodifiableMap)))
                 .build();
     }
 }

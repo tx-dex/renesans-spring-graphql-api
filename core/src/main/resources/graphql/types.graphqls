@@ -12,6 +12,10 @@ scalar Long
 # }
 scalar Translation
 
+# A json map containing question driver weights
+# Key value is a driver id whereas value is actual driver weight (float value)
+scalar QuestionDriverWeights
+
 enum QuestionSourceType {
     GENERIC
     SEGMENT
@@ -139,12 +143,7 @@ type SurveyStaticTextGroup {
 type LikertQuestion {
     id: ID!
     title: String!
-    weights: [QuestionDriverWeight]!
-}
-
-type QuestionDriverWeight {
-    driver: Driver!
-    weight: Float!
+    weights: QuestionDriverWeights!
 }
 
 type SurveyRespondent {

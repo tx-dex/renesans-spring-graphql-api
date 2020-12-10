@@ -1,9 +1,9 @@
 package fi.sangre.renesans.graphql.resolver.question;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.application.model.DriverWeight;
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.graphql.output.question.QuestionDriverWeights;
 import fi.sangre.renesans.graphql.resolver.MetadataLanguageHelper;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import graphql.schema.DataFetchingEnvironment;
@@ -12,7 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toMap;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -33,7 +38,12 @@ public class LikertQuestionResolver implements GraphQLResolver<LikertQuestion> {
     }
 
     @NonNull
-    public List<DriverWeight> getWeights(@NonNull final LikertQuestion output) {
-        return ImmutableList.of();
+    public QuestionDriverWeights getWeights(@NonNull final LikertQuestion output) {
+        return new QuestionDriverWeights(Optional.ofNullable(output.getWeights())
+                .orElse(ImmutableMap.of()).entrySet().stream()
+                .collect(collectingAndThen(toMap(
+                        e -> e.getKey().asString(),
+                        Map.Entry::getValue
+                ), Collections::unmodifiableMap)));
     }
 }

@@ -1,8 +1,6 @@
 package fi.sangre.renesans.graphql;
 
 import graphql.language.StringValue;
-import graphql.scalars.ExtendedScalars;
-import graphql.scalars.alias.AliasedScalar;
 import graphql.schema.Coercing;
 import graphql.schema.GraphQLScalarType;
 import org.springframework.context.annotation.Bean;
@@ -15,14 +13,6 @@ import java.util.Date;
 
 @Configuration
 public class Scalars {
-
-    @Bean
-    public AliasedScalar translationScalar() {
-        return ExtendedScalars.newAliasedScalar("Translation")
-                .aliasedScalar(ExtendedScalars.Json)
-                .description("Scalar for keeping translation data of the app")
-                .build();
-    }
 
     @Bean
     public GraphQLScalarType dateScalar() {

@@ -12,4 +12,9 @@ import java.util.UUID;
 @EqualsAndHashCode(of = "value")
 public class QuestionId implements IdValueObject<UUID> {
     private final UUID value;
+
+    @Override
+    public String asString() {
+        return value.toString();
+    }
 }

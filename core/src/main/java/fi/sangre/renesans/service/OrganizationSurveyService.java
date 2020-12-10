@@ -17,6 +17,7 @@ import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.model.Question;
+import fi.sangre.renesans.model.Weight;
 import fi.sangre.renesans.persistence.model.TemplateId;
 import fi.sangre.renesans.persistence.model.*;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
@@ -325,6 +326,7 @@ public class OrganizationSurveyService {
         return LikertQuestionMetadata.builder()
                 .id(UUID.randomUUID())
                 .titles(multilingualService.getPhrases(question.getTitleId()))
+                .driverWeights(getQuestionDriverWeights(question))
                 .build();
     }
 
@@ -333,6 +335,15 @@ public class OrganizationSurveyService {
                 .id(UUID.randomUUID())
                 .titles(multilingualService.getPhrases(question.getTitleId()))
                 .reference( new TemplateReference(new TemplateId(segmentId), 1L))
+                .driverWeights(getQuestionDriverWeights(question))
                 .build();
+    }
+
+    private Map<String, Double> getQuestionDriverWeights(@NonNull final Question question) {
+        return question.getWeights().stream()
+                .collect(collectingAndThen(toMap(
+                        e -> e.getQuestionGroupId().toString(),
+                        Weight::getWeight
+                ), Collections::unmodifiableMap));
     }
 }

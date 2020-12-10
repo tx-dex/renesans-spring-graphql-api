@@ -31,6 +31,11 @@ public class ParameterId implements IdValueObject<UUID> {
         return value.toString();
     }
 
+    @Override
+    public String asString() {
+        return value.toString();
+    }
+
     @Nullable
     public static ParameterId from(@Nullable final String value) {
         return Optional.ofNullable(value)

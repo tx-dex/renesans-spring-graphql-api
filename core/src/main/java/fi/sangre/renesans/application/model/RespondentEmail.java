@@ -13,4 +13,9 @@ public class RespondentEmail implements IdValueObject<String> {
     public RespondentEmail(final String value) {
         this.value = Objects.requireNonNull(value, "value is required");
     }
+
+    @Override
+    public String asString() {
+        return value;
+    }
 }

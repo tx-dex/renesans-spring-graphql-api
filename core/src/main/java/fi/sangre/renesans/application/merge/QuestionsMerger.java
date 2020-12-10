@@ -1,7 +1,8 @@
 package fi.sangre.renesans.application.merge;
 
 import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.application.model.DriverWeight;
+import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.DriverId;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -48,7 +49,7 @@ public class QuestionsMerger {
             newOrExisting = LikertQuestion.builder()
                     .id(new QuestionId(UUID.randomUUID()))
                     .catalystId(input.getCatalystId())
-                    .weights(ImmutableList.of())
+                    .weights(ImmutableMap.of())
                     .titles(multilingualUtils.empty())
                     .build();
         } else {
@@ -69,18 +70,15 @@ public class QuestionsMerger {
     }
 
     @NonNull
-    private List<DriverWeight> combineWeights(@Nullable final List<DriverWeight> existing, @Nullable final List<DriverWeight> inputs) {
-        return ImmutableList.copyOf(Stream.concat(
-                Optional.ofNullable(existing).orElse(ImmutableList.of()).stream(),
-                Optional.ofNullable(inputs).orElse(ImmutableList.of()).stream())
+    private Map<DriverId, Double> combineWeights(@Nullable final Map<DriverId, Double> existing, @Nullable final Map<DriverId, Double> inputs) {
+        return Collections.unmodifiableMap(Stream.concat(
+                Optional.ofNullable(existing).orElse(ImmutableMap.of()).entrySet().stream(),
+                Optional.ofNullable(inputs).orElse(ImmutableMap.of()).entrySet().stream())
                 .collect(toMap(
-                        e -> e.getDriver().getId(),
-                        e -> e,
-                        (e1, e2) -> DriverWeight.builder()
-                                .driver(e2.getDriver())
-                                .question(e2.getQuestion())
-                                .weight(e2.getWeight())
-                                .build()
-                )).values());
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e2,
+                        LinkedHashMap::new
+                )));
     }
 }
