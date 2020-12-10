@@ -18,7 +18,7 @@ class MultilingualUtilsTest extends Specification {
         expect:
         instance.create(["fi":"1"]).getPhrases() == ["fi":"1"]
         instance.create("1", "fi").getPhrases() == ["fi":"1"]
-        instance.create(null, "fi").getPhrases() == ["fi":null]
+        instance.create(null, "fi").getPhrases() == [:]
         instance.create("   ", "fi").getPhrases() == ["fi":null]
     }
 }
