@@ -12,6 +12,7 @@ import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
+import fi.sangre.renesans.graphql.input.question.QuestionDriverWeightInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
@@ -193,6 +194,18 @@ public class AdminMutations implements GraphQLMutationResolver {
         final OrganizationSurvey inputSurvey = organizationSurveyAssembler
                 .fromQuestionsInput(id, version, input, resolverHelper.getLanguageCode(environment));
         return organizationSurveyService.updateMetadata(inputSurvey);
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
+    public OrganizationSurvey storeOrganizationSurveyQuestionWeight(@NonNull final UUID id,
+                                                                   @NonNull final Long version,
+                                                                   @NonNull final QuestionDriverWeightInput input,
+                                                                   @Nullable final String languageCode,
+                                                                   @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return organizationSurveyService.updateQuestionDriverWeights(new SurveyId(id), version, input);
     }
 
     @NonNull

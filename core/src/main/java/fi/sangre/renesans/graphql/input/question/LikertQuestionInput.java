@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -15,5 +14,4 @@ import java.util.UUID;
 public class LikertQuestionInput {
     private UUID id;
     private String title;
-    private List<QuestionDriverWeightInput> driverWeights;
 }

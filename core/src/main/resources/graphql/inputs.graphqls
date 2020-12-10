@@ -108,10 +108,10 @@ input LikertQuestionInput {
     # Question Id, if null the question is created and generated id is returned
     id: ID
     title: String!
-    driverWeights: [QuestionDriverWeightInput!]
 }
 
 input QuestionDriverWeightInput {
+    questionId: ID!
     driverId: ID!
     weight: Float!
 }
@@ -137,10 +137,10 @@ input ParameterAnswerInput {
 
 # input for filtering respondents or statistics
 input FilterInput {
-    # Parameter id from the column header that is chosen for filtering
+    # Parameter id from the column header that is chosen for filtering (SurveyParameter.value field from root)
     id: ID!
     # Selected values or ids
-    # for TREE and LIST parameter it should be selected children (SurveyParameter.value field)
+    # for TREE and LIST parameter it should be selected children (SurveyParameter.value field from children)
     values: [String!]!
 }
 

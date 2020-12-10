@@ -41,7 +41,7 @@ public class QuestionMetadataAssembler {
     private Map<String, Double> fromWeights(@Nullable final Map<DriverId, Double> weights) {
         return Optional.ofNullable(weights)
                 .map(map -> map.entrySet().stream()
-                        .filter(e ->  DEFAULT_QUESTION_DRIVER_WEIGHT.equals(e.getValue()))
+                        .filter(e ->  !DEFAULT_QUESTION_DRIVER_WEIGHT.equals(e.getValue()))
                         .collect(collectingAndThen(toMap(
                                 e -> e.getKey().asString(),
                                 Map.Entry::getValue,

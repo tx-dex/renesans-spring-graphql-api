@@ -2,6 +2,8 @@ package fi.sangre.renesans.application.dao;
 
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.assemble.SurveyAssembler;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.repository.SurveyRepository;
@@ -19,6 +21,13 @@ public class SurveyDao {
     private final SurveyRepository surveyRepository;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
     private final SurveyAssembler surveyAssembler;
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public OrganizationSurvey getSurveyOrThrow(@NonNull final SurveyId surveyId) {
+        return organizationSurveyAssembler.from(surveyRepository.findById(surveyId.getValue())
+        .orElseThrow(() -> new SurveyException("Survey not found")));
+    }
 
     @NonNull
     @Transactional

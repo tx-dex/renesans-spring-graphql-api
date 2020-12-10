@@ -9,13 +9,17 @@ import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.event.InviteRespondentsEvent;
 import fi.sangre.renesans.application.merge.OrganizationSurveyMerger;
 import fi.sangre.renesans.application.model.*;
+import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
+import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
+import fi.sangre.renesans.graphql.input.question.QuestionDriverWeightInput;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.Weight;
 import fi.sangre.renesans.persistence.model.TemplateId;
@@ -58,6 +62,7 @@ public class OrganizationSurveyService {
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
     private final OrganizationSurveyMerger organizationSurveyMerger;
     private final SurveyDao surveyDao;
+    private final SurveyUtils surveyUtils;
     private final CustomerRepository customerRepository;
     private final QuestionService questionService;
     private final MultilingualService multilingualService;
@@ -128,6 +133,24 @@ public class OrganizationSurveyService {
         }
 
         return organizationSurveyAssembler.from(survey);
+    }
+
+    @NonNull
+    public OrganizationSurvey updateQuestionDriverWeights(@NonNull final SurveyId surveyId, @NonNull final Long version, @NonNull final QuestionDriverWeightInput input) {
+        checkArgument(input.getWeight() >= 0, "Weight must have positive value");
+
+        final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(surveyId);
+
+        survey.setVersion(version);
+        final QuestionId questionId = new QuestionId(input.getQuestionId());
+        final LikertQuestion question = Objects.requireNonNull(surveyUtils.findQuestion(questionId, survey),
+                "Survey likert question not found");
+        //TODO: validate that driver id belongs to survey
+        final Map<DriverId, Double> weights = new LinkedHashMap<>(question.getWeights());
+        weights.put(new DriverId(input.getDriverId()), input.getWeight());
+        question.setWeights(weights);
+
+        return updateMetadata(survey);
     }
 
     @NonNull

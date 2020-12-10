@@ -114,6 +114,16 @@ type Mutation {
         languageCode: String
     ) : OrganizationSurvey!
 
+    storeOrganizationSurveyQuestionWeight(
+        # Survey id
+        id: ID!
+        # Survey version
+        version: Long!
+        input: QuestionDriverWeightInput!
+        # Language that user is currently editing
+        languageCode: String
+    ): OrganizationSurvey!
+
     removeOrganizationSurvey(
         # Survey id
         id: ID!
