@@ -63,6 +63,14 @@ public class RespondentAssembler {
         switch (respondentState) {
             case INVITING:
                 return RespondentState.INVITING;
+            case OPENED:
+                return RespondentState.OPENED;
+            case ANSWERING:
+                return RespondentState.ANSWERING;
+            case ANSWERED:
+                return RespondentState.ANSWERED;
+            case ERROR:
+                return RespondentState.ERROR;
             default:
                 return RespondentState.INVITED;
         }

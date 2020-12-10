@@ -13,7 +13,7 @@ public enum RespondentState {
     OPENED,
     /** When respondent answered first question */
     ANSWERING,
-    /** When respondend answered all questions */
+    /** When respondent answered all questions */
     ANSWERED,
     /** When there was some kind of error either in sending email or storing respondent */
     ERROR;

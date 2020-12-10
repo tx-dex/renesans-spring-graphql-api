@@ -59,6 +59,11 @@ public class AnswerDao {
 
     //TODO: save catalysts questions answer
 
+    @Transactional(readOnly = true)
+    public long countRespondentAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+        return likerQuestionAnswerRepository.countAllByIdSurveyIdAndIdRespondentId(surveyId.getValue(), respondentId.getValue());
+    }
+
     @NonNull
     @Transactional(readOnly = true)
     public Set<LikertQuestionAnswer> getQuestionsAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {

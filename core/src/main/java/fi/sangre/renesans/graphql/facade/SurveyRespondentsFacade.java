@@ -82,7 +82,7 @@ public class SurveyRespondentsFacade {
             }
         } catch (final ExecutionException | InterruptedException ex) {
             log.warn("Cannot get respondents for survey(id={})", surveyId);
-            throw new InternalServiceException("Internal Server Error. Cannot get respondent list");
+            throw new InternalServiceException("Cannot get respondent list");
         }
     }
 

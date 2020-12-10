@@ -2,5 +2,8 @@ package fi.sangre.renesans.persistence.model;
 
 public enum SurveyRespondentState {
     INVITING,
-    INVITED;
+    OPENED,
+    ANSWERING,
+    ANSWERED,
+    ERROR;
 }

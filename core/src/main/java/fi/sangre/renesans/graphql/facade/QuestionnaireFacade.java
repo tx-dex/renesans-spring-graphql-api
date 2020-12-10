@@ -4,8 +4,10 @@ import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.LikertAnswerAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
+import fi.sangre.renesans.application.event.QuestionnaireOpenedEvent;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.parameter.Parameter;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
@@ -19,6 +21,7 @@ import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -37,13 +40,18 @@ public class QuestionnaireFacade {
     private final ParameterAssembler parameterAssembler;
     private final AnswerService answerService;
     private final TokenService tokenService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @NonNull
-    public AuthorizationOutput openQuestionnaire(@NonNull final UUID id, @NonNull final String invitationHash) {
-        return AuthorizationOutput.builder()
+    public AuthorizationOutput openQuestionnaire(@NonNull final RespondentId respondentId, @NonNull final String invitationHash) {
+        final AuthorizationOutput output = AuthorizationOutput.builder()
                 // TODO: provide invitation hash for the user so it can refresh token
-                .token(tokenService.generateQuestionnaireToken(id, invitationHash))
+                .token(tokenService.generateQuestionnaireToken(respondentId, invitationHash))
                 .build();
+
+        applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(respondentId));
+
+        return output;
     }
 
     @NonNull
@@ -64,7 +72,7 @@ public class QuestionnaireFacade {
             return questionnaireAssembler.from(respondent.getId(), respondent.getSurveyId());
         } catch (final InterruptedException | ExecutionException ex) {
             log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
-            throw new InternalServiceException("Internal Server Error. Cannot get questionnaire");
+            throw new InternalServiceException("Cannot get questionnaire");
         }
     }
 
@@ -80,7 +88,7 @@ public class QuestionnaireFacade {
                 return questionnaireAssembler.from(respondent.getId(), survey);
             } catch (final InterruptedException | ExecutionException ex) {
                 log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
-                throw new InternalServiceException("Internal Server Error. Cannot get questionnaire");
+                throw new InternalServiceException("Cannot get questionnaire");
             }
         } else {
             throw new SurveyException("Only respondent can answer");
@@ -110,7 +118,7 @@ public class QuestionnaireFacade {
                 return questionnaireAssembler.from(respondent.getId(), survey);
             } catch (final InterruptedException | ExecutionException ex) {
                 log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
-                throw new InternalServiceException("Internal Server Error. Cannot get questionnaire");
+                throw new InternalServiceException("Cannot get questionnaire");
             }
         } else {
             throw new SurveyException("Only respondent can answer");

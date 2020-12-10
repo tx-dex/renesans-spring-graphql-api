@@ -20,6 +20,12 @@ import java.util.Optional;
 
 @Component
 public class SurveyUtils {
+
+    public long countLikertQuestions(@NonNull final OrganizationSurvey survey) {
+        return survey.getCatalysts().stream()
+                .map(catalyst -> catalyst.getQuestions().size())
+                .mapToLong(Integer::longValue).sum();
+    }
     @Nullable
     public LikertQuestion findQuestion(@NonNull final QuestionId questionId, @NonNull final OrganizationSurvey survey) {
         for(final Catalyst catalyst : survey.getCatalysts()) {

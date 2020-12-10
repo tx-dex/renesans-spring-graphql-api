@@ -5,17 +5,16 @@ import com.sangre.mail.dto.MailDto;
 import com.sangre.mail.dto.MailInfoDto;
 import com.sangre.mail.dto.MailStatus;
 import com.sangre.mail.dto.NameEmailPairDto;
-import fi.sangre.renesans.aaa.UserPrincipalService;
 import fi.sangre.renesans.application.client.FeignMailClient;
+import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.event.InviteRespondentsEvent;
 import fi.sangre.renesans.application.model.RespondentEmail;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
+import fi.sangre.renesans.persistence.model.SurveyRespondentState;
 import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
-import fi.sangre.renesans.repository.RespondentGroupRepository;
-import fi.sangre.renesans.repository.RespondentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -41,19 +40,13 @@ import static java.util.stream.Collectors.toMap;
 
 @Service
 public class InvitationService {
-    private final RespondentRepository respondentRepository;
-    private final RespondentGroupRepository respondentGroupRepository;
     private final SurveyRespondentRepository surveyRespondentRepository;
     private final MailService mailService;
-    private final UserPrincipalService userPrincipalService;
     private final FeignMailClient feignMailClient;
-
-    @Value("${fi.sangre.renesans.invitation.url}")
-    private String url;
+    private final RespondentDao respondentDao;
 
     @Value("${fi.sangre.renesans.survey.url}")
     private String surveyUrl;
-    private static final String RESPONDENT_GROUP_ID_PARAM = "groupId";
 
     @Async(DAO_EXECUTOR_NAME)
     public Future<Map<RespondentEmail, MailStatus>> getInvitationStatuses(final SurveyId surveyId) {
@@ -73,8 +66,7 @@ public class InvitationService {
                 sendInvitationEmail(respondentId, event.getSubject(), event.getBody(), event.getReplyTo());
                 log.info("Sending invitation to respondent(id={})", respondentId);
             } catch (final Exception ex) {
-                log.warn("Cannot invite respondent(id={})", respondentId, ex);
-                //TODO: mark as an error in respondent table
+                log.warn("Cannot update respondent status on error respondent(id={})", respondentId, ex);
             }
         });
     }
@@ -83,26 +75,31 @@ public class InvitationService {
                                      @NonNull final String subject,
                                      @NonNull final String body,
                                      @NonNull final Pair<String, String> replyTo) {
-        final SurveyRespondent respondent = surveyRespondentRepository.findById(respondentId.getValue())
-                .orElseThrow(() -> new InternalServiceException("Cannot get respondent"));
+        try {
+            final SurveyRespondent respondent = surveyRespondentRepository.findById(respondentId.getValue())
+                    .orElseThrow(() -> new InternalServiceException("Cannot get respondent"));
 
-        final String senderName = replyTo.getLeft() + " | Engager";
-        final MailDto message = MailDto.builder()
-                .recipient(respondent.getEmail())
-                .subject(subject)
-                .body(composeBody(respondent, body))
-                .sender(NameEmailPairDto.builder()
-                        .name(senderName)
-                        .build())
-                .replyTo(NameEmailPairDto.builder()
-                        .name(senderName)
-                        .email(replyTo.getRight())
-                        .build())
-                .tags(ImmutableMap.of("email-type", "survey-invitation",
-                        "survey-id", respondent.getSurveyId().toString(),
-                        "respondent-id", respondentId.getValue().toString()))
-                .build();
-        feignMailClient.sendEmail(message);
+            final String senderName = replyTo.getLeft() + " | Engager";
+            final MailDto message = MailDto.builder()
+                    .recipient(respondent.getEmail())
+                    .subject(subject)
+                    .body(composeBody(respondent, body))
+                    .sender(NameEmailPairDto.builder()
+                            .name(senderName)
+                            .build())
+                    .replyTo(NameEmailPairDto.builder()
+                            .name(senderName)
+                            .email(replyTo.getRight())
+                            .build())
+                    .tags(ImmutableMap.of("email-type", "survey-invitation",
+                            "survey-id", respondent.getSurveyId().toString(),
+                            "respondent-id", respondentId.getValue().toString()))
+                    .build();
+            feignMailClient.sendEmail(message);
+        } catch (final Exception ex) {
+            log.warn("Cannot invite respondent(id={})", respondentId, ex);
+            respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.ERROR);
+        }
     }
 
     @NonNull

@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;
@@ -29,7 +30,7 @@ public class AppMutations implements GraphQLMutationResolver {
     // this is public and respondent does not have token for that yet. Do not authorize it!!!
     @NonNull
     public AuthorizationOutput openQuestionnaire(@NonNull final UUID id, @NonNull final String invitationHash) {
-        return questionnaireFacade.openQuestionnaire(id, invitationHash);
+        return questionnaireFacade.openQuestionnaire(new RespondentId(id), invitationHash);
     }
 
     @NonNull

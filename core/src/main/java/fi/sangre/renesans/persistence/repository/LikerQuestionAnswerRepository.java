@@ -15,4 +15,6 @@ public interface LikerQuestionAnswerRepository extends JpaRepository<LikertQuest
     @NonNull
     @EntityGraph("question-answer-graph")
     List<LikertQuestionAnswerEntity> findAllByIdSurveyIdAndIdRespondentId(@NonNull UUID surveyId, @NonNull UUID respondentId);
+
+    long countAllByIdSurveyIdAndIdRespondentId(@NonNull UUID surveyId, @NonNull UUID respondentId);
 }

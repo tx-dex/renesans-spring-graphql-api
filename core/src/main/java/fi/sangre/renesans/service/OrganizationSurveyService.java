@@ -5,8 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.assemble.RespondentAssembler;
+import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.event.InviteRespondentsEvent;
+import fi.sangre.renesans.application.event.QuestionnaireOpenedEvent;
 import fi.sangre.renesans.application.merge.OrganizationSurveyMerger;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
@@ -39,9 +41,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +54,7 @@ import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.application.utils.MultilingualUtils.compare;
+import static fi.sangre.renesans.config.ApplicationConfig.ASYNC_EXECUTOR_NAME;
 import static java.util.stream.Collectors.*;
 
 
@@ -61,6 +66,7 @@ public class OrganizationSurveyService {
     private final SurveyRepository surveyRepository;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
     private final OrganizationSurveyMerger organizationSurveyMerger;
+    private final RespondentDao respondentDao;
     private final SurveyDao surveyDao;
     private final SurveyUtils surveyUtils;
     private final CustomerRepository customerRepository;
@@ -309,6 +315,16 @@ public class OrganizationSurveyService {
     private Survey getSurveyOrThrow(@NonNull final UUID id) {
         return surveyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
+    }
+
+    @EventListener
+    @Async(ASYNC_EXECUTOR_NAME)
+    public void handleOpenedEvent(@NonNull final QuestionnaireOpenedEvent event) {
+        final RespondentId respondentId = event.getRespondentId();
+
+        if (!respondentDao.isInvited(respondentId)) {
+            respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.OPENED);
+        }
     }
 
     @NonNull

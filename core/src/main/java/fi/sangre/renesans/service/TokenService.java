@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.UUID;
 
 import static fi.sangre.renesans.application.utils.TokenUtils.*;
 
@@ -38,8 +37,8 @@ public class TokenService {
     private Duration activationTokenDuration;
 
     @NonNull
-    public String generateQuestionnaireToken(@NonNull final UUID respondentId , @NonNull final String invitationHash) {
-        final Respondent respondent = organizationSurveyService.getRespondent(new RespondentId(respondentId), invitationHash);
+    public String generateQuestionnaireToken(@NonNull final RespondentId respondentId , @NonNull final String invitationHash) {
+        final Respondent respondent = organizationSurveyService.getRespondent(respondentId, invitationHash);
 
         return jwtTokenService.generateToken(respondent.getId().toString()
                 , QUESTIONNAIRE_TOKEN_CLAIMS
