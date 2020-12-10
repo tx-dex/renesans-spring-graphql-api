@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class DriverMerger {
+    private final MultilingualUtils multilingualUtils;
 
     @NonNull
     public List<Driver> combine(@NonNull final List<Driver> existing, @Nullable final List<Driver> inputs) {
@@ -58,9 +59,9 @@ public class DriverMerger {
     private Driver combine(@NonNull final Driver existing, @NonNull final Driver input) {
         return Driver.builder()
                 .id(existing.getId())
-                .titles(MultilingualUtils.combine(existing.getTitles(), input.getTitles()))
-                .descriptions(MultilingualUtils.combine(existing.getDescriptions(), input.getDescriptions()))
-                .prescriptions(MultilingualUtils.combine(existing.getPrescriptions(), input.getPrescriptions()))
+                .titles(multilingualUtils.combine(existing.getTitles(), input.getTitles()))
+                .descriptions(multilingualUtils.combine(existing.getDescriptions(), input.getDescriptions()))
+                .prescriptions(multilingualUtils.combine(existing.getPrescriptions(), input.getPrescriptions()))
                 .weight(input.getWeight())
                 .build();
     }

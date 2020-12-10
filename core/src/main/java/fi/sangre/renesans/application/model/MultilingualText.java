@@ -1,13 +1,10 @@
 package fi.sangre.renesans.application.model;
 
 import com.google.common.collect.ImmutableMap;
-import lombok.Builder;
-import lombok.Data;
 
 import java.util.Map;
+import java.util.Objects;
 
-@Data
-@Builder
 public class MultilingualText {
     private final Map<String, String> phrases;
 
@@ -17,8 +14,16 @@ public class MultilingualText {
     }
 
     public boolean isEmpty() {
-        return phrases == null || phrases.isEmpty();
+        return phrases == null
+                || phrases.isEmpty()
+                || phrases.values().stream().allMatch(Objects::isNull);
     }
 
-    public static MultilingualText EMPTY = new MultilingualText(ImmutableMap.of());
+    public Map<String, String> getPhrases() {
+        if (phrases == null) {
+            return ImmutableMap.of();
+        } else {
+            return phrases;
+        }
+    }
 }

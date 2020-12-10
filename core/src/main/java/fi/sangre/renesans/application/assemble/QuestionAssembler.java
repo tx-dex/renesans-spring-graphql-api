@@ -1,11 +1,10 @@
 package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.CatalystId;
-import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.question.LikertQuestionInput;
 import fi.sangre.renesans.persistence.model.metadata.questions.LikertQuestionMetadata;
@@ -29,6 +28,8 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class QuestionAssembler {
+    private final MultilingualUtils multilingualUtils;
+
     @Nullable
     public List<LikertQuestion> fromInput(@NonNull final CatalystId catalystId, @Nullable final List<LikertQuestionInput> inputs, @NonNull final String languageTag) {
         if (inputs != null) {
@@ -53,7 +54,7 @@ public class QuestionAssembler {
         return LikertQuestion.builder()
                 .id(questionId)
                 .catalystId(catalystId)
-                .titles(new MultilingualText(ImmutableMap.of(languageTag, input.getTitle())))
+                .titles(multilingualUtils.create(input.getTitle(), languageTag))
                 .build();
     }
 
@@ -80,7 +81,7 @@ public class QuestionAssembler {
     private LikertQuestion from(@NonNull final LikertQuestionMetadata metadata) {
         return LikertQuestion.builder()
                 .id(new QuestionId(metadata.getId()))
-                .titles(new MultilingualText((metadata).getTitles()))
+                .titles(multilingualUtils.create(metadata.getTitles()))
                 .build();
     }
 }

@@ -8,10 +8,7 @@ import fi.sangre.renesans.application.assemble.RespondentAssembler;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.event.InviteRespondentsEvent;
 import fi.sangre.renesans.application.merge.OrganizationSurveyMerger;
-import fi.sangre.renesans.application.model.Organization;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.Respondent;
-import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -20,6 +17,7 @@ import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.model.Question;
+import fi.sangre.renesans.persistence.model.TemplateId;
 import fi.sangre.renesans.persistence.model.*;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
@@ -47,7 +45,6 @@ import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.application.utils.MultilingualUtils.compare;
-import static fi.sangre.renesans.application.utils.MultilingualUtils.create;
 import static java.util.stream.Collectors.*;
 
 
@@ -66,6 +63,7 @@ public class OrganizationSurveyService {
     private final SurveyRespondentRepository surveyRespondentRepository;
     private final RespondentAssembler respondentAssembler;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final MultilingualUtils multilingualUtils;
 
     @NonNull
     @Transactional(readOnly = true)
@@ -110,8 +108,19 @@ public class OrganizationSurveyService {
                     .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
 
             final SurveyMetadata metadata = copy(survey.getMetadata());
-            metadata.setTitles(MultilingualUtils.combine(metadata.getTitles(), input.getTitle(), languageTag));
-            metadata.setDescriptions(MultilingualUtils.combine(metadata.getDescriptions(), input.getDescription(), languageTag));
+            final MultilingualText titles = multilingualUtils.combine(
+                    multilingualUtils.create(metadata.getTitles()),
+                    multilingualUtils.create(input.getTitle(), languageTag));
+            final MultilingualText descriptions = multilingualUtils.combine(
+                    multilingualUtils.create(metadata.getDescriptions()),
+                    multilingualUtils.create(input.getDescription(), languageTag));
+
+            if (titles.isEmpty()) {
+                throw new SurveyException("Title must not be empty");
+            }
+
+            metadata.setTitles(titles.getPhrases());
+            metadata.setDescriptions(descriptions.getPhrases());
             survey.setMetadata(metadata);
 
             surveyRepository.saveAndFlush(survey);
@@ -217,10 +226,17 @@ public class OrganizationSurveyService {
 
     @NonNull
     private Survey createSurvey(@NonNull final Customer customer, SurveyInput input, @Nullable final Survey defaultSurvey, @NonNull final String languageTag) {
+        final MultilingualText titles = multilingualUtils.create(input.getTitle(), languageTag);
+        final MultilingualText descriptions = multilingualUtils.create(input.getDescription(), languageTag);
+
+        if (titles.isEmpty()) {
+            throw new SurveyException("Title must not be empty");
+        }
+
         final SurveyMetadata.SurveyMetadataBuilder metadata = SurveyMetadata
                 .builder()
-                .titles(create(input.getTitle(), languageTag))
-                .descriptions(create(input.getDescription(), languageTag))
+                .titles(titles.getPhrases())
+                .descriptions(descriptions.getPhrases())
                 .localisation(LocalisationMetadata.builder().build())
                 .translations(ImmutableMap.of());
 

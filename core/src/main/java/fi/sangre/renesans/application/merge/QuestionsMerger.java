@@ -1,9 +1,7 @@
 package fi.sangre.renesans.application.merge;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.DriverWeight;
-import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -24,6 +22,8 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class QuestionsMerger {
+    private final MultilingualUtils multilingualUtils;
+
     @NonNull
     public List<LikertQuestion> combine(@NonNull final List<LikertQuestion> existing, @Nullable final List<LikertQuestion> inputs) {
         if (inputs == null) {
@@ -49,7 +49,7 @@ public class QuestionsMerger {
                     .id(new QuestionId(UUID.randomUUID()))
                     .catalystId(input.getCatalystId())
                     .weights(ImmutableList.of())
-                    .titles(new MultilingualText(ImmutableMap.of()))
+                    .titles(multilingualUtils.empty())
                     .build();
         } else {
             newOrExisting = Objects.requireNonNull(existing.get(input.getId()), "Not existing question in the input");
@@ -63,7 +63,7 @@ public class QuestionsMerger {
     private LikertQuestion combine(@NonNull final LikertQuestion existing, @NonNull final LikertQuestion input) {
         return LikertQuestion.builder()
                 .id(existing.getId())
-                .titles(MultilingualUtils.combine(existing.getTitles(), input.getTitles()))
+                .titles(multilingualUtils.combine(existing.getTitles(), input.getTitles()))
                 .weights(combineWeights(existing.getWeights(), input.getWeights()))
                 .build();
     }

@@ -3,11 +3,11 @@ package fi.sangre.renesans.application.assemble;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.StaticTextGroup;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.input.StaticTextInput;
 import fi.sangre.renesans.persistence.model.metadata.PhrasesGroupMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -25,12 +25,12 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class StaticTextAssembler {
-
+    private final MultilingualUtils multilingualUtils;
     @NonNull
     public MultilingualText from(@NonNull final StaticTextInput input, @NonNull final String languageTag) {
         checkArgument(input.getId() != null, "input.id must be provided");
 
-        return new MultilingualText(ImmutableMap.of(languageTag, StringUtils.trim(input.getText())));
+        return multilingualUtils.create(input.getText(), languageTag);
     }
 
     @NonNull
@@ -44,7 +44,7 @@ public class StaticTextAssembler {
                                 .texts(group.getValue().getPhrases().entrySet().stream()
                                         .collect(collectingAndThen(toMap(
                                                 Map.Entry::getKey,
-                                                e -> new MultilingualText(e.getValue().getPhrases())
+                                                e -> multilingualUtils.create(e.getValue().getPhrases())
                                         ), Collections::unmodifiableMap)))
                                 .build()), Collections::unmodifiableMap));
     }

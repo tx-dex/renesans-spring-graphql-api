@@ -1,18 +1,24 @@
 package fi.sangre.renesans.application.utils;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import fi.sangre.renesans.application.model.MultilingualText;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
+
+@Component
 public class MultilingualUtils {
     private static final String DEFAULT_LANGUAGE_TAG = "en";
+    private static final MultilingualText EMPTY = new MultilingualText(ImmutableMap.of());
 
     public static int compare(@NonNull final Map<String, String> e1,
                               @NonNull final Map<String, String> e2,
@@ -26,40 +32,52 @@ public class MultilingualUtils {
                 .orElseGet(() -> Optional.ofNullable(phrases.get(DEFAULT_LANGUAGE_TAG))
                         .orElseGet(() -> phrases.values().stream().findAny()
                                 .orElse(null)));
-
     }
 
     @NonNull
-    public static Map<String, String> create(@Nullable final String phrase, @NonNull final String languageTag) {
-        return combine((Map<String, String>) null, phrase, languageTag);
+    public MultilingualText create(@Nullable final Map<String, String> phrases) {
+        return combineMaps(null, phrases);
     }
 
     @NonNull
-    public static Map<String, String> combine(@Nullable final Map<String, String> phrases, @Nullable final String phrase, @NonNull final String languageTag) {
-        final Map<String, String> combined;
-        if (phrases == null) {
-            combined = Maps.newHashMap();
-        } else {
-            combined = Maps.newHashMap(phrases);
-        }
-
+    public MultilingualText create(@Nullable final String phrase, @NonNull final String languageTag) {
         if (phrase != null) {
-            combined.put(languageTag, phrase);
+            final Map<String, String> phrases = new LinkedHashMap<>();
+            phrases.put(languageTag, StringUtils.trimToNull(phrase));
+            return new MultilingualText(Collections.unmodifiableMap(phrases));
+        } else {
+            return EMPTY;
         }
 
-        return ImmutableMap.copyOf(combined);
     }
 
     @NonNull
-    public static MultilingualText combine(@Nullable final MultilingualText existing, @NonNull final MultilingualText input) {
-        final MultilingualText combined;
-        if (existing == null || existing.getPhrases() == null) {
-            combined = new MultilingualText(new LinkedHashMap<>());
-        } else {
-            combined = new MultilingualText(new LinkedHashMap<>(existing.getPhrases()));
-        }
-        combined.getPhrases().putAll(input.getPhrases());
+    public MultilingualText empty() {
+        return EMPTY;
+    }
 
-        return combined;
+    @NonNull
+    public MultilingualText combine(@Nullable final MultilingualText existing, @Nullable final MultilingualText input) {
+        return combineMaps(existing != null ? existing.getPhrases() : null, input != null ? input.getPhrases() : null);
+    }
+
+    @NonNull
+    private MultilingualText combineMaps(@Nullable final Map<String, String> existing, @Nullable final Map<String, String> input) {
+        final Map<String, String> phrases = new LinkedHashMap<>();
+        if (existing != null) {
+            phrases.putAll(existing);
+        }
+
+        if (input != null) {
+            input.forEach((languageTag, phrase) -> {
+                if (phrase == null) {
+                    phrases.remove(languageTag);
+                } else {
+                    phrases.put(languageTag, phrase);
+                }
+            });
+        }
+
+        return new MultilingualText(Collections.unmodifiableMap(phrases));
     }
 }

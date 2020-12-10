@@ -34,7 +34,6 @@ public class OrganizationSurveyMerger {
         existing.setParameters(parameterMerger.combine(existing.getParameters(), input.getParameters()));
         existing.setStaticTexts(staticTextMerger.combine(existing.getStaticTexts(), input.getStaticTexts()));
 
-
         return existing;
     }
 }

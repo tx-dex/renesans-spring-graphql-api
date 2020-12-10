@@ -2,8 +2,8 @@ package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import com.google.common.collect.ImmutableMap;
-import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.StaticTextGroup;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireTranslationOutput;
 import fi.sangre.renesans.service.TranslationService;
@@ -26,13 +26,13 @@ import static java.util.stream.Collectors.toMap;
 public class QuestionnaireResolver implements GraphQLResolver<QuestionnaireOutput> {
     private final TranslationService translationService;
     private final ResolverHelper resolverHelper;
+    private final MultilingualUtils multilingualUtils;
 
     public QuestionnaireTranslationOutput getStaticTexts(@NonNull final QuestionnaireOutput output, @NonNull final DataFetchingEnvironment environment) {
         final String languageTag = resolverHelper.getLanguageCode(environment);
         final StaticTextGroup emptyGroup = StaticTextGroup.builder()
                 .texts(ImmutableMap.of())
                 .build();
-        final MultilingualText emptyText = new MultilingualText(ImmutableMap.of());
 
         final Map<String, Map<String, String>> translations = translationService.getTranslations(languageTag).entrySet().stream()
                 .collect(collectingAndThen(toMap(
@@ -41,7 +41,7 @@ public class QuestionnaireResolver implements GraphQLResolver<QuestionnaireOutpu
                                 .collect(collectingAndThen(toMap(
                                         Map.Entry::getKey,
                                         text -> output.getStaticTexts().getOrDefault(group.getKey(), emptyGroup)
-                                                .getTexts().getOrDefault(text.getKey(), emptyText)
+                                                .getTexts().getOrDefault(text.getKey(), multilingualUtils.empty())
                                                 .getPhrases().getOrDefault(languageTag, text.getValue().getText()))
                                         , Collections::unmodifiableMap)))
                         , Collections::unmodifiableMap));

@@ -3,6 +3,7 @@ package fi.sangre.renesans.application.assemble;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.Driver;
 import fi.sangre.renesans.application.model.MultilingualText;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.exception.MissingIdException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.DriverInput;
@@ -23,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class DriverAssembler {
-    private final MultilingualTextAssembler multilingualTextAssembler;
+    private final MultilingualUtils multilingualUtils;
 
     @Nullable
     public List<Driver> fromInput(@Nullable List<DriverInput> inputs, @NonNull final String languageTag) {
@@ -42,11 +43,17 @@ public class DriverAssembler {
 
     @NonNull
     public Driver from(@NonNull final DriverInput input, @NonNull final String languageTag) {
+        final MultilingualText title = multilingualUtils.create(input.getTitle(), languageTag);
+
+        if (title.isEmpty()) {
+            throw new SurveyException("Title must not be empty");
+        }
+
         return Driver.builder()
                 .id(input.getId())
-                .titles(multilingualTextAssembler.fromRequired(input.getTitle(), languageTag))
-                .descriptions(multilingualTextAssembler.fromOptional(input.getDescription(), languageTag))
-                .prescriptions(multilingualTextAssembler.fromOptional(input.getPrescription(), languageTag))
+                .titles(title)
+                .descriptions(multilingualUtils.create(input.getDescription(), languageTag))
+                .prescriptions(multilingualUtils.create(input.getPrescription(), languageTag))
                 .weight(input.getWeight())
                 .build();
     }
@@ -65,9 +72,9 @@ public class DriverAssembler {
         return Driver.builder()
                 .id(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER))
                 .pdfName(metadata.getPdfName())
-                .titles(new MultilingualText(metadata.getTitles()))
-                .descriptions(new MultilingualText(metadata.getDescriptions()))
-                .prescriptions(new MultilingualText(metadata.getPrescriptions()))
+                .titles(multilingualUtils.create(metadata.getTitles()))
+                .descriptions(multilingualUtils.create(metadata.getDescriptions()))
+                .prescriptions(multilingualUtils.create(metadata.getPrescriptions()))
                 .weight(metadata.getWeight())
                 .build();
     }

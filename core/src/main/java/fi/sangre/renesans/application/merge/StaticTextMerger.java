@@ -18,6 +18,8 @@ import java.util.Map;
 
 @Component
 public class StaticTextMerger {
+    private final MultilingualUtils multilingualUtils;
+
     @NonNull
     public Map<String, StaticTextGroup> combine(@NonNull final Map<String, StaticTextGroup> existing, @Nullable final Map<String, StaticTextGroup> input) {
         if (input == null) {
@@ -51,7 +53,7 @@ public class StaticTextMerger {
             if (found == null) {
                 builder.put(text.getKey(), text.getValue());
             } else {
-                builder.put(text.getKey(), MultilingualUtils.combine(found, text.getValue()));
+                builder.put(text.getKey(), multilingualUtils.combine(found, text.getValue()));
             }
         }
 

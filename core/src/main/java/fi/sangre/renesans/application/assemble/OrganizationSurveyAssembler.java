@@ -1,9 +1,9 @@
 package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableMap;
-import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.StaticTextGroup;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.input.CatalystInput;
 import fi.sangre.renesans.graphql.input.StaticTextInput;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
@@ -27,10 +27,10 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class OrganizationSurveyAssembler {
-    private final MultilingualTextAssembler multilingualTextAssembler;
     private final ParameterAssembler parameterAssembler;
     private final StaticTextAssembler staticTextAssembler;
     private final CatalystAssembler catalystAssembler;
+    private final MultilingualUtils multilingualUtils;
 
     @NonNull
     public OrganizationSurvey fromQuestionsInput(@NonNull final UUID id,
@@ -44,8 +44,8 @@ public class OrganizationSurveyAssembler {
                 .catalysts(catalystAssembler.fromInputs(input, languageTag).stream()
                         .peek(e -> {
                             // we don't want to update drivers or titles
-                            e.setTitles(MultilingualText.EMPTY);
-                            e.setDescriptions(MultilingualText.EMPTY);
+                            e.setTitles(multilingualUtils.empty());
+                            e.setDescriptions(multilingualUtils.empty());
                             e.setDrivers(null);
                         })
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
@@ -63,7 +63,7 @@ public class OrganizationSurveyAssembler {
                 .catalysts(catalystAssembler.fromInputs(input, languageTag).stream()
                         .peek(e -> {
                             // we don't want to update questions here
-                            e.setOpenQuestion(MultilingualText.EMPTY);
+                            e.setOpenQuestion(multilingualUtils.empty());
                             e.setQuestions(null);
                         })
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
@@ -111,8 +111,8 @@ public class OrganizationSurveyAssembler {
         return OrganizationSurvey.builder()
                 .id(survey.getId())
                 .version(survey.getVersion())
-                .titles(multilingualTextAssembler.from(metadata.getTitles()))
-                .descriptions(multilingualTextAssembler.from(metadata.getDescriptions()))
+                .titles(multilingualUtils.create(metadata.getTitles()))
+                .descriptions(multilingualUtils.create(metadata.getDescriptions()))
                 .catalysts(catalystAssembler.fromMetadata(metadata.getCatalysts()))
                 .parameters(parameterAssembler.fromMetadata(metadata.getParameters()))
                 .staticTexts(staticTextAssembler.fromMetadata(metadata.getTranslations()))

@@ -27,6 +27,8 @@ import static java.util.stream.Collectors.toMap;
 public class CatalystMerger {
     private final DriverMerger driverMerger;
     private final QuestionsMerger questionsMerger;
+    private final MultilingualUtils multilingualUtils;
+
 
     @NonNull
     public List<Catalyst> combine(@NonNull final List<Catalyst> existing, @Nullable final List<Catalyst> inputs) {
@@ -61,8 +63,8 @@ public class CatalystMerger {
     private Catalyst combine(@NonNull final Catalyst existing, @NonNull final Catalyst input) {
         return Catalyst.builder()
                 .id(existing.getId())
-                .titles(MultilingualUtils.combine(existing.getTitles(), input.getTitles()))
-                .descriptions(MultilingualUtils.combine(existing.getDescriptions(), input.getDescriptions()))
+                .titles(multilingualUtils.combine(existing.getTitles(), input.getTitles()))
+                .descriptions(multilingualUtils.combine(existing.getDescriptions(), input.getDescriptions()))
                 .drivers(driverMerger.combine(existing.getDrivers(), input.getDrivers()))
                 .questions(questionsMerger.combine(existing.getQuestions(), input.getQuestions()))
                 .openQuestion(combineOpenQuestion(existing.getOpenQuestion(), input.getOpenQuestion()))
@@ -75,7 +77,7 @@ public class CatalystMerger {
         if (input == null) {
             return null;
         } else {
-            final MultilingualText combined = MultilingualUtils.combine(existing, input);
+            final MultilingualText combined = multilingualUtils.combine(existing, input);
 
             if (combined.isEmpty()) {
                 return null;

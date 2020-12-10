@@ -1,11 +1,10 @@
 package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.ParameterId;
 import fi.sangre.renesans.application.model.parameter.*;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.SurveyException;
@@ -33,6 +32,7 @@ import static java.util.stream.Collectors.toList;
 public class ParameterAssembler {
     private final SurveyUtils surveyUtils;
     private final ParameterUtils parameterUtils;
+    private final MultilingualUtils multilingualUtils;
 
     @NonNull
     public Parameter fromInput(@NonNull final ParameterAnswerInput input, @NonNull final OrganizationSurvey survey) {
@@ -95,7 +95,7 @@ public class ParameterAssembler {
     private Parameter from(@NonNull final SurveyListParameterInput input, @NonNull final String languageTag) {
         return ListParameter.builder()
                 .id(ParameterId.from(input.getValue()))
-                .label(new MultilingualText(ImmutableMap.of(languageTag, input.getLabel())))
+                .label(multilingualUtils.create(input.getLabel(), languageTag))
                 .values(input.getChildren().stream()
                         .map(e -> from(e, languageTag))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
@@ -106,7 +106,7 @@ public class ParameterAssembler {
     private ParameterItem from(@NonNull final SurveyParameterItemInput input, @NonNull final String languageTag) {
         return ParameterItem.builder()
                 .id(ParameterId.from(input.getValue()))
-                .label(new MultilingualText(ImmutableMap.of(languageTag, input.getLabel())))
+                .label(multilingualUtils.create(input.getLabel(), languageTag))
                 .build();
     }
 
@@ -114,7 +114,7 @@ public class ParameterAssembler {
     private Parameter from(@NonNull final SurveyTreeParameterInput input, @NonNull final String languageTag) {
         final TreeParameter.TreeParameterBuilder parameter = TreeParameter.builder()
                 .id(ParameterId.from(input.getValue()))
-                .label(new MultilingualText(ImmutableMap.of(languageTag, input.getLabel())));
+                .label(multilingualUtils.create(input.getLabel(), languageTag));
 
         final List<SurveyTreeParameterChildInput> children = input.getChildren();
         if (children != null && !children.isEmpty()) {
@@ -131,12 +131,12 @@ public class ParameterAssembler {
         if (input.getChildren() == null) {
             return ParameterItem.builder()
                     .id(ParameterId.from(input.getValue()))
-                    .label(new MultilingualText(ImmutableMap.of(languageTag, input.getLabel())))
+                    .label(multilingualUtils.create(input.getLabel(), languageTag))
                     .build();
         } else {
             return TreeParameter.builder()
                     .id(ParameterId.from(input.getValue()))
-                    .label(new MultilingualText(ImmutableMap.of(languageTag, input.getLabel())))
+                    .label(multilingualUtils.create(input.getLabel(), languageTag))
                     .children(input.getChildren().stream()
                             .map(e -> from(e, languageTag))
                             .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
@@ -168,7 +168,7 @@ public class ParameterAssembler {
     private Parameter from(@NonNull final ListParameterMetadata metadata, @Nullable final Parameter root, @Nullable final Parameter parent) {
         final ListParameter parameter = ListParameter.builder()
                 .id(new ParameterId(metadata.getId()))
-                .label(new MultilingualText(metadata.getTitles()))
+                .label(multilingualUtils.create(metadata.getTitles()))
                 .build();
 
         parameter.setValues(metadata.getValues().stream()
@@ -184,7 +184,7 @@ public class ParameterAssembler {
                 .root(root)
                 .parent(parent)
                 .id(new ParameterId(metadata.getId()))
-                .label(new MultilingualText(metadata.getTitles()))
+                .label(multilingualUtils.create(metadata.getTitles()))
                 .build();
     }
 
@@ -194,7 +194,7 @@ public class ParameterAssembler {
                 .root(root)
                 .parent(parent)
                 .id(new ParameterId(metadata.getId()))
-                .label(new MultilingualText(metadata.getTitles()))
+                .label(multilingualUtils.create(metadata.getTitles()))
                 .build();
 
         final List<ParameterChildMetadata> children = metadata.getChildren();

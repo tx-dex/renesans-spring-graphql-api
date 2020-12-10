@@ -1,10 +1,9 @@
 package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.CatalystId;
-import fi.sangre.renesans.application.model.MultilingualText;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.exception.MissingIdException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.CatalystInput;
@@ -28,7 +27,7 @@ import static java.util.stream.Collectors.toList;
 public class CatalystAssembler {
     private final QuestionAssembler questionAssembler;
     private final DriverAssembler driverAssembler;
-    private final MultilingualTextAssembler multilingualTextAssembler;
+    private final MultilingualUtils multilingualUtils;
 
     @NonNull
     public List<Catalyst> fromInputs(@NonNull final List<CatalystInput> inputs, @NonNull final String languageTag) {
@@ -42,17 +41,17 @@ public class CatalystAssembler {
     }
 
     @NonNull
-    public Catalyst from(@NonNull CatalystInput input, @NonNull final String languageTag) {
+    private Catalyst from(@NonNull CatalystInput input, @NonNull final String languageTag) {
         final CatalystId catalystId = new CatalystId(Objects.requireNonNull(input.getId(), "Catalyst id not provided in the input"));
 
         return Catalyst.builder()
                 .id(catalystId)
-                .titles(multilingualTextAssembler.fromOptional(input.getTitle(), languageTag)) // This is optional as it may not be provided when updating questions
-                .descriptions(multilingualTextAssembler.fromOptional(input.getDescription(), languageTag))
+                .titles(multilingualUtils.create(input.getTitle(), languageTag)) // This is optional as it may not be provided when updating questions
+                .descriptions(multilingualUtils.create(input.getDescription(), languageTag))
                 .drivers(driverAssembler.fromInput(input.getDrivers(), languageTag))
                 .questions(questionAssembler.fromInput(catalystId, input.getQuestions(), languageTag))
                 .openQuestion(Optional.ofNullable(StringUtils.trimToNull(input.getCatalystQuestion()))
-                        .map(e -> new MultilingualText(ImmutableMap.of(languageTag, e)))
+                        .map(e -> multilingualUtils.create(e, languageTag))
                         .orElse(null))
                 .build();
     }
@@ -71,12 +70,10 @@ public class CatalystAssembler {
         return Catalyst.builder()
                 .id(new CatalystId(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER)))
                 .pdfName(metadata.getPdfName())
-                .titles(new MultilingualText(metadata.getTitles()))
+                .titles(multilingualUtils.create(metadata.getTitles()))
                 .drivers(driverAssembler.fromMetadata(metadata.getDrivers()))
                 .questions(questionAssembler.fromMetadata(metadata.getQuestions()))
-                .openQuestion(Optional.ofNullable(metadata.getOpenQuestion())
-                        .map(MultilingualText::new)
-                        .orElse(null))
+                .openQuestion(multilingualUtils.create(metadata.getOpenQuestion()))
                 .weight(metadata.getWeight())
                 .build();
     }

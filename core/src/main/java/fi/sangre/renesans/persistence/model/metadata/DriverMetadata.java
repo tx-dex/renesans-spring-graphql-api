@@ -13,7 +13,6 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@EqualsAndHashCode(of = "id")
 @ToString
 @Builder
 

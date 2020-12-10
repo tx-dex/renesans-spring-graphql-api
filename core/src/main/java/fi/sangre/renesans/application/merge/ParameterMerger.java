@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class ParameterMerger {
+    private final MultilingualUtils multilingualUtils;
 
     @NonNull
     public List<Parameter> combine(@NonNull final List<Parameter> existing, @Nullable final List<Parameter> inputs) {
@@ -67,7 +68,7 @@ public class ParameterMerger {
 
     @NonNull
     private Parameter combine(@NonNull final ListParameter existing, @NonNull final ListParameter input) {
-        existing.setLabel(MultilingualUtils.combine(existing.getLabel(), input.getLabel()));
+        existing.setLabel(multilingualUtils.combine(existing.getLabel(), input.getLabel()));
 
         final ImmutableList.Builder<ParameterItem> values = ImmutableList.builder();
         final Map<ParameterId, ParameterItem> existingItems = Optional.ofNullable(existing.getValues())
@@ -102,7 +103,7 @@ public class ParameterMerger {
 
     @NonNull
     private ParameterItem combineItem(@NonNull final ParameterItem existing, @NonNull final ParameterItem input) {
-        existing.setLabel(MultilingualUtils.combine(existing.getLabel(), input.getLabel()));
+        existing.setLabel(multilingualUtils.combine(existing.getLabel(), input.getLabel()));
 
         return existing;
     }
@@ -129,7 +130,7 @@ public class ParameterMerger {
 
     @NonNull
     private Parameter combine(@NonNull final TreeParameter existing, @NonNull final TreeParameter input) {
-        existing.setLabel(MultilingualUtils.combine(existing.getLabel(), input.getLabel()));
+        existing.setLabel(multilingualUtils.combine(existing.getLabel(), input.getLabel()));
 
         final ImmutableList.Builder<ParameterChild> children = ImmutableList.builder();
         final Map<ParameterId, ParameterChild> existingItems = Optional.ofNullable(existing.getChildren())

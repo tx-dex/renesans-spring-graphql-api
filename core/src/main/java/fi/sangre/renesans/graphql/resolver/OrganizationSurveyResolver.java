@@ -2,10 +2,10 @@ package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import com.google.common.collect.ImmutableMap;
-import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.RespondentCounters;
 import fi.sangre.renesans.application.model.StaticTextGroup;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.assemble.SurveyParameterOutputAssembler;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.graphql.output.StaticTextGroupOutput;
@@ -33,6 +33,7 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
     private final ResolverHelper resolverHelper;
     private final SurveyParameterOutputAssembler surveyParameterOutputAssembler;
     private final TranslationService translationService;
+    private final MultilingualUtils multilingualUtils;
 
     @NonNull
     public String getTitle(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
@@ -63,7 +64,6 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
         final StaticTextGroup emptyGroup = StaticTextGroup.builder()
                 .texts(ImmutableMap.of())
                 .build();
-        final MultilingualText emptyText = new MultilingualText(ImmutableMap.of());
 
         return translationService.getTranslations(languageTag).entrySet().stream()
                 .map(group -> StaticTextGroupOutput.builder()
@@ -75,7 +75,7 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
                                         .title(translationService.getTitle(text.getKey(), text.getValue().getTitle()))
                                         .description(text.getValue().getDescription())
                                         .text(survey.getStaticTexts().getOrDefault(group.getKey(), emptyGroup)
-                                                .getTexts().getOrDefault(text.getKey(), emptyText)
+                                                .getTexts().getOrDefault(text.getKey(), multilingualUtils.empty())
                                                 .getPhrases().getOrDefault(languageTag, text.getValue().getText()))
                                         .build())
                                 .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
