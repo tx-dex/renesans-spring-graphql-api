@@ -13,8 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -45,8 +44,20 @@ public class ParameterMerger {
 
             log.trace("Combined parameters: {}", combined);
 
+            validate(combined);
+
             return Collections.unmodifiableList(combined);
         }
+    }
+
+    private void validate(@NonNull final List<Parameter> parameters) {
+        multilingualUtils.checkDuplicates(parameters.stream()
+                        .map(Parameter::getLabel)
+                        .collect(collectingAndThen(toList(), Collections::unmodifiableList)),
+                "Duplicate parameter name"
+        );
+
+        // TODO: check children labels?
     }
 
     @NonNull

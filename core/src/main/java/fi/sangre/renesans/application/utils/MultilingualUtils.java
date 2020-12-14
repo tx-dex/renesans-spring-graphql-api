@@ -44,6 +44,24 @@ public class MultilingualUtils {
         }
     }
 
+    public void checkDuplicates(@NonNull final List<MultilingualText> texts, @NonNull final String message) {
+        for(final String languageTag : VALID_LANGUAGE_TAGS) {
+            final List<String> all = new ArrayList<>();
+            final Set<String> unique = new HashSet<>();
+            for(final MultilingualText text : texts) {
+                final String phrase = StringUtils.lowerCase(text.getPhrase(languageTag));
+                if (phrase != null) {
+                    all.add(phrase);
+                    unique.add(phrase);
+                }
+            }
+
+            if (all.size() != unique.size()) {
+                throw new SurveyException(message);
+            }
+        }
+    }
+
     @NonNull
     public MultilingualText create(@Nullable final Map<String, String> phrases) {
         return combineMaps(null, phrases);
