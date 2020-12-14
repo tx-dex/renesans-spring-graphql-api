@@ -3,6 +3,7 @@ package fi.sangre.renesans.graphql.facade;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.LikertAnswerAssembler;
+import fi.sangre.renesans.application.assemble.OpenAnswerAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.event.QuestionnaireOpenedEvent;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
@@ -37,6 +38,7 @@ public class QuestionnaireFacade {
     private final OrganizationSurveyService organizationSurveyService;
     private final QuestionnaireAssembler questionnaireAssembler;
     private final LikertAnswerAssembler likertAnswerAssembler;
+    private final OpenAnswerAssembler openAnswerAssembler;
     private final ParameterAssembler parameterAssembler;
     private final AnswerService answerService;
     private final TokenService tokenService;
@@ -98,8 +100,17 @@ public class QuestionnaireFacade {
     @NonNull
     public QuestionnaireOutput answerCatalystQuestion(@NonNull final CatalystOpenQuestionAnswerInput answer, @NonNull final UserDetails principal) {
         if (principal instanceof RespondentPrincipal) {
-            //TODO: implement
-            return getQuestionnaire((RespondentPrincipal) principal);
+            final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+            try {
+                final OrganizationSurvey survey = organizationSurveyService.getSurvey(respondent.getSurveyId());
+
+                answerService.answerQuestion(openAnswerAssembler.from(answer, survey), respondent.getSurveyId(), respondent.getId());
+
+                return questionnaireAssembler.from(respondent.getId(), survey);
+            } catch (final InterruptedException | ExecutionException ex) {
+                log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
+                throw new InternalServiceException("Cannot get questionnaire");
+            }
         } else {
             throw new SurveyException("Only respondent can answer");
         }

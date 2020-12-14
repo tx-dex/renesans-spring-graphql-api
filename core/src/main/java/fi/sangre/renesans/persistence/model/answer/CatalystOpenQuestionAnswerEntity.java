@@ -4,10 +4,7 @@ import fi.sangre.renesans.application.model.QuestionType;
 import fi.sangre.renesans.application.model.answer.AnswerStatus;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,6 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(of = "id")
+@Builder
 
 @NamedEntityGraph(
         name = "catalyst-answer-graph",

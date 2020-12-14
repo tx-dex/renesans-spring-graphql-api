@@ -54,6 +54,16 @@ public class AnswerService {
                 .collect(collectingAndThen(toMap(OpenQuestionAnswer::getCatalystId, e -> e), Collections::unmodifiableMap)));
     }
 
+    public void answerQuestion(@NonNull final OpenQuestionAnswer answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+        try {
+            answerDao.saveAnswer(answer, surveyId, respondentId);
+            applicationEventPublisher.publishEvent(new RespondentAnswerEvent(surveyId, respondentId));
+        } catch (final Exception ex) {
+            log.warn("Cannot answer open question respondent(id={})", respondentId, ex);
+            throw new InternalServiceException("Cannot answer");
+        }
+    }
+
     @NonNull
     @Async(DAO_EXECUTOR_NAME)
     public Future<Map<CatalystId, List<LikertQuestionAnswer>>> getQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
@@ -69,7 +79,7 @@ public class AnswerService {
             answerDao.saveAnswer(answer, surveyId, respondentId);
             applicationEventPublisher.publishEvent(new RespondentAnswerEvent(surveyId, respondentId));
         } catch (final Exception ex) {
-            log.warn("Cannot answer parameter respondent(id={})", respondentId, ex);
+            log.warn("Cannot answer likert question respondent(id={})", respondentId, ex);
             throw new InternalServiceException("Cannot answer");
         }
     }

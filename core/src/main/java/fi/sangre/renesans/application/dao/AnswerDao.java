@@ -42,7 +42,6 @@ public class AnswerDao {
     private final ParameterAnswerAssembler parameterAnswerAssembler;
     private final ParameterUtils parameterUtils;
 
-
     @NonNull
     @Transactional(readOnly = true)
     public Set<OpenQuestionAnswer> getCatalystsQuestionsAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
@@ -57,7 +56,16 @@ public class AnswerDao {
                 .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
     }
 
-    //TODO: save catalysts questions answer
+    @Transactional
+    public void saveAnswer(@NonNull final OpenQuestionAnswer answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+        final CatalystAnswerId id = new CatalystAnswerId(surveyId.getValue(), respondentId.getValue(), answer.getCatalystId().getValue());
+        final CatalystOpenQuestionAnswerEntity entity = CatalystOpenQuestionAnswerEntity.builder()
+                .id(id)
+                .response(answer.getResponse())
+                .status(answer.getStatus())
+                .build();
+        catalystOpenQuestionAnswerRepository.save(entity);
+    }
 
     @Transactional(readOnly = true)
     public long countRespondentAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {

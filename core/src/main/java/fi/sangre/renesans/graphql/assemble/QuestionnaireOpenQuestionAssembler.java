@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class QuestionnaireOpenQuestionAssembler {
     @Nullable
     public QuestionnaireOpenQuestionOutput from(@NonNull final Catalyst catalyst, @Nullable final OpenQuestionAnswer answer) {
-        if (catalyst.getOpenQuestion() != null) {
+        if (catalyst.getOpenQuestion() != null && !catalyst.getOpenQuestion().isEmpty()) {
             final QuestionnaireOpenQuestionOutput.QuestionnaireOpenQuestionOutputBuilder output = QuestionnaireOpenQuestionOutput.builder()
                     .id(new QuestionId(catalyst.getId().getValue()))
                     .titles(catalyst.getOpenQuestion().getPhrases())
