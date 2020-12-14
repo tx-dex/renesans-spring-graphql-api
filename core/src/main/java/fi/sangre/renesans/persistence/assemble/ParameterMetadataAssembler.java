@@ -22,9 +22,13 @@ import static java.util.stream.Collectors.toList;
 public class ParameterMetadataAssembler {
     @NonNull
     public List<ParameterMetadata> from(@NonNull final List<Parameter> parameters) {
-        return parameters.stream()
+        final List<ParameterMetadata> metadata = parameters.stream()
                 .map(this::from)
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+
+        log.trace("Assembled metadata parameters: {}", metadata);
+
+        return metadata;
     }
 
     @NonNull

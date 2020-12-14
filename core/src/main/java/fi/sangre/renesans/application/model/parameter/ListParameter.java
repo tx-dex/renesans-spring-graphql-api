@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(of = "id")
+@ToString
 @Builder
 public class ListParameter implements Parameter {
     private ParameterId id;

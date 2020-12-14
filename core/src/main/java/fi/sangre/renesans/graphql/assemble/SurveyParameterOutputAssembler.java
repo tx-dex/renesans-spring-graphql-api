@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -23,13 +24,15 @@ import static java.util.stream.Collectors.toList;
 public class SurveyParameterOutputAssembler {
     @NonNull
     public List<SurveyParameterOutput> from(@Nullable final List<Parameter> parameters) {
-        if (parameters == null) {
-            return ImmutableList.of();
-        } else {
-            return parameters.stream()
-                    .map(this::from)
-                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
-        }
+        final List<SurveyParameterOutput> output = Optional.ofNullable(parameters)
+                .orElse(ImmutableList.of())
+                .stream()
+                .map(this::from)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+
+        log.trace("Assembled output parameters: {}", output);
+
+        return output;
     }
 
     @NonNull

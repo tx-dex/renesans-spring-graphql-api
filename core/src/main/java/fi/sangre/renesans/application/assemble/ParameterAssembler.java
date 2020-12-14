@@ -75,9 +75,13 @@ public class ParameterAssembler {
             throw new SurveyException("Duplicated parameters' keys in the input");
         }
 
-        return inputs.stream()
+        final List<Parameter> parameters = inputs.stream()
                 .map(e -> from(e, languageTag))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+
+        log.trace("Assembled parameters from input: {}", parameters);
+
+        return parameters;
     }
 
     @NonNull
@@ -146,11 +150,15 @@ public class ParameterAssembler {
 
     @NonNull
     public List<Parameter> fromMetadata(@Nullable final List<ParameterMetadata> metadata) {
-        return Optional.ofNullable(metadata)
+        final List<Parameter> parameters = Optional.ofNullable(metadata)
                 .orElse(ImmutableList.of())
                 .stream()
                 .map(this::from)
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+
+        log.trace("Assembled parameters from metadata: {}", parameters);
+
+        return parameters;
     }
 
     @NonNull

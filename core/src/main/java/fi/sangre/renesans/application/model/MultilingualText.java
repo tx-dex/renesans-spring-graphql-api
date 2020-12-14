@@ -1,10 +1,12 @@
 package fi.sangre.renesans.application.model;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.ToString;
 
 import java.util.Map;
 import java.util.Objects;
 
+@ToString
 public class MultilingualText {
     private final Map<String, String> phrases;
 

@@ -1,22 +1,22 @@
 package fi.sangre.renesans.application.utils;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.application.model.MultilingualText;
+import fi.sangre.renesans.exception.SurveyException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 
 @Component
 public class MultilingualUtils {
+    private static final Set<String> VALID_LANGUAGE_TAGS = ImmutableSet.of("en", "fi");
     private static final String DEFAULT_LANGUAGE_TAG = "en";
     private static final MultilingualText EMPTY = new MultilingualText(ImmutableMap.of());
 
@@ -34,6 +34,16 @@ public class MultilingualUtils {
                                 .orElse(null)));
     }
 
+    public void checkLanguageTag(@NonNull final String languageTag) {
+        if (StringUtils.isBlank(languageTag)) {
+            log.warn("Language code must not be empty");
+            throw new SurveyException("Language code must not be empty");
+        } else if (!VALID_LANGUAGE_TAGS.contains(languageTag)) {
+            log.warn("Invalid language tag. Must be 'fi' or 'en' but is '{}'", languageTag);
+            throw new SurveyException("Invalid language tag. Must be 'fi' or 'en' but is '" + languageTag + "'");
+        }
+    }
+
     @NonNull
     public MultilingualText create(@Nullable final Map<String, String> phrases) {
         return combineMaps(null, phrases);
@@ -48,7 +58,6 @@ public class MultilingualUtils {
         } else {
             return EMPTY;
         }
-
     }
 
     @NonNull

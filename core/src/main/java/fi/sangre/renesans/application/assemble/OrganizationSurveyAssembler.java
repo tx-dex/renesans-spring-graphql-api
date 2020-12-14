@@ -37,6 +37,7 @@ public class OrganizationSurveyAssembler {
                                                  @NonNull final Long version,
                                                  @NonNull final List<CatalystInput> input,
                                                  @NonNull final String languageTag) {
+        multilingualUtils.checkLanguageTag(languageTag);
 
         return OrganizationSurvey.builder()
                 .id(id)
@@ -57,6 +58,8 @@ public class OrganizationSurveyAssembler {
                                                           @NonNull final Long version,
                                                           @NonNull final List<CatalystInput> input,
                                                           @NonNull final String languageTag) {
+        multilingualUtils.checkLanguageTag(languageTag);
+
         return OrganizationSurvey.builder()
                 .id(id)
                 .version(version)
@@ -75,6 +78,8 @@ public class OrganizationSurveyAssembler {
                                                   @NonNull final Long version,
                                                   @NonNull final List<SurveyParameterInput> input,
                                                   @NonNull final String languageTag) {
+        multilingualUtils.checkLanguageTag(languageTag);
+
         return OrganizationSurvey.builder()
                 .id(id)
                 .version(version)
@@ -87,6 +92,8 @@ public class OrganizationSurveyAssembler {
                                                   @NonNull final Long version,
                                                   @NonNull final StaticTextInput input,
                                                   @NonNull final String languageTag) {
+        multilingualUtils.checkLanguageTag(languageTag);
+
         if (StringUtils.isNotBlank(input.getText())) {
             return OrganizationSurvey.builder()
                     .id(id)

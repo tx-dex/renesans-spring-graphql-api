@@ -26,9 +26,10 @@ public class ParameterMerger {
     @NonNull
     public List<Parameter> combine(@NonNull final List<Parameter> existing, @Nullable final List<Parameter> inputs) {
         if (inputs == null) {
+            log.trace("Copied parameters from existing. {}", existing);
             return ImmutableList.copyOf(existing);
         } else {
-            final ImmutableList.Builder<Parameter> combined = ImmutableList.builder();
+            final List<Parameter> combined = new LinkedList<>();
             final Map<ParameterId, Parameter> existingParameters = existing.stream()
                         .collect(collectingAndThen(toMap(Parameter::getId, v -> v), Collections::unmodifiableMap));
 
@@ -42,7 +43,9 @@ public class ParameterMerger {
                 }
             }
 
-            return combined.build();
+            log.trace("Combined parameters: {}", combined);
+
+            return Collections.unmodifiableList(combined);
         }
     }
 

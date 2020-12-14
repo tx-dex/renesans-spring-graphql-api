@@ -13,6 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Data
 @EqualsAndHashCode(of = "id")
+@ToString
 @Builder
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
