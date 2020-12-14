@@ -1,6 +1,7 @@
 package fi.sangre.renesans.service;
 
 
+import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
@@ -9,6 +10,7 @@ import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
+import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.SurveyUtils;
@@ -87,9 +89,14 @@ public class AnswerService {
     @NonNull
     @Async(DAO_EXECUTOR_NAME)
     public Future<Collection<Respondent>> getRespondentsParametersAnswersAsync(@NonNull final SurveyId surveyId) {
-        log.debug("Getting list of parameters answers for survey(id={})", surveyId);
+        return getRespondentsParametersAnswersAsync(surveyId, ImmutableList.of());
+    }
 
-        return new AsyncResult<>(answerDao.getParametersAnswers(surveyId));
+    @NonNull
+    @Async(DAO_EXECUTOR_NAME)
+    public Future<Collection<Respondent>> getRespondentsParametersAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final List<RespondentFilter> filters) {
+        log.debug("Getting list of parameters answers for survey(id={})", surveyId);
+        return new AsyncResult<>(answerDao.getParametersAnswers(surveyId, filters));
     }
 
     @NonNull

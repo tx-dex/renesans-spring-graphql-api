@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import fi.sangre.renesans.application.assemble.RespondentFilterAssembler;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.SurveyId;
@@ -32,6 +33,7 @@ public class AdminQueries implements GraphQLQueryResolver {
     private final OrganizationService organizationService;
     private final OrganizationSurveyService organizationSurveyService;
     private final SurveyRespondentsFacade surveyRespondentsFacade;
+    private final RespondentFilterAssembler respondentFilterAssembler;
     private final TemplateService templateService;
     private final ResolverHelper resolverHelper;
 
@@ -73,6 +75,8 @@ public class AdminQueries implements GraphQLQueryResolver {
                                                              @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-        return surveyRespondentsFacade.getSurveyRespondents(new SurveyId(surveyId), filters, resolverHelper.getLanguageCode(environment));
+        return surveyRespondentsFacade.getSurveyRespondents(new SurveyId(surveyId),
+                respondentFilterAssembler.fromInput(filters),
+                resolverHelper.getLanguageCode(environment));
     }
 }

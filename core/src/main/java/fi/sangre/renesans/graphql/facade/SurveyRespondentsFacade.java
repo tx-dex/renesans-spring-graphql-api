@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.sangre.mail.dto.MailStatus;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.model.*;
+import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
@@ -12,7 +13,6 @@ import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.RespondentOutputAssembler;
-import fi.sangre.renesans.graphql.input.FilterInput;
 import fi.sangre.renesans.graphql.input.RespondentInvitationInput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.service.AnswerService;
@@ -24,7 +24,6 @@ import org.apache.commons.collections4.map.LazyMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -49,7 +48,7 @@ public class SurveyRespondentsFacade {
 
     @NonNull
     public Collection<RespondentOutput> getSurveyRespondents(@NonNull final SurveyId surveyId,
-                                                             @Nullable final List<FilterInput> filters,
+                                                             @NonNull final List<RespondentFilter> filters,
                                                              @NonNull final String languageCode) {
         try {
             final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
@@ -62,7 +61,7 @@ public class SurveyRespondentsFacade {
                     .map(e -> MultilingualUtils.getText(e.getLabel().getPhrases(), languageCode))
                     .orElse(EMPTY));
 
-            if (filters == null || filters.isEmpty()) {
+            if (filters.isEmpty()) {
                 answers = answerService.getRespondentsParametersAnswersAsync(surveyId);
 
                 return respondentOutputAssembler.from(Stream.concat(
@@ -75,7 +74,7 @@ public class SurveyRespondentsFacade {
                         .sorted((e1, e2) -> StringUtils.compareIgnoreCase(e1.getEmail(), e2.getEmail()))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList));
             } else {
-                answers = answerService.getRespondentsParametersAnswersAsync(surveyId); //TODO: filter
+                answers = answerService.getRespondentsParametersAnswersAsync(surveyId, filters); //TODO: filter
                 return respondentOutputAssembler.from( answers.get().stream(), parameters, invitations)
                         .sorted((e1, e2) -> StringUtils.compareIgnoreCase(e1.getEmail(), e2.getEmail()))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList));
@@ -89,7 +88,7 @@ public class SurveyRespondentsFacade {
     @NonNull
     public Collection<RespondentOutput> inviteRespondents(@NonNull final SurveyId surveyId,
                                                           @NonNull final RespondentInvitationInput invitation,
-                                                          @Nullable final List<FilterInput> filters,
+                                                          @NonNull final List<RespondentFilter> filters,
                                                           @NonNull final String languageCode,
                                                           @NonNull final UserPrincipal principal) {
         final Set<String> emails = Optional.ofNullable(invitation.getEmails())

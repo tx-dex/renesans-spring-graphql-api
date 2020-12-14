@@ -4,6 +4,7 @@ import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
+import fi.sangre.renesans.application.assemble.RespondentFilterAssembler;
 import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.SurveyId;
@@ -47,6 +48,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     private final OrganizationSurveyService organizationSurveyService;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
     private final SurveyRespondentsFacade surveyRespondentsFacade;
+    private final RespondentFilterAssembler respondentFilterAssembler;
     private final ResolverHelper resolverHelper;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtTokenService;
@@ -221,7 +223,7 @@ public class AdminMutations implements GraphQLMutationResolver {
         if (principal instanceof UserPrincipal) {
             return surveyRespondentsFacade.inviteRespondents(new SurveyId(surveyId),
                     invitation,
-                    filters,
+                    respondentFilterAssembler.fromInput(filters),
                     resolverHelper.getLanguageCode(environment),
                     (UserPrincipal ) principal);
         } else {

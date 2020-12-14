@@ -1,6 +1,8 @@
 package fi.sangre.renesans.application.dao;
 
 import com.google.common.collect.ImmutableList;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import fi.sangre.renesans.application.assemble.ParameterAnswerAssembler;
 import fi.sangre.renesans.application.assemble.RespondentAssembler;
 import fi.sangre.renesans.application.model.CatalystId;
@@ -10,6 +12,8 @@ import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
+import fi.sangre.renesans.application.model.filter.RespondentFilter;
+import fi.sangre.renesans.application.model.filter.RespondentParameterFilter;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
 import fi.sangre.renesans.application.model.questions.QuestionId;
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.*;
 
@@ -100,12 +105,36 @@ public class AnswerDao {
 
     @NonNull
     @Transactional(readOnly = true)
-    public Collection<Respondent> getParametersAnswers(@NonNull final SurveyId surveyId) {
-        return respondentAssembler.from(
-                parameterAnswerRepository.findAllByIdSurveyIdAndTypeIs(surveyId.getValue(),
-                        ParameterAnswerType.ITEM) // There always should be only one last child selected with ITEM tipe
-                        .stream()
+    public Collection<Respondent> getParametersAnswers(@NonNull final SurveyId surveyId, @NonNull final List<RespondentFilter> filters) {
+        final BooleanBuilder filter = new BooleanBuilder(QParameterAnswerEntity.parameterAnswerEntity.survey.id.eq(surveyId.getValue()))
+                .and(QParameterAnswerEntity.parameterAnswerEntity.type.eq(ParameterAnswerType.ITEM)) // There always should be only one last child selected with ITEM type
+                .and(createRespondentFilters(surveyId, filters));
+
+        return respondentAssembler.from(StreamSupport.stream(parameterAnswerRepository.findAll(filter).spliterator(), false)
                         .collect(groupingBy(ParameterAnswerEntity::getRespondent)));
+    }
+
+    @NonNull
+    private BooleanBuilder createRespondentFilters(@NonNull final SurveyId surveyId, @NonNull final List<RespondentFilter> filters) {
+        final BooleanBuilder filter = new BooleanBuilder();
+
+        if (!filters.isEmpty()) {
+            final QParameterAnswerEntity answers = new QParameterAnswerEntity("a");
+
+            for (final RespondentFilter respondentFilter : filters) {
+                if (respondentFilter instanceof RespondentParameterFilter) {
+                    final List<UUID> parameterIds = ((RespondentParameterFilter) respondentFilter).getValues();
+
+                    filter.and(JPAExpressions.selectOne()
+                            .from(answers)
+                            .where(answers.respondent.id.eq(QParameterAnswerEntity.parameterAnswerEntity.respondent.id)
+                                    .and(answers.id.surveyId.eq(surveyId.getValue()).and(answers.id.parameterId.in(parameterIds))))
+                            .exists());
+                }
+            }
+        }
+
+        return filter;
     }
 
     @NonNull
