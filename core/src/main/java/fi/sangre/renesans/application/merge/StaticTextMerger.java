@@ -11,7 +11,13 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toMap;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -45,18 +51,25 @@ public class StaticTextMerger {
     }
 
     private void combineGroup(@NonNull final StaticTextGroup existing, @NonNull final StaticTextGroup input) {
-        final ImmutableMap.Builder<String, MultilingualText> builder = ImmutableMap.builder();
+        final Map<String, MultilingualText> createdOrUpdated = new LinkedHashMap<>();
 
         for (final Map.Entry<String, MultilingualText> text : input.getTexts().entrySet()) {
             final MultilingualText found = existing.getTexts().get(text.getKey());
 
             if (found == null) {
-                builder.put(text.getKey(), text.getValue());
+                createdOrUpdated.put(text.getKey(), text.getValue());
             } else {
-                builder.put(text.getKey(), multilingualUtils.combine(found, text.getValue()));
+                createdOrUpdated.put(text.getKey(), multilingualUtils.combine(found, text.getValue()));
             }
         }
 
-        existing.setTexts(builder.build());
+        existing.setTexts(Stream.concat(existing.getTexts().entrySet().stream(),
+                createdOrUpdated.entrySet().stream())
+                .collect(collectingAndThen(toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e2,
+                        LinkedHashMap::new
+                ), Collections::unmodifiableMap)));
     }
 }
