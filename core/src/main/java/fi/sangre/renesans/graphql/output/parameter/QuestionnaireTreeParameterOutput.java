@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,4 +23,5 @@ public class QuestionnaireTreeParameterOutput implements QuestionnaireParameterO
     private boolean answered;
     @Builder.Default
     private boolean selectable = false;
+    private Set<UUID> selectedAnswer;
 }

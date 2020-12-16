@@ -2,6 +2,7 @@ package fi.sangre.renesans.graphql.assemble;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.application.model.ParameterId;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.parameter.*;
@@ -48,13 +49,22 @@ public class QuestionnaireParameterOutputAssembler {
                 .map(ParameterItemAnswer::getResponse)
                 .orElse(null);
 
+        final QuestionnaireParameterOutput output;
         if (parameter instanceof ListParameter) {
-            return from((ListParameter) parameter, answerId);
+            output = from((ListParameter) parameter, answerId);
         } else if (parameter instanceof TreeParameter) {
-            return from((TreeParameter) parameter, answerId);
+            output = from((TreeParameter) parameter, answerId);
         } else {
             throw new SurveyException("Invalid parameter type");
         }
+
+        if (answerId != null) {
+            output.setSelectedAnswer(ImmutableSet.of(answerId.getValue()));
+        } else {
+            output.setSelectedAnswer(ImmutableSet.of());
+        }
+
+        return output;
     }
 
     @NonNull

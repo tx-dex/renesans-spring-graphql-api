@@ -237,6 +237,9 @@ type QuestionnaireListParameter {
     value: String!
     children: [QuestionnaireParameterItem!]!
     answered: Boolean!
+    # list of children.value that were answered
+    # Currently will have 1 element if answered, as multi-serlect is not possible
+    selectedAnswer: [ID!]
 }
 
 union QuestionnaireParameterChild = QuestionnaireParameterItem | QuestionnaireTreeParameter
@@ -248,6 +251,10 @@ type QuestionnaireTreeParameter {
     selectable: Boolean!
     children: [QuestionnaireParameterChild!]!
     answered: Boolean!
+    # list of children.value that were answered
+    # Currently will have 1 element if answered, as multi-serlect is not possible
+    # It will never be null for root, however children will not have this set
+    selectedAnswer: [ID!]
 }
 
 

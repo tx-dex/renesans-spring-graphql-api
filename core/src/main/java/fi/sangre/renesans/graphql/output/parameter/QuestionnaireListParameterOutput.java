@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,4 +19,5 @@ public class QuestionnaireListParameterOutput implements QuestionnaireParameterO
     private String value;
     private List<QuestionnaireParameterItemOutput> children;
     private boolean answered;
+    private Set<UUID> selectedAnswer;
 }
