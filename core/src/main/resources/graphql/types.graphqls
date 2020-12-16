@@ -228,7 +228,7 @@ type QuestionnaireParameterItem {
     label: String!
     value: String!
     selectable: Boolean!
-    checked: Boolean!
+    checked: Boolean! @deprecated(reason: "turns out it will be not used in the frontend")
 }
 
 type QuestionnaireListParameter {

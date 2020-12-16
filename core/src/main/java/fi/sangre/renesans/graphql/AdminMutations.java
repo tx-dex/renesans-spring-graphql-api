@@ -5,16 +5,18 @@ import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.assemble.RespondentFilterAssembler;
-import fi.sangre.renesans.application.model.Organization;
+import fi.sangre.renesans.application.model.OrganizationId;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
 import fi.sangre.renesans.graphql.input.question.QuestionDriverWeightInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
+import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.model.User;
@@ -45,6 +47,7 @@ import java.util.UUID;
 @Component
 public class AdminMutations implements GraphQLMutationResolver {
     private final OrganizationService organizationService;
+    private final OrganizationOutputAssembler organizationOutputAssembler;
     private final OrganizationSurveyService organizationSurveyService;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
     private final SurveyRespondentsFacade surveyRespondentsFacade;
@@ -98,31 +101,25 @@ public class AdminMutations implements GraphQLMutationResolver {
     }
 
     @PreAuthorize("hasRole('SUPER_USER')")
-    public User allowUserCustomerAccess(
-            Long id,
-            Long customerId
-    ) {
-        return userService.setUserAccess(id, customerId, true);
+    public User allowUserCustomerAccess(@NonNull final Long id, @NonNull final UUID customerId) {
+        return userService.setUserAccess(id, new OrganizationId(customerId), true);
     }
 
     @PreAuthorize("hasRole('SUPER_USER')")
-    public User revokeUserCustomerAccess(
-            Long id,
-            Long customerId
-    ) {
-        return userService.setUserAccess(id, customerId, false);
+    public User revokeUserCustomerAccess(@NonNull final Long id, @NonNull final UUID customerId) {
+        return userService.setUserAccess(id, new OrganizationId(customerId), false);
     }
 
     @NonNull
     @PreAuthorize("isAuthenticated()") //TODO: implement it properly
-    public Organization storeOrganization(@NonNull final OrganizationInput input) {
-        return organizationService.storeOrganization(input);
+    public OrganizationOutput storeOrganization(@NonNull final OrganizationInput input) {
+        return organizationOutputAssembler.from(organizationService.storeOrganization(input)); //TODO: move to facade
     }
 
     @NonNull
     @PreAuthorize("hasPermission(#id, 'organization', 'DELETE')")
-    public Organization removeOrganization(@NonNull final UUID id) {
-        return organizationService.softDeleteOrganization(id);
+    public OrganizationOutput removeOrganization(@NonNull final UUID id) {
+        return organizationOutputAssembler.from(organizationService.softDeleteOrganization(id));
     }
 
     @NonNull

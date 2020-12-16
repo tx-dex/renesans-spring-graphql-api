@@ -92,7 +92,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     @PreAuthorize("isAuthenticated()")
-    public Question storeCustomerQuestion(final String languageCode,final Long customerId, final QuestionInput question, final DataFetchingEnvironment environment) {
+    public Question storeCustomerQuestion(final String languageCode,final UUID customerId, final QuestionInput question, final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return questionService.storeCustomerQuestion(languageCode, customerId, question);

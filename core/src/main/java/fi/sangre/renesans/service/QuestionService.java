@@ -268,7 +268,7 @@ public class QuestionService {
         return ImmutableList.copyOf(questions);
     }
 
-    public List<Question> getAllCustomerQuestions(final Long customerId) {
+    public List<Question> getAllCustomerQuestions(final UUID customerId) {
         checkArgument(customerId != null, "Customer id is required");
 
         final Optional<Customer> customer = customerRepository.findById(customerId);
@@ -303,13 +303,13 @@ public class QuestionService {
     }
 
     @Transactional
-    public Question storeCustomerQuestion(final String languageCode, final Long customerId, final QuestionInput questionInput) {
+    public Question storeCustomerQuestion(final String languageCode, final UUID customerId, final QuestionInput questionInput) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(customerId));
 
         final Question question = createOrUpdateQuestion(languageCode, questionInput, Question.SourceType.ORGANISATION);
         question.setCustomer(customer);
-        question.setCustomerId(customerId);
+//        question.setCustomerId(customerId);
 
         return questionRepository.save(question);
     }

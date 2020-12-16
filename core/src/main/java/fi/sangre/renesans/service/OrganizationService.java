@@ -1,6 +1,10 @@
 package fi.sangre.renesans.service;
 
+import fi.sangre.renesans.application.dao.OrganizationDao;
 import fi.sangre.renesans.application.model.Organization;
+import fi.sangre.renesans.application.model.OrganizationId;
+import fi.sangre.renesans.application.model.RespondentCounters;
+import fi.sangre.renesans.application.model.SurveyCounters;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.OrganizationInput;
 import fi.sangre.renesans.model.Segment;
@@ -12,16 +16,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
+import static fi.sangre.renesans.config.ApplicationConfig.DAO_EXECUTOR_NAME;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -32,6 +41,7 @@ import static java.util.stream.Collectors.toList;
 public class OrganizationService {
     private final CustomerRepository customerRepository;
     private final SegmentRepository segmentRepository;
+    private final OrganizationDao organizationDao;
 
     @Transactional
     @CacheEvict(cacheNames = AUTH_CUSTOMER_IDS_CACHE, allEntries = true, condition = "#input.id == null")
@@ -62,6 +72,18 @@ public class OrganizationService {
     }
 
     @NonNull
+    @Async(DAO_EXECUTOR_NAME)
+    public Future<Map<OrganizationId, RespondentCounters>> countRespondentsAsync() {
+        return AsyncResult.forValue(organizationDao.countRespondents());
+    }
+
+    @NonNull
+    @Async(DAO_EXECUTOR_NAME)
+    public Future<Map<OrganizationId, SurveyCounters>> countSurveysAsync() {
+        return AsyncResult.forValue(organizationDao.countSurveys());
+    }
+
+    @NonNull
     @Transactional
     @CacheEvict(cacheNames = AUTH_CUSTOMER_IDS_CACHE, allEntries = true, condition = "#id == null")
     public Organization softDeleteOrganization(@NonNull final UUID id) {
@@ -74,17 +96,11 @@ public class OrganizationService {
 
     @Nullable
     @Transactional(readOnly = true)
-    public Segment getSegment(@NonNull final Organization organization) {
-        final Customer customer = customerRepository.findById(organization.getId())
+    public Segment getSegment(@NonNull final UUID organizationId) {
+        final Customer customer = customerRepository.findById(organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
         return segmentRepository.findByCustomers(customer)
                 .orElseThrow(() -> new ResourceNotFoundException("Segment not found"));
-    }
-
-    @NonNull
-    @Transactional(readOnly = true)
-    public Organization findOrganization(@NonNull final UUID id) {
-        return toOrganisation(getByIdOrThrow(id));
     }
 
     @NonNull

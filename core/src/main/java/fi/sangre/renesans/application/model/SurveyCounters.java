@@ -11,18 +11,15 @@ import static fi.sangre.renesans.application.model.Counts.ZERO_L;
 @AllArgsConstructor
 @Data
 @Builder
-public class RespondentCounters {
-    private static final RespondentCounters EMPTY = RespondentCounters.builder()
-            .invited(ZERO_L)
-            .answered(ZERO_L)
+public class SurveyCounters {
+    private static final SurveyCounters EMPTY = SurveyCounters.builder()
+            .all(ZERO_L)
             .build();
 
     @Builder.Default
-    private Long invited = ZERO_L;
-    @Builder.Default
-    private Long answered = ZERO_L;
+    private Long all = ZERO_L;
 
-    public static RespondentCounters empty() {
+    public static SurveyCounters empty() {
         return EMPTY;
     }
 }

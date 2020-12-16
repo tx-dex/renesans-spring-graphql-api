@@ -7,12 +7,13 @@ import graphql.language.SourceLocation;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 
 public class CustomerNotFoundException extends RuntimeException implements GraphQLError {
     private Map<String, Object> extensions = new HashMap<>();
 
-    public CustomerNotFoundException(Long id) {
+    public CustomerNotFoundException(UUID id) {
         super("Customer not found!");
         extensions.put("InvalidCustomerId", id);
     }

@@ -4,6 +4,7 @@ import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.event.ActivateUserEvent;
 import fi.sangre.renesans.application.event.RequestUserPasswordResetEvent;
+import fi.sangre.renesans.application.model.OrganizationId;
 import fi.sangre.renesans.application.utils.TokenUtils;
 import fi.sangre.renesans.exception.CurrentUserDeleteException;
 import fi.sangre.renesans.exception.UserNotFoundException;
@@ -128,9 +129,10 @@ public class UserService {
     }
 
     @CacheEvict(cacheNames = {AUTH_CUSTOMER_IDS_CACHE, AUTH_RESPONDENT_GROUP_IDS_CACHE}, key = "#id")
-    public User setUserAccess(Long id, Long customerId, Boolean allow) {
+    @Transactional
+    public User setUserAccess(Long id, @NonNull final OrganizationId customerId, Boolean allow) {
         User user = userRepository.findById(id).orElseThrow(() -> new GraphQLException("Invalid user id"));
-        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new GraphQLException("Invalid customer id"));
+        Customer customer = customerRepository.findById(customerId.getValue()).orElseThrow(() -> new GraphQLException("Invalid customer id"));
 
         if (user.getId().equals(customer.getCreatedBy())) {
             throw new GraphQLException("Can't alter user's customer access rights for customers created by the user");

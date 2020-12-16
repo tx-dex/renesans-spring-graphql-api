@@ -1,6 +1,7 @@
 package fi.sangre.renesans.application.dao;
 
 import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.application.utils.RespondentUtils;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import fi.sangre.renesans.persistence.model.SurveyRespondentState;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class RespondentDao {
     private final SurveyRespondentRepository surveyRespondentRepository;
+    private final RespondentUtils respondentUtils;
 
     /**
      * @param respondentId Respondent Id
@@ -24,9 +26,7 @@ public class RespondentDao {
      */
     @Transactional(readOnly = true)
     public boolean isAnswering(@NonNull final RespondentId respondentId) {
-        final SurveyRespondentState state = getRespondentOrThrow(respondentId).getState();
-        return state == SurveyRespondentState.ANSWERING
-                || state == SurveyRespondentState.ANSWERED;
+        return respondentUtils.isAnswering(getRespondentOrThrow(respondentId));
     }
 
     /**
@@ -35,10 +35,7 @@ public class RespondentDao {
      */
     @Transactional(readOnly = true)
     public boolean isInvited(@NonNull final RespondentId respondentId) {
-        final SurveyRespondentState state = getRespondentOrThrow(respondentId).getState();
-        return state == SurveyRespondentState.OPENED
-                || state == SurveyRespondentState.ANSWERING
-                || state == SurveyRespondentState.ANSWERED;
+        return respondentUtils.isInvited(getRespondentOrThrow(respondentId));
     }
 
     @Transactional

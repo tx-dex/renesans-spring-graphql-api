@@ -2,15 +2,16 @@ package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import fi.sangre.renesans.application.assemble.RespondentFilterAssembler;
-import fi.sangre.renesans.application.model.Organization;
+import fi.sangre.renesans.application.model.OrganizationId;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.SurveyTemplate;
+import fi.sangre.renesans.graphql.facade.OrganizationSurveyFacade;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.FilterInput;
+import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
-import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.TemplateService;
 import graphql.schema.DataFetchingEnvironment;
@@ -30,29 +31,27 @@ import java.util.UUID;
 
 @Component
 public class AdminQueries implements GraphQLQueryResolver {
-    private final OrganizationService organizationService;
     private final OrganizationSurveyService organizationSurveyService;
+    private final OrganizationSurveyFacade organizationSurveyFacade;
     private final SurveyRespondentsFacade surveyRespondentsFacade;
     private final RespondentFilterAssembler respondentFilterAssembler;
     private final TemplateService templateService;
     private final ResolverHelper resolverHelper;
 
     @NonNull
-    // TODO: authorize
-    @PreAuthorize("isAuthenticated()")
-    public List<Organization> getOrganizations() {
-        return organizationService.findAll();
+    @PreAuthorize("hasRole('SUPER_USER') or hasRole('POWER_USER')")
+    public Collection<OrganizationOutput> getOrganizations() {
+        return organizationSurveyFacade.getOrganizations();
     }
 
     @NonNull
     @PreAuthorize("hasPermission(#id, 'organization', 'READ')")
-    public Organization getOrganization(@NonNull final UUID id) {
-        return organizationService.findOrganization(id);
+    public OrganizationOutput getOrganization(@NonNull final UUID id) {
+        return organizationSurveyFacade.getOrganization(new OrganizationId(id));
     }
 
     @NonNull
-    // TODO: authorize
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('SUPER_USER') or hasRole('POWER_USER')")
     public List<SurveyTemplate> getSurveyTemplates(@Nullable final String languageCode, @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 

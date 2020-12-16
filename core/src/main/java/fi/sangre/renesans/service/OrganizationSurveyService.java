@@ -46,15 +46,18 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.Future;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static fi.sangre.renesans.application.utils.MultilingualUtils.compare;
 import static fi.sangre.renesans.config.ApplicationConfig.ASYNC_EXECUTOR_NAME;
+import static fi.sangre.renesans.config.ApplicationConfig.DAO_EXECUTOR_NAME;
 import static java.util.stream.Collectors.*;
 
 
@@ -92,8 +95,8 @@ public class OrganizationSurveyService {
     @NonNull
     @Transactional(readOnly = true)
 //    @PostFilter("hasPermission(filterObject, 'READ')")
-    public List<OrganizationSurvey> getSurveys(@NonNull final Organization organization, @NonNull final String languageTag) {
-        return customerRepository.findById(organization.getId())
+    public List<OrganizationSurvey> getSurveys(@NonNull final UUID organizationId, @NonNull final String languageTag) {
+        return customerRepository.findById(organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found"))
                 .getSurveys().stream()
                 .map(organizationSurveyAssembler::from)
@@ -210,11 +213,19 @@ public class OrganizationSurveyService {
     }
 
     @NonNull
+    @Async(DAO_EXECUTOR_NAME)
+    public Future<Map<SurveyId, RespondentCounters>> countRespondentsAsync(@NonNull final OrganizationId organizationId) {
+        return AsyncResult.forValue(surveyDao.countRespondents(organizationId));
+    }
+
+    //TODO: move to dao
+    @NonNull
     @Transactional(readOnly = true)
     public Collection<Respondent> getAllRespondents(@NonNull final SurveyId surveyId) {
         return respondentAssembler.from(surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()));
     }
 
+    //TODO: move to dao
     @NonNull
     @Transactional(readOnly = true)
     public Respondent getRespondent(@NonNull final RespondentId respondentId, @NonNull final String invitationHash) {
@@ -222,6 +233,7 @@ public class OrganizationSurveyService {
                 .orElseThrow(() -> new SurveyException("Respondent not found")));
     }
 
+    //TODO: move to dao
     @NonNull
     @Transactional(readOnly = true)
     public Respondent getRespondent(@NonNull final RespondentId respondentId) {
@@ -229,6 +241,7 @@ public class OrganizationSurveyService {
                 .orElseThrow(() -> new SurveyException("Respondent not found")));
     }
 
+    //TODO: move to dao
     @NonNull
     @Transactional
     public Respondent softDeleteRespondent(@NonNull final RespondentId respondentId) {
@@ -240,6 +253,7 @@ public class OrganizationSurveyService {
         return respondentAssembler.from(respondent);
     }
 
+    //TODO: move to dao
     @NonNull
     @Transactional
     public OrganizationSurvey softDeleteSurvey(@NonNull final UUID surveyId) {

@@ -85,6 +85,10 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
 
     @NonNull
     public RespondentCounters respondentCounts(@NonNull final OrganizationSurvey survey) {
-        return RespondentCounters.builder().build();
+        if (survey.getRespondentCounters() == null) {
+            return RespondentCounters.empty();
+        } else {
+            return survey.getRespondentCounters();
+        }
     }
 }

@@ -24,4 +24,6 @@ public class OrganizationSurvey {
     private Map<String, StaticTextGroup> staticTexts;
     @Builder.Default
     private boolean deleted = false;
+    //TODO: create OrganizationSurveyOutput and move this there
+    private RespondentCounters respondentCounters;
 }
