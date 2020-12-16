@@ -15,4 +15,6 @@ public class QuestionnaireParameterItemOutput implements QuestionnaireParameterC
     private String value;
     private Map<String, String> labels;
     private boolean checked;
+    @Builder.Default
+    private boolean selectable = true;
 }

@@ -19,4 +19,6 @@ public class QuestionnaireTreeParameterOutput implements QuestionnaireParameterO
     private Map<String, String> labels;
     private List<QuestionnaireParameterChildOutput> children;
     private boolean answered;
+    @Builder.Default
+    private boolean selectable = false;
 }

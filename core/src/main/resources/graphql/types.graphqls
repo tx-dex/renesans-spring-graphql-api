@@ -227,6 +227,7 @@ union QuestionnaireParameter = QuestionnaireListParameter | QuestionnaireTreePar
 type QuestionnaireParameterItem {
     label: String!
     value: String!
+    selectable: Boolean!
     checked: Boolean!
 }
 
@@ -244,6 +245,7 @@ type QuestionnaireTreeParameter {
     type: SurveyParameterType!
     label: String!
     value: String!
+    selectable: Boolean!
     children: [QuestionnaireParameterChild!]!
     answered: Boolean!
 }
