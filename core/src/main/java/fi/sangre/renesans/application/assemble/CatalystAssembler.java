@@ -46,7 +46,7 @@ public class CatalystAssembler {
 
         return Catalyst.builder()
                 .id(catalystId)
-                .titles(multilingualUtils.create(input.getTitle(), languageTag)) // This is optional as it may not be provided when updating questions
+                .titles(multilingualUtils.create(input.getTitle(), languageTag))
                 .descriptions(multilingualUtils.create(input.getDescription(), languageTag))
                 .drivers(driverAssembler.fromInput(input.getDrivers(), languageTag))
                 .questions(questionAssembler.fromInput(catalystId, input.getQuestions(), languageTag))
@@ -71,6 +71,7 @@ public class CatalystAssembler {
                 .id(new CatalystId(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER)))
                 .pdfName(metadata.getPdfName())
                 .titles(multilingualUtils.create(metadata.getTitles()))
+                .descriptions(multilingualUtils.create(metadata.getDescriptions()))
                 .drivers(driverAssembler.fromMetadata(metadata.getDrivers()))
                 .questions(questionAssembler.fromMetadata(metadata.getQuestions()))
                 .openQuestion(multilingualUtils.create(metadata.getOpenQuestion()))

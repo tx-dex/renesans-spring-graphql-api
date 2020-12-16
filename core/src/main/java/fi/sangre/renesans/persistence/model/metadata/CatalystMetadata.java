@@ -26,6 +26,7 @@ public class CatalystMetadata implements Serializable {
     @Deprecated
     private String pdfName;
     private Map<String, String> titles;
+    private Map<String, String> descriptions;
     private List<DriverMetadata> drivers;
     private List<QuestionMetadata> questions;
     private Map<String, String> openQuestion;

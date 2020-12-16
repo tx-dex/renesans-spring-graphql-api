@@ -94,6 +94,7 @@ public class QuestionnaireAssembler {
         return QuestionnaireCatalystOutput.builder()
                 .id(catalyst.getId().getValue())
                 .titles(catalyst.getTitles())
+                .descriptions(catalyst.getDescriptions())
                 .drivers(fromDrivers(catalyst.getDrivers()))
                 .questions(questionnaireLikertQuestionAssembler.from(catalyst.getQuestions()))
                 .catalystQuestion(questionnaireOpenQuestionAssembler.from(catalyst, null))

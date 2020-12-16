@@ -180,6 +180,7 @@ type Questionnaire {
 type QuestionnaireCatalyst {
     id: ID!
     title: String!
+    description: String
     questions: [QuestionnaireLikertQuestion!]!
     drivers: [QuestionnaireDriver!]!
     # The open question to be displayed by the end of the catalyst answers
@@ -335,8 +336,8 @@ type Weight {
 type Catalyst {
     id: ID!
     title: String!
+    description: String
     titleId: Long @deprecated(reason: "This shouldn't be exposed. It is internal data. Will be removed")
-    description: String @deprecated(reason: "There is no data for that in data table. Will be removed")
     pdfName: String @deprecated(reason: "This was static text used for displayin it on the reports. Will be removed")
     questions: [LikertQuestion!]!
     # Catalyst/Theme open question displayed at the end

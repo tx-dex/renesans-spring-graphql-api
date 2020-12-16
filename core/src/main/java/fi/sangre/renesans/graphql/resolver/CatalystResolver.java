@@ -51,9 +51,8 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         return null;
     }
 
-    @Deprecated
-    public String getDescription(@NonNull final CatalystProxy proxy) {
-        return null;
+    public String getDescription(@NonNull final CatalystProxy proxy, @NonNull final DataFetchingEnvironment environment) {
+        return strategies.get(proxy.getObject().getClass()).getDescription(proxy, resolverHelper.getLanguageCode(environment) );
     }
 
     @NonNull
@@ -74,6 +73,7 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
 
     private interface CatalystStrategy<T extends OutputProxy<?>> {
         @NonNull String getTitle(@NonNull T output, @NonNull String languageTag);
+        @Nullable String getDescription(@NonNull T output, @NonNull String languageTag);
         @NonNull List<DriverProxy> getDrivers(@NonNull T output);
         @NonNull List<LikertQuestion> getQuestions(@NonNull T output);
         @Nullable String getCatalystQuestion(@NonNull T output, @NonNull String languageTag);
@@ -85,6 +85,12 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         public String getTitle(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
             final CatalystDto catalyst = (CatalystDto) proxy.getObject();
             return multilingualService.lookupPhrase(catalyst.getTitleId(), languageTag);
+        }
+
+        @Nullable
+        @Override
+        public String getDescription(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
+            return null;
         }
 
         @NonNull
@@ -113,6 +119,13 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         public String getTitle(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
             final Catalyst catalyst = (Catalyst) proxy.getObject();
             return metadataLanguageHelper.getRequiredText(catalyst.getTitles().getPhrases(), languageTag);
+        }
+
+        @Nullable
+        @Override
+        public String getDescription(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
+            final Catalyst catalyst = (Catalyst) proxy.getObject();
+            return metadataLanguageHelper.getOptionalText(catalyst.getDescriptions().getPhrases(), languageTag);
         }
 
         @NonNull

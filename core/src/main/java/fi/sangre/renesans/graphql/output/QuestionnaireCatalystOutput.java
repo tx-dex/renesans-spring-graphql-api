@@ -16,6 +16,7 @@ import java.util.UUID;
 public class QuestionnaireCatalystOutput {
     private UUID id;
     private MultilingualText titles;
+    private MultilingualText descriptions;
     private List<QuestionnaireLikertQuestionOutput> questions;
     private List<QuestionnaireDriverOutput> drivers;
     private QuestionnaireOpenQuestionOutput catalystQuestion;

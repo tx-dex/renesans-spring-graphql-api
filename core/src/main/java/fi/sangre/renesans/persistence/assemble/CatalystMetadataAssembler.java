@@ -35,6 +35,7 @@ public class CatalystMetadataAssembler {
         return CatalystMetadata.builder()
                 .id(catalyst.getId().getValue())
                 .titles(catalyst.getTitles().getPhrases())
+                .descriptions(catalyst.getDescriptions().getPhrases())
                 .drivers(driverMetadataAssembler.from(catalyst.getDrivers()))
                 .questions(questionMetadataAssembler.from(catalyst.getQuestions()))
                 .openQuestion(Optional.ofNullable(catalyst.getOpenQuestion())
