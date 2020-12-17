@@ -1,20 +1,20 @@
 package fi.sangre.renesans.persistence.repository;
 
-import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.model.OrganizationSurveyMapping;
 import fi.sangre.renesans.persistence.model.SurveyStateCounters;
 import fi.sangre.renesans.persistence.model.User;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,11 +35,19 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
     @NonNull
     @Override
+    @EntityGraph("customer-owner-graph")
+    Optional<Customer> findById(@NonNull UUID uuid);
+
+    @NonNull
+    @Override
+    @EntityGraph("customer-owner-graph")
     default List<Customer> findAll() {
         return findAll(DEFAULT_CUSTOMER_SORTING);
     }
 
     @NonNull
+    @Override
+    @EntityGraph("customer-owner-graph")
     List<Customer> findAll(@NonNull Sort sort);
 
     @PostFilter("hasPermission(filterObject, 'READ')")
@@ -54,13 +62,12 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     @NonNull
     Long countBySegment(Segment segment);
 
-    @PostAuthorize("hasPermission(returnObject, 'READ')")
-    Customer findByGroupsContaining(RespondentGroup respondentGroup);
-
     @Deprecated
     List<Customer> findAllByGroupsIdIn(Set<String> respondentGroupIds);
     Set<Customer> findByUsersContaining(User user);
+
     @NonNull
+    @EntityGraph("customer-owner-graph")
     List<Customer> findByUsersContainingOrCreatedBy(@NonNull User user, @NonNull Long createdBy);
 }
 

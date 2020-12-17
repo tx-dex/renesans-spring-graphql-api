@@ -4,16 +4,14 @@ import fi.sangre.renesans.application.model.Organization;
 import fi.sangre.renesans.application.model.OrganizationId;
 import fi.sangre.renesans.application.model.RespondentCounters;
 import fi.sangre.renesans.application.model.SurveyCounters;
+import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -23,6 +21,8 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class OrganizationOutputAssembler {
+    private final UserOutputAssembler userOutputAssembler;
+
     @NonNull
     public Collection<OrganizationOutput> from(@NonNull final List<Organization> organizations,
                                                @NonNull final Map<OrganizationId, RespondentCounters> respondents,
@@ -34,6 +34,9 @@ public class OrganizationOutputAssembler {
                         .description(e.getDescription())
                         .respondentCounters(respondents.getOrDefault(new OrganizationId(e.getId()), RespondentCounters.empty()))
                         .surveyCounters(surveys.getOrDefault(new OrganizationId(e.getId()), SurveyCounters.empty()))
+                        .owner(Optional.ofNullable(e.getOwner())
+                                .map(userOutputAssembler::from)
+                                .orElse(null))
                         .build())
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
@@ -51,6 +54,9 @@ public class OrganizationOutputAssembler {
                 .id(organization.getId())
                 .name(organization.getName())
                 .description(organization.getDescription())
+                .owner(Optional.ofNullable(organization.getOwner())
+                        .map(userOutputAssembler::from)
+                        .orElse(null))
                 .respondentCounters(null)
                 .surveyCounters(null) //TODO: add survey counters
                 .build();

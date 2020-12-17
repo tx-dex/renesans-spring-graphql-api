@@ -2,7 +2,10 @@ package fi.sangre.renesans.persistence.model;
 
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Sets;
-import fi.sangre.renesans.model.*;
+import fi.sangre.renesans.model.BaseModel;
+import fi.sangre.renesans.model.Question;
+import fi.sangre.renesans.model.RespondentGroup;
+import fi.sangre.renesans.model.Segment;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.*;
@@ -24,6 +27,21 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+
+@NamedEntityGraph(
+        name = "customer-owner-graph",
+        attributeNodes = {
+                @NamedAttributeNode(value = "owner", subgraph = "user-roles-subgraph"),
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "user-roles-subgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode("roles"),
+                        }
+                ),
+        }
+)
 
 @Entity
 @Table(name = "customer")
@@ -49,8 +67,12 @@ public class Customer extends BaseModel {
     private List<RespondentGroup> groups = new ArrayList<>();
 
     @CreatedBy
-    @Column(updatable = false, nullable = false)
+    @Column(name = "created_by", updatable = false, nullable = false)
     private Long createdBy;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "created_by", updatable = false, insertable = false, nullable = true)
+    private User owner;
 
     @ManyToMany
     @JoinTable(

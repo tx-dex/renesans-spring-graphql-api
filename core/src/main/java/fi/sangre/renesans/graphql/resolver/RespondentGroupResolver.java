@@ -45,7 +45,7 @@ public class RespondentGroupResolver implements GraphQLResolver<RespondentGroup>
 
     @PreAuthorize("isAuthenticated()")
     public Customer getCustomer(RespondentGroup respondentGroup) {
-        return customerService.getCustomer(respondentGroup);
+        return null;
     }
 
     // do not expose internals to the public

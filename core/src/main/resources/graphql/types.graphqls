@@ -70,6 +70,7 @@ type Organization {
     surveys: [OrganizationSurvey!]!
     surveyCount: Long!
     respondentCounts: RespondentCounters!
+    owner: User
 }
 
 type RespondentCounters {

@@ -18,6 +18,7 @@ public class OrganizationAssembler {
                 .id(entity.getId())
                 .name(entity.getName())
                 .description(entity.getDescription())
+                .owner(entity.getOwner())
                 .build();
     }
 }

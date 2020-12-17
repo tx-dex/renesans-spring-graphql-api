@@ -36,7 +36,7 @@ public class OrganizationSurveyFacade {
         try {
             final Future<Map<OrganizationId, RespondentCounters>> respondents = organizationService.countRespondentsAsync();
             final Future<Map<OrganizationId, SurveyCounters>> surveys = organizationService.countSurveysAsync();
-            final List<Organization> organizations = organizationService.findAll();
+            final List<Organization> organizations = organizationDao.getAllOrganizations();
 
             return organizationOutputAssembler.from(organizations, respondents.get(), surveys.get());
         } catch (final ExecutionException | InterruptedException ex) {

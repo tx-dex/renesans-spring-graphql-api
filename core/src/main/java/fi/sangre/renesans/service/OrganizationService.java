@@ -18,7 +18,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,13 +104,6 @@ public class OrganizationService {
 
     @NonNull
     @Transactional(readOnly = true)
-    @PostFilter("hasPermission(filterObject, 'READ')")
-    public List<Organization> findAll() {
-        return toOrganisations(customerRepository.findAll());
-    }
-
-    @NonNull
-    @Transactional(readOnly = true)
     public List<Organization> findAllBySegment(@NonNull final Segment segment) {
         return findAllBySegment(segment,this::toOrganisation);
     }
@@ -133,12 +125,6 @@ public class OrganizationService {
     private Customer getByIdOrThrow(@NonNull final UUID id) {
         return customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
-    }
-
-    @NonNull
-    private List<Organization> toOrganisations(@NonNull final List<Customer> customers) {
-        return customers.stream().map(this::toOrganisation)
-                .collect(toList());
     }
 
     @NonNull

@@ -12,11 +12,13 @@ import fi.sangre.renesans.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.*;
@@ -31,6 +33,26 @@ public class OrganizationDao {
     private final CustomerRepository customerRepository;
     private final OrganizationAssembler organizationAssembler;
     private final RespondentCounterAssembler respondentCounterAssembler;
+
+    @NonNull
+    @Transactional(readOnly = true)
+    @PostFilter("hasPermission(filterObject, 'READ')") //TODO: apply the filter before not after
+    public List<Organization> getAllOrganizations() {
+        return customerRepository.findAll().stream()
+                .map(organizationAssembler::from)
+                .collect(toList()); // Cannot return numodifialbe because of PostFilter
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public Collection<Organization> getUserOrganizations(@NonNull final Long userId) {
+        final User user = userRepository.findById(userId)
+                .orElseThrow(() -> new SurveyException("User not found"));
+
+        return customerRepository.findByUsersContainingOrCreatedBy(user, userId).stream()
+                .map(organizationAssembler::from)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
 
     @NonNull
     @Transactional(readOnly = true)
@@ -68,16 +90,5 @@ public class OrganizationDao {
                                 .all(e.getAll())
                                 .build()
                 ), Collections::unmodifiableMap));
-    }
-
-    @NonNull
-    @Transactional(readOnly = true)
-    public Collection<Organization> getUserOrganizations(@NonNull final Long userId) {
-        final User user = userRepository.findById(userId)
-                .orElseThrow(() -> new SurveyException("User not found"));
-
-        return customerRepository.findByUsersContainingOrCreatedBy(user, userId).stream()
-                .map(organizationAssembler::from)
-                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 }

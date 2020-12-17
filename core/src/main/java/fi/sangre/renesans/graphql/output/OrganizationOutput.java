@@ -2,6 +2,7 @@ package fi.sangre.renesans.graphql.output;
 
 import fi.sangre.renesans.application.model.RespondentCounters;
 import fi.sangre.renesans.application.model.SurveyCounters;
+import fi.sangre.renesans.graphql.output.aaa.UserOutput;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,4 +20,5 @@ public class OrganizationOutput {
     private String description;
     private RespondentCounters respondentCounters;
     private SurveyCounters surveyCounters;
+    private UserOutput owner;
 }

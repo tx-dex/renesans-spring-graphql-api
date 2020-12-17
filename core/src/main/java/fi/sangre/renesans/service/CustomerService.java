@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.graphql.input.DriverWeightInput;
 import fi.sangre.renesans.model.CustomerDriverWeights;
-import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
@@ -51,10 +50,6 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public Segment getCustomerSegment(@NonNull final Customer customer) {
         return segmentRepository.findByCustomers(customer).orElse(null);
-    }
-
-    public Customer getCustomer(RespondentGroup respondentGroup) {
-        return customerRepository.findByGroupsContaining(respondentGroup);
     }
 
     @Deprecated
