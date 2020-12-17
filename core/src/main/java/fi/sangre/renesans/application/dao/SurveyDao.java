@@ -1,5 +1,6 @@
 package fi.sangre.renesans.application.dao;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.assemble.RespondentCounterAssembler;
@@ -83,11 +84,15 @@ public class SurveyDao {
                 .map(Survey::getId)
                 .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
 
-        return surveyRespondentRepository.countSurveyRespondents(surveyIds).stream()
-                .collect(collectingAndThen(toMap(
-                        RespondentStateCounters::getSurveyId,
-                        respondentCounterAssembler::from
-                ), Collections::unmodifiableMap));
+        if (!surveyIds.isEmpty()) {
+            return surveyRespondentRepository.countSurveyRespondents(surveyIds).stream()
+                    .collect(collectingAndThen(toMap(
+                            RespondentStateCounters::getSurveyId,
+                            respondentCounterAssembler::from
+                    ), Collections::unmodifiableMap));
+        } else {
+            return ImmutableMap.of();
+        }
     }
 
     @NonNull
