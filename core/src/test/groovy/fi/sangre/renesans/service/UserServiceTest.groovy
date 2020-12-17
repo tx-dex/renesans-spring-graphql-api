@@ -2,7 +2,8 @@ package fi.sangre.renesans.service
 
 import fi.sangre.renesans.aaa.JwtTokenService
 import fi.sangre.renesans.persistence.repository.CustomerRepository
-import fi.sangre.renesans.repository.UserRepository
+import fi.sangre.renesans.persistence.repository.RoleRepository
+import fi.sangre.renesans.persistence.repository.UserRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.crypto.password.PasswordEncoder
 import spock.lang.Specification
@@ -12,7 +13,7 @@ class UserServiceTest extends Specification {
     final passwordEncoder = Mock(PasswordEncoder)
     final jwtTokenService = Mock(JwtTokenService)
     final tokenService = Mock(TokenService)
-    final roleService = Mock(RoleService)
+    final roleRepository = Mock(RoleRepository)
     final customerRepository = Mock(CustomerRepository)
     final applicationEventPublisher = Mock(ApplicationEventPublisher)
 
@@ -20,7 +21,7 @@ class UserServiceTest extends Specification {
             passwordEncoder,
             jwtTokenService,
             tokenService,
-            roleService,
+            roleRepository,
             customerRepository,
             applicationEventPublisher
     )

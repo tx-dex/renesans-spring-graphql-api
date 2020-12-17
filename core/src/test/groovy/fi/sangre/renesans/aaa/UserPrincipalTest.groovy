@@ -1,6 +1,6 @@
 package fi.sangre.renesans.aaa
 
-import fi.sangre.renesans.model.User
+import fi.sangre.renesans.persistence.model.User
 import spock.lang.Specification
 
 class UserPrincipalTest extends Specification {

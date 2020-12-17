@@ -1,16 +1,22 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.RespondentFilterAssembler;
+import fi.sangre.renesans.application.dao.UserDao;
 import fi.sangre.renesans.application.model.OrganizationId;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.SurveyTemplate;
+import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
 import fi.sangre.renesans.graphql.facade.OrganizationSurveyFacade;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.FilterInput;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
+import fi.sangre.renesans.graphql.output.aaa.UserOutput;
+import fi.sangre.renesans.graphql.output.aaa.UserRoleOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.TemplateService;
@@ -20,11 +26,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toSet;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -36,6 +47,8 @@ public class AdminQueries implements GraphQLQueryResolver {
     private final SurveyRespondentsFacade surveyRespondentsFacade;
     private final RespondentFilterAssembler respondentFilterAssembler;
     private final TemplateService templateService;
+    private final UserDao userDao;
+    private final UserOutputAssembler userOutputAssembler;
     private final ResolverHelper resolverHelper;
 
     @NonNull
@@ -77,5 +90,38 @@ public class AdminQueries implements GraphQLQueryResolver {
         return surveyRespondentsFacade.getSurveyRespondents(new SurveyId(surveyId),
                 respondentFilterAssembler.fromInput(filters),
                 resolverHelper.getLanguageCode(environment));
+    }
+
+    // ADMIN USER MGMT
+    // TODO: create seperate query for getting logged in user (me)
+    @PreAuthorize("isAuthenticated() and (hasRole('SUPER_USER') or (#id == null or #id == authentication.principal.id))")
+    public UserOutput user(Long id, @NonNull final DataFetchingEnvironment environment) {
+        if (id == null) {
+            final UserDetails user = resolverHelper.getRequiredPrincipal(environment);
+            if (user instanceof UserPrincipal) {
+                return userOutputAssembler.from((UserPrincipal) user);
+            } else {
+                throw new SurveyException("Not logged in as user");
+            }
+        } else {
+            return userOutputAssembler.from(userDao.getByIdOrThrow(id));
+        }
+    }
+
+    @NonNull
+    @PreAuthorize("hasRole('SUPER_USER')")
+    public Collection<UserOutput> users() {
+        return
+                userOutputAssembler.from(userDao.getUsers());
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    public Collection<UserRoleOutput> roles() {
+        return userDao.getRoles().stream()
+                .map(e -> UserRoleOutput.builder()
+                        .name(e.getName())
+                        .title(e.getTitle())
+                        .build())
+                .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
     }
 }

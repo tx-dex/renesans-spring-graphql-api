@@ -2,11 +2,8 @@ package fi.sangre.renesans.aaa;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.model.User;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import fi.sangre.renesans.persistence.model.User;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,12 +19,15 @@ import static java.util.stream.Collectors.toList;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @ToString(doNotUseGetters = true, exclude = "password")
+@Getter
 @EqualsAndHashCode(of = "id")
 public class UserPrincipal implements UserDetails {
     private static final Joiner nameBuilder = Joiner.on(" ").skipNulls();
     private final Long id;
     private final String username;
     private final String name;
+    private final String firstName;
+    private final String lastName;
     private final String email;
     private final String password;
     private final boolean isEnabled;
@@ -44,23 +44,13 @@ public class UserPrincipal implements UserDetails {
                 user.getId(),
                 user.getUsername(),
                 nameBuilder.join(StringUtils.capitalize(user.getFirstName()), StringUtils.capitalize(user.getLastName())),
+                user.getFirstName(),
+                user.getLastName(),
                 user.getEmail(),
                 user.getPassword(),
                 user.isEnabled(),
                 authorities
         );
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     @Override

@@ -3,10 +3,10 @@ package fi.sangre.renesans.graphql.resolver;
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
+import fi.sangre.renesans.graphql.output.aaa.UserOutput;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.model.Segment;
-import fi.sangre.renesans.model.User;
 import fi.sangre.renesans.persistence.model.Customer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class CustomerResolver implements GraphQLResolver<Customer> {
         return ImmutableList.of();
     }
 
-    public User getCreatedBy(Customer customer) {
+    public UserOutput getCreatedBy(Customer customer) {
         return null;
     }
 

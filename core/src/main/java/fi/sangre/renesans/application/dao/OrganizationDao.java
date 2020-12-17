@@ -6,13 +6,16 @@ import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.model.OrganizationSurveyMapping;
 import fi.sangre.renesans.persistence.model.SurveyStateCounters;
+import fi.sangre.renesans.persistence.model.User;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
+import fi.sangre.renesans.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -23,6 +26,7 @@ import static java.util.stream.Collectors.*;
 
 @Component
 public class OrganizationDao {
+    private final UserRepository userRepository;
     private final SurveyDao surveyDao;
     private final CustomerRepository customerRepository;
     private final OrganizationAssembler organizationAssembler;
@@ -64,5 +68,16 @@ public class OrganizationDao {
                                 .all(e.getAll())
                                 .build()
                 ), Collections::unmodifiableMap));
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public Collection<Organization> getUserOrganizations(@NonNull final Long userId) {
+        final User user = userRepository.findById(userId)
+                .orElseThrow(() -> new SurveyException("User not found"));
+
+        return customerRepository.findByUsersContainingOrCreatedBy(user, userId).stream()
+                .map(organizationAssembler::from)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 }

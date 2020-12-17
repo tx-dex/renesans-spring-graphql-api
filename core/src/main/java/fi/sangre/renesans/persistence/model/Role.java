@@ -1,4 +1,4 @@
-package fi.sangre.renesans.model;
+package fi.sangre.renesans.persistence.model;
 
 import lombok.Data;
 
@@ -16,10 +16,10 @@ public class Role {
 
     private String title;
 
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
     private Collection<User> users;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "roles_privileges",
             joinColumns = @JoinColumn(

@@ -1,15 +1,15 @@
-package fi.sangre.renesans.repository;
+package fi.sangre.renesans.persistence.repository;
 
-import fi.sangre.renesans.model.Role;
-import fi.sangre.renesans.model.User;
+import fi.sangre.renesans.persistence.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
-    List<Role> findByUsersContaining(User u);
+    List<Role> findByUsersIdIn(Set<Long> userId);
     List<Role> findByNameIn(List<String> names);
 }
 

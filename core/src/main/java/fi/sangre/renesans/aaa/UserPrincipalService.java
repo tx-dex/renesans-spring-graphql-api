@@ -1,8 +1,8 @@
 package fi.sangre.renesans.aaa;
 
 import fi.sangre.renesans.exception.UserNotFoundException;
-import fi.sangre.renesans.model.User;
-import fi.sangre.renesans.repository.UserRepository;
+import fi.sangre.renesans.persistence.model.User;
+import fi.sangre.renesans.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
@@ -18,9 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static fi.sangre.renesans.aaa.CacheConfig.AUTH_CUSTOMER_IDS_CACHE;
 
@@ -63,9 +64,11 @@ public class UserPrincipalService implements UserDetailsService {
     @Cacheable(cacheNames = AUTH_CUSTOMER_IDS_CACHE, key = "#user.id")
     public Set<UUID> getCustomerIdsThatPrincipalCanAccess(final UserPrincipal user) {
         log.info("Get customer ids for principal: {}", user);
-        Set<UUID> customersIds = userRepository.findCustomerIdsAccessibleByUserId(user.getId()).stream().collect(Collectors.toSet());
+        final Set<UUID> customersIds = new HashSet<>();
+        customersIds.addAll(userRepository.findOwnedOrganizationIds(user.getId()));
+        customersIds.addAll(userRepository.findMappedOrganizationIds(user.getId()));
         log.debug("Found {} customer ids for principal: {}", customersIds.size(), user.getUsername());
-        return customersIds;
+        return Collections.unmodifiableSet(customersIds);
     }
 
     @Deprecated

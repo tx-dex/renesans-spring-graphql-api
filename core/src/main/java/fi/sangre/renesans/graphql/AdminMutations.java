@@ -11,6 +11,7 @@ import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
+import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
@@ -18,8 +19,8 @@ import fi.sangre.renesans.graphql.input.question.QuestionDriverWeightInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
+import fi.sangre.renesans.graphql.output.aaa.UserOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
-import fi.sangre.renesans.model.User;
 import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.UserService;
@@ -28,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -56,6 +56,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtTokenService;
     private final UserService userService;
+    private final UserOutputAssembler userOutputAssembler;
 
     public AuthorizationOutput login(@NotNull String username, @NotNull String password) {
         Authentication authentication = authenticationManager.authenticate(
@@ -79,35 +80,52 @@ public class AdminMutations implements GraphQLMutationResolver {
         return true;
     }
 
+    @NonNull
     @PreAuthorize("hasRole('SUPER_USER') or (hasRole('POWER_USER') and authentication.principal.id == #id)")
-    public User storeUser(
-            @P("id") Long id,
-            String firstName,
-            String lastName,
-            String email,
-            String password,
-            String username,
-            Boolean enabled,
-            List<String> roles,
-            DataFetchingEnvironment environment
+    public UserOutput storeUser(
+            @Nullable final Long id,
+            @Nullable final String firstName,
+            @Nullable final String lastName,
+            @Nullable final String email,
+            @Nullable final String password,
+            @Nullable final String username,
+            @Nullable final Boolean enabled,
+            @Nullable final List<String> roles,
+            @NonNull final DataFetchingEnvironment environment
     ) {
         final String locale = resolverHelper.getLanguageCode(environment);
-        return userService.storeUser(id, firstName, lastName, email, password, username, enabled, roles, locale);
+        return userOutputAssembler.from(userService.storeUser(
+                id,
+                firstName,
+                lastName,
+                email,
+                username,
+                enabled,
+                roles,
+                (UserPrincipal) resolverHelper.getRequiredPrincipal(environment),
+                locale));
+    }
+
+    @NonNull
+    @PreAuthorize("hasRole('SUPER_USER')")
+    public UserOutput removeUser(@NonNull final Long id) {
+        return userOutputAssembler.from(userService.removeUser(id));
     }
 
     @PreAuthorize("hasRole('SUPER_USER')")
-    public User removeUser(@P("id") Long id) {
-        return userService.removeUser(id);
+    public UserOutput allowUserCustomerAccess(@NonNull final Long id, @NonNull final UUID customerId) {
+        return userOutputAssembler.from(userService.setUserAccess(
+                id
+                , new OrganizationId(customerId),
+                true));
     }
 
     @PreAuthorize("hasRole('SUPER_USER')")
-    public User allowUserCustomerAccess(@NonNull final Long id, @NonNull final UUID customerId) {
-        return userService.setUserAccess(id, new OrganizationId(customerId), true);
-    }
-
-    @PreAuthorize("hasRole('SUPER_USER')")
-    public User revokeUserCustomerAccess(@NonNull final Long id, @NonNull final UUID customerId) {
-        return userService.setUserAccess(id, new OrganizationId(customerId), false);
+    public UserOutput revokeUserCustomerAccess(@NonNull final Long id, @NonNull final UUID customerId) {
+        return userOutputAssembler.from(userService.setUserAccess(
+                id,
+                new OrganizationId(customerId),
+                false));
     }
 
     @NonNull

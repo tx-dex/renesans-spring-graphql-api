@@ -596,7 +596,8 @@ type User {
     lastName: String
     enabled: Boolean
     roles: [Role]
-    customers: [Customer]
+    customers: [Customer] @deprecated(reason: "Use organizations. Customer type will be removed")
+    organizations: [Organization!]!
 }
 
 type Role {

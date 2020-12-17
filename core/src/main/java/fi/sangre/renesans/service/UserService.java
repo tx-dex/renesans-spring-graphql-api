@@ -8,11 +8,12 @@ import fi.sangre.renesans.application.model.OrganizationId;
 import fi.sangre.renesans.application.utils.TokenUtils;
 import fi.sangre.renesans.exception.CurrentUserDeleteException;
 import fi.sangre.renesans.exception.UserNotFoundException;
-import fi.sangre.renesans.model.Role;
-import fi.sangre.renesans.model.User;
 import fi.sangre.renesans.persistence.model.Customer;
+import fi.sangre.renesans.persistence.model.Role;
+import fi.sangre.renesans.persistence.model.User;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
-import fi.sangre.renesans.repository.UserRepository;
+import fi.sangre.renesans.persistence.repository.RoleRepository;
+import fi.sangre.renesans.persistence.repository.UserRepository;
 import graphql.GraphQLException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -45,14 +46,21 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
     private final TokenService tokenService;
-    private final RoleService roleService;
+    private final RoleRepository roleRepository;
     private final CustomerRepository customerRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public User storeUser(Long id, String firstName, String lastName, String email, String password, String username, Boolean enabled, List<String> roleNames, final String locale) {
+    public User storeUser(Long id,
+                          String firstName,
+                          String lastName,
+                          String email,
+                          String username,
+                          Boolean enabled,
+                          List<String> roleNames,
+                          final @NonNull UserPrincipal principal,
+                          final String locale) {
         User user;
-        UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         final boolean isCurrentUser = principal.getId().equals(id);
         final boolean sendActivationEmail;
 
@@ -109,7 +117,7 @@ public class UserService {
 
             List<Role> roles = roleNames.isEmpty()
                     ? new ArrayList<>()
-                    : roleService.findByNames(roleNames);
+                    : roleRepository.findByNameIn(roleNames);
 
             user.setRoles(roles);
         }

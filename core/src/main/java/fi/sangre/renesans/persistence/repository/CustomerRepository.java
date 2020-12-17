@@ -2,10 +2,10 @@ package fi.sangre.renesans.persistence.repository;
 
 import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.model.Segment;
-import fi.sangre.renesans.model.User;
 import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.model.OrganizationSurveyMapping;
 import fi.sangre.renesans.persistence.model.SurveyStateCounters;
+import fi.sangre.renesans.persistence.model.User;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -57,9 +57,11 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     @PostAuthorize("hasPermission(returnObject, 'READ')")
     Customer findByGroupsContaining(RespondentGroup respondentGroup);
 
+    @Deprecated
     List<Customer> findAllByGroupsIdIn(Set<String> respondentGroupIds);
     Set<Customer> findByUsersContaining(User user);
-    List<Customer> findByUsersContainingOrCreatedBy(User user, Long createdBy);
+    @NonNull
+    List<Customer> findByUsersContainingOrCreatedBy(@NonNull User user, @NonNull Long createdBy);
 }
 
 

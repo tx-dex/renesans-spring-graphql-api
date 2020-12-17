@@ -11,7 +11,6 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -49,14 +48,11 @@ public class DriverResolver implements GraphQLResolver<DriverProxy> {
     }
 
     @Nullable
-    // do not expose internals to the public
-    @PreAuthorize("hasRole('SUPER_USER')")
     public String getPrescription(@NonNull final DriverProxy proxy, final DataFetchingEnvironment environment) {
         return strategies.get(proxy.getObject().getClass()).getPrescription(proxy, resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull
-    @PreAuthorize("hasRole('SUPER_USER')")
     public Double getWeight(@NonNull final DriverProxy proxy) {
         return proxy.getObject().getWeight();
     }
@@ -65,7 +61,6 @@ public class DriverResolver implements GraphQLResolver<DriverProxy> {
         @NonNull  String getTitle(@NonNull T proxy, @NonNull String languageTag);
         @Nullable String getDescription(@NonNull T proxy, @NonNull String languageTag);
         @Nullable String getPrescription(@NonNull T proxy, @NonNull String languageTag);
-
     }
 
     private class DriverDtoStrategy implements DriverStrategy<DriverProxy> {

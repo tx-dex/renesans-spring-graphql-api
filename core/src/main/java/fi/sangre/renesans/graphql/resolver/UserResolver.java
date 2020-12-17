@@ -1,38 +1,35 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import fi.sangre.renesans.model.Role;
-import fi.sangre.renesans.model.User;
+import com.google.common.collect.ImmutableList;
+import fi.sangre.renesans.application.dao.OrganizationDao;
+import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
+import fi.sangre.renesans.graphql.output.OrganizationOutput;
+import fi.sangre.renesans.graphql.output.aaa.UserOutput;
 import fi.sangre.renesans.persistence.model.Customer;
-import fi.sangre.renesans.persistence.repository.CustomerRepository;
-import fi.sangre.renesans.repository.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
+@RequiredArgsConstructor
+@Slf4j
+
 @Component
-@Transactional
-public class UserResolver implements GraphQLResolver<User> {
+public class UserResolver implements GraphQLResolver<UserOutput> {
+    private final OrganizationDao organizationDao;
+    private final OrganizationOutputAssembler organizationOutputAssembler;
 
-    private final CustomerRepository customerRepository;
-    private final RoleRepository roleRepository;
-
-    @Autowired
-    public UserResolver(
-            CustomerRepository customerRepository,
-            RoleRepository roleRepository
-    ) {
-        this.customerRepository = customerRepository;
-        this.roleRepository = roleRepository;
+    @Deprecated
+    public List<Customer> getCustomers(@NonNull final UserOutput user) {
+        return ImmutableList.of();
     }
 
-    public List<Customer> getCustomers(User user) {
-        return customerRepository.findByUsersContainingOrCreatedBy(user, user.getId());
-    }
-
-    public List<Role> getRoles(User user) {
-        return roleRepository.findByUsersContaining(user);
+    public Collection<OrganizationOutput> getOrganizations(@NonNull final UserOutput user) {
+        return organizationOutputAssembler.from(
+                organizationDao.getUserOrganizations(user.getId()));
     }
 }

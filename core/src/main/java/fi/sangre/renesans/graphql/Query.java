@@ -40,7 +40,6 @@ public class Query implements GraphQLQueryResolver {
     private final StatisticsService statisticsService;
     private final ImageUploadService imageUploadService;
     private final UserService userService;
-    private final RoleService roleService;
     private final JwtTokenService tokenService;
     private final SegmentService segmentService;
     private final QuestionnaireService questionnaireService;
@@ -87,14 +86,7 @@ public class Query implements GraphQLQueryResolver {
             FiltersDto filters,
             DataFetchingEnvironment environment
     ) {
-        if (filters == null) {
-            filters = new FiltersDto();
-        }
-
-        // TODO currently using default survey always. Change when necessary (ie. iCan or something like that)
-        filters.setSurveyId(surveyService.getDefaultSurvey().getId());
-
-        return respondentService.getUniqueRespondents(filters);
+        return ImmutableList.of();
     }
 
     public Statistics statistics(
@@ -124,11 +116,10 @@ public class Query implements GraphQLQueryResolver {
         return statisticsService.comparativeStatistics(filters, customerIds, respondentGroupIds, respondentIds, edit != null && edit, resolverHelper.getLanguageCode(environment));
     }
 
+    @Deprecated
     public List<RespondentOption> respondentOptions(String languageCode, RespondentOption.OptionType optionType,
                                                     DataFetchingEnvironment environment) {
-        resolverHelper.setLanguageCode(languageCode, environment);
-
-        return respondentOptionService.getRespondentOptions(optionType);
+        return ImmutableList.of();
     }
 
     public List<Country> countries(String languageCode, DataFetchingEnvironment environment) {
@@ -137,10 +128,9 @@ public class Query implements GraphQLQueryResolver {
         return multilingualService.getCountries(resolverHelper.getLanguageCode(environment));
     }
 
+    @Deprecated
     public MultilingualPhrase phrase(String languageCode, String key, DataFetchingEnvironment environment) {
-        resolverHelper.setLanguageCode(languageCode, environment);
-
-        return multilingualService.getPhrase(key, resolverHelper.getLanguageCode(environment));
+        return new MultilingualPhrase();
     }
 
     /**
@@ -158,13 +148,12 @@ public class Query implements GraphQLQueryResolver {
         return new LocaleDto(phrases);
     }
 
+    @Deprecated
     public List<MultilingualPhrase> phrases(String languageCode,
                                             List<String> keys,
                                             String startsWith,
                                             DataFetchingEnvironment environment) {
-        resolverHelper.setLanguageCode(languageCode, environment);
-
-        return multilingualService.getPhrases(keys, startsWith, resolverHelper.getLanguageCode(environment));
+        return ImmutableList.of();
     }
 
     @Deprecated
@@ -209,21 +198,6 @@ public class Query implements GraphQLQueryResolver {
     @PreAuthorize("isAuthenticated()")
     public ImageUploadUrlDto imageUploadUrl(String fileName) {
         return imageUploadService.getUploadUrl(fileName);
-    }
-
-    @PreAuthorize("isAuthenticated() and (hasRole('SUPER_USER') or (#id == null or #id == authentication.principal.id))")
-    public User user(Long id) {
-        return id == null ? userService.findLoggedInUser() : userService.findById(id);
-    }
-
-    @PreAuthorize("hasRole('SUPER_USER')")
-    public List<User> users() {
-        return userService.findUsers();
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    public List<Role> roles() {
-        return roleService.findAll();
     }
 
     public boolean validateResetPasswordToken(String token) {

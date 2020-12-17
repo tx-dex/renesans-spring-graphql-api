@@ -1,4 +1,4 @@
-package fi.sangre.renesans.model;
+package fi.sangre.renesans.persistence.model;
 
 import lombok.*;
 

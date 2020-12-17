@@ -1,6 +1,5 @@
-package fi.sangre.renesans.model;
+package fi.sangre.renesans.persistence.model;
 
-import fi.sangre.renesans.persistence.model.Customer;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.Email;
@@ -16,7 +15,15 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 
+@NamedEntityGraph(
+        name = "user-roles-graph",
+        attributeNodes = {
+                @NamedAttributeNode(value = "roles"),
+        }
+)
+
 @Entity
+@Table(name = "user")
 @DynamicUpdate
 public class User {
 
@@ -32,7 +39,7 @@ public class User {
     private boolean enabled;
     private boolean tokenExpired;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(
