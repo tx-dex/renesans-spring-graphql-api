@@ -119,8 +119,8 @@ input QuestionDriverWeightInput {
 input LikertQuestionAnswerInput {
     questionId: ID!
     # Selected index
-    # Set null for skipping the question
-    response: Int
+    # Use 0 for skipping the question. Valid values 0, 1, 2, 3, 4, 5
+    response: Int!
 }
 
 input CatalystOpenQuestionAnswerInput {

@@ -32,16 +32,22 @@ public class LikertAnswerAssembler {
 
         final LikertQuestionAnswer.LikertQuestionAnswerBuilder builder = LikertQuestionAnswer.builder()
                 .id(questionId)
-                .catalystId(question.getCatalystId())
-                .status(AnswerStatus.SKIPPED);
+                .catalystId(question.getCatalystId());
 
         if (answer.getResponse() != null) {
-            if (answer.getResponse() < 0 || answer.getResponse() > 4) {
-                throw new RuntimeException("Invalid 'answer.response' value. Must be 0, 1, 2, 3 or 4");
+            if (answer.getResponse() < 0 || answer.getResponse() > 5) {
+                throw new RuntimeException("Invalid 'answer.response' value. Must be 0, 1, 2, 3, 4, 5");
             }
 
-            builder.response(answer.getResponse())
-                    .status(AnswerStatus.ANSWERED);
+            if (answer.getResponse() > 0) {
+                builder.response(answer.getResponse() - 1)
+                        .status(AnswerStatus.ANSWERED);
+            } else {
+                builder.response(null)
+                        .status(AnswerStatus.SKIPPED);
+            }
+        } else {
+            throw new SurveyException("answer.response must not be null");
         }
 
         return builder.build();

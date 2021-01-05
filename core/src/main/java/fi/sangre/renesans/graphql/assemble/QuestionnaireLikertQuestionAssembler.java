@@ -58,8 +58,11 @@ public class QuestionnaireLikertQuestionAssembler {
             output.skipped(AnswerStatus.SKIPPED.equals(answer.getStatus()));
 
             if (AnswerStatus.ANSWERED.equals(answer.getStatus())) {
-                output.answered(true)
-                        .response(answer.getResponse());
+                output
+                        .answered(true)
+                        .response(answer.getResponse() + 1);
+            } else {
+                output.response(0);
             }
         }
 
