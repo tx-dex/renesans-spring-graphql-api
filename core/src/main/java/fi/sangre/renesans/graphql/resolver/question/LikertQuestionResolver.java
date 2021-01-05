@@ -4,7 +4,7 @@ import com.coxautodev.graphql.tools.GraphQLResolver;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.graphql.output.question.QuestionDriverWeights;
-import fi.sangre.renesans.graphql.resolver.MetadataLanguageHelper;
+import fi.sangre.renesans.graphql.resolver.MultilingualTextResolver;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class LikertQuestionResolver implements GraphQLResolver<LikertQuestion> {
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final MultilingualTextResolver multilingualTextResolver;
     private final ResolverHelper resolverHelper;
 
     @NonNull
@@ -34,7 +34,7 @@ public class LikertQuestionResolver implements GraphQLResolver<LikertQuestion> {
 
     @NonNull
     public String getTitle(@NonNull final LikertQuestion output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(output.getTitles().getPhrases(), resolverHelper.getLanguageCode(environment));
+        return multilingualTextResolver.getRequiredText(output.getTitles(), resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull

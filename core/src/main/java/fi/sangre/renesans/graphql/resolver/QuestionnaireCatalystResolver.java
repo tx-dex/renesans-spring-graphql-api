@@ -15,15 +15,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestionnaireCatalystResolver implements GraphQLResolver<QuestionnaireCatalystOutput> {
     private final ResolverHelper resolverHelper;
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final MultilingualTextResolver multilingualTextResolver;
 
     @NonNull
     public String getTitle(@NonNull final QuestionnaireCatalystOutput output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(output.getTitles().getPhrases(), resolverHelper.getLanguageCode(environment));
+        return multilingualTextResolver.getRequiredText(output.getTitles(), resolverHelper.getLanguageCode(environment));
     }
 
     @Nullable
     public String getDescription(@NonNull final QuestionnaireCatalystOutput output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getOptionalText(output.getDescriptions().getPhrases(), resolverHelper.getLanguageCode(environment));
+        return multilingualTextResolver.getOptionalText(output.getDescriptions(), resolverHelper.getLanguageCode(environment));
     }
 }

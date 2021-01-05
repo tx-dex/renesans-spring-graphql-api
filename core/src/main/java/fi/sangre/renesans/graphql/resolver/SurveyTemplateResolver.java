@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SurveyTemplateResolver implements GraphQLResolver<SurveyTemplate> {
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final MultilingualTextResolver multilingualTextResolver;
     private final ResolverHelper resolverHelper;
 
     @NonNull
@@ -25,13 +25,13 @@ public class SurveyTemplateResolver implements GraphQLResolver<SurveyTemplate> {
 
     @NonNull
     public String getTitle(@NonNull final SurveyTemplate output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(output.getTitles().getPhrases(),
+        return multilingualTextResolver.getRequiredText(output.getTitles(),
                 resolverHelper.getLanguageCode(environment));
     }
 
     @Nullable
     public String getDescription(@NonNull final SurveyTemplate output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getOptionalText(output.getDescriptions().getPhrases(),
+        return multilingualTextResolver.getOptionalText(output.getDescriptions(),
                 resolverHelper.getLanguageCode(environment));
     }
 }

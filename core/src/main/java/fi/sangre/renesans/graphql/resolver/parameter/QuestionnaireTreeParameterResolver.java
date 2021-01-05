@@ -2,7 +2,7 @@ package fi.sangre.renesans.graphql.resolver.parameter;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireTreeParameterOutput;
-import fi.sangre.renesans.graphql.resolver.MetadataLanguageHelper;
+import fi.sangre.renesans.graphql.resolver.MultilingualTextResolver;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class QuestionnaireTreeParameterResolver implements GraphQLResolver<QuestionnaireTreeParameterOutput> {
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final MultilingualTextResolver multilingualTextResolver;
     private final ResolverHelper resolverHelper;
 
     @NonNull
     public String getLabel(@NonNull final QuestionnaireTreeParameterOutput output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(output.getLabels(), resolverHelper.getLanguageCode(environment));
+        return multilingualTextResolver.getRequiredText(output.getLabels(), resolverHelper.getLanguageCode(environment));
     }
 }
 

@@ -21,7 +21,7 @@ import java.util.Map;
 public class DriverResolver implements GraphQLResolver<DriverProxy> {
     private final MultilingualService multilingualService;
     private final ResolverHelper resolverHelper;
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final MultilingualTextResolver multilingualTextResolver;
     private final Map<Class<?>, DriverStrategy<DriverProxy>> strategies = ImmutableMap.<Class<?>, DriverStrategy<DriverProxy>>builder()
             .put(Driver.class, new DriverModelStrategy())
             .put(DriverDto.class, new DriverDtoStrategy())
@@ -91,21 +91,21 @@ public class DriverResolver implements GraphQLResolver<DriverProxy> {
         @Override
         public String getTitle(@NonNull final DriverProxy proxy, @NonNull final String languageTag) {
             final Driver driver = (Driver) proxy.getObject();
-            return metadataLanguageHelper.getRequiredText(driver.getTitles().getPhrases(), languageTag);
+            return multilingualTextResolver.getRequiredText(driver.getTitles(), languageTag);
         }
 
         @Nullable
         @Override
         public String getDescription(@NonNull final DriverProxy proxy, @NonNull final String languageTag) {
             final Driver driver = (Driver) proxy.getObject();
-            return metadataLanguageHelper.getOptionalText(driver.getDescriptions().getPhrases(), languageTag);
+            return multilingualTextResolver.getOptionalText(driver.getDescriptions(), languageTag);
         }
 
         @Nullable
         @Override
         public String getPrescription(@NonNull final DriverProxy proxy, @NonNull final String languageTag) {
             final Driver driver = (Driver) proxy.getObject();
-            return metadataLanguageHelper.getOptionalText(driver.getPrescriptions().getPhrases(), languageTag);
+            return multilingualTextResolver.getOptionalText(driver.getPrescriptions(), languageTag);
         }
     }
 }

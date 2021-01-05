@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class QuestionnaireOpenQuestionResolver implements GraphQLResolver<QuestionnaireOpenQuestionOutput> {
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final MultilingualTextResolver multilingualTextResolver;
     private final ResolverHelper resolverHelper;
 
     @NonNull
@@ -23,6 +23,6 @@ public class QuestionnaireOpenQuestionResolver implements GraphQLResolver<Questi
 
     @NonNull
     public String getTitle(@NonNull final QuestionnaireOpenQuestionOutput output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(output.getTitles(), resolverHelper.getLanguageCode(environment));
+        return multilingualTextResolver.getRequiredText(output.getTitles(), resolverHelper.getLanguageCode(environment));
     }
 }

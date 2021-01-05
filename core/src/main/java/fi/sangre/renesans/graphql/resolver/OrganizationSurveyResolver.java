@@ -29,7 +29,7 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationSurvey> {
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final MultilingualTextResolver multilingualTextResolver;
     private final ResolverHelper resolverHelper;
     private final SurveyParameterOutputAssembler surveyParameterOutputAssembler;
     private final TranslationService translationService;
@@ -37,13 +37,13 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
 
     @NonNull
     public String getTitle(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(survey.getTitles().getPhrases(),
+        return multilingualTextResolver.getRequiredText(survey.getTitles(),
                 resolverHelper.getLanguageCode(environment));
     }
 
     @Nullable
     public String getDescription(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getOptionalText(survey.getDescriptions().getPhrases(),
+        return multilingualTextResolver.getOptionalText(survey.getDescriptions(),
                 resolverHelper.getLanguageCode(environment));
     }
 

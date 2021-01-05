@@ -29,7 +29,7 @@ import static fi.sangre.renesans.graphql.output.DriverProxy.toProxies;
 public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
     private final MultilingualService multilingualService;
     private final QuestionService questionService;
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final MultilingualTextResolver multilingualTextResolver;
     private final ResolverHelper resolverHelper;
     private final Map<Class<?>, CatalystStrategy<CatalystProxy>> strategies = ImmutableMap.<Class<?>, CatalystStrategy<CatalystProxy>>builder()
             .put(Catalyst.class, new CatalystModelStrategy())
@@ -118,14 +118,14 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         @Override
         public String getTitle(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
             final Catalyst catalyst = (Catalyst) proxy.getObject();
-            return metadataLanguageHelper.getRequiredText(catalyst.getTitles().getPhrases(), languageTag);
+            return multilingualTextResolver.getRequiredText(catalyst.getTitles(), languageTag);
         }
 
         @Nullable
         @Override
         public String getDescription(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
             final Catalyst catalyst = (Catalyst) proxy.getObject();
-            return metadataLanguageHelper.getOptionalText(catalyst.getDescriptions().getPhrases(), languageTag);
+            return multilingualTextResolver.getOptionalText(catalyst.getDescriptions(), languageTag);
         }
 
         @NonNull
@@ -147,7 +147,7 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         public String getCatalystQuestion(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
             final Catalyst catalyst = (Catalyst) proxy.getObject();
             return Optional.ofNullable(catalyst.getOpenQuestion())
-                    .map(e -> metadataLanguageHelper.getOptionalText(e.getPhrases(), languageTag))
+                    .map(e -> multilingualTextResolver.getOptionalText(e.getPhrases(), languageTag))
                     .orElse(null);
         }
     }

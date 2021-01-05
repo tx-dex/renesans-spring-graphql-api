@@ -14,15 +14,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestionnaireDriverResolver implements GraphQLResolver<QuestionnaireDriverOutput> {
     private final ResolverHelper resolverHelper;
-    private final MetadataLanguageHelper metadataLanguageHelper;
+    private final MultilingualTextResolver multilingualTextResolver;
 
     @NonNull
     public String getTitle(@NonNull final QuestionnaireDriverOutput output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(output.getTitles().getPhrases(), resolverHelper.getLanguageCode(environment));
+        return multilingualTextResolver.getRequiredText(output.getTitles(), resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull
     public String getDescription(@NonNull final QuestionnaireDriverOutput output, @NonNull final DataFetchingEnvironment environment) {
-        return metadataLanguageHelper.getRequiredText(output.getDescriptions().getPhrases(), resolverHelper.getLanguageCode(environment));
+        return multilingualTextResolver.getRequiredText(output.getDescriptions(), resolverHelper.getLanguageCode(environment));
     }
 }
