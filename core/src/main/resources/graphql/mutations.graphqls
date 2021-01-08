@@ -148,6 +148,7 @@ type Mutation {
     openQuestionnaire(id: ID!, invitationHash: String!): Authorization!
 
     answerOrSkipLikertQuestion(answer: LikertQuestionAnswerInput!, languageCode: String): Questionnaire
+    rateLikertQuestion(rate: LikertQuestionRateInput!, languageCode: String): Questionnaire
 
     answerOrSkipCatalystQuestion(answer: CatalystOpenQuestionAnswerInput!, languageCode: String): Questionnaire
 

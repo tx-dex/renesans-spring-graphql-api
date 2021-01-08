@@ -68,6 +68,12 @@ type Query {
         languageCode: String
     ): [SurveyRespondent!]!
 
+    # Returns all catalysts statistics for specific questionnaire
+    afterGameOverviewCatalystsStatistics(
+        questionnaireId: ID!
+        languageCode: String
+    ) : [AfterGameCatalystStatistics!]!
+
     customer(
         languageCode: String
         id: ID!

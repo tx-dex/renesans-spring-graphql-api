@@ -22,6 +22,10 @@ public class CatalystProxy implements OutputProxy<CatalystOutput> {
         return object.getId().getValue();
     }
 
+    public static <T extends CatalystOutput> CatalystProxy toProxy(@NonNull final T catalyst) {
+        return new CatalystProxy(catalyst);
+    }
+
     public static  <T extends CatalystOutput> List<CatalystProxy> toProxies(@NonNull final List<T> catalysts) {
         return catalysts.stream()
                 .map(CatalystProxy::new)

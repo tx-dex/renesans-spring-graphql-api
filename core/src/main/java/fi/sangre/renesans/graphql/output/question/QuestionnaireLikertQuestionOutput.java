@@ -16,4 +16,5 @@ public class QuestionnaireLikertQuestionOutput implements QuestionnaireQuestionO
     private boolean skipped;
     private boolean answered;
     private Integer response;
+    private Integer rate;
 }

@@ -123,6 +123,12 @@ input LikertQuestionAnswerInput {
     response: Int!
 }
 
+input LikertQuestionRateInput {
+    questionId: ID!
+    # Use for rateing -> "How important is this question to you?
+    rate: Int
+}
+
 input CatalystOpenQuestionAnswerInput {
     catalystId: ID!
     # Free text

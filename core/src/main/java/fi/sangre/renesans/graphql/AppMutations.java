@@ -5,6 +5,7 @@ import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;
+import fi.sangre.renesans.graphql.input.answer.LikertQuestionRateInput;
 import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
@@ -42,6 +43,17 @@ public class AppMutations implements GraphQLMutationResolver {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return questionnaireFacade.answerLikertQuestion(answer, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasRole('RESPONDENT')")
+    public QuestionnaireOutput rateLikertQuestion(@NonNull final LikertQuestionRateInput rate,
+                                                  @Nullable final String languageCode,
+                                                  @NonNull final DataFetchingEnvironment environment) {
+        log.debug("Rating question: {}", rate);
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return questionnaireFacade.rateLikertQuestion(rate, resolverHelper.getRequiredPrincipal(environment));
     }
 
     @NonNull

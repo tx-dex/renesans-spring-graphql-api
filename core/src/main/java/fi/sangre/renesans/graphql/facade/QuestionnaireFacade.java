@@ -14,6 +14,7 @@ import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;
+import fi.sangre.renesans.graphql.input.answer.LikertQuestionRateInput;
 import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
@@ -86,6 +87,26 @@ public class QuestionnaireFacade {
                 final OrganizationSurvey survey = organizationSurveyService.getSurvey(respondent.getSurveyId());
 
                 answerService.answerQuestion(likertAnswerAssembler.from(answer, survey), respondent.getSurveyId(), respondent.getId());
+
+                return questionnaireAssembler.from(respondent.getId(), survey);
+            } catch (final InterruptedException | ExecutionException ex) {
+                log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
+                throw new InternalServiceException("Cannot get questionnaire");
+            }
+        } else {
+            throw new SurveyException("Only respondent can answer");
+        }
+    }
+
+    @NonNull
+    public QuestionnaireOutput rateLikertQuestion(@NonNull final LikertQuestionRateInput rate, @NonNull final UserDetails principal) {
+        if (principal instanceof RespondentPrincipal) {
+            final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+            try {
+                final OrganizationSurvey survey = organizationSurveyService.getSurvey(respondent.getSurveyId());
+
+                //TODO: implement
+                //answerService.answerQuestion(likertAnswerAssembler.from(answer, survey), respondent.getSurveyId(), respondent.getId());
 
                 return questionnaireAssembler.from(respondent.getId(), survey);
             } catch (final InterruptedException | ExecutionException ex) {

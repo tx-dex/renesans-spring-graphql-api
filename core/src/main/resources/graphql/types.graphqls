@@ -213,6 +213,9 @@ type QuestionnaireLikertQuestion implements IQuestionnaireQuestion {
     answered: Boolean!
     skipped: Boolean!
     response: Long
+    # How important is this question to you?
+    # May be null is not rated
+    rate: Int
 }
 
 type QuestionnaireOpenQuestion implements IQuestionnaireQuestion{
@@ -258,8 +261,24 @@ type QuestionnaireTreeParameter {
     selectedAnswer: [ID!]
 }
 
+type AfterGameCatalystStatistics {
+  catalyst: QuestionnaireCatalyst!
+  # result for current respondent "You"
+  respondentRate: Float!
+  # result for "Everyone" or selected parameter group on details page
+  # may be null if group is not selected, or it's just "You"
+  respondentGroupRate: Float
+  drivers: [AfterGameDriverStatistics!]!
+}
 
-
+type AfterGameDriverStatistics {
+    driver: QuestionnaireDriver!
+    # result for current respondent "You"
+    respondentRate: Float!
+    # result for "Everyone" or selected parameter group on details page
+    # may be null if group is not selected, or it's just "You"
+    respondentGroupRate: Float
+}
 
 
 
