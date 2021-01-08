@@ -39,6 +39,7 @@ public class SurveyAssembler {
         entity.setMetadata(SurveyMetadata.builder()
                 .titles(model.getTitles().getPhrases())
                 .descriptions(model.getDescriptions().getPhrases())
+                .logo(model.getLogo())
                 .catalysts(catalystMetadataAssembler.from(model.getCatalysts()))
                 .parameters(parameterMetadataAssembler.from(model.getParameters()))
                 .translations(translationMetadataAssembler.from(model.getStaticTexts()))

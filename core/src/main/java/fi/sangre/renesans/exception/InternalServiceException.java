@@ -8,4 +8,8 @@ public class InternalServiceException extends RuntimeException {
     public InternalServiceException(@NonNull final String message) {
         super(PREFIX + message);
     }
+
+    public InternalServiceException(@NonNull final String message, @NonNull final Throwable cause) {
+        super(PREFIX + message, cause);
+    }
 }

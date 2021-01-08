@@ -7,6 +7,7 @@ import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.RespondentCounters;
 import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
+import fi.sangre.renesans.graphql.assemble.MediaDetailsAssembler;
 import fi.sangre.renesans.graphql.assemble.SurveyParameterOutputAssembler;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.graphql.output.StaticTextGroupOutput;
@@ -38,6 +39,7 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
     private final SurveyParameterOutputAssembler surveyParameterOutputAssembler;
     private final TranslationService translationService;
     private final MultilingualUtils multilingualUtils;
+    private final MediaDetailsAssembler mediaDetailsAssembler;
 
     @NonNull
     public String getTitle(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
@@ -53,7 +55,7 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
 
     @Nullable
     public MediaDetailsOutput getLogo(@NonNull final OrganizationSurvey survey) {
-        return null;
+        return mediaDetailsAssembler.from(survey.getLogo());
     }
 
     @NonNull

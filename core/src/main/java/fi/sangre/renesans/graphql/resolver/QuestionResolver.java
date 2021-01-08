@@ -13,7 +13,6 @@ import fi.sangre.renesans.service.MultilingualService;
 import fi.sangre.renesans.service.QuestionService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +40,7 @@ public class QuestionResolver implements GraphQLResolver<Question> {
     }
 
     public List<AnswerOption> getAnswerOptions(Question question) {
-        return answerOptionService.getAnswerOptions(question);
+        return ImmutableList.of();
     }
 
     // do not expose internals to the public

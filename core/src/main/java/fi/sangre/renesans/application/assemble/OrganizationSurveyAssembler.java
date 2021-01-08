@@ -6,17 +6,21 @@ import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.input.CatalystInput;
 import fi.sangre.renesans.graphql.input.StaticTextInput;
+import fi.sangre.renesans.graphql.input.media.MediaDetailsInput;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
+import fi.sangre.renesans.persistence.model.metadata.media.ImageMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.collectingAndThen;
@@ -112,12 +116,31 @@ public class OrganizationSurveyAssembler {
     }
 
     @NonNull
+    public OrganizationSurvey fromLogoInput(@NonNull final UUID id,
+                                            @NonNull final Long version,
+                                            @Nullable final MediaDetailsInput input) {
+        final ImageMetadata logo = Optional.ofNullable(input)
+                .map(MediaDetailsInput::getKey)
+                .map(v -> ImageMetadata.builder()
+                        .key(v)
+                        .build())
+                .orElse(null);
+
+        return OrganizationSurvey.builder()
+                .id(id)
+                .version(version)
+                .logo(logo)
+                .build();
+    }
+
+    @NonNull
     public OrganizationSurvey from(@NonNull final Survey survey) {
         final SurveyMetadata metadata = survey.getMetadata();
 
         return OrganizationSurvey.builder()
                 .id(survey.getId())
                 .version(survey.getVersion())
+                .logo(metadata.getLogo())
                 .titles(multilingualUtils.create(metadata.getTitles()))
                 .descriptions(multilingualUtils.create(metadata.getDescriptions()))
                 .catalysts(catalystAssembler.fromMetadata(metadata.getCatalysts()))

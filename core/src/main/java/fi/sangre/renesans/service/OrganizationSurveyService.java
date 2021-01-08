@@ -164,7 +164,8 @@ public class OrganizationSurveyService {
 
     @NonNull
     public OrganizationSurvey updateMetadata(@NonNull final OrganizationSurvey input) {
-        final OrganizationSurvey updated = organizationSurveyMerger.combine(input);
+        final OrganizationSurvey existing = surveyDao.getSurveyOrThrow(new SurveyId(input.getId()));
+        final OrganizationSurvey updated = organizationSurveyMerger.combine(existing, input);
 
         try {
             return surveyDao.store(updated);

@@ -31,6 +31,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -130,7 +131,7 @@ public class AdminQueries implements GraphQLQueryResolver {
 
     @Nullable
     @PreAuthorize("isAuthenticated()")
-    public String getImageUrl(@NonNull final String key, @Nullable final MediaParametersInput params) {
+    public URL getImageUrl(@NonNull final String key, @Nullable final MediaParametersInput params) {
         return mediaService.getImageUrl(key, params);
     }
 }

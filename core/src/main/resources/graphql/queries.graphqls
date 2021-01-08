@@ -75,7 +75,7 @@ type Query {
     ) : [AfterGameCatalystStatistics!]!
 
     # get image url by key
-    getImageUrl(key: String!, params: MediaParametersInput): String
+    getImageUrl(key: String!, params: MediaParametersInput): Url
 
 
 

@@ -182,7 +182,9 @@ public class AdminMutations implements GraphQLMutationResolver {
     public OrganizationSurvey storeOrganizationSurveyLogo(@NonNull final UUID id,
                                                           @NonNull final Long version,
                                                           @NonNull MediaDetailsInput details) {
-        return organizationSurveyService.getSurvey(id);
+        final OrganizationSurvey inputSurvey = organizationSurveyAssembler
+                .fromLogoInput(id, version, details);
+        return organizationSurveyService.updateMetadata(inputSurvey);
     }
 
 
@@ -285,6 +287,6 @@ public class AdminMutations implements GraphQLMutationResolver {
     @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
     public MediaUploadOutput getMediaUploadUrl(@NonNull final UUID id,
                                                @NonNull final MediaUploadInput input) {
-        throw new SurveyException("Cannot get url from media service");
+        return mediaService.requestUploadUrl(input);
     }
 }
