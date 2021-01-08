@@ -6,6 +6,7 @@ import fi.sangre.renesans.graphql.output.question.QuestionnaireLikertQuestionOut
 import fi.sangre.renesans.graphql.output.question.QuestionnaireOpenQuestionOutput;
 import graphql.scalars.ExtendedScalars;
 import graphql.scalars.alias.AliasedScalar;
+import graphql.schema.GraphQLScalarType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,5 +45,11 @@ public class GraphqlConfig {
                 .aliasedScalar(ExtendedScalars.Json)
                 .description("Json map for question driver weights")
                 .build();
+
+    }
+
+    @Bean
+    public GraphQLScalarType urlScalar() {
+        return ExtendedScalars.Url;
     }
 }

@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.RespondentCounters;
@@ -10,6 +11,8 @@ import fi.sangre.renesans.graphql.assemble.SurveyParameterOutputAssembler;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.graphql.output.StaticTextGroupOutput;
 import fi.sangre.renesans.graphql.output.StaticTextOutput;
+import fi.sangre.renesans.graphql.output.media.MediaDetailsOutput;
+import fi.sangre.renesans.graphql.output.media.SurveyMediaOutput;
 import fi.sangre.renesans.graphql.output.parameter.SurveyParameterOutput;
 import fi.sangre.renesans.service.TranslationService;
 import graphql.schema.DataFetchingEnvironment;
@@ -18,6 +21,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,6 +49,16 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
     public String getDescription(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
         return multilingualTextResolver.getOptionalText(survey.getDescriptions(),
                 resolverHelper.getLanguageCode(environment));
+    }
+
+    @Nullable
+    public MediaDetailsOutput getLogo(@NonNull final OrganizationSurvey survey) {
+        return null;
+    }
+
+    @NonNull
+    public Collection<SurveyMediaOutput> getMedia(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
+        return ImmutableList.of();
     }
 
     @NonNull

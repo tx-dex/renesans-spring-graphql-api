@@ -13,11 +13,13 @@ import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
 import fi.sangre.renesans.graphql.facade.OrganizationSurveyFacade;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.FilterInput;
+import fi.sangre.renesans.graphql.input.media.MediaParametersInput;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.output.aaa.UserOutput;
 import fi.sangre.renesans.graphql.output.aaa.UserRoleOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
+import fi.sangre.renesans.service.MediaService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.TemplateService;
 import graphql.schema.DataFetchingEnvironment;
@@ -50,6 +52,7 @@ public class AdminQueries implements GraphQLQueryResolver {
     private final UserDao userDao;
     private final UserOutputAssembler userOutputAssembler;
     private final ResolverHelper resolverHelper;
+    private final MediaService mediaService;
 
     @NonNull
     @PreAuthorize("hasRole('SUPER_USER') or hasRole('POWER_USER')")
@@ -123,5 +126,11 @@ public class AdminQueries implements GraphQLQueryResolver {
                         .title(e.getTitle())
                         .build())
                 .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+    }
+
+    @Nullable
+    @PreAuthorize("isAuthenticated()")
+    public String getImageUrl(@NonNull final String key, @Nullable final MediaParametersInput params) {
+        return mediaService.getImageUrl(key, params);
     }
 }

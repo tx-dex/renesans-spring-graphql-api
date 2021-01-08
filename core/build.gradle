@@ -87,6 +87,7 @@ dependencies {
     implementation("com.querydsl:querydsl-jpa:${queryDslVersion}")
     implementation("org.projectlombok:lombok:${lombokVersion}")
 
+    api("fi.sangre.media:media-spring-5-rest-client:1.0.3")
     api("fi.sangre.renesans:mail-service-api:0.1.0")
 
     implementation("com.google.guava:guava:${guavaVersion}")

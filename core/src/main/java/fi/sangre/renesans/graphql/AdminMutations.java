@@ -14,13 +14,18 @@ import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
+import fi.sangre.renesans.graphql.input.media.MediaDetailsInput;
+import fi.sangre.renesans.graphql.input.media.MediaUploadInput;
+import fi.sangre.renesans.graphql.input.media.SurveyMediaInput;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
 import fi.sangre.renesans.graphql.input.question.QuestionDriverWeightInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.output.aaa.UserOutput;
+import fi.sangre.renesans.graphql.output.media.MediaUploadOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
+import fi.sangre.renesans.service.MediaService;
 import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.UserService;
@@ -57,6 +62,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     private final JwtTokenService jwtTokenService;
     private final UserService userService;
     private final UserOutputAssembler userOutputAssembler;
+    private final MediaService mediaService;
 
     public AuthorizationOutput login(@NotNull String username, @NotNull String password) {
         Authentication authentication = authenticationManager.authenticate(
@@ -173,6 +179,29 @@ public class AdminMutations implements GraphQLMutationResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
+    public OrganizationSurvey storeOrganizationSurveyLogo(@NonNull final UUID id,
+                                                          @NonNull final Long version,
+                                                          @NonNull MediaDetailsInput details) {
+        return organizationSurveyService.getSurvey(id);
+    }
+
+
+    @NonNull
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
+    public OrganizationSurvey storeOrganizationSurveyMedia(@NonNull final UUID id,
+                                                           @NonNull final Long version,
+                                                           @NonNull final List<SurveyMediaInput> input,
+                                                           @Nullable final String languageCode,
+                                                           @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+//        final OrganizationSurvey inputSurvey = organizationSurveyAssembler
+//                .fromParametersInput(id, version, input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.getSurvey(id);
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
     public OrganizationSurvey storeOrganizationSurveyStaticText(@NonNull final UUID id,
                                                                 @NonNull final Long version,
                                                                 @NonNull final StaticTextInput input,
@@ -252,4 +281,10 @@ public class AdminMutations implements GraphQLMutationResolver {
         return surveyRespondentsFacade.softDeleteRespondent(new RespondentId(id));
     }
 
+    @NonNull
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
+    public MediaUploadOutput getMediaUploadUrl(@NonNull final UUID id,
+                                               @NonNull final MediaUploadInput input) {
+        throw new SurveyException("Cannot get url from media service");
+    }
 }

@@ -74,6 +74,12 @@ type Query {
         languageCode: String
     ) : [AfterGameCatalystStatistics!]!
 
+    # get image url by key
+    getImageUrl(key: String!, params: MediaParametersInput): String
+
+
+
+
     customer(
         languageCode: String
         id: ID!

@@ -78,6 +78,27 @@ type Mutation {
         languageCode: String
     ): OrganizationSurvey!
 
+    storeOrganizationSurveyLogo(
+        # Survey id
+        id: ID!
+        # Survey version
+        version: Long!
+        # Logo details. As a key use field value taken from getMediaUploadUrl mutation
+        # Removes the logo if null
+        details: MediaDetailsInput
+    ): OrganizationSurvey!
+
+    storeOrganizationSurveyMedia(
+        # Survey id
+        id: ID!
+        # Survey version
+        version: Long!
+        # List of medias that will be saved
+        input: [SurveyMediaInput!]!
+        # Language that user is currently editing
+        languageCode: String
+    ): OrganizationSurvey!
+
     # Use for updating static texts that show up in the survey app
     storeOrganizationSurveyStaticText(
         # Survey id
@@ -153,6 +174,17 @@ type Mutation {
     answerOrSkipCatalystQuestion(answer: CatalystOpenQuestionAnswerInput!, languageCode: String): Questionnaire
 
     answerParameter(answer: ParameterAnswerInput!, languageCode: String): Questionnaire
+
+    # get presigned upload url
+    getMediaUploadUrl(
+        # Survey id
+        id: ID!
+        # media input
+        input: MediaUploadInput!
+    ): MediaUpload!
+
+
+
 
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer  @deprecated(reason: "Will be removed")
 

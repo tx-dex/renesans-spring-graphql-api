@@ -1,5 +1,6 @@
 scalar Date
 scalar Long
+scalar Url
 
 # A json map containg translations data
 # e.g.
@@ -92,11 +93,28 @@ type OrganizationSurvey {
     version: Long!
     title: String!
     description: String
+    # Custom logo url
+    # This field should be fetched in a seperate query
+    logo: MediaDetails
+    media: [SurveyMedia!]!
     catalysts: [Catalyst!]!
     staticTexts: [SurveyStaticTextGroup!]!
     # List of parameters
     parameters: [SurveyParameter!]!
     respondentCounts: RespondentCounters!
+}
+
+type SurveyMedia {
+    id: ID!
+    title: String!
+    # Custom media details
+    details: MediaDetails
+}
+
+type MediaDetails {
+    # Custom media key
+    # Use getImageUrl query for fetching the file with the key
+    key: String
 }
 
 union SurveyParameter = SurveyListParameter | SurveyTreeParameter
@@ -279,6 +297,15 @@ type AfterGameDriverStatistics {
     # may be null if group is not selected, or it's just "You"
     respondentGroupRate: Float
 }
+
+type MediaUpload {
+    key: String!
+    url: Url!
+}
+
+
+
+
 
 
 

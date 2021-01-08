@@ -157,6 +157,31 @@ input RespondentInvitationInput {
     emails: [String!]!
 }
 
+input SurveyMediaInput {
+    id: ID!
+    title: String!
+    # media details
+    details: MediaDetailsInput
+}
+
+input MediaUploadInput {
+    fileName: String!
+    mimeType: String!
+}
+
+input MediaParametersInput {
+    width: Long
+    height: Long
+}
+
+input MediaDetailsInput {
+    key: String
+}
+
+
+
+
+
 input CustomerInput {
     id: ID
     name: String
