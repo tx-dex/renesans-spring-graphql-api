@@ -5,6 +5,7 @@ import fi.sangre.renesans.graphql.facade.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatistics;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,36 @@ public class AppQueries implements GraphQLQueryResolver {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return afterGameFacade.afterGameOverviewCatalystsStatistics(questionnaireId,
+                resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public AfterGameCatalystStatistics afterGameDetailedCatalystStatistics(@NonNull final UUID questionnaireId,
+                                                                           @NonNull final UUID catalystId,
+                                                                           @Nullable final UUID parameterValue,
+                                                                           @Nullable final String languageCode,
+                                                                           @NonNull final DataFetchingEnvironment environment) {
+        log.debug("Getting after game detailed statistics questionnaire(id={}, catalystId={})", questionnaireId, catalystId);
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return afterGameFacade.afterGameDetailedCatalystStatistics(questionnaireId,
+                catalystId,
+                parameterValue,
+                resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public Collection<AfterGameParameterStatisticsOutput> afterGameRespondentParametersStatistics(@NonNull final UUID questionnaireId,
+                                                                                                  @NonNull final UUID catalystId,
+                                                                                                  @Nullable final String languageCode,
+                                                                                                  @NonNull final DataFetchingEnvironment environment) {
+        log.debug("Getting after game parameter statistics questionnaire(id={}, catalystId={})", questionnaireId, catalystId);
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return afterGameFacade.afterGameRespondentParametersStatistics(questionnaireId,
+                catalystId,
                 resolverHelper.getRequiredPrincipal(environment));
     }
 }
