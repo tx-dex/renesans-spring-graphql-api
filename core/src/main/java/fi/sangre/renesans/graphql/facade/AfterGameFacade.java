@@ -7,9 +7,10 @@ import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatistics;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameDriverStatistics;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameDriverStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameQuestionStatisticsOutput;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,43 +35,53 @@ public class AfterGameFacade {
     private final QuestionnaireAssembler questionnaireAssembler;
 
     @NonNull
-    public Collection<AfterGameCatalystStatistics> afterGameOverviewCatalystsStatistics(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
+    public Collection<AfterGameCatalystStatisticsOutput> afterGameOverviewCatalystsStatistics(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
         final QuestionnaireOutput questionnaire = getQuestionnaire(questionnaireId, principal);
 
         return questionnaire.getCatalysts().stream()
-                .map(catalyst -> AfterGameCatalystStatistics.builder()
-                        .catalyst(catalyst)
-                        .respondentRate(0d)
-                        .respondentGroupRate(0d)
+                .map(catalyst -> AfterGameCatalystStatisticsOutput.builder()
+                        .id(catalyst.getId())
+                        .titles(catalyst.getTitles().getPhrases())
+                        .respondentResult(0d)
+                        .respondentGroupResult(0d)
                         .drivers(catalyst.getDrivers().stream()
-                                .map(driver -> AfterGameDriverStatistics.builder()
-                                        .driver(driver)
-                                        .respondentRate(0d)
-                                        .respondentGroupRate(0d)
+                                .map(driver -> AfterGameDriverStatisticsOutput.builder()
+                                        .titles(driver.getTitles().getPhrases())
+                                        .respondentResult(0d)
+                                        .respondentGroupResult(0d)
                                         .build())
                                 .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
+                        .questions(ImmutableList.of())
                         .build())
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull
-    public AfterGameCatalystStatistics afterGameDetailedCatalystStatistics(@NonNull final UUID questionnaireId,
-                                                                           @NonNull final UUID catalystId,
-                                                                           @Nullable final UUID parameterValue,
-                                                                           @NonNull final UserDetails principal) {
+    public AfterGameCatalystStatisticsOutput afterGameDetailedCatalystStatistics(@NonNull final UUID questionnaireId,
+                                                                                 @NonNull final UUID catalystId,
+                                                                                 @Nullable final UUID parameterValue,
+                                                                                 @NonNull final UserDetails principal) {
         final QuestionnaireOutput questionnaire = getQuestionnaire(questionnaireId, principal);
 
         return questionnaire.getCatalysts().stream()
                 .filter(catalyst -> catalyst.getId().equals(catalystId))
-                .map(catalyst -> AfterGameCatalystStatistics.builder()
-                        .catalyst(catalyst)
-                        .respondentRate(0d)
-                        .respondentGroupRate(0d)
+                .map(catalyst -> AfterGameCatalystStatisticsOutput.builder()
+                        .id(catalyst.getId())
+                        .titles(catalyst.getTitles().getPhrases())
+                        .respondentResult(0d)
+                        .respondentGroupResult(0d)
                         .drivers(catalyst.getDrivers().stream()
-                                .map(driver -> AfterGameDriverStatistics.builder()
-                                        .driver(driver)
-                                        .respondentRate(0d)
-                                        .respondentGroupRate(0d)
+                                .map(driver -> AfterGameDriverStatisticsOutput.builder()
+                                        .titles(driver.getTitles().getPhrases())
+                                        .respondentResult(0d)
+                                        .respondentGroupResult(0d)
+                                        .build())
+                                .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
+                        .questions(catalyst.getQuestions().stream()
+                                .map(question -> AfterGameQuestionStatisticsOutput.builder()
+                                        .titles(question.getTitles())
+                                        .rate(0d)
+                                        .result(0d)
                                         .build())
                                 .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
                         .build())

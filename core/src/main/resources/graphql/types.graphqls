@@ -280,27 +280,39 @@ type QuestionnaireTreeParameter {
 }
 
 type AfterGameCatalystStatistics {
-  catalyst: QuestionnaireCatalyst!
-  # result for current respondent "You"
-  respondentRate: Float
-  # result for "Everyone" or selected parameter group on details page
-  # may be null if group is not selected, or it's just "You"
-  respondentGroupRate: Float
-  drivers: [AfterGameDriverStatistics!]!
+    # Catalyst Id
+    id: ID!
+    # Catalyst title
+    title: String
+    # result for current respondent "You"
+    respondentResult: Float
+    # result for "Everyone" or selected parameter group on details page
+    # may be null if group is not selected, or it's just "You"
+    respondentGroupResult: Float
+    drivers: [AfterGameDriverStatistics!]!
+    questions: [AfterGameQuestionStatistics]!
 }
 
 type AfterGameDriverStatistics {
-    driver: QuestionnaireDriver!
+    # Driver title
+    title: String
     # result for current respondent "You"
-    respondentRate: Float
+    respondentResult: Float
     # result for "Everyone" or selected parameter group on details page
     # may be null if group is not selected, or it's just "You"
-    respondentGroupRate: Float
+    respondentGroupResult: Float
 }
 
 type AfterGameParameterStatistics {
     title: String!
     value: String
+    result: Float
+}
+
+type AfterGameQuestionStatistics {
+    title: String!
+    result: Float
+    # this is calculated rate of "How important is the question to me?"
     rate: Float
 }
 

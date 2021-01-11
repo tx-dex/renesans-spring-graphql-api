@@ -11,8 +11,8 @@ import java.util.Map;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class AfterGameParameterStatisticsOutput {
+public class AfterGameQuestionStatisticsOutput {
     private Map<String, String> titles;
-    private String value;
     private Double result;
+    private Double rate;
 }

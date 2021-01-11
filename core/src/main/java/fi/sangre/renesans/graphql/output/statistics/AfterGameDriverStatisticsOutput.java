@@ -6,13 +6,15 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode
 @ToString
 @Builder
-public class AfterGameParameterStatisticsOutput {
+public class AfterGameDriverStatisticsOutput {
+    private UUID id;
     private Map<String, String> titles;
-    private String value;
-    private Double result;
+    private Double respondentResult;
+    private Double respondentGroupResult;
 }

@@ -4,7 +4,7 @@ import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import fi.sangre.renesans.graphql.facade.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatistics;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import graphql.schema.DataFetchingEnvironment;
@@ -39,7 +39,7 @@ public class AppQueries implements GraphQLQueryResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
-    public Collection<AfterGameCatalystStatistics> afterGameOverviewCatalystsStatistics(@NonNull final UUID questionnaireId, @Nullable final String languageCode, @NonNull final DataFetchingEnvironment environment) {
+    public Collection<AfterGameCatalystStatisticsOutput> afterGameOverviewCatalystsStatistics(@NonNull final UUID questionnaireId, @Nullable final String languageCode, @NonNull final DataFetchingEnvironment environment) {
         log.debug("Getting after game overview statistics questionnaire(id={})", questionnaireId);
         resolverHelper.setLanguageCode(languageCode, environment);
 
@@ -49,11 +49,11 @@ public class AppQueries implements GraphQLQueryResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
-    public AfterGameCatalystStatistics afterGameDetailedCatalystStatistics(@NonNull final UUID questionnaireId,
-                                                                           @NonNull final UUID catalystId,
-                                                                           @Nullable final UUID parameterValue,
-                                                                           @Nullable final String languageCode,
-                                                                           @NonNull final DataFetchingEnvironment environment) {
+    public AfterGameCatalystStatisticsOutput afterGameDetailedCatalystStatistics(@NonNull final UUID questionnaireId,
+                                                                                 @NonNull final UUID catalystId,
+                                                                                 @Nullable final UUID parameterValue,
+                                                                                 @Nullable final String languageCode,
+                                                                                 @NonNull final DataFetchingEnvironment environment) {
         log.debug("Getting after game detailed statistics questionnaire(id={}, catalystId={})", questionnaireId, catalystId);
         resolverHelper.setLanguageCode(languageCode, environment);
 
@@ -76,4 +76,5 @@ public class AppQueries implements GraphQLQueryResolver {
                 catalystId,
                 resolverHelper.getRequiredPrincipal(environment));
     }
+
 }
