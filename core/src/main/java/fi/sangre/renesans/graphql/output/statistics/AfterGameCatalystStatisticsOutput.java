@@ -20,4 +20,5 @@ public class AfterGameCatalystStatisticsOutput {
     private Double respondentGroupResult;
     private Collection<AfterGameDriverStatisticsOutput> drivers;
     private Collection<AfterGameQuestionStatisticsOutput> questions;
+    private AfterGameOpenQuestionOutput openQuestion;
 }

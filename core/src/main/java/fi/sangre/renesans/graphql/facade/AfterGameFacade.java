@@ -7,10 +7,7 @@ import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameDriverStatisticsOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameQuestionStatisticsOutput;
+import fi.sangre.renesans.graphql.output.statistics.*;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.collectingAndThen;
@@ -52,6 +50,7 @@ public class AfterGameFacade {
                                         .build())
                                 .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
                         .questions(ImmutableList.of())
+                        .openQuestion(null)
                         .build())
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
@@ -84,6 +83,12 @@ public class AfterGameFacade {
                                         .result(0d)
                                         .build())
                                 .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
+                        .openQuestion(Optional.ofNullable(catalyst.getCatalystQuestion())
+                                .map(question -> AfterGameOpenQuestionOutput.builder()
+                                        .titles(question.getTitles())
+                                        .answers(ImmutableList.of())
+                                        .build())
+                                .orElse(null))
                         .build())
                 .findFirst()
                 .orElseThrow(() -> new SurveyException("Catalyst not found"));

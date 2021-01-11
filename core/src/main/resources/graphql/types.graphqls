@@ -291,6 +291,7 @@ type AfterGameCatalystStatistics {
     respondentGroupResult: Float
     drivers: [AfterGameDriverStatistics!]!
     questions: [AfterGameQuestionStatistics]!
+    openQuestion: AfterGameOpenQuestion
 }
 
 type AfterGameDriverStatistics {
@@ -314,6 +315,11 @@ type AfterGameQuestionStatistics {
     result: Float
     # this is calculated rate of "How important is the question to me?"
     rate: Float
+}
+
+type AfterGameOpenQuestion {
+    title: String
+    answers: [String!]!
 }
 
 type MediaUpload {
