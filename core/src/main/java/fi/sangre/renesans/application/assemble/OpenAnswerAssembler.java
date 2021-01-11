@@ -35,6 +35,7 @@ public class OpenAnswerAssembler {
         final OpenQuestionAnswer.OpenQuestionAnswerBuilder builder = OpenQuestionAnswer.builder()
                 .id(new QuestionId(answer.getCatalystId()))
                 .catalystId(catalystId)
+                .isPublic(Boolean.TRUE.equals(answer.getPublic()))
                 .status(AnswerStatus.SKIPPED);
 
         if (StringUtils.isNotBlank(answer.getResponse())) {

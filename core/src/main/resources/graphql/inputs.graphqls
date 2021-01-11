@@ -134,6 +134,7 @@ input CatalystOpenQuestionAnswerInput {
     # Free text
     # Set null for skipping the question
     response: String
+    public: Boolean
 }
 
 input ParameterAnswerInput {

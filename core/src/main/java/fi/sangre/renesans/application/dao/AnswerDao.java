@@ -56,6 +56,7 @@ public class AnswerDao {
                         .id(new QuestionId(e.getId().getCatalystId()))
                         .catalystId(new CatalystId(e.getId().getCatalystId()))
                         .status(e.getStatus())
+                        .isPublic(e.isPublic())
                         .response(e.getResponse())
                         .build())
                 .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
@@ -68,6 +69,7 @@ public class AnswerDao {
                 .id(id)
                 .response(answer.getResponse())
                 .status(answer.getStatus())
+                .isPublic(answer.isPublic())
                 .build();
         catalystOpenQuestionAnswerRepository.save(entity);
     }

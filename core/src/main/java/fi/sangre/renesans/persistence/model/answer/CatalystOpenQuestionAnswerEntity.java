@@ -5,6 +5,7 @@ import fi.sangre.renesans.application.model.answer.AnswerStatus;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import lombok.*;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -46,6 +47,10 @@ public class CatalystOpenQuestionAnswerEntity {
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.ORDINAL)
     private AnswerStatus status;
+
+    @Column(name = "is_public")
+    @Accessors(fluent = true)
+    private Boolean isPublic;
 
     @Column(name = "open_response")
     private String response;

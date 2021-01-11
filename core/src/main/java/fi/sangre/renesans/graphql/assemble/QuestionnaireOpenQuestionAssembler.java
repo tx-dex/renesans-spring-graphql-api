@@ -22,12 +22,11 @@ public class QuestionnaireOpenQuestionAssembler {
             final QuestionnaireOpenQuestionOutput.QuestionnaireOpenQuestionOutputBuilder output = QuestionnaireOpenQuestionOutput.builder()
                     .id(new QuestionId(catalyst.getId().getValue()))
                     .titles(catalyst.getOpenQuestion().getPhrases())
-                    .answered(false)
-                    .skipped(false)
                     .response(null);
 
             if (answer != null) {
-                output.skipped(AnswerStatus.SKIPPED.equals(answer.getStatus()));
+                output.skipped(AnswerStatus.SKIPPED.equals(answer.getStatus()))
+                        .isPublic(answer.isPublic());
 
                 if (AnswerStatus.ANSWERED.equals(answer.getStatus())) {
                     output.answered(true)

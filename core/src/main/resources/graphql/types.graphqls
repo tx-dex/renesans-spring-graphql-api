@@ -241,6 +241,7 @@ type QuestionnaireOpenQuestion implements IQuestionnaireQuestion{
     title: String!
     answered: Boolean!
     skipped: Boolean!
+    public: Boolean!
     response: String
 }
 

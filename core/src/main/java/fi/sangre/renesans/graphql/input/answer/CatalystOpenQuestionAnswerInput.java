@@ -2,6 +2,7 @@ package fi.sangre.renesans.graphql.input.answer;
 
 import lombok.Data;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import java.util.UUID;
 
@@ -10,4 +11,6 @@ import java.util.UUID;
 public class CatalystOpenQuestionAnswerInput {
     private UUID catalystId;
     private String response;
+    @Accessors(prefix = "_")
+    private Boolean _public;
 }

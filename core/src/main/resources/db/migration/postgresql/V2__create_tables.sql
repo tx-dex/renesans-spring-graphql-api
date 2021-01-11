@@ -153,7 +153,6 @@ create table if not exists question_answer
             references question_group(uuid),
     status integer not null,
     likert_response integer null,
-    open_response text,
     answer_time timestamp default CURRENT_TIMESTAMP not null
 );
 
@@ -176,7 +175,7 @@ create table if not exists catalyst_answer
         constraint catalyst_answer_catalyst_id_fkey
             references question_group(uuid),
     status integer not null,
-    likert_response integer null,
+    is_public bool not null default false,
     open_response text null,
     answer_time timestamp default CURRENT_TIMESTAMP not null
 );
