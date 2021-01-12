@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -64,5 +65,15 @@ public class SurveyUtils {
                 .stream()
                 .filter(parameter -> parameterId.equals(parameter.getId()))
                 .findFirst().orElse(null);
+    }
+
+    @Nullable
+    public Parameter findParameter(@NonNull final UUID parameterId, @NonNull final OrganizationSurvey survey) {
+        return findParameter(new ParameterId(parameterId), survey);
+    }
+
+    @Nullable
+    public Parameter findParameter(@NonNull final String parameterId, @NonNull final OrganizationSurvey survey) {
+        return findParameter(UUID.fromString(parameterId), survey);
     }
 }

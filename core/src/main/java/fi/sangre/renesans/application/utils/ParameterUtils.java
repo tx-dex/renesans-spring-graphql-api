@@ -13,10 +13,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -71,6 +68,35 @@ public class ParameterUtils {
                     .orElse(null);
         } else {
             throw new SurveyException("Invalid parameter type");
+        }
+    }
+
+    @NonNull
+    public List<ParameterChild> findChildren(@Nullable final Set<ParameterId> childrenIds, @Nullable final Parameter parameter) {
+        if (parameter == null || childrenIds == null) {
+            return ImmutableList.of();
+        } else {
+            if (parameter instanceof ParentParameter) {
+                final ParentParameter parent = (ParentParameter) parameter;
+                if (parent.hasChildren()) {
+                    return parent.getLeaves().stream()
+                            .filter(child -> childrenIds.contains(child.getId()))
+                            .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+
+                } else {
+                    return ImmutableList.of();
+                }
+            } else if (parameter instanceof ListParameter) {
+                final ListParameter list = (ListParameter) parameter;
+                return Optional.ofNullable(list.getValues())
+                        .orElse(ImmutableList.of())
+                        .stream()
+                        .filter(child -> childrenIds.contains(child.getId()))
+                        .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+
+            } else {
+                throw new SurveyException("Invalid parameter type");
+            }
         }
     }
 

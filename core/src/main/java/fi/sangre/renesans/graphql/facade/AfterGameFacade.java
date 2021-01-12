@@ -1,13 +1,21 @@
 package fi.sangre.renesans.graphql.facade;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.ParameterId;
+import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
+import fi.sangre.renesans.application.utils.ParameterUtils;
+import fi.sangre.renesans.application.utils.SurveyUtils;
+import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.*;
+import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +24,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -31,6 +38,9 @@ import static java.util.stream.Collectors.toList;
 public class AfterGameFacade {
     private final OrganizationSurveyService organizationSurveyService;
     private final QuestionnaireAssembler questionnaireAssembler;
+    private final AnswerService answerService;
+    private final ParameterUtils parameterUtils;
+    private final SurveyUtils surveyUtils;
 
     @NonNull
     public Collection<AfterGameCatalystStatisticsOutput> afterGameOverviewCatalystsStatistics(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
@@ -98,13 +108,52 @@ public class AfterGameFacade {
     public Collection<AfterGameParameterStatisticsOutput> afterGameRespondentParametersStatistics(@NonNull final UUID questionnaireId,
                                                                                                   @NonNull final UUID catalystId,
                                                                                                   @NonNull final UserDetails principal) {
-        final QuestionnaireOutput questionnaire = getQuestionnaire(questionnaireId, principal);
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final QuestionnaireOutput questionnaire;
+        final ImmutableList.Builder<AfterGameParameterStatisticsOutput> result = ImmutableList.builder();
+        if (principal instanceof RespondentPrincipal) {
+            final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+            try {
+                final Future<Map<ParameterId, ParameterItemAnswer>> parameterAnswers = answerService.getParametersAnswersAsync(respondent.getSurveyId(), respondent.getId());
 
-        return ImmutableList.of();
+                questionnaire = questionnaireAssembler.from(respondent.getId(), survey, ImmutableMap.of(), ImmutableMap.of(), parameterAnswers.get());
+
+                result.add(AfterGameParameterStatisticsOutput.builder()
+                        .value(ParameterId.GLOBAL_YOU_PARAMETER_ID.asString())
+                        .titles(ImmutableMap.of("en", "you"))
+                        .result(0d)
+                        .build());
+
+                result.addAll(questionnaire.getParameters().stream()
+                        .filter(QuestionnaireParameterOutput::isAnswered)
+                        .map(parameter -> parameterUtils.findChildren(ParameterId.fromUUID(parameter.getSelectedAnswer()), surveyUtils.findParameter(parameter.getValue(), survey)))
+                        .flatMap(Collection::stream)
+                        .map(parameter -> AfterGameParameterStatisticsOutput.builder()
+                        .titles(parameter.getLabel().getPhrases())
+                                .value(parameter.getId().asString())
+                                .result(0d)
+                        .build())
+                .collect(toList()));
+            } catch (final InterruptedException | ExecutionException ex) {
+                log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
+                throw new InternalServiceException("Cannot get questionnaire");
+            }
+        } else if (principal instanceof UserPrincipal) {
+            questionnaire = questionnaireAssembler.from(survey);
+        }
+
+        return result.build();
     }
 
     @NonNull
     private QuestionnaireOutput getQuestionnaire(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+
+        return questionnaireAssembler.from(survey);
+    }
+
+    @NonNull
+    public OrganizationSurvey getSurvey(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
         final OrganizationSurvey survey;
         if (principal instanceof RespondentPrincipal) {
             survey = organizationSurveyService.getSurvey(((RespondentPrincipal) principal).getSurveyId());
@@ -114,6 +163,6 @@ public class AfterGameFacade {
             throw new SurveyException("Invalid principal");
         }
 
-        return questionnaireAssembler.from(survey);
+        return survey;
     }
 }

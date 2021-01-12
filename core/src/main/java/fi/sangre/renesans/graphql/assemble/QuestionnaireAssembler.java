@@ -57,11 +57,21 @@ public class QuestionnaireAssembler {
         final Future<Map<CatalystId, OpenQuestionAnswer>> catalystAnswers = answerService.getCatalystsQuestionsAnswersAsync(surveyId, respondentId);
         final Future<Map<ParameterId, ParameterItemAnswer>> parameterAnswers = answerService.getParametersAnswersAsync(surveyId, respondentId);
 
+        return from(respondentId, survey, catalystAnswers.get(), questionsAnswers.get(), parameterAnswers.get());
+    }
+
+    @NonNull
+    public QuestionnaireOutput from(@NonNull final RespondentId respondentId,
+                                    @NonNull final OrganizationSurvey survey,
+                                    @NonNull final Map<CatalystId, OpenQuestionAnswer> openQuestionAnswers,
+                                    @NonNull final Map<CatalystId, List<LikertQuestionAnswer>> questionsAnswers,
+                                    @NonNull final Map<ParameterId, ParameterItemAnswer> parameterAnswers) {
+
         return builder(survey)
                 .id(respondentId.getValue()) // overwrite the id with the respondent one
                 .answerable(true)
-                .catalysts(fromCatalysts(survey.getCatalysts(), catalystAnswers.get(), questionsAnswers.get()))
-                .parameters(questionnaireParameterOutputAssembler.from(survey.getParameters(), parameterAnswers.get()))
+                .catalysts(fromCatalysts(survey.getCatalysts(), openQuestionAnswers, questionsAnswers))
+                .parameters(questionnaireParameterOutputAssembler.from(survey.getParameters(), parameterAnswers))
                 .build();
     }
 
