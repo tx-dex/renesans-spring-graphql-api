@@ -68,6 +68,16 @@ type Query {
         languageCode: String
     ): [SurveyRespondent!]!
 
+    # Get survey statistcs based on provided filters
+    surveyStatistics(
+        surveyId: ID!
+        # List of filters for filtering respondents
+        filters: [FilterInput!]
+        # Should be used for selecting the language
+        languageCode: String
+    ): [SurveyCatalystStatistics!]!
+
+
     # Returns all catalysts/themes statistics for specific questionnaire
     afterGameOverviewCatalystsStatistics(
         questionnaireId: ID!

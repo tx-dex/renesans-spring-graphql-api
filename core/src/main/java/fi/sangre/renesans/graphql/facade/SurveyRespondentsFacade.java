@@ -3,6 +3,7 @@ package fi.sangre.renesans.graphql.facade;
 import com.google.common.collect.ImmutableList;
 import com.sangre.mail.dto.MailStatus;
 import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
@@ -40,6 +41,8 @@ import static java.util.stream.Collectors.*;
 @Component
 public class SurveyRespondentsFacade {
     private static final String EMPTY = "";
+
+    private final SurveyDao surveyDao;
     private final OrganizationSurveyService organizationSurveyService;
     private final AnswerService answerService;
     private final RespondentOutputAssembler respondentOutputAssembler;
@@ -51,7 +54,7 @@ public class SurveyRespondentsFacade {
                                                              @NonNull final List<RespondentFilter> filters,
                                                              @NonNull final String languageCode) {
         try {
-            final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
+            final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(surveyId);
             final Future<Collection<Respondent>> answers;
             final Future<Map<RespondentEmail, MailStatus>> invitations = invitationService.getInvitationStatuses(surveyId);
             final List<ParameterChild> allChildren = parameterUtils.getChildren(survey.getParameters());

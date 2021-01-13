@@ -159,7 +159,7 @@ input RespondentInvitationInput {
 }
 
 input SurveyMediaInput {
-    id: ID!
+    id: ID
     title: String!
     # media details
     details: MediaDetailsInput

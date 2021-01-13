@@ -18,6 +18,7 @@ import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.output.aaa.UserOutput;
 import fi.sangre.renesans.graphql.output.aaa.UserRoleOutput;
+import fi.sangre.renesans.graphql.output.statistics.SurveyCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.service.MediaService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
@@ -92,6 +93,19 @@ public class AdminQueries implements GraphQLQueryResolver {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return surveyRespondentsFacade.getSurveyRespondents(new SurveyId(surveyId),
+                respondentFilterAssembler.fromInput(filters),
+                resolverHelper.getLanguageCode(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'READ')")
+    public Collection<SurveyCatalystStatisticsOutput> getSurveyStatistics(@NonNull final UUID surveyId,
+                                                                          @Nullable final List<FilterInput> filters,
+                                                                          @Nullable final String languageCode,
+                                                                          @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return organizationSurveyFacade.getStatistics(new SurveyId(surveyId),
                 respondentFilterAssembler.fromInput(filters),
                 resolverHelper.getLanguageCode(environment));
     }

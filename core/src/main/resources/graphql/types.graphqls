@@ -192,6 +192,35 @@ type RespondentParameterAnswer {
     response: String
 }
 
+type SurveyCatalystStatistics {
+    # Catalyst Id
+    id: ID!
+    # Catalyst title
+    title: String
+    # result
+    result: Float!
+    drivers: [SurveyDriverStatistics!]!
+    questions: [SurveyQuestionStatistics!]!
+}
+
+type SurveyDriverStatistics {
+    # Driver Id
+    id: ID!
+    # Driver title
+    title: String
+    # result
+    result: Float!
+}
+
+type SurveyQuestionStatistics {
+    # Question Id
+    id: ID!
+    # Question title
+    title: String
+    result: Float!
+    rate: Float!
+}
+
 # type for the app
 type Questionnaire {
     id: ID!
