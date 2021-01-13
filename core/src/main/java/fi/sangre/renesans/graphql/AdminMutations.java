@@ -287,6 +287,6 @@ public class AdminMutations implements GraphQLMutationResolver {
     @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
     public MediaUploadOutput getMediaUploadUrl(@NonNull final UUID id,
                                                @NonNull final MediaUploadInput input) {
-        return mediaService.requestUploadUrl(input);
+        return mediaService.requestUploadUrl(new SurveyId(id), input);
     }
 }

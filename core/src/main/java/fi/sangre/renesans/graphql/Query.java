@@ -27,22 +27,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
+@Slf4j
 
 @Component
-@Slf4j
+@Deprecated
 public class Query implements GraphQLQueryResolver {
     private final SurveyService surveyService;
-    private final RespondentOptionService respondentOptionService;
     private final MultilingualService multilingualService;
-    private final InvitationService invitationService;
     private final CustomerService customerService;
-    private final RespondentService respondentService;
     private final StatisticsService statisticsService;
-    private final ImageUploadService imageUploadService;
     private final UserService userService;
     private final JwtTokenService tokenService;
     private final SegmentService segmentService;
-    private final QuestionnaireService questionnaireService;
     private final QuestionService questionService;
     private final ResolverHelper resolverHelper;
 
@@ -81,12 +77,12 @@ public class Query implements GraphQLQueryResolver {
         return surveyService.getSurvey(id, customerId);
     }
 
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public Iterable<Respondent> respondents(
             FiltersDto filters,
-            DataFetchingEnvironment environment
-    ) {
-        return ImmutableList.of();
+            DataFetchingEnvironment environment) {
+        throw new DeprecatedException();
     }
 
     public Statistics statistics(
@@ -119,7 +115,7 @@ public class Query implements GraphQLQueryResolver {
     @Deprecated
     public List<RespondentOption> respondentOptions(String languageCode, RespondentOption.OptionType optionType,
                                                     DataFetchingEnvironment environment) {
-        return ImmutableList.of();
+        throw new DeprecatedException();
     }
 
     public List<Country> countries(String languageCode, DataFetchingEnvironment environment) {
@@ -130,7 +126,7 @@ public class Query implements GraphQLQueryResolver {
 
     @Deprecated
     public MultilingualPhrase phrase(String languageCode, String key, DataFetchingEnvironment environment) {
-        return new MultilingualPhrase();
+        throw new DeprecatedException();
     }
 
     /**
@@ -164,15 +160,16 @@ public class Query implements GraphQLQueryResolver {
     @Deprecated
     @PreAuthorize("isAuthenticated()")
     public List<InvitationDetailsDto> invitations(String respondentGroupId) {
-        return ImmutableList.of();
+        throw new DeprecatedException();
     }
 
     @Deprecated
     @PreAuthorize("isAuthenticated()")
     public List<InvitationDetailsDto> invitationsByEmail(String respondentGroupId, String email, String status) {
-        return ImmutableList.of();
+        throw new DeprecatedException();
     }
 
+    @Deprecated
     public String defaultSurveyId() {
         return surveyService.getDefaultSurvey().getId().toString();
     }
@@ -195,9 +192,10 @@ public class Query implements GraphQLQueryResolver {
         return multilingualService.getLanguages(resolverHelper.getLanguageCode(environment));
     }
 
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public ImageUploadUrlDto imageUploadUrl(String fileName) {
-        return imageUploadService.getUploadUrl(fileName);
+        throw new DeprecatedException();
     }
 
     public boolean validateResetPasswordToken(String token) {

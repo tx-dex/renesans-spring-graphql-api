@@ -1,20 +1,19 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
-import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.aaa.JwtTokenService;
 import fi.sangre.renesans.exception.DeprecatedException;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.persistence.model.Customer;
-import fi.sangre.renesans.service.*;
+import fi.sangre.renesans.service.QuestionService;
+import fi.sangre.renesans.service.SegmentService;
+import fi.sangre.renesans.service.UserService;
 import graphql.GraphQLException;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,14 +26,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 @Slf4j
 @Component
+@Deprecated
 public class Mutation implements GraphQLMutationResolver {
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenService tokenService;
-    private final CustomerService customerService;
-    private final WeightService weightService;
-    private final InvitationService invitationService;
-    private final MultilingualService multilingualService;
-    private final RespondentService respondentService;
     private final UserService userService;
     private final SegmentService segmentService;
     private final QuestionService questionService;
@@ -141,19 +134,16 @@ public class Mutation implements GraphQLMutationResolver {
         throw new DeprecatedException();
     }
 
+    @Deprecated
     @PreAuthorize("hasRole('SUPER_USER')")
     public MultilingualPhrase storeNamedPhrase(PhraseInput phraseInput, DataFetchingEnvironment environment) {
-        // if input does not have a set languageCode, set it from the request context
-        if (phraseInput.getLanguageCode() == null) {
-            phraseInput.setLanguageCode(resolverHelper.getLanguageCode(environment));
-        }
-        return multilingualService.saveNamedPhrase(phraseInput);
+        throw new DeprecatedException();
     }
 
     @Deprecated
     @PreAuthorize("isAuthenticated()")
     public List<Weight> storeWeights(List<WeightInput> weights) {
-        return ImmutableList.of();
+        throw new DeprecatedException();
     }
 
     @Deprecated

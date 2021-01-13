@@ -101,8 +101,10 @@ type Query {
     ): [AfterGameParameterStatistics]!
 
     # get image url by key
-    getImageUrl(key: String!, params: MediaParametersInput): Url
+    getImageUrl(key: String!, params: MediaParametersInput): Url @deprecated(reason: "Use getMediaUrl")
 
+    # get media url by key
+    getMediaUrl(key: String!, params: MediaParametersInput): Url
 
 
 
