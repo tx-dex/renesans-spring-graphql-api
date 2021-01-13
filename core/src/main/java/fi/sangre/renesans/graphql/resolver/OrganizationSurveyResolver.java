@@ -59,7 +59,7 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
     }
 
     @NonNull
-    public Collection<SurveyMediaOutput> getMedia(@NonNull final OrganizationSurvey survey, @NonNull final DataFetchingEnvironment environment) {
+    public Collection<SurveyMediaOutput> getMedia(@NonNull final OrganizationSurvey survey) {
         return ImmutableList.of();
     }
 

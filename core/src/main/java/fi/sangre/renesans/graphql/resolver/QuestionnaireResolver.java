@@ -1,11 +1,13 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireTranslationOutput;
+import fi.sangre.renesans.graphql.output.media.SurveyMediaOutput;
 import fi.sangre.renesans.service.TranslationService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -47,5 +50,10 @@ public class QuestionnaireResolver implements GraphQLResolver<QuestionnaireOutpu
                         , Collections::unmodifiableMap));
 
         return new QuestionnaireTranslationOutput(translations);
+    }
+
+    @NonNull
+    public Collection<SurveyMediaOutput> getMedia(@NonNull final QuestionnaireOutput output) {
+        return ImmutableList.of();
     }
 }

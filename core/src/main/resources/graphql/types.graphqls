@@ -23,6 +23,12 @@ enum QuestionSourceType {
     ORGANISATION
 }
 
+enum MediaType {
+    IMAGE
+    VIDEO
+    PDF
+}
+
 # Currently supported parameter types
 enum SurveyParameterType {
     # List / Combobox
@@ -107,6 +113,7 @@ type OrganizationSurvey {
 type SurveyMedia {
     id: ID!
     title: String!
+    type: MediaType!
     # Custom media details
     details: MediaDetails
 }
@@ -191,6 +198,7 @@ type Questionnaire {
     staticTexts: Translation!
     catalysts: [QuestionnaireCatalyst!]!
     parameters: [QuestionnaireParameter!]!
+    media: [SurveyMedia!]!
     isFinished: Boolean!
     isAnswerable: Boolean!
 }
