@@ -3,10 +3,12 @@ package fi.sangre.renesans.application.assemble;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.StaticTextGroup;
+import fi.sangre.renesans.application.model.media.MediaDetails;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.input.CatalystInput;
 import fi.sangre.renesans.graphql.input.StaticTextInput;
 import fi.sangre.renesans.graphql.input.media.MediaDetailsInput;
+import fi.sangre.renesans.graphql.input.media.SurveyMediaInput;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
@@ -31,10 +33,12 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class OrganizationSurveyAssembler {
+    private final MediaAssembler mediaAssembler;
     private final ParameterAssembler parameterAssembler;
     private final StaticTextAssembler staticTextAssembler;
     private final CatalystAssembler catalystAssembler;
     private final MultilingualUtils multilingualUtils;
+
 
     @NonNull
     public OrganizationSurvey fromQuestionsInput(@NonNull final UUID id,
@@ -92,6 +96,20 @@ public class OrganizationSurveyAssembler {
     }
 
     @NonNull
+    public OrganizationSurvey fromMediasInput(@NonNull final UUID id,
+                                               @NonNull final Long version,
+                                               @NonNull final List<SurveyMediaInput> input,
+                                               @NonNull final String languageTag) {
+        multilingualUtils.checkLanguageTag(languageTag);
+
+        return OrganizationSurvey.builder()
+                .id(id)
+                .version(version)
+                .media(mediaAssembler.fromInputs(input, languageTag))
+                .build();
+    }
+
+    @NonNull
     public OrganizationSurvey fromStaticTextInput(@NonNull final UUID id,
                                                   @NonNull final Long version,
                                                   @NonNull final StaticTextInput input,
@@ -119,12 +137,14 @@ public class OrganizationSurveyAssembler {
     public OrganizationSurvey fromLogoInput(@NonNull final UUID id,
                                             @NonNull final Long version,
                                             @Nullable final MediaDetailsInput input) {
-        final ImageMetadata logo = Optional.ofNullable(input)
+        final MediaDetails logo = Optional.ofNullable(input)
                 .map(MediaDetailsInput::getKey)
-                .map(v -> ImageMetadata.builder()
-                        .key(v)
+                .map(StringUtils::trimToNull)
+                .map(key -> MediaDetails.builder()
+                        .key(key)
                         .build())
-                .orElse(null);
+                .orElse(MediaDetails.builder()
+                        .build());
 
         return OrganizationSurvey.builder()
                 .id(id)
@@ -140,9 +160,15 @@ public class OrganizationSurveyAssembler {
         return OrganizationSurvey.builder()
                 .id(survey.getId())
                 .version(survey.getVersion())
-                .logo(metadata.getLogo())
+                .logo(Optional.ofNullable(metadata.getLogo())
+                        .map(ImageMetadata::getKey)
+                        .map(key -> MediaDetails.builder()
+                                .key(key)
+                                .build())
+                        .orElse(null))
                 .titles(multilingualUtils.create(metadata.getTitles()))
                 .descriptions(multilingualUtils.create(metadata.getDescriptions()))
+                .media(mediaAssembler.fromMetadata(metadata.getMedia()))
                 .catalysts(catalystAssembler.fromMetadata(metadata.getCatalysts()))
                 .parameters(parameterAssembler.fromMetadata(metadata.getParameters()))
                 .staticTexts(staticTextAssembler.fromMetadata(metadata.getTranslations()))

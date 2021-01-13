@@ -197,9 +197,9 @@ public class AdminMutations implements GraphQLMutationResolver {
                                                            @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-//        final OrganizationSurvey inputSurvey = organizationSurveyAssembler
-//                .fromParametersInput(id, version, input, resolverHelper.getLanguageCode(environment));
-        return organizationSurveyService.getSurvey(id);
+        final OrganizationSurvey inputSurvey = organizationSurveyAssembler
+                .fromMediasInput(id, version, input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.updateMetadata(inputSurvey);
     }
 
     @NonNull

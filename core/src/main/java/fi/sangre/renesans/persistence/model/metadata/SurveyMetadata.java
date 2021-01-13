@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import fi.sangre.renesans.persistence.model.metadata.media.ImageMetadata;
+import fi.sangre.renesans.persistence.model.metadata.media.MediaMetadata;
 import fi.sangre.renesans.persistence.model.metadata.parameters.ParameterMetadata;
 import lombok.*;
 
@@ -26,6 +27,7 @@ public class SurveyMetadata implements Serializable {
     private Map<String, String> titles;
     private Map<String, String> descriptions;
     private ImageMetadata logo;
+    private List<MediaMetadata> media;
     private List<CatalystMetadata> catalysts;
     private List<ParameterMetadata> parameters;
     private LocalisationMetadata localisation;

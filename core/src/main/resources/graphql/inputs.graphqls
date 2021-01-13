@@ -162,7 +162,7 @@ input SurveyMediaInput {
     id: ID
     title: String!
     # media details
-    details: MediaDetailsInput
+    details: MediaDetailsInput!
 }
 
 input MediaUploadInput {
@@ -176,7 +176,7 @@ input MediaParametersInput {
 }
 
 input MediaDetailsInput {
-    key: String
+    key: String!
 }
 
 

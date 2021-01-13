@@ -2,8 +2,6 @@ package fi.sangre.renesans.persistence.model.metadata.media;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.io.Serializable;
 
@@ -14,9 +12,8 @@ import java.io.Serializable;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ImageMetadata.class, name = "image"),
         @JsonSubTypes.Type(value = VideoMetadata.class, name = "video"),
-        @JsonSubTypes.Type(value = FileMetadata.class, name = "file"),
+        @JsonSubTypes.Type(value = PdfMetadata.class, name = "pdf"),
 })
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public interface MediaMetadata extends Serializable {
     String getKey();
     void setKey(String key);

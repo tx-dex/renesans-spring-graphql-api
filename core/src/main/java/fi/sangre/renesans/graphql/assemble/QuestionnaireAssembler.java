@@ -6,6 +6,7 @@ import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.graphql.assemble.media.MediaDetailsAssembler;
 import fi.sangre.renesans.graphql.output.QuestionnaireCatalystOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireDriverOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
@@ -36,6 +37,8 @@ public class QuestionnaireAssembler {
     private final QuestionnaireLikertQuestionAssembler questionnaireLikertQuestionAssembler;
     private final QuestionnaireOpenQuestionAssembler questionnaireOpenQuestionAssembler;
     private final QuestionnaireParameterOutputAssembler questionnaireParameterOutputAssembler;
+    private final SurveyMediaAssembler surveyMediaAssembler;
+    private final MediaDetailsAssembler mediaDetailsAssembler;
 
     @NonNull
     public QuestionnaireOutput from(@NonNull final OrganizationSurvey survey) {
@@ -78,7 +81,8 @@ public class QuestionnaireAssembler {
     private QuestionnaireOutput.QuestionnaireOutputBuilder builder(@NonNull final OrganizationSurvey survey) {
         return QuestionnaireOutput.builder()
                 .id(survey.getId())
-                .logo(survey.getLogo())
+                .logo(mediaDetailsAssembler.from(survey.getLogo()))
+                .media(surveyMediaAssembler.from(survey.getMedia()))
                 .staticTexts(survey.getStaticTexts())
                 .finished(true)
                 .answerable(false);

@@ -1,7 +1,7 @@
-package fi.sangre.renesans.graphql.assemble;
+package fi.sangre.renesans.graphql.assemble.media;
 
+import fi.sangre.renesans.application.model.media.MediaDetails;
 import fi.sangre.renesans.graphql.output.media.MediaDetailsOutput;
-import fi.sangre.renesans.persistence.model.metadata.media.ImageMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
@@ -16,11 +16,11 @@ import java.util.Optional;
 public class MediaDetailsAssembler {
 
     @Nullable
-    public MediaDetailsOutput from(@Nullable final ImageMetadata model) {
+    public MediaDetailsOutput from(@Nullable final MediaDetails model) {
         return Optional.ofNullable(model)
-                .map(ImageMetadata::getKey)
-                .map(v -> MediaDetailsOutput.builder()
-                        .key(v)
+                .map(MediaDetails::getKey)
+                .map(key -> MediaDetailsOutput.builder()
+                        .key(key)
                         .build())
                 .orElse(null);
     }

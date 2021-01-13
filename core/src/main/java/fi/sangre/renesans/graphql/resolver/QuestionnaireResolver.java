@@ -1,24 +1,18 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
-import fi.sangre.renesans.graphql.assemble.MediaDetailsAssembler;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireTranslationOutput;
-import fi.sangre.renesans.graphql.output.media.MediaDetailsOutput;
-import fi.sangre.renesans.graphql.output.media.SurveyMediaOutput;
 import fi.sangre.renesans.service.TranslationService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -33,7 +27,6 @@ public class QuestionnaireResolver implements GraphQLResolver<QuestionnaireOutpu
     private final TranslationService translationService;
     private final ResolverHelper resolverHelper;
     private final MultilingualUtils multilingualUtils;
-    private final MediaDetailsAssembler mediaDetailsAssembler;
 
     public QuestionnaireTranslationOutput getStaticTexts(@NonNull final QuestionnaireOutput output, @NonNull final DataFetchingEnvironment environment) {
         final String languageTag = resolverHelper.getLanguageCode(environment);
@@ -54,15 +47,5 @@ public class QuestionnaireResolver implements GraphQLResolver<QuestionnaireOutpu
                         , Collections::unmodifiableMap));
 
         return new QuestionnaireTranslationOutput(translations);
-    }
-
-    @Nullable
-    public MediaDetailsOutput getLogo(@NonNull final QuestionnaireOutput output) {
-        return mediaDetailsAssembler.from(output.getLogo());
-    }
-
-    @NonNull
-    public Collection<SurveyMediaOutput> getMedia(@NonNull final QuestionnaireOutput output) {
-        return ImmutableList.of();
     }
 }

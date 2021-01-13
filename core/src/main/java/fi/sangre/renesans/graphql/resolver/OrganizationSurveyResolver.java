@@ -1,14 +1,14 @@
 package fi.sangre.renesans.graphql.resolver;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.RespondentCounters;
 import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
-import fi.sangre.renesans.graphql.assemble.MediaDetailsAssembler;
+import fi.sangre.renesans.graphql.assemble.SurveyMediaAssembler;
 import fi.sangre.renesans.graphql.assemble.SurveyParameterOutputAssembler;
+import fi.sangre.renesans.graphql.assemble.media.MediaDetailsAssembler;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.graphql.output.StaticTextGroupOutput;
 import fi.sangre.renesans.graphql.output.StaticTextOutput;
@@ -39,6 +39,7 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
     private final SurveyParameterOutputAssembler surveyParameterOutputAssembler;
     private final TranslationService translationService;
     private final MultilingualUtils multilingualUtils;
+    private final SurveyMediaAssembler surveyMediaAssembler;
     private final MediaDetailsAssembler mediaDetailsAssembler;
 
     @NonNull
@@ -60,7 +61,7 @@ public class OrganizationSurveyResolver implements GraphQLResolver<OrganizationS
 
     @NonNull
     public Collection<SurveyMediaOutput> getMedia(@NonNull final OrganizationSurvey survey) {
-        return ImmutableList.of();
+        return surveyMediaAssembler.from(survey.getMedia());
     }
 
     @NonNull

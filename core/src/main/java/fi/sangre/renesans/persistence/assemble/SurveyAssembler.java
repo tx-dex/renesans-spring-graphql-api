@@ -1,13 +1,17 @@
 package fi.sangre.renesans.persistence.assemble;
 
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.media.MediaDetails;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
+import fi.sangre.renesans.persistence.model.metadata.media.ImageMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Component;
 public class SurveyAssembler {
     private final CatalystMetadataAssembler catalystMetadataAssembler;
     private final ParameterMetadataAssembler parameterMetadataAssembler;
+    private final MediaMetadataAssembler mediaMetadataAssembler;
     private final TranslationMetadataAssembler translationMetadataAssembler;
 
     @NonNull
@@ -39,7 +44,13 @@ public class SurveyAssembler {
         entity.setMetadata(SurveyMetadata.builder()
                 .titles(model.getTitles().getPhrases())
                 .descriptions(model.getDescriptions().getPhrases())
-                .logo(model.getLogo())
+                .logo(Optional.ofNullable(model.getLogo())
+                        .map(MediaDetails::getKey)
+                        .map(key -> ImageMetadata.builder()
+                                .key(key)
+                                .build())
+                        .orElse(null))
+                .media(mediaMetadataAssembler.from(model.getMedia()))
                 .catalysts(catalystMetadataAssembler.from(model.getCatalysts()))
                 .parameters(parameterMetadataAssembler.from(model.getParameters()))
                 .translations(translationMetadataAssembler.from(model.getStaticTexts()))

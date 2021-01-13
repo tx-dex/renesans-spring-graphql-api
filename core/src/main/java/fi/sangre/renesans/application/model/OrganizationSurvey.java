@@ -1,7 +1,8 @@
 package fi.sangre.renesans.application.model;
 
+import fi.sangre.renesans.application.model.media.Media;
+import fi.sangre.renesans.application.model.media.MediaDetails;
 import fi.sangre.renesans.application.model.parameter.Parameter;
-import fi.sangre.renesans.persistence.model.metadata.media.ImageMetadata;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,9 +19,10 @@ import java.util.UUID;
 public class OrganizationSurvey {
     private UUID id;
     private Long version;
-    private ImageMetadata logo; //TODO: use different class not a persistence object
+    private MediaDetails logo;
     private MultilingualText titles;
     private MultilingualText descriptions;
+    private List<Media> media;
     private List<Catalyst> catalysts;
     private List<Parameter> parameters;
     private Map<String, StaticTextGroup> staticTexts;

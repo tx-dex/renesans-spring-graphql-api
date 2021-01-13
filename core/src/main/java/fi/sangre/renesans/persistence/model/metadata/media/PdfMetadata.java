@@ -19,7 +19,7 @@ import java.util.UUID;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VideoMetadata implements MediaMetadata {
+public class PdfMetadata implements MediaMetadata {
     private UUID id;
     private Map<String, String> titles;
     private String key;
