@@ -46,6 +46,9 @@ public class LikertQuestionAnswerEntity {
     @Column(name = "catalyst_id", updatable = false, nullable = false)
     private UUID catalystId;
 
+    @Column(name = "rate")
+    private Integer rate;
+
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.ORDINAL)
     private AnswerStatus status;

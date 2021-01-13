@@ -151,6 +151,7 @@ create table if not exists question_answer
     catalyst_id uuid
         constraint question_answer_catalyst_id_fkey
             references question_group(uuid),
+    rate integer null,
     status integer not null,
     likert_response integer null,
     answer_time timestamp default CURRENT_TIMESTAMP not null

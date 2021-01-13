@@ -86,6 +86,15 @@ public class AnswerService {
         }
     }
 
+    public void rateQuestion(@NonNull final LikertQuestionAnswer answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+        try {
+            answerDao.saveRating(answer, surveyId, respondentId);
+        } catch (final Exception ex) {
+            log.warn("Cannot rate likert question respondent(id={})", respondentId, ex);
+            throw new InternalServiceException("Cannot rate");
+        }
+    }
+
     @NonNull
     @Async(DAO_EXECUTOR_NAME)
     public Future<Collection<Respondent>> getRespondentsParametersAnswersAsync(@NonNull final SurveyId surveyId) {

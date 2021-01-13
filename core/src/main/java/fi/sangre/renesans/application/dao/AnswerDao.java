@@ -9,6 +9,7 @@ import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.ParameterId;
 import fi.sangre.renesans.application.model.Respondent;
 import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.answer.AnswerStatus;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
@@ -89,6 +90,7 @@ public class AnswerDao {
                         .catalystId(new CatalystId(e.getCatalystId()))
                         .status(e.getStatus())
                         .response(e.getResponse())
+                        .rate(e.getRate())
                         .build())
                 .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
     }
@@ -96,12 +98,34 @@ public class AnswerDao {
     @Transactional
     public void saveAnswer(@NonNull final LikertQuestionAnswer answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
         final QuestionAnswerId id = new QuestionAnswerId(surveyId.getValue(), respondentId.getValue(), answer.getId().getValue());
-        final LikertQuestionAnswerEntity entity = LikertQuestionAnswerEntity.builder()
-                .id(id)
-                .catalystId(answer.getCatalystId().getValue())
-                .response(answer.getResponse())
-                .status(answer.getStatus())
-                .build();
+        final LikertQuestionAnswerEntity entity = likerQuestionAnswerRepository.findById(id)
+                .orElse(LikertQuestionAnswerEntity.builder()
+                        .id(id)
+                        .catalystId(answer.getCatalystId().getValue())
+                        .build());
+
+        entity.setStatus(answer.getStatus());
+        entity.setResponse(answer.getResponse());
+
+        likerQuestionAnswerRepository.save(entity);
+    }
+
+    @Transactional
+    public void saveRating(@NonNull final LikertQuestionAnswer answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+        if (answer.getRate() < 0 || answer.getRate() > 5) {
+            throw new SurveyException("Invalid rate value");
+        }
+
+        final QuestionAnswerId id = new QuestionAnswerId(surveyId.getValue(), respondentId.getValue(), answer.getId().getValue());
+        final LikertQuestionAnswerEntity entity = likerQuestionAnswerRepository.findById(id)
+                .orElse(LikertQuestionAnswerEntity.builder()
+                        .id(id)
+                        .catalystId(answer.getCatalystId().getValue())
+                        .status(AnswerStatus.NOT_ANSWERED)
+                        .build());
+
+        entity.setRate(answer.getRate());
+
         likerQuestionAnswerRepository.save(entity);
     }
 

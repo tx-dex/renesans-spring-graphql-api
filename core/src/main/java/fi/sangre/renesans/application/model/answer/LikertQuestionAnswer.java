@@ -14,4 +14,5 @@ public class LikertQuestionAnswer {
     private CatalystId catalystId;
     private AnswerStatus status;
     private Integer response;
+    private Integer rate;
 }

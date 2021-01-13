@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.*;
 
@@ -55,15 +56,21 @@ public class QuestionnaireLikertQuestionAssembler {
                 .response(null);
 
         if (answer != null) {
-            output.skipped(AnswerStatus.SKIPPED.equals(answer.getStatus()));
+            if (AnswerStatus.SKIPPED.equals(answer.getStatus())) {
+                output.skipped(true)
+                        .response(0);
+            }
 
             if (AnswerStatus.ANSWERED.equals(answer.getStatus())) {
                 output
                         .answered(true)
                         .response(answer.getResponse() + 1);
-            } else {
-                output.response(0);
             }
+
+            output.rate(Optional.ofNullable(answer.getRate())
+                    .map(rate -> rate * 10 + 1)
+                    .orElse(null)
+            );
         }
 
         return output.build();

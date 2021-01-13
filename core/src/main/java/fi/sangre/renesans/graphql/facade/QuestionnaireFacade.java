@@ -105,8 +105,7 @@ public class QuestionnaireFacade {
             try {
                 final OrganizationSurvey survey = organizationSurveyService.getSurvey(respondent.getSurveyId());
 
-                //TODO: implement
-                //answerService.answerQuestion(likertAnswerAssembler.from(answer, survey), respondent.getSurveyId(), respondent.getId());
+                answerService.rateQuestion(likertAnswerAssembler.from(rate, survey), respondent.getSurveyId(), respondent.getId());
 
                 return questionnaireAssembler.from(respondent.getId(), survey);
             } catch (final InterruptedException | ExecutionException ex) {
