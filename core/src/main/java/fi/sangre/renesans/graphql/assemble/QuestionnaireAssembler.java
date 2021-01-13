@@ -78,6 +78,7 @@ public class QuestionnaireAssembler {
     private QuestionnaireOutput.QuestionnaireOutputBuilder builder(@NonNull final OrganizationSurvey survey) {
         return QuestionnaireOutput.builder()
                 .id(survey.getId())
+                .logo(survey.getLogo())
                 .staticTexts(survey.getStaticTexts())
                 .finished(true)
                 .answerable(false);

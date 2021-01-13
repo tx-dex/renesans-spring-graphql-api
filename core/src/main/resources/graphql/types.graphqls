@@ -195,6 +195,9 @@ type RespondentParameterAnswer {
 # type for the app
 type Questionnaire {
     id: ID!
+    # Custom logo url
+    # This field should be fetched in a seperate query
+    logo: MediaDetails
     staticTexts: Translation!
     catalysts: [QuestionnaireCatalyst!]!
     parameters: [QuestionnaireParameter!]!
