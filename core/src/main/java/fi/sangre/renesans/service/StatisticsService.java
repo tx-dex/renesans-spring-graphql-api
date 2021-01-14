@@ -276,12 +276,34 @@ public class StatisticsService {
         return ImmutableList.copyOf(driversStatistics.values());
     }
 
-    private List<CatalystStatistics> calculateCatalystsStatistics(@NonNull final OrganizationSurvey survey, final List<DriverStatistics> driverStatistics) {
+    private List<CatalystStatistics> calculateCatalystsStatistics(@NonNull final OrganizationSurvey survey,
+                                                                  @NonNull final List<DriverStatistics> driverStatistics,
+                                                                  @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
         final double allDriverWeightSum = driverStatistics.stream().mapToDouble(DriverStatistics::getWeight).sum();
 
         final ImmutableList.Builder<CatalystStatistics> builder = ImmutableList.builder();
 
         survey.getCatalysts().forEach(catalyst -> {
+            final Set<QuestionId> questionsIds = catalyst.getQuestions().stream()
+                    .map(LikertQuestion::getId)
+                    .collect(toSet());
+
+            final Map<QuestionId, QuestionStatistics> catalystQuestions = questionStatistics.entrySet()
+                    .stream()
+                    .filter(e -> questionsIds.contains(e.getKey()))
+                    .collect(collectingAndThen(toMap(
+                            Map.Entry::getKey,
+                            e -> QuestionStatistics.builder()
+                                    .questionId(e.getValue().getQuestionId())
+                                    .rate(indexToRate(e.getValue().getRate()))
+                                    .avg(indexToRate(e.getValue().getAvg()))
+                                    .max(indexToRate(e.getValue().getMax()))
+                                    .min(indexToRate(e.getValue().getMin()))
+                                    .count(e.getValue().getCount())
+                            .build(),
+                            (e1, e2) -> e1
+                    ), Collections::unmodifiableMap));
+
             final Set<DriverId> driverIds = catalyst.getDrivers().stream()
                     .map(Driver::getId)
                     .map(DriverId::new)
@@ -302,6 +324,7 @@ public class StatisticsService {
                             v -> v,
                             (v1, v2) -> v1
                     ), Collections::unmodifiableMap)))
+                    .questions(catalystQuestions)
                     .result(catalystResult)
                     .weighedResult(catalystWeighedResult)
                     .weight(catalystWeight)
@@ -318,6 +341,24 @@ public class StatisticsService {
         });
 
         return catalysts;
+    }
+
+    @Nullable
+    private Double indexToRate(@Nullable final Double value) {
+        if (value == null) {
+            return null;
+        } else {
+            return value / MAX_ANSWER_VALUE;
+        }
+    }
+
+    @Nullable
+    private Integer indexToRate(@Nullable final Integer value) {
+        if (value == null) {
+            return null;
+        } else {
+            return Double.valueOf(value / MAX_ANSWER_VALUE).intValue();
+        }
     }
 
     private Double calculateTotalResult(final List<CatalystStatistics> catalysts) {
@@ -516,7 +557,7 @@ public class StatisticsService {
                                                 @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
 
         final List<DriverStatistics> driverStatistics = calculateDriversStatistics(survey, questionStatistics);
-        final List<CatalystStatistics> catalystsStatistics = calculateCatalystsStatistics(survey, driverStatistics);
+        final List<CatalystStatistics> catalystsStatistics = calculateCatalystsStatistics(survey, driverStatistics, questionStatistics);
         final Double totalGrowthIndex = calculateTotalResult(catalystsStatistics);
 
         return SurveyStatistics.builder()
