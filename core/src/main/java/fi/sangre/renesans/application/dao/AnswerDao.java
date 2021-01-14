@@ -1,6 +1,7 @@
 package fi.sangre.renesans.application.dao;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import fi.sangre.renesans.application.assemble.ParameterAnswerAssembler;
@@ -22,6 +23,7 @@ import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.model.answer.*;
+import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import fi.sangre.renesans.persistence.repository.CatalystOpenQuestionAnswerRepository;
 import fi.sangre.renesans.persistence.repository.LikerQuestionAnswerRepository;
 import fi.sangre.renesans.persistence.repository.ParameterAnswerRepository;
@@ -47,6 +49,30 @@ public class AnswerDao {
     private final RespondentAssembler respondentAssembler;
     private final ParameterAnswerAssembler parameterAnswerAssembler;
     private final ParameterUtils parameterUtils;
+
+    @NonNull
+    public Map<QuestionId, QuestionStatistics> getQuestionStatistics(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> respondentIds) {
+        if (!respondentIds.isEmpty()) {
+            return likerQuestionAnswerRepository.getQuestionStatisticsByQuestionAndRespondentsIn(surveyId.getValue(), RespondentId.toUUIDs(respondentIds)).stream()
+                    .collect(collectingAndThen(toMap(
+                            v -> new QuestionId(v.getQuestionId()),
+                            v -> v,
+                            (v1, v2) -> v1
+                    ), Collections::unmodifiableMap));
+        } else {
+            return ImmutableMap.of();
+        }
+    }
+
+    @NonNull
+    public Map<QuestionId, QuestionStatistics> getQuestionStatistics(@NonNull final SurveyId surveyId) {
+        return likerQuestionAnswerRepository.getQuestionStatisticsByQuestion(surveyId.getValue()).stream()
+                .collect(collectingAndThen(toMap(
+                        v -> new QuestionId(v.getQuestionId()),
+                        v -> v,
+                        (v1, v2) -> v1
+                ), Collections::unmodifiableMap));
+    }
 
     @NonNull
     @Transactional(readOnly = true)

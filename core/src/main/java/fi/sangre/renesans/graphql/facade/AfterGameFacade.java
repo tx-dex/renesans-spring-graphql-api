@@ -2,21 +2,29 @@ package fi.sangre.renesans.graphql.facade;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.ParameterId;
+import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
+import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
 import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
+import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.*;
+import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
+import fi.sangre.renesans.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -39,30 +47,31 @@ public class AfterGameFacade {
     private final OrganizationSurveyService organizationSurveyService;
     private final QuestionnaireAssembler questionnaireAssembler;
     private final AnswerService answerService;
+    private final AnswerDao answerDao;
+    private final StatisticsService statisticsService;
+    private final AfterGameCatalystStatisticsAssembler afterGameCatalystStatisticsAssembler;
     private final ParameterUtils parameterUtils;
     private final SurveyUtils surveyUtils;
 
     @NonNull
     public Collection<AfterGameCatalystStatisticsOutput> afterGameOverviewCatalystsStatistics(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
-        final QuestionnaireOutput questionnaire = getQuestionnaire(questionnaireId, principal);
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyId surveyId = new SurveyId(survey.getId());
 
-        return questionnaire.getCatalysts().stream()
-                .map(catalyst -> AfterGameCatalystStatisticsOutput.builder()
-                        .id(catalyst.getId())
-                        .titles(catalyst.getTitles().getPhrases())
-                        .respondentResult(0d)
-                        .respondentGroupResult(0d)
-                        .drivers(catalyst.getDrivers().stream()
-                                .map(driver -> AfterGameDriverStatisticsOutput.builder()
-                                        .titles(driver.getTitles().getPhrases())
-                                        .respondentResult(0d)
-                                        .respondentGroupResult(0d)
-                                        .build())
-                                .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
-                        .questions(ImmutableList.of())
-                        .openQuestion(null)
-                        .build())
-                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+        final SurveyStatistics respondentStatistics;
+        final SurveyStatistics allRespondentStatistics;
+        if (principal instanceof RespondentPrincipal) {
+            final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+            final Map<QuestionId, QuestionStatistics> results = answerDao.getQuestionStatistics(surveyId, ImmutableSet.of(respondent.getId()));
+            respondentStatistics = statisticsService.calculateStatistics(survey, results);
+        } else {
+            respondentStatistics = statisticsService.calculateStatistics(survey, ImmutableMap.of());
+        }
+
+        final Map<QuestionId, QuestionStatistics> results = answerDao.getQuestionStatistics(surveyId);
+        allRespondentStatistics = statisticsService.calculateStatistics(survey, results);
+
+        return afterGameCatalystStatisticsAssembler.from(survey, respondentStatistics, allRespondentStatistics);
     }
 
     @NonNull

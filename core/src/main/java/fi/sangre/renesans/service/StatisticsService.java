@@ -1,8 +1,13 @@
 package fi.sangre.renesans.service;
 
 import com.google.common.collect.*;
-import fi.sangre.renesans.application.model.LocalizedCatalyst;
-import fi.sangre.renesans.application.model.LocalizedDriver;
+import fi.sangre.renesans.application.model.*;
+import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
+import fi.sangre.renesans.application.model.statistics.DriverStatistics;
+import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
+import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.DriverDto;
 import fi.sangre.renesans.dto.FiltersDto;
@@ -15,6 +20,7 @@ import fi.sangre.renesans.model.RespondentGroup;
 import fi.sangre.renesans.model.Segment;
 import fi.sangre.renesans.persistence.model.Customer;
 import fi.sangre.renesans.persistence.model.Survey;
+import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
 import fi.sangre.renesans.repository.AnswerRepository;
 import fi.sangre.renesans.repository.RespondentGroupRepository;
@@ -23,6 +29,8 @@ import fi.sangre.renesans.statistics.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +61,9 @@ public class StatisticsService {
     private final QuestionService questionService;
     private final CustomerService customerService;
     private final RespondentGroupService respondentGroupService;
+    private final SurveyUtils surveyUtils;
 
+    @Deprecated
     @Transactional(readOnly = true)
     public Statistics statistics(final FiltersDto filters, final String languageCode) {
         final Survey survey = surveyService.getDefaultSurvey();
@@ -62,6 +72,7 @@ public class StatisticsService {
         return calculateStatistics(survey, questions, newFilters, languageCode);
     }
 
+    @Deprecated
     @Transactional(readOnly = true)
     public ComparativeStatistics comparativeStatistics(FiltersDto filters,
                                                        final List<UUID> customerIds,
@@ -181,6 +192,142 @@ public class StatisticsService {
             questions.retainAll(newQuestions); //removes the questions that were added before but are not in newQuestions collection
             return questions;
         }
+    }
+
+    private void applyDriverWeightModifier(@NonNull final Map<DriverId, DriverStatistics> driversStatistics, @NonNull final Map<DriverId, Double> driverWeights) {
+        final double[] weights = driverWeights.values().stream().mapToDouble(e -> e != null ? e : DEFAULT_WEIGHT_VALUE).sorted().toArray();
+
+        final DescriptiveStatistics statistics = new DescriptiveStatistics(weights);
+        final Double driverWeightMedian = statistics.getPercentile(MEDIAN_PERCENTILE_VALUE);
+        final Double driverWeightSum = statistics.getSum();
+        final Double driverWeightMax = statistics.getMax();
+
+        for(final Map.Entry<DriverId, DriverStatistics> entry : driversStatistics.entrySet()) {
+            final Double driverWeight = driverWeights.getOrDefault(entry.getKey(), DEFAULT_WEIGHT_VALUE);
+
+            entry.getValue().setWeight(driverWeight / driverWeightSum);
+            entry.getValue().setWeightModifier(driverWeight / driverWeightMedian);
+            entry.getValue().setImportance(driverWeight / driverWeightMax);
+        }
+    }
+
+    private List<DriverStatistics> calculateDriversStatistics(@NonNull final OrganizationSurvey survey, @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
+        final Map<DriverId, DriverStatistics> driversStatistics = Maps.newHashMap();
+        final Map<DriverId, Double> driverWeights = Maps.newHashMap();
+        final Map<DriverId, Double> sumOfQuestionsWeightsPerDriver = Maps.newHashMap();
+        final Map<DriverId, Double> sumOfQuestionsResultsPerDriver = Maps.newHashMap();
+        final Map<DriverId, Double> sumOfQuestionsWeighedResultsPerDriver = Maps.newHashMap();
+
+        final Map<QuestionId, Map<DriverId, Double>> questionWeights = surveyUtils.getAllQuestions(survey).stream()
+                .collect(collectingAndThen(toMap(
+                        LikertQuestion::getId,
+                        LikertQuestion::getWeights,
+                        (v1, v2) -> v1
+                ), Collections::unmodifiableMap));
+
+        // Prepare temporary maps
+        survey.getCatalysts().forEach(catalyst -> catalyst.getDrivers()
+            .forEach(driver -> {
+                final DriverId driverId = new DriverId(driver.getId());
+                driversStatistics.put(driverId, DriverStatistics.builder()
+                        .id(driverId)
+                        .titles(driver.getTitles().getPhrases())
+                        .catalystId(catalyst.getId())
+                        .build());
+                driverWeights.put(driverId, driver.getWeight());
+
+                sumOfQuestionsWeightsPerDriver.put(driverId, 0d);
+                sumOfQuestionsResultsPerDriver.put(driverId, 0d);
+                sumOfQuestionsWeighedResultsPerDriver.put(driverId, 0d);
+            }));
+
+        applyDriverWeightModifier(driversStatistics, driverWeights);
+
+        // Sums all question results and weights per driver to calculate weighted average after all
+        for (final Map.Entry<QuestionId, QuestionStatistics> entry : questionStatistics.entrySet()) {
+            final Map<DriverId, Double> weights = questionWeights.get(entry.getKey());
+
+            weights.forEach((driverId, questionWeight) -> {
+                final Double questionAverage = entry.getValue().getAvg();
+                sumOfQuestionsWeightsPerDriver.computeIfPresent(driverId, (k, v) -> v + questionWeight);
+
+                if (questionAverage != null) { // may happen if there are no answers for the question
+                    final Double driverWeightModifier = driversStatistics.get(driverId).getWeightModifier();
+                    final Double questionResult = questionAverage / MAX_ANSWER_VALUE;
+
+                    sumOfQuestionsResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * questionResult));
+                    sumOfQuestionsWeighedResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * calculateWeighedQuestionResult(questionResult, driverWeightModifier)));
+                }
+            });
+        }
+
+        // Just calculates weighted average for each driver
+        for (final Map.Entry<DriverId, DriverStatistics> entry : driversStatistics.entrySet()) {
+            final Double driverQuestionWeightsSum = sumOfQuestionsWeightsPerDriver.get(entry.getKey());
+            final Double driverQuestionResultsSum = sumOfQuestionsResultsPerDriver.get(entry.getKey());
+            final Double driverQuestionWeighedResultSum = sumOfQuestionsWeighedResultsPerDriver.get(entry.getKey());
+
+            if (driverQuestionWeightsSum > 0d) {
+                entry.getValue().setResult(driverQuestionResultsSum / driverQuestionWeightsSum);
+                entry.getValue().setWeighedResult(driverQuestionWeighedResultSum / driverQuestionWeightsSum);
+            }
+        }
+
+        return ImmutableList.copyOf(driversStatistics.values());
+    }
+
+    private List<CatalystStatistics> calculateCatalystsStatistics(@NonNull final OrganizationSurvey survey, final List<DriverStatistics> driverStatistics) {
+        final double allDriverWeightSum = driverStatistics.stream().mapToDouble(DriverStatistics::getWeight).sum();
+
+        final ImmutableList.Builder<CatalystStatistics> builder = ImmutableList.builder();
+
+        survey.getCatalysts().forEach(catalyst -> {
+            final Set<DriverId> driverIds = catalyst.getDrivers().stream()
+                    .map(Driver::getId)
+                    .map(DriverId::new)
+                    .collect(toSet());
+            final List<DriverStatistics> catalystDriversStatistics = driverStatistics.stream()
+                    .filter(e -> driverIds.contains(e.getId()))
+                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+
+            final Double catalystWeight = catalystDriversStatistics.stream().mapToDouble(DriverStatistics::getWeight).sum() / allDriverWeightSum;
+            final Double catalystResult = catalystDriversStatistics.stream().mapToDouble(e -> e.getResult() != null ? e.getResult() : 0d).sum() / catalystDriversStatistics.size();
+            final Double catalystWeighedResult = catalystDriversStatistics.stream().mapToDouble(e -> e.getWeighedResult() != null ? e.getWeighedResult() : 0d).sum() / catalystDriversStatistics.size();
+
+            builder.add(CatalystStatistics.builder()
+                    .id(catalyst.getId())
+                    .titles(catalyst.getTitles().getPhrases())
+                    .drivers(catalystDriversStatistics.stream().collect(collectingAndThen(toMap(
+                            DriverStatistics::getId,
+                            v -> v,
+                            (v1, v2) -> v1
+                    ), Collections::unmodifiableMap)))
+                    .result(catalystResult)
+                    .weighedResult(catalystWeighedResult)
+                    .weight(catalystWeight)
+                    .build());
+        });
+
+        final List<CatalystStatistics> catalysts = builder.build();
+
+        final DescriptiveStatistics statistics = new DescriptiveStatistics(catalysts.stream().mapToDouble(CatalystStatistics::getWeight).toArray());
+        final Double catalystWeightMax = statistics.getMax();
+
+        catalysts.forEach(e -> {
+            e.setImportance(e.getWeight() / catalystWeightMax);
+        });
+
+        return catalysts;
+    }
+
+    private Double calculateTotalResult(final List<CatalystStatistics> catalysts) {
+        final List<CatalystStatistics> enabledCatalysts = catalysts.stream()
+                .filter(catalyst -> catalyst.getResult() > 0)
+                .collect(toList());
+
+        final double ratio = enabledCatalysts.size() > 0 ? enabledCatalysts.size() : 1d;
+
+        return catalysts.stream().mapToDouble(CatalystStatistics::getWeighedResult).sum() / ratio;
     }
 
     private Map<Question, StatisticsAnswer> getAnswerStatistics(final Set<Question> questions, final List<Respondent> respondents) {
@@ -363,6 +510,26 @@ public class StatisticsService {
         return catalysts.stream().mapToDouble(StatisticsCatalyst::getWeighedIndex).sum() / ratio;
     }
 
+    @NonNull
+    @Transactional(readOnly = true)
+    public SurveyStatistics calculateStatistics(@NonNull final OrganizationSurvey survey,
+                                                @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
+
+        final List<DriverStatistics> driverStatistics = calculateDriversStatistics(survey, questionStatistics);
+        final List<CatalystStatistics> catalystsStatistics = calculateCatalystsStatistics(survey, driverStatistics);
+        final Double totalGrowthIndex = calculateTotalResult(catalystsStatistics);
+
+        return SurveyStatistics.builder()
+                .titles(survey.getTitles().getPhrases())
+                .catalysts(catalystsStatistics.stream().collect(collectingAndThen(toMap(
+                        CatalystStatistics::getId,
+                        v -> v,
+                        (v1, v2) -> v1
+                ), Collections::unmodifiableMap)))
+                .totalResult(totalGrowthIndex)
+                .build();
+    }
+
     private Statistics calculateStatistics(
             final Survey survey,
             final Set<Question> questions,
@@ -389,7 +556,7 @@ public class StatisticsService {
         final Double totalGrowthIndex = calculateTotalGrowthIndex(catalystsStatistics);
 
         // survey title is set in survey object
-        String surveyTitle = multilingualService.lookupPhrase(survey.getTitleId(), languageCode);
+        final String surveyTitle = multilingualService.lookupPhrase(survey.getTitleId(), languageCode);
 
         // report "name" will be either static text (filtered/all) or individual user names
         String name = getName(respondents, filters, languageCode);
@@ -470,6 +637,17 @@ public class StatisticsService {
         return catalysts;
     }
 
+    @NonNull
+    private List<DriverDto> getAllDrivers(@Nullable final Customer customer) {
+        if (customer == null) {
+            log.info("Getting all drivers.");
+            return questionService.getAllDrivers();
+        } else {
+            log.info("Getting drivers for customer: {}", customer.getName());
+            return questionService.getAllDrivers(customer);
+        }
+    }
+
     private List<StatisticsDriver> calculateDriversStatistics(final Customer customer, final Map<Question, StatisticsAnswer> questionStatistics, final Map<Long, String> driverNames) {
         final Map<Long, StatisticsDriver> driversStatistics = Maps.newHashMap();
         final Map<Long, Double> driverWeights = Maps.newHashMap();
@@ -477,14 +655,7 @@ public class StatisticsService {
         final Map<Long, Double> sumOfQuestionsResultsPerDriver = Maps.newHashMap();
         final Map<Long, Double> sumOfQuestionsWeighedResultsPerDriver = Maps.newHashMap();
 
-        final List<DriverDto> drivers;
-        if (customer == null) {
-            log.info("Getting all drivers.");
-            drivers = questionService.getAllDrivers();
-        } else {
-            log.info("Getting drivers for customer: {}", customer.getName());
-            drivers = questionService.getAllDrivers(customer);
-        }
+        final List<DriverDto> drivers = getAllDrivers(customer);
 
         // Prepare temporary maps
         drivers.forEach(e -> {

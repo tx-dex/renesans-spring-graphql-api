@@ -1,0 +1,23 @@
+package fi.sangre.renesans.application.model.statistics;
+
+import fi.sangre.renesans.application.model.CatalystId;
+import fi.sangre.renesans.application.model.DriverId;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.Map;
+
+@Data
+@Builder
+@EqualsAndHashCode(of = "id")
+public class DriverStatistics {
+    private DriverId id;
+    private CatalystId catalystId;
+    private Map<String, String> titles;
+    private Double result;
+    private Double weighedResult;
+    private Double weight;
+    private Double weightModifier;
+    private Double importance;
+}

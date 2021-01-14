@@ -11,6 +11,7 @@ import lombok.*;
 @Builder
 public class Driver implements DriverOutput {
     private Long id;
+    @Deprecated
     private String pdfName;
     private MultilingualText titles;
     private MultilingualText descriptions;

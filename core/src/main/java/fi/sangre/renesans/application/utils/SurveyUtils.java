@@ -11,15 +11,22 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
 @Slf4j
 
 @Component
 public class SurveyUtils {
+
+    public List<LikertQuestion> getAllQuestions(@NonNull final OrganizationSurvey survey) {
+        return survey.getCatalysts().stream()
+                .flatMap(catalyst -> catalyst.getQuestions().stream())
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
 
     public long countLikertQuestions(@NonNull final OrganizationSurvey survey) {
         return survey.getCatalysts().stream()
