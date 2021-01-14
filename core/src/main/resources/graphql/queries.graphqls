@@ -100,11 +100,18 @@ type Query {
         languageCode: String
     ): [AfterGameParameterStatistics]!
 
-    # get image url by key
-    getImageUrl(key: String!, params: MediaParametersInput): Url @deprecated(reason: "Use getMediaUrl")
+    # get media public url by key, this should be used for logo
+    mediaPublicUrl(key: String!, params: MediaParametersInput): Url!
+
+    # get media signed url, should be used "on-click" when getting media.
+    mediaSignedUrl(key: String!, params: MediaParametersInput): Url!
 
     # get media url by key
-    getMediaUrl(key: String!, params: MediaParametersInput): Url
+    getMediaUrl(key: String!, params: MediaParametersInput): Url @deprecated(reason: "Use mediaPublicUrl or mediaSignedUrl")
+    # get media url by key
+    getImageUrl(key: String!, params: MediaParametersInput): Url @deprecated(reason: "Use mediaPublicUrl or mediaSignedUrl")
+
+
 
 
 

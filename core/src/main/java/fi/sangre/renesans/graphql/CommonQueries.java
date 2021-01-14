@@ -20,15 +20,28 @@ public class CommonQueries implements GraphQLQueryResolver {
     private final MediaService mediaService;
 
     @Nullable
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public URL getMediaUrl(@NonNull final String key, @Nullable final MediaParametersInput params) {
-        return mediaService.getMediaUrl(key, params);
+        return mediaService.getSignedUrl(key, params);
     }
 
-    @Deprecated
     @Nullable
+    @Deprecated
     @PreAuthorize("isAuthenticated()")
     public URL getImageUrl(@NonNull final String key, @Nullable final MediaParametersInput params) {
-        return mediaService.getMediaUrl(key, params);
+        return mediaService.getPublicUrl(key, params);
+    }
+
+    @NonNull
+    @PreAuthorize("isAuthenticated()")
+    public URL mediaSignedUrl(@NonNull final String key, @Nullable final MediaParametersInput params) {
+        return mediaService.getSignedUrl(key, params);
+    }
+
+    @NonNull
+    @PreAuthorize("isAuthenticated()")
+    public URL mediaPublicUrl(@NonNull final String key, @Nullable final MediaParametersInput params) {
+        return mediaService.getPublicUrl(key, params);
     }
 }

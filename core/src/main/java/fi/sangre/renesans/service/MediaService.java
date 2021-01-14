@@ -1,5 +1,6 @@
 package fi.sangre.renesans.service;
 
+import fi.sangre.media.rest.api.dto.SignedUrlResponseDto;
 import fi.sangre.media.rest.api.dto.UploadUrlRequestDto;
 import fi.sangre.media.rest.api.dto.UploadUrlResponseDto;
 import fi.sangre.renesans.application.client.FeignMediaClient;
@@ -17,8 +18,10 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -29,10 +32,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Service
 public class MediaService {
     private static final String PARAM = "p=";
-    private static final String SLASH_ENCODED = "%2F";
-    private static final String SLASH_DECODED = "/";
-    private static final String PLUS_ENCODED = "%2B";
-    private static final String PLUS_DECODED = "+";
     private static final String IMAGES_PATH_FORMAT = "%s/images";
     private static final String VIDEOS_PATH_FORMAT = "%s/videos";
     private static final String FILES_PATH_FORMAT = "%s/files";
@@ -77,8 +76,8 @@ public class MediaService {
     }
 
     @NonNull
-    public URL getMediaUrl(@NonNull final String imageKey, @Nullable final MediaParametersInput params) {
-        final MediaType mediaType = mediaUtils.getTypeFromKey(imageKey);
+    public URL getPublicUrl(@NonNull final String key, @Nullable final MediaParametersInput params) {
+        final MediaType mediaType = mediaUtils.getTypeFromKey(key);
         final String mediaServicePath;
         switch (mediaType) {
             case IMAGE:
@@ -91,8 +90,72 @@ public class MediaService {
                 mediaServicePath = MEDIA_SERVICE_FILE_PATH;
         }
 
+        final String resize = getResizeParameters(mediaType, params);
+
+        final String url;
+        try {
+            if (resize == null) {
+                url = feignMediaClient.getPublicUrl(mediaServicePath + key);
+            } else {
+                url = feignMediaClient.getPublicUrl(mediaServicePath + key + resize);
+            }
+        } catch (final Exception ex) {
+            log.warn("Cannot get upload url for key: {}", key, ex);
+            throw new InternalServiceException("Cannot get url", ex);
+        }
+
+        try {
+            if (url == null) { // Actually client may return null
+                throw new InternalServiceException("Cannot convert empty url");
+            }
+
+            return toDecodedUrl(StringUtils.replaceOnce(url, PARAM, StringUtils.EMPTY));
+        } catch (final MalformedURLException | UnsupportedEncodingException ex) {
+            log.warn("Cannot convert url");
+            throw new InternalServiceException("Cannot convert url", ex);
+        }
+    }
+
+    @NonNull
+    public URL getSignedUrl(@NonNull final String key, @Nullable final MediaParametersInput params) {
+        final MediaType mediaType = mediaUtils.getTypeFromKey(key);
+
+        final String resize = getResizeParameters(mediaType, params);
+
+        final Optional<SignedUrlResponseDto> dto;
+        try {
+            if (resize == null) {
+                dto = Optional.ofNullable(feignMediaClient.getSignedUrl(key));
+            } else {
+                dto = Optional.ofNullable(feignMediaClient.getSignedUrl(key + resize));
+            }
+        } catch (final Exception ex) {
+            log.warn("Cannot get upload url for key: {}", key, ex);
+            throw new InternalServiceException("Cannot get url", ex);
+        }
+
+        final String url = dto
+                .map(SignedUrlResponseDto::getUrl)
+                .map(StringUtils::trimToNull)
+               .orElseThrow(() -> new InternalServiceException("Cannot convert empty url"));
+        try {
+            return new URL(url);
+        } catch (final MalformedURLException ex) {
+            log.warn("Cannot convert url");
+            throw new InternalServiceException("Cannot convert url", ex);
+
+        }
+    }
+
+    @NonNull
+    private URL toDecodedUrl(@NonNull final String url) throws UnsupportedEncodingException, MalformedURLException {
+        return new URL(URLDecoder.decode(url, "UTF-8"));
+    }
+
+    @Nullable
+    private String getResizeParameters(@NonNull final MediaType type, @Nullable final MediaParametersInput params) {
         final String resize;
-        if (params != null && MediaType.IMAGE.equals(mediaType)) {
+        if (params != null && MediaType.IMAGE.equals(type)) {
             checkArgument(params.getWidth() != null && params.getWidth() > 0, "Invalid width");
             checkArgument(params.getHeight() != null && params.getHeight() > 0, "Invalid height");
 
@@ -101,33 +164,6 @@ public class MediaService {
             resize = null;
         }
 
-        final String url;
-        try {
-            if (resize == null) {
-                url = feignMediaClient.getPublicUrl(mediaServicePath + imageKey);
-            } else {
-                url = feignMediaClient.getPublicUrl(mediaServicePath + imageKey + resize);
-            }
-        } catch (final Exception ex) {
-            log.warn("Cannot get upload url for key: {}", imageKey, ex);
-            throw new InternalServiceException("Cannot get url", ex);
-        }
-
-        return Optional.ofNullable(url)
-                .map(v -> StringUtils.replaceOnce(v, PARAM, StringUtils.EMPTY))
-                .map(v -> StringUtils.replaceOnce(v, SLASH_ENCODED, SLASH_DECODED))
-                .map(v -> StringUtils.replace(v, PLUS_ENCODED, PLUS_DECODED))
-                .map(this::toUrl)
-                .orElseThrow(() -> new InternalServiceException("Cannot get url"));
-    }
-
-    @Nullable
-    private URL toUrl(@NonNull final String url) {
-        try {
-            return new URL(url);
-        } catch (final MalformedURLException ex) {
-            log.warn("Cannot transform to URL: {}", url, ex);
-            return null;
-        }
+        return resize;
     }
 }
