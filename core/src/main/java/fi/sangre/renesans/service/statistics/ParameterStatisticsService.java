@@ -1,11 +1,10 @@
 package fi.sangre.renesans.service.statistics;
 
-import fi.sangre.renesans.application.dao.AnswerDao;
+import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.ParameterId;
-import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.filter.RespondentParameterFilter;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
-import fi.sangre.renesans.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -16,16 +15,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ParameterStatisticsService {
-    private final AnswerDao answerDao;
-    private final StatisticsService statisticsService;
+    private final RespondentStatisticsService respondentStatisticsService;
 
     @NonNull
     // TODO: cache
     public SurveyStatistics calculateStatistics(@NonNull final OrganizationSurvey survey, @NonNull final ParameterId parameterId) {
-        final SurveyId surveyId = new SurveyId(survey.getId());
-        //TODO: implement;
-//        final Map<QuestionId, QuestionStatistics> results = answerDao.getQuestionStatistics(surveyId, ImmutableSet.of(respondentId));
-//        return statisticsService.calculateStatistics(survey, results);
-        return null;
+        return respondentStatisticsService.calculateStatistics(survey, ImmutableList.of(RespondentParameterFilter.builder()
+                .values(ImmutableList.of(parameterId.getValue()))
+                .build()));
     }
 }

@@ -14,6 +14,11 @@ import java.util.UUID;
 @Builder
 @EqualsAndHashCode(of = "questionId")
 public class QuestionStatistics {
+    public static final QuestionStatistics EMPTY = QuestionStatistics.builder()
+            .avg(null)
+            .rate(null)
+            .build();
+
     private UUID questionId;
     private Double avg;
     private Integer min;

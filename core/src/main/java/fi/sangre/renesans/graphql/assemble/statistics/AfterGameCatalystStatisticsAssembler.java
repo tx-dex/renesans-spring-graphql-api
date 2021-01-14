@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static fi.sangre.renesans.application.utils.StatisticsUtils.rateToPercent;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -30,19 +31,6 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class AfterGameCatalystStatisticsAssembler {
-    private static final CatalystStatistics EMPTY_CATALYST = CatalystStatistics.builder()
-            .weighedResult(null)
-            .drivers(ImmutableMap.of())
-            .questions(ImmutableMap.of())
-            .build();
-    private static final DriverStatistics EMPTY_DRIVER = DriverStatistics.builder()
-            .weighedResult(null)
-            .build();
-    private static final QuestionStatistics EMPTY_QUESTION = QuestionStatistics.builder()
-            .avg(null)
-            .rate(null)
-            .build();
-
     @NonNull
     public List<AfterGameCatalystStatisticsOutput> from(@NonNull final OrganizationSurvey survey,
                                                         @Nullable final SurveyStatistics respondentResult,
@@ -78,8 +66,8 @@ public class AfterGameCatalystStatisticsAssembler {
     private AfterGameCatalystStatisticsOutput from(@NonNull final Catalyst catalyst,
                                                    @NonNull final Map<CatalystId, CatalystStatistics> respondentCatalysts,
                                                    @NonNull final Map<CatalystId, CatalystStatistics> respondentGroupCatalysts) {
-        final CatalystStatistics respondentCatalyst = respondentCatalysts.getOrDefault(catalyst.getId(), EMPTY_CATALYST);
-        final CatalystStatistics respondentGroupCatalyst = respondentGroupCatalysts.getOrDefault(catalyst.getId(), EMPTY_CATALYST);
+        final CatalystStatistics respondentCatalyst = respondentCatalysts.getOrDefault(catalyst.getId(), CatalystStatistics.EMPTY);
+        final CatalystStatistics respondentGroupCatalyst = respondentGroupCatalysts.getOrDefault(catalyst.getId(), CatalystStatistics.EMPTY);
 
         return AfterGameCatalystStatisticsOutput.builder()
                 .id(catalyst.getId().getValue())
@@ -105,8 +93,8 @@ public class AfterGameCatalystStatisticsAssembler {
                                                  @NonNull final Map<DriverId, DriverStatistics> respondentDrivers,
                                                  @NonNull final Map<DriverId, DriverStatistics> respondentGroupDrivers) {
         final DriverId driverId = new DriverId(driver.getId());
-        final DriverStatistics respondentDriver = respondentDrivers.getOrDefault(driverId, EMPTY_DRIVER);
-        final DriverStatistics respondentGroupDriver = respondentGroupDrivers.getOrDefault(driverId, EMPTY_DRIVER);
+        final DriverStatistics respondentDriver = respondentDrivers.getOrDefault(driverId, DriverStatistics.EMPTY);
+        final DriverStatistics respondentGroupDriver = respondentGroupDrivers.getOrDefault(driverId, DriverStatistics.EMPTY);
 
         return AfterGameDriverStatisticsOutput.builder()
                 .titles(driver.getTitles().getPhrases())
@@ -119,22 +107,13 @@ public class AfterGameCatalystStatisticsAssembler {
     private AfterGameQuestionStatisticsOutput from(@NonNull final LikertQuestion question,
                                                    @NonNull final Map<QuestionId, QuestionStatistics> respondentQuestions,
                                                    @NonNull final Map<QuestionId, QuestionStatistics> respondentGroupQuestions) {
-        final QuestionStatistics respondentQuestion = respondentQuestions.getOrDefault(question.getId(), EMPTY_QUESTION);
-        final QuestionStatistics respondentGroupQuestion = respondentGroupQuestions.getOrDefault(question.getId(), EMPTY_QUESTION);
+        final QuestionStatistics respondentQuestion = respondentQuestions.getOrDefault(question.getId(), QuestionStatistics.EMPTY);
+        final QuestionStatistics respondentGroupQuestion = respondentGroupQuestions.getOrDefault(question.getId(), QuestionStatistics.EMPTY);
 
         return AfterGameQuestionStatisticsOutput.builder()
                 .titles(question.getTitles().getPhrases())
                 .result(rateToPercent(respondentGroupQuestion.getAvg()))
                 .rate(rateToPercent(respondentGroupQuestion.getRate()))
                 .build();
-    }
-
-    @Nullable
-    public Double rateToPercent(@Nullable final Double result) {
-        if (result != null) {
-            return 100 * result;
-        } else {
-            return null;
-        }
     }
 }

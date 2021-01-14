@@ -1,6 +1,6 @@
 package fi.sangre.renesans.service.statistics;
 
-import fi.sangre.renesans.application.dao.AnswerDao;
+import fi.sangre.renesans.application.dao.StatisticsDao;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.questions.QuestionId;
@@ -19,14 +19,14 @@ import java.util.Map;
 
 @Service
 public class SurveyStatisticsService {
-    private final AnswerDao answerDao;
+    private final StatisticsDao statisticsDao;
     private final StatisticsService statisticsService;
 
     @NonNull
     // TODO: cache
     public SurveyStatistics calculateStatistics(@NonNull final OrganizationSurvey survey) {
         final SurveyId surveyId = new SurveyId(survey.getId());
-        final Map<QuestionId, QuestionStatistics> results = answerDao.getQuestionStatistics(surveyId);
+        final Map<QuestionId, QuestionStatistics> results = statisticsDao.getQuestionStatistics(surveyId);
         return statisticsService.calculateStatistics(survey, results);
     }
 }

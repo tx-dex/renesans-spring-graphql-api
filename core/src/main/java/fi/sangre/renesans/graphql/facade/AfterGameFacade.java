@@ -1,5 +1,6 @@
 package fi.sangre.renesans.graphql.facade;
 
+import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
@@ -27,10 +28,13 @@ import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
 import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
+import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +42,8 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static fi.sangre.renesans.config.ApplicationConfig.DAO_EXECUTOR_NAME;
+import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
@@ -55,6 +61,8 @@ public class AfterGameFacade {
     private final ParameterUtils parameterUtils;
     private final SurveyUtils surveyUtils;
     private final MultilingualUtils multilingualUtils;
+    @Qualifier(DAO_EXECUTOR_NAME)
+    private final ThreadPoolTaskExecutor daoExecutor;
 
     @NonNull
     public Collection<AfterGameCatalystStatisticsOutput> afterGameOverviewCatalystsStatistics(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
@@ -89,21 +97,39 @@ public class AfterGameFacade {
         final Catalyst catalyst = Optional.ofNullable(surveyUtils.findCatalyst(catalystId, survey))
                 .orElseThrow(() -> new SurveyException("Catalyst not found in the survey"));
 
-        final ImmutableList.Builder<AfterGameParameterStatisticsOutput> result = ImmutableList.builder();
-
+        final List<io.vavr.concurrent.Future<AfterGameParameterStatisticsOutput>> futures = Lists.newArrayList();
         final List<ParameterChild> parameters = getParameters(survey, principal);
 
         parameters.forEach(parameter -> {
-            final AfterGameCatalystStatisticsOutput stats = getParameterStatistics(survey, catalyst, parameter.getId(), principal);
-
-            result.add(AfterGameParameterStatisticsOutput.builder()
-                    .titles(parameter.getLabel().getPhrases())
-                    .value(parameter.getId().asString())
-                    .result(stats.getRespondentGroupResult())
-                    .build());
+            log.debug("Get async stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameter.getId());
+            futures.add(io.vavr.concurrent.Future.of(daoExecutor, () -> {
+                final AfterGameCatalystStatisticsOutput statistics = getParameterStatistics(survey, catalyst, parameter.getId(), principal);
+                return AfterGameParameterStatisticsOutput.builder()
+                        .titles(parameter.getLabel().getPhrases())
+                        .value(parameter.getId().asString())
+                        .result(statistics.getRespondentGroupResult())
+                        .build();
+            }));
         });
 
-        return result.build();
+        final List<Try<AfterGameParameterStatisticsOutput>> tries = futures.stream()
+                .map(e -> Try.ofSupplier(e::get)
+                        .onFailure(ex -> log.warn("Cannot get stats", ex))
+                ).collect(toList());
+
+        if (isAllSuccess(tries)) {
+            return tries.stream()
+                    .map(Try::get)
+                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+        } else {
+            throw new SurveyException("Cannot get statistics");
+        }
+    }
+
+    private <T> boolean isAllSuccess(@NonNull final Collection<Try<T>> tries) {
+        return tries.stream()
+                .map(Try::isSuccess)
+                .reduce(Boolean.TRUE, Boolean::logicalAnd);
     }
 
     @NonNull
@@ -138,7 +164,7 @@ public class AfterGameFacade {
                                                                      @NonNull final Catalyst catalyst,
                                                                      @NonNull final ParameterId parameterId,
                                                                      @NonNull final UserDetails principal) {
-
+        log.debug("Start getting stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameterId);
         final SurveyStatistics surveyStatistics;
 
         if (ParameterId.GLOBAL_YOU_PARAMETER_ID.equals(parameterId)) {
@@ -149,7 +175,11 @@ public class AfterGameFacade {
             surveyStatistics = parameterStatisticsService.calculateStatistics(survey, parameterId);
         }
 
-        return afterGameCatalystStatisticsAssembler.from(catalyst, null, surveyStatistics);
+        final AfterGameCatalystStatisticsOutput output =  afterGameCatalystStatisticsAssembler.from(catalyst, null, surveyStatistics);
+
+        log.debug("Finished getting stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameterId);
+
+        return output;
     }
 
     private List<ParameterChild> getParameters(@NonNull final OrganizationSurvey survey, @NonNull final UserDetails principal) {
@@ -159,10 +189,10 @@ public class AfterGameFacade {
             final RespondentPrincipal respondent = (RespondentPrincipal) principal;
 
             try {
-                parameters.add(getGlobalYouParameter(survey));
-
                 final Future<Map<ParameterId, ParameterItemAnswer>> parameterAnswers = answerService.getParametersAnswersAsync(respondent.getSurveyId(), respondent.getId());
                 final QuestionnaireOutput questionnaire = questionnaireAssembler.from(respondent.getId(), survey, ImmutableMap.of(), ImmutableMap.of(), parameterAnswers.get());
+
+                parameters.add(getGlobalYouParameter(survey));
                 parameters.addAll(questionnaire.getParameters().stream()
                         .filter(QuestionnaireParameterOutput::isAnswered)
                         .map(parameter -> parameterUtils.findChildren(ParameterId.fromUUID(parameter.getSelectedAnswer()), surveyUtils.findParameter(parameter.getValue(), survey)))

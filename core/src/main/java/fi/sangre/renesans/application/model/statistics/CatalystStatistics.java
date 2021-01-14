@@ -1,5 +1,6 @@
 package fi.sangre.renesans.application.model.statistics;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.DriverId;
@@ -13,6 +14,12 @@ import java.util.Map;
 @Data
 @Builder
 public class CatalystStatistics {
+    public static final CatalystStatistics EMPTY = CatalystStatistics.builder()
+            .weighedResult(null)
+            .drivers(ImmutableMap.of())
+            .questions(ImmutableMap.of())
+            .build();
+
     private CatalystId id;
     private Map<String, String> titles;
 

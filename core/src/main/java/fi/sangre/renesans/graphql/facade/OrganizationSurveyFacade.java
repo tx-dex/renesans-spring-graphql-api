@@ -4,30 +4,27 @@ import fi.sangre.renesans.application.dao.OrganizationDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
-import fi.sangre.renesans.application.utils.MultilingualUtils;
+import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.OrganizationSurveyOutputAssembler;
+import fi.sangre.renesans.graphql.assemble.statistics.SurveyCatalystStatisticsAssembler;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyCatalystStatisticsOutput;
-import fi.sangre.renesans.graphql.output.statistics.SurveyDriverStatisticsOutput;
-import fi.sangre.renesans.graphql.output.statistics.SurveyQuestionStatisticsOutput;
 import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
+import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
+import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -40,6 +37,9 @@ public class OrganizationSurveyFacade {
     private final OrganizationService organizationService;
     private final OrganizationDao organizationDao;
     private final OrganizationOutputAssembler organizationOutputAssembler;
+    private final SurveyStatisticsService surveyStatisticsService;
+    private final RespondentStatisticsService respondentStatisticsService;
+    private final SurveyCatalystStatisticsAssembler surveyCatalystStatisticsAssembler;
 
     @NonNull
     public Collection<OrganizationOutput> getOrganizations() {
@@ -81,27 +81,14 @@ public class OrganizationSurveyFacade {
 
         final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(surveyId);
 
-        return survey.getCatalysts().stream()
-                .map(catalyst -> SurveyCatalystStatisticsOutput.builder()
-                        .id(catalyst.getId().asString())
-                        .title(MultilingualUtils.getText(catalyst.getTitles().getPhrases(), languageTag))
-                        .result(0d)
-                        .drivers(catalyst.getDrivers().stream()
-                                .map(driver -> SurveyDriverStatisticsOutput.builder()
-                                        .id(driver.getId().toString())
-                                        .title(MultilingualUtils.getText(catalyst.getTitles().getPhrases(), languageTag))
-                                        .result(0d)
-                                        .build())
-                                .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
-                        .questions(catalyst.getQuestions().stream()
-                                .map(question -> SurveyQuestionStatisticsOutput.builder()
-                                        .id(question.getId().asString())
-                                        .title(MultilingualUtils.getText(question.getTitles().getPhrases(), languageTag))
-                                        .result(0d)
-                                        .rate(0d)
-                                        .build())
-                                .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
-                        .build())
-                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+        final SurveyStatistics statistics;
+        if (filters.isEmpty()) {
+            statistics = surveyStatisticsService.calculateStatistics(survey);
+        } else  {
+            //TODO: We can verify also if the filter contains only one parameter. in that case we could use parameterStatisticsService which caches data
+            statistics =  respondentStatisticsService.calculateStatistics(survey, filters);
+        }
+
+        return surveyCatalystStatisticsAssembler.from(survey, statistics, languageTag);
     }
 }

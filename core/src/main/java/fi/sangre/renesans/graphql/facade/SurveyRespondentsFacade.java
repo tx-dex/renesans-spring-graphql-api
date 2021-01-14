@@ -77,7 +77,7 @@ public class SurveyRespondentsFacade {
                         .sorted((e1, e2) -> StringUtils.compareIgnoreCase(e1.getEmail(), e2.getEmail()))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList));
             } else {
-                answers = answerService.getRespondentsParametersAnswersAsync(surveyId, filters); //TODO: filter
+                answers = answerService.getRespondentsParametersAnswersAsync(surveyId, filters);
                 return respondentOutputAssembler.from( answers.get().stream(), parameters, invitations)
                         .sorted((e1, e2) -> StringUtils.compareIgnoreCase(e1.getEmail(), e2.getEmail()))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList));

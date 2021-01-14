@@ -103,6 +103,7 @@ dependencies {
     implementation("com.squarespace.cldr:cldr-core:${cldrVersion}")
     implementation("com.squarespace.cldr:cldr-runtime:${cldrVersion}")
     implementation("com.github.spullara.mustache.java:compiler:${mustacheVersion}")
+    implementation("io.vavr:vavr:${vavrVersion}")
 
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")

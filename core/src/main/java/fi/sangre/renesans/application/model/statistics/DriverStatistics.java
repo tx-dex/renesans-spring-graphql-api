@@ -12,6 +12,10 @@ import java.util.Map;
 @Builder
 @EqualsAndHashCode(of = "id")
 public class DriverStatistics {
+    public static final DriverStatistics EMPTY = DriverStatistics.builder()
+            .weighedResult(null)
+            .build();
+
     private DriverId id;
     private CatalystId catalystId;
     private Map<String, String> titles;
