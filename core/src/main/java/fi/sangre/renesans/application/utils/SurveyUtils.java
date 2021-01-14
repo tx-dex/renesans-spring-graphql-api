@@ -83,4 +83,17 @@ public class SurveyUtils {
     public Parameter findParameter(@NonNull final String parameterId, @NonNull final OrganizationSurvey survey) {
         return findParameter(UUID.fromString(parameterId), survey);
     }
+
+    @Nullable
+    public Catalyst findCatalyst(@NonNull final UUID catalystId, @NonNull final OrganizationSurvey survey) {
+        return findCatalyst(new CatalystId(catalystId), survey);
+    }
+
+    @Nullable
+    public Catalyst findCatalyst(@NonNull final CatalystId catalystId, @NonNull final OrganizationSurvey survey) {
+        return survey.getCatalysts().stream()
+                .filter(catalyst -> catalystId.equals(catalyst.getId()))
+                .findFirst()
+                .orElse(null);
+    }
 }

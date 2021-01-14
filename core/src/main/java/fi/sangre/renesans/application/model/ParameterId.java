@@ -14,6 +14,7 @@ import static java.util.stream.Collectors.toSet;
 @EqualsAndHashCode(of = "value")
 public class ParameterId implements IdValueObject<UUID> {
     public static final ParameterId GLOBAL_YOU_PARAMETER_ID = new ParameterId(UUID.fromString("3b13b3f5-f418-408c-a451-39cd81fa9d89"));
+    public static final ParameterId GLOBAL_EVERYONE_PARAMETER_ID = new ParameterId(UUID.fromString("3acde9f7-c76e-41ee-9971-0ff5b09a7949"));
 
     private final UUID value;
 
