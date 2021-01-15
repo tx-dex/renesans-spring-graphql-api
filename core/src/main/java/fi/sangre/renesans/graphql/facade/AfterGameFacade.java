@@ -5,13 +5,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.ParameterId;
+import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
-import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
+import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
@@ -54,6 +56,7 @@ public class AfterGameFacade {
     private final OrganizationSurveyService organizationSurveyService;
     private final QuestionnaireAssembler questionnaireAssembler;
     private final AnswerService answerService;
+    private final AnswerDao answerDao;
     private final SurveyStatisticsService surveyStatisticsService;
     private final RespondentStatisticsService respondentStatisticsService;
     private final ParameterStatisticsService parameterStatisticsService;
@@ -68,8 +71,8 @@ public class AfterGameFacade {
     public Collection<AfterGameCatalystStatisticsOutput> afterGameOverviewCatalystsStatistics(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
 
-        final SurveyStatistics respondentStatistics = getRespondentStatistics(survey, principal);
-        final SurveyStatistics allRespondentStatistics = surveyStatisticsService.calculateStatistics(survey);
+        final SurveyResult respondentStatistics = getRespondentStatistics(survey, principal);
+        final SurveyResult allRespondentStatistics = surveyStatisticsService.calculateStatistics(survey);
 
         return afterGameCatalystStatisticsAssembler.from(survey, respondentStatistics, allRespondentStatistics);
     }
@@ -79,14 +82,37 @@ public class AfterGameFacade {
                                                                                  @NonNull final UUID catalystId,
                                                                                  @Nullable final UUID parameterValue, @NonNull final UserDetails principal) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyId surveyId = new SurveyId(survey.getId());
         final Catalyst catalyst = Optional.ofNullable(surveyUtils.findCatalyst(catalystId, survey))
                 .orElseThrow(() -> new SurveyException("Catalyst not found in the survey"));
 
+        final SurveyResult statistics;
+        final ParameterId parameterId;
         if (parameterValue == null) {
-            return afterGameCatalystStatisticsAssembler.from(catalyst, null, null);
+            parameterId = null;
+            statistics = null;
         } else {
-            return getParameterStatistics(survey, catalyst, new ParameterId(parameterValue), principal);
+            parameterId = new ParameterId(parameterValue);
+            statistics = getParameterStatistics(survey, catalyst, parameterId, principal);
         }
+
+        final AfterGameCatalystStatisticsOutput output = afterGameCatalystStatisticsAssembler.from(catalyst, null, statistics);
+
+
+        if (output.getOpenQuestion() != null && statistics != null) {
+            Try.ofSupplier(() -> {
+                if (ParameterId.GLOBAL_YOU_PARAMETER_ID.equals(parameterId)) { // return open answer for parameter if respondend is checking "you"
+                    return answerDao.getAllOpenQuestionAnswers(surveyId, statistics.getRespondentIds());
+                } else {
+                    return answerDao.getPublicOpenQuestionAnswers(surveyId, statistics.getRespondentIds());
+                }
+            })
+                    .onSuccess(answers -> output.getOpenQuestion().setAnswers(answers))
+                    .onFailure(ex -> log.warn("Cannot get answers", ex))
+                    .getOrElseThrow(ex -> new SurveyException("Cannot get answers"));
+        }
+
+        return output;
     }
 
     @NonNull
@@ -103,11 +129,12 @@ public class AfterGameFacade {
         parameters.forEach(parameter -> {
             log.debug("Get async stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameter.getId());
             futures.add(io.vavr.concurrent.Future.of(daoExecutor, () -> {
-                final AfterGameCatalystStatisticsOutput statistics = getParameterStatistics(survey, catalyst, parameter.getId(), principal);
+                final SurveyResult statistics = getParameterStatistics(survey, catalyst, parameter.getId(), principal);
+                final AfterGameCatalystStatisticsOutput output = afterGameCatalystStatisticsAssembler.from(catalyst, null, statistics);
                 return AfterGameParameterStatisticsOutput.builder()
                         .titles(parameter.getLabel().getPhrases())
                         .value(parameter.getId().asString())
-                        .result(statistics.getRespondentGroupResult())
+                        .result(output.getRespondentGroupResult())
                         .build();
             }));
         });
@@ -147,8 +174,8 @@ public class AfterGameFacade {
     }
 
     @Nullable
-    private SurveyStatistics getRespondentStatistics(@NonNull final OrganizationSurvey survey, @NonNull final UserDetails principal) {
-        final SurveyStatistics respondentStatistics;
+    private SurveyResult getRespondentStatistics(@NonNull final OrganizationSurvey survey, @NonNull final UserDetails principal) {
+        final SurveyResult respondentStatistics;
         if (principal instanceof RespondentPrincipal) {
             final RespondentPrincipal respondent = (RespondentPrincipal) principal;
             respondentStatistics = respondentStatisticsService.calculateStatistics(survey, respondent.getId());
@@ -159,13 +186,13 @@ public class AfterGameFacade {
         return respondentStatistics;
     }
 
-    @NonNull
-    private AfterGameCatalystStatisticsOutput getParameterStatistics(@NonNull final OrganizationSurvey survey,
-                                                                     @NonNull final Catalyst catalyst,
-                                                                     @NonNull final ParameterId parameterId,
-                                                                     @NonNull final UserDetails principal) {
+    @Nullable
+    private SurveyResult getParameterStatistics(@NonNull final OrganizationSurvey survey,
+                                                @NonNull final Catalyst catalyst,
+                                                @NonNull final ParameterId parameterId,
+                                                @NonNull final UserDetails principal) {
         log.debug("Start getting stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameterId);
-        final SurveyStatistics surveyStatistics;
+        final SurveyResult surveyStatistics;
 
         if (ParameterId.GLOBAL_YOU_PARAMETER_ID.equals(parameterId)) {
             surveyStatistics = getRespondentStatistics(survey, principal);
@@ -175,11 +202,9 @@ public class AfterGameFacade {
             surveyStatistics = parameterStatisticsService.calculateStatistics(survey, parameterId);
         }
 
-        final AfterGameCatalystStatisticsOutput output =  afterGameCatalystStatisticsAssembler.from(catalyst, null, surveyStatistics);
-
         log.debug("Finished getting stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameterId);
 
-        return output;
+        return surveyStatistics;
     }
 
     private List<ParameterChild> getParameters(@NonNull final OrganizationSurvey survey, @NonNull final UserDetails principal) {

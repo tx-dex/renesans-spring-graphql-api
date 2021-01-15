@@ -21,6 +21,7 @@ import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.persistence.model.SurveyRespondentState;
 import fi.sangre.renesans.persistence.model.answer.*;
 import fi.sangre.renesans.persistence.repository.CatalystOpenQuestionAnswerRepository;
 import fi.sangre.renesans.persistence.repository.LikerQuestionAnswerRepository;
@@ -142,14 +143,59 @@ public class AnswerDao {
 
     @NonNull
     @Transactional(readOnly = true)
-    public Set<RespondentId> getRespondentIds(@NonNull final SurveyId surveyId, @NonNull final List<RespondentFilter> filters) {
+    public Set<RespondentId> getAnsweredRespondentIds(@NonNull final SurveyId surveyId, @NonNull final List<RespondentFilter> filters) {
         final BooleanBuilder filter = new BooleanBuilder(QParameterAnswerEntity.parameterAnswerEntity.survey.id.eq(surveyId.getValue()))
                 .and(QParameterAnswerEntity.parameterAnswerEntity.type.eq(ParameterAnswerType.ITEM)) // There always should be only one last child selected with ITEM type
+                .and(QParameterAnswerEntity.parameterAnswerEntity.respondent.state.eq(SurveyRespondentState.ANSWERED))
                 .and(createRespondentFilters(surveyId, filters));
 
         return StreamSupport.stream(parameterAnswerRepository.findAll(filter).spliterator(), false)
                 .collect(groupingBy(e -> new RespondentId(e.getId().getRespondentId())))
                 .keySet();
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public Set<RespondentId> getAnsweredRespondentIds(@NonNull final SurveyId surveyId) {
+        final BooleanBuilder filter = new BooleanBuilder(QParameterAnswerEntity.parameterAnswerEntity.survey.id.eq(surveyId.getValue()))
+                .and(QParameterAnswerEntity.parameterAnswerEntity.type.eq(ParameterAnswerType.ITEM)) // There always should be only one last child selected with ITEM type
+                .and(QParameterAnswerEntity.parameterAnswerEntity.respondent.state.eq(SurveyRespondentState.ANSWERED));
+
+        return StreamSupport.stream(parameterAnswerRepository.findAll(filter).spliterator(), false)
+                .collect(groupingBy(e -> new RespondentId(e.getId().getRespondentId())))
+                .keySet();
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public List<String> getAllOpenQuestionAnswers(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> respondentIds) {
+        if (respondentIds.size() > 0) {
+            final List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository
+                    .findAllByIdSurveyIdAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), RespondentId.toUUIDs(respondentIds));
+
+            return from(answers);
+        } else {
+            return ImmutableList.of();
+        }
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public List<String> getPublicOpenQuestionAnswers(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> respondentIds) {
+        if (respondentIds.size() > 0) {
+            final List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository
+                    .findAllByIdSurveyIdAndIsPublicIsTrueAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), RespondentId.toUUIDs(respondentIds));
+            return from(answers);
+        } else {
+            return ImmutableList.of();
+        }
+    }
+
+    @NonNull
+    private List<String> from(@NonNull final List<CatalystOpenQuestionAnswerEntity> answers) {
+        return answers.stream()
+                .map(CatalystOpenQuestionAnswerEntity::getResponse)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull

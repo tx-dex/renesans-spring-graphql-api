@@ -1,10 +1,11 @@
 package fi.sangre.renesans.graphql.facade;
 
+import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.OrganizationDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
-import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
+import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
@@ -17,6 +18,7 @@ import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
 import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
+import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -36,6 +38,7 @@ import java.util.concurrent.Future;
 public class OrganizationSurveyFacade {
     private final OrganizationSurveyService organizationSurveyService;
     private final SurveyDao surveyDao;
+    private final AnswerDao answerDao;
     private final OrganizationSurveyOutputAssembler organizationSurveyOutputAssembler;
     private final OrganizationService organizationService;
     private final OrganizationDao organizationDao;
@@ -88,7 +91,7 @@ public class OrganizationSurveyFacade {
         final Catalyst catalyst = Optional.ofNullable(surveyUtils.findCatalyst(catalystId, survey))
                 .orElseThrow(() -> new SurveyException("Catalyst not found"));
 
-        final SurveyStatistics statistics;
+        final SurveyResult statistics;
         if (filters.isEmpty()) {
             statistics = surveyStatisticsService.calculateStatistics(survey);
         } else  {
@@ -96,6 +99,15 @@ public class OrganizationSurveyFacade {
             statistics =  respondentStatisticsService.calculateStatistics(survey, filters);
         }
 
-        return surveyCatalystStatisticsAssembler.from(catalyst, statistics, languageTag);
+        final SurveyCatalystStatisticsOutput output = surveyCatalystStatisticsAssembler.from(catalyst, statistics, languageTag);
+
+        if (output.getOpenQuestion() != null) {
+            Try.ofSupplier(() -> answerDao.getAllOpenQuestionAnswers(surveyId, statistics.getRespondentIds()))
+                    .onSuccess(answers -> output.getOpenQuestion().setAnswers(answers))
+                    .onFailure(ex -> log.warn("Cannot get answers", ex))
+                    .getOrElseThrow(ex -> new SurveyException("Cannot get answers"));
+        }
+
+        return output;
     }
 }

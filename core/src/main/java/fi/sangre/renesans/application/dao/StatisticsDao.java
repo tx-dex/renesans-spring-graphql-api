@@ -2,7 +2,6 @@ package fi.sangre.renesans.application.dao;
 
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.SurveyId;
-import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +25,6 @@ import static java.util.stream.Collectors.toMap;
 @Component
 public class StatisticsDao {
     private final LikerQuestionAnswerRepository likerQuestionAnswerRepository;
-    private final AnswerDao answerDao;
 
     @NonNull
     @Transactional(readOnly = true)
@@ -42,13 +39,6 @@ public class StatisticsDao {
         } else {
             return ImmutableMap.of();
         }
-    }
-
-    @NonNull
-    @Transactional(readOnly = true)
-    public Map<QuestionId, QuestionStatistics> getQuestionStatistics(@NonNull final SurveyId surveyId, @NonNull final List<RespondentFilter> filters) {
-        final Set<RespondentId> ids = answerDao.getRespondentIds(surveyId, filters);
-        return getQuestionStatistics(surveyId, ids);
     }
 
     @NonNull

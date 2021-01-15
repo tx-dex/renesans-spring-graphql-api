@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import feign.Logger;
 import fi.sangre.renesans.application.model.TranslationMap;
+import fi.sangre.renesans.config.properties.StatisticsProperties;
 import fi.sangre.renesans.service.TranslationService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,7 @@ import java.util.Objects;
 @Configuration
 @EnableAsync
 @EnableFeignClients(basePackages = "fi.sangre.renesans.application.client")
+@EnableConfigurationProperties({StatisticsProperties.class})
 public class ApplicationConfig {
     public static final String ASYNC_EXECUTOR_NAME = "async-executor";
     public static final String DAO_EXECUTOR_NAME = "dao-executor";

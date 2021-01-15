@@ -7,6 +7,7 @@ import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
 import fi.sangre.renesans.application.model.statistics.DriverStatistics;
+import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameDriverStatisticsOutput;
@@ -35,13 +36,15 @@ import static java.util.stream.Collectors.toList;
 public class AfterGameCatalystStatisticsAssembler {
     @NonNull
     public List<AfterGameCatalystStatisticsOutput> from(@NonNull final OrganizationSurvey survey,
-                                                        @Nullable final SurveyStatistics respondentResult,
-                                                        @Nullable final SurveyStatistics respondentGroupResult) {
+                                                        @Nullable final SurveyResult respondentResult,
+                                                        @Nullable final SurveyResult respondentGroupResult) {
 
         final Map<CatalystId, CatalystStatistics> respondentCatalysts = Optional.ofNullable(respondentResult)
+                .map(SurveyResult::getStatistics)
                 .map(SurveyStatistics::getCatalysts)
                 .orElse(ImmutableMap.of());
         final Map<CatalystId, CatalystStatistics> respondentGroupCatalysts = Optional.ofNullable(respondentGroupResult)
+                .map(SurveyResult::getStatistics)
                 .map(SurveyStatistics::getCatalysts)
                 .orElse(ImmutableMap.of());
 
@@ -52,12 +55,14 @@ public class AfterGameCatalystStatisticsAssembler {
 
     @NonNull
     public AfterGameCatalystStatisticsOutput from(@NonNull final Catalyst catalyst,
-                                                  @Nullable final SurveyStatistics respondentResult,
-                                                  @Nullable final SurveyStatistics respondentGroupResult) {
+                                                  @Nullable final SurveyResult respondentResult,
+                                                  @Nullable final SurveyResult respondentGroupResult) {
         final Map<CatalystId, CatalystStatistics> respondentCatalysts = Optional.ofNullable(respondentResult)
+                .map(SurveyResult::getStatistics)
                 .map(SurveyStatistics::getCatalysts)
                 .orElse(ImmutableMap.of());
         final Map<CatalystId, CatalystStatistics> respondentGroupCatalysts = Optional.ofNullable(respondentGroupResult)
+                .map(SurveyResult::getStatistics)
                 .map(SurveyStatistics::getCatalysts)
                 .orElse(ImmutableMap.of());
 
