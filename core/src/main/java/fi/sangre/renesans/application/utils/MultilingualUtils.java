@@ -62,6 +62,15 @@ public class MultilingualUtils {
         }
     }
 
+    @Nullable
+    public Map<String, String> emptyToNull(@Nullable final MultilingualText text) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        } else {
+            return text.getPhrases();
+        }
+    }
+
     @NonNull
     public MultilingualText create(@Nullable final Map<String, String> phrases) {
         return combineMaps(null, phrases);

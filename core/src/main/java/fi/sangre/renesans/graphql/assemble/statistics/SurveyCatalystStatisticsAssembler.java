@@ -35,6 +35,8 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class SurveyCatalystStatisticsAssembler {
+    private final MultilingualUtils multilingualUtils;
+
     @NonNull
     public List<SurveyCatalystStatisticsOutput> from(@NonNull final OrganizationSurvey survey, @Nullable final SurveyResult statistics, @NonNull final String languageTag) {
         final Map<CatalystId, CatalystStatistics> catalystStatistics = Optional.ofNullable(statistics)
@@ -71,9 +73,9 @@ public class SurveyCatalystStatisticsAssembler {
                 .questions(catalyst.getQuestions().stream()
                         .map(question -> from(question, catalystStatistics.getQuestions(), languageTag))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
-                .openQuestion(Optional.ofNullable(catalyst.getOpenQuestion())
-                        .map(question -> SurveyOpenQuestionStatisticsOutput.builder()
-                                .title(MultilingualUtils.getText(question.getPhrases(), languageTag))
+                .openQuestion(Optional.ofNullable(multilingualUtils.emptyToNull(catalyst.getOpenQuestion()))
+                        .map(phrases -> SurveyOpenQuestionStatisticsOutput.builder()
+                                .title(MultilingualUtils.getText(phrases, languageTag))
                                 .answers(ImmutableList.of())
                                 .build())
                         .orElse(null))
