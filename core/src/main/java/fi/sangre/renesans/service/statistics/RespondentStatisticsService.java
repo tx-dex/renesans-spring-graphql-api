@@ -1,6 +1,5 @@
 package fi.sangre.renesans.service.statistics;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.StatisticsDao;
@@ -49,10 +48,7 @@ public class RespondentStatisticsService {
 
         final Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId, filters);
         if (respondentIds.size() < properties.getMinRespondentCount()) {
-            return SurveyResult.builder()
-                    .respondentIds(ImmutableSet.of())
-                    .statistics(statisticsService.calculateStatistics(survey, ImmutableMap.of()))
-                    .build();
+            return SurveyResult.EMPTY;
         } else {
             final Map<QuestionId, QuestionStatistics> results = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
             return SurveyResult.builder()

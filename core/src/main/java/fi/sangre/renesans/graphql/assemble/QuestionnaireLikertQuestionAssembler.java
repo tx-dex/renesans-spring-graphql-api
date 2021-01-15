@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.stream.Collectors.*;
 
@@ -67,10 +66,7 @@ public class QuestionnaireLikertQuestionAssembler {
                         .response(answer.getResponse() + 1);
             }
 
-            output.rate(Optional.ofNullable(answer.getRate())
-                    .map(rate -> rate * 10 + 1)
-                    .orElse(null)
-            );
+            output.rate(answer.getRate());
         }
 
         return output.build();

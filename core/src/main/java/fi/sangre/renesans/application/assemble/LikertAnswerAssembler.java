@@ -22,13 +22,17 @@ import java.util.Optional;
 
 @Component
 public class LikertAnswerAssembler {
-    private static final Integer SOME_DIVISOR = 10;
     private final SurveyUtils surveyUtils;
 
 
     @NonNull
     public LikertQuestionAnswer from(@NonNull final LikertQuestionRateInput answer, @NonNull final OrganizationSurvey survey) {
         final QuestionId questionId = new QuestionId(Objects.requireNonNull(answer.getQuestionId(), "answer.questionId is required"));
+        Objects.requireNonNull(answer.getRate());
+
+        if (answer.getRate() < 0 || answer.getRate() > 5) {
+            throw new SurveyException("Invalid rate value. Must be 1, 2, 3, 4 or 5");
+        }
 
         final LikertQuestion question = Optional.ofNullable(surveyUtils.findQuestion(questionId, survey))
                 .orElseThrow(() -> new SurveyException("Question not found in the questionnaire"));
@@ -36,7 +40,7 @@ public class LikertAnswerAssembler {
         final LikertQuestionAnswer.LikertQuestionAnswerBuilder builder = LikertQuestionAnswer.builder()
                 .id(questionId)
                 .catalystId(question.getCatalystId())
-                .rate(Math.floorDiv(answer.getRate(), SOME_DIVISOR));  // This is because frontend is giving some strange values like 11, 21, 31, 41, 51
+                .rate(answer.getRate());
 
         return builder.build();
     }
