@@ -1,5 +1,6 @@
 package fi.sangre.renesans.graphql.assemble.statistics;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
@@ -10,6 +11,7 @@ import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.output.statistics.SurveyCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyDriverStatisticsOutput;
+import fi.sangre.renesans.graphql.output.statistics.SurveyOpenQuestionStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyQuestionStatisticsOutput;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,15 @@ public class SurveyCatalystStatisticsAssembler {
     }
 
     @NonNull
+    public SurveyCatalystStatisticsOutput from(@NonNull final Catalyst catalyst, @Nullable final SurveyStatistics statistics, @NonNull final String languageTag) {
+        final Map<CatalystId, CatalystStatistics> catalystStatistics = Optional.ofNullable(statistics)
+                .map(SurveyStatistics::getCatalysts)
+                .orElse(ImmutableMap.of());
+
+        return from(catalyst, catalystStatistics, languageTag);
+    }
+
+    @NonNull
     private SurveyCatalystStatisticsOutput from(@NonNull final Catalyst catalyst, @NonNull final Map<CatalystId, CatalystStatistics> statistics, @NonNull final String languageTag) {
         final CatalystStatistics catalystStatistics = statistics.getOrDefault(catalyst.getId(), CatalystStatistics.EMPTY);
 
@@ -57,6 +68,12 @@ public class SurveyCatalystStatisticsAssembler {
                 .questions(catalyst.getQuestions().stream()
                         .map(question -> from(question, catalystStatistics.getQuestions(), languageTag))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
+                .openQuestion(Optional.ofNullable(catalyst.getOpenQuestion())
+                        .map(question -> SurveyOpenQuestionStatisticsOutput.builder()
+                                .title(MultilingualUtils.getText(question.getPhrases(), languageTag))
+                                .answers(ImmutableList.of())
+                                .build())
+                        .orElse(null))
                 .build();
     }
 
@@ -79,7 +96,7 @@ public class SurveyCatalystStatisticsAssembler {
         final QuestionStatistics questionStatistics = statistics.getOrDefault(question.getId(), QuestionStatistics.EMPTY);
 
         return SurveyQuestionStatisticsOutput.builder()
-                .id(question.getId().asString())
+                .id(question.getId().getValue())
                 .title(MultilingualUtils.getText(question.getTitles().getPhrases(), languageTag))
                 .result(rateToPercent(questionStatistics.getAvg()))
                 .rate(rateToPercent(questionStatistics.getRate()))

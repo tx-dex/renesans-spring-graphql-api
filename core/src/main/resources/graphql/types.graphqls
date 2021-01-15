@@ -198,9 +198,10 @@ type SurveyCatalystStatistics {
     # Catalyst title
     title: String
     # result
-    result: Float!
+    result: Float
     drivers: [SurveyDriverStatistics!]!
     questions: [SurveyQuestionStatistics!]!
+    openQuestion: SurveyOpenQuestionStatistics
 }
 
 type SurveyDriverStatistics {
@@ -209,7 +210,7 @@ type SurveyDriverStatistics {
     # Driver title
     title: String
     # result
-    result: Float!
+    result: Float
 }
 
 type SurveyQuestionStatistics {
@@ -217,8 +218,13 @@ type SurveyQuestionStatistics {
     id: ID!
     # Question title
     title: String
-    result: Float!
-    rate: Float!
+    result: Float
+    rate: Float
+}
+
+type SurveyOpenQuestionStatistics {
+    title: String
+    answers: [String!]!
 }
 
 # type for the app

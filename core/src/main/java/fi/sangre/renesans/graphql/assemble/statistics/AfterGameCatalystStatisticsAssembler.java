@@ -1,5 +1,6 @@
 package fi.sangre.renesans.graphql.assemble.statistics;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
@@ -9,6 +10,7 @@ import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameDriverStatisticsOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameOpenQuestionOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameQuestionStatisticsOutput;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import lombok.RequiredArgsConstructor;
@@ -84,7 +86,12 @@ public class AfterGameCatalystStatisticsAssembler {
                                 respondentCatalyst.getQuestions(),
                                 respondentGroupCatalyst.getQuestions())))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
-                .openQuestion(null)
+                .openQuestion(Optional.ofNullable(catalyst.getOpenQuestion())
+                        .map(question -> AfterGameOpenQuestionOutput.builder()
+                                .titles(question.getPhrases())
+                        .answers(ImmutableList.of())
+                        .build())
+                .orElse(null))
                 .build();
     }
 

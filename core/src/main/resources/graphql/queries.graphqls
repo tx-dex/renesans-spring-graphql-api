@@ -69,13 +69,14 @@ type Query {
     ): [SurveyRespondent!]!
 
     # Get survey statistcs based on provided filters
-    surveyStatistics(
+    surveyCatalystStatistics(
         surveyId: ID!
+        catalystId: ID!
         # List of filters for filtering respondents
         filters: [FilterInput!]
         # Should be used for selecting the language
         languageCode: String
-    ): [SurveyCatalystStatistics!]!
+    ): SurveyCatalystStatistics!
 
 
     # Returns all catalysts/themes statistics for specific questionnaire

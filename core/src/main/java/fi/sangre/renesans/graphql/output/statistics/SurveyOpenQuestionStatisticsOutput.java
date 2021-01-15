@@ -5,15 +5,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.UUID;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode
 @ToString
 @Builder
-public class SurveyQuestionStatisticsOutput {
-    private UUID id;
+public class SurveyOpenQuestionStatisticsOutput {
     private String title;
-    private Double result;
-    private Double rate;
+    private List<String> answers;
 }

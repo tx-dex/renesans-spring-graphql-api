@@ -4,10 +4,7 @@ import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.RespondentFilterAssembler;
 import fi.sangre.renesans.application.dao.UserDao;
-import fi.sangre.renesans.application.model.OrganizationId;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.SurveyId;
-import fi.sangre.renesans.application.model.SurveyTemplate;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
 import fi.sangre.renesans.graphql.facade.OrganizationSurveyFacade;
@@ -95,13 +92,15 @@ public class AdminQueries implements GraphQLQueryResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#surveyId, 'survey', 'READ')")
-    public Collection<SurveyCatalystStatisticsOutput> getSurveyStatistics(@NonNull final UUID surveyId,
-                                                                          @Nullable final List<FilterInput> filters,
-                                                                          @Nullable final String languageCode,
-                                                                          @NonNull final DataFetchingEnvironment environment) {
+    public SurveyCatalystStatisticsOutput getSurveyCatalystStatistics(@NonNull final UUID surveyId,
+                                                                      @NonNull final UUID catalystId,
+                                                                      @Nullable final List<FilterInput> filters,
+                                                                      @Nullable final String languageCode,
+                                                                      @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return organizationSurveyFacade.getStatistics(new SurveyId(surveyId),
+                new CatalystId(catalystId),
                 respondentFilterAssembler.fromInput(filters),
                 resolverHelper.getLanguageCode(environment));
     }

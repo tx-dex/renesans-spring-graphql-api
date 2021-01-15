@@ -5,7 +5,9 @@ import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
+import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
+import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.OrganizationSurveyOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.SurveyCatalystStatisticsAssembler;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -40,6 +43,7 @@ public class OrganizationSurveyFacade {
     private final SurveyStatisticsService surveyStatisticsService;
     private final RespondentStatisticsService respondentStatisticsService;
     private final SurveyCatalystStatisticsAssembler surveyCatalystStatisticsAssembler;
+    private final SurveyUtils surveyUtils;
 
     @NonNull
     public Collection<OrganizationOutput> getOrganizations() {
@@ -75,11 +79,14 @@ public class OrganizationSurveyFacade {
     }
 
     @NonNull
-    public Collection<SurveyCatalystStatisticsOutput> getStatistics(@NonNull final SurveyId surveyId,
-                                                                    @NonNull final List<RespondentFilter> filters,
-                                                                    @NonNull final String languageTag) {
+    public SurveyCatalystStatisticsOutput getStatistics(@NonNull final SurveyId surveyId,
+                                                        @NonNull final CatalystId catalystId,
+                                                        @NonNull final List<RespondentFilter> filters,
+                                                        @NonNull final String languageTag) {
 
         final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(surveyId);
+        final Catalyst catalyst = Optional.ofNullable(surveyUtils.findCatalyst(catalystId, survey))
+                .orElseThrow(() -> new SurveyException("Catalyst not found"));
 
         final SurveyStatistics statistics;
         if (filters.isEmpty()) {
@@ -89,6 +96,6 @@ public class OrganizationSurveyFacade {
             statistics =  respondentStatisticsService.calculateStatistics(survey, filters);
         }
 
-        return surveyCatalystStatisticsAssembler.from(survey, statistics, languageTag);
+        return surveyCatalystStatisticsAssembler.from(catalyst, statistics, languageTag);
     }
 }
