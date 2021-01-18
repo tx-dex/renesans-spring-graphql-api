@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -25,7 +26,7 @@ public class DiscussionQuestionMetadataAssembler {
         } else {
             return questions.stream()
                     .map(question -> DiscussionQuestionMetadata.builder()
-                            .id(question.getId().getValue())
+                            .id(Objects.requireNonNull(question.getId().getValue()))
                             .titles(question.getTitle().getPhrases())
                             .active(question.isActive())
                             .build())

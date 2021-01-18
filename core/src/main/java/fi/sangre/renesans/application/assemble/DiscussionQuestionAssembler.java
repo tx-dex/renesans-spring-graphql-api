@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -29,7 +30,9 @@ public class DiscussionQuestionAssembler {
     public List<DiscussionQuestion> fromInput(@NonNull final List<DiscussionQuestionInput> input, @NonNull final String languageTag) {
         return input.stream()
                 .map(question -> DiscussionQuestion.builder()
-                        .id(new QuestionId(question.getId()))
+                        .id(Optional.ofNullable(question.getId())
+                                .map(QuestionId::new)
+                                .orElse(null))
                         .title(multilingualUtils.create(question.getTitle(), languageTag))
                         .active(question.getActive())
                         .build())
