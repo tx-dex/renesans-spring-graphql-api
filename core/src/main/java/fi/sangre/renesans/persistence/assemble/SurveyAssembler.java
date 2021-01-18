@@ -22,6 +22,7 @@ public class SurveyAssembler {
     private final ParameterMetadataAssembler parameterMetadataAssembler;
     private final MediaMetadataAssembler mediaMetadataAssembler;
     private final TranslationMetadataAssembler translationMetadataAssembler;
+    private final DiscussionQuestionMetadataAssembler discussionQuestionMetadataAssembler;
 
     @NonNull
     public Survey from(@NonNull final OrganizationSurvey model) {
@@ -54,6 +55,7 @@ public class SurveyAssembler {
                 .catalysts(catalystMetadataAssembler.from(model.getCatalysts()))
                 .parameters(parameterMetadataAssembler.from(model.getParameters()))
                 .translations(translationMetadataAssembler.from(model.getStaticTexts()))
+                .discussionQuestions(discussionQuestionMetadataAssembler.from(model.getDiscussionQuestions()))
                 .build());
 
         return entity;

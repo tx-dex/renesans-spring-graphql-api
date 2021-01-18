@@ -7,6 +7,7 @@ import fi.sangre.renesans.application.model.media.MediaDetails;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.input.CatalystInput;
 import fi.sangre.renesans.graphql.input.StaticTextInput;
+import fi.sangre.renesans.graphql.input.discussion.DiscussionQuestionInput;
 import fi.sangre.renesans.graphql.input.media.MediaDetailsInput;
 import fi.sangre.renesans.graphql.input.media.SurveyMediaInput;
 import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
@@ -37,6 +38,7 @@ public class OrganizationSurveyAssembler {
     private final ParameterAssembler parameterAssembler;
     private final StaticTextAssembler staticTextAssembler;
     private final CatalystAssembler catalystAssembler;
+    private final DiscussionQuestionAssembler discussionQuestionAssembler;
     private final MultilingualUtils multilingualUtils;
 
 
@@ -154,6 +156,19 @@ public class OrganizationSurveyAssembler {
     }
 
     @NonNull
+    public OrganizationSurvey fromDiscussionQuestionInput(@NonNull final UUID id,
+                                                          @NonNull final Long version,
+                                                          @NonNull final List<DiscussionQuestionInput> input,
+                                                          @NonNull final String languageTag) {
+
+       return OrganizationSurvey.builder()
+                .id(id)
+                .version(version)
+                .discussionQuestions(discussionQuestionAssembler.fromInput(input, languageTag))
+                .build();
+    }
+
+    @NonNull
     public OrganizationSurvey from(@NonNull final Survey survey) {
         final SurveyMetadata metadata = survey.getMetadata();
 
@@ -171,6 +186,7 @@ public class OrganizationSurveyAssembler {
                 .media(mediaAssembler.fromMetadata(metadata.getMedia()))
                 .catalysts(catalystAssembler.fromMetadata(metadata.getCatalysts()))
                 .parameters(parameterAssembler.fromMetadata(metadata.getParameters()))
+                .discussionQuestions(discussionQuestionAssembler.fromMetadata(metadata.getDiscussionQuestions()))
                 .staticTexts(staticTextAssembler.fromMetadata(metadata.getTranslations()))
                 .build();
     }

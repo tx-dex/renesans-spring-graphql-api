@@ -80,6 +80,14 @@ input SurveyStaticTextInput {
     text: String!
 }
 
+input SurveyDiscussionQuestionInput {
+    # might be null if adding a new question
+    id: ID
+    # should never be null or empty
+    title: String!
+    active: Boolean!
+}
+
 input SurveyCatalystInput {
     # Catalyst id, there should never be a null as we do not allow for creating catalysts now
     id: ID!

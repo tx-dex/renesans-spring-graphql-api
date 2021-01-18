@@ -78,6 +78,17 @@ type Mutation {
         languageCode: String
     ): OrganizationSurvey!
 
+    storeOrganizationSurveyDiscussionQuestions(
+        # Survey id
+        id: ID!
+        # Survey version
+        version: Long!
+        # The whole list of questions to save
+        input: [SurveyDiscussionQuestionInput!]!
+        # Language that user is currently editing
+        languageCode: String
+    ): OrganizationSurvey!
+
     storeOrganizationSurveyLogo(
         # Survey id
         id: ID!

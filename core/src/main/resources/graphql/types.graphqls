@@ -107,6 +107,7 @@ type OrganizationSurvey {
     staticTexts: [SurveyStaticTextGroup!]!
     # List of parameters
     parameters: [SurveyParameter!]!
+    discussionQuestions: [SurveyDiscussionQuestion!]!
     respondentCounts: RespondentCounters!
 }
 
@@ -145,6 +146,12 @@ type SurveyTreeParameter {
     label: String!
     value: String!
     children: [SurveyParameterChild!]!
+}
+
+type SurveyDiscussionQuestion {
+    id: ID!
+    title: String
+    active: Boolean!
 }
 
 type SurveyStaticText {

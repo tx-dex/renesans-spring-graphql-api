@@ -1,5 +1,6 @@
 package fi.sangre.renesans.application.model;
 
+import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
 import fi.sangre.renesans.application.model.media.Media;
 import fi.sangre.renesans.application.model.media.MediaDetails;
 import fi.sangre.renesans.application.model.parameter.Parameter;
@@ -26,6 +27,7 @@ public class OrganizationSurvey {
     private List<Catalyst> catalysts;
     private List<Parameter> parameters;
     private Map<String, StaticTextGroup> staticTexts;
+    private List<DiscussionQuestion> discussionQuestions;
     @Builder.Default
     private boolean deleted = false;
     //TODO: create OrganizationSurveyOutput and move this there

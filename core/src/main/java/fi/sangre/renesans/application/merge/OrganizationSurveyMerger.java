@@ -18,6 +18,7 @@ public class OrganizationSurveyMerger {
     private final ParameterMerger parameterMerger;
     private final CatalystMerger catalystMerger;
     private final MediaMerger mediaMerger;
+    private final DiscussionQuestionMerger discussionQuestionMerger;
 
     @NonNull
     public OrganizationSurvey combine(@NonNull final OrganizationSurvey existing, @NonNull final OrganizationSurvey input) {
@@ -28,7 +29,7 @@ public class OrganizationSurveyMerger {
         existing.setCatalysts(catalystMerger.combine(existing.getCatalysts(), input.getCatalysts()));
         existing.setParameters(parameterMerger.combine(existing.getParameters(), input.getParameters()));
         existing.setStaticTexts(staticTextMerger.combine(existing.getStaticTexts(), input.getStaticTexts()));
-
+        existing.setDiscussionQuestions(discussionQuestionMerger.combine(existing.getDiscussionQuestions(), input.getDiscussionQuestions()));
         return existing;
     }
 

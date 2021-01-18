@@ -14,6 +14,7 @@ import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
+import fi.sangre.renesans.graphql.input.discussion.DiscussionQuestionInput;
 import fi.sangre.renesans.graphql.input.media.MediaDetailsInput;
 import fi.sangre.renesans.graphql.input.media.MediaUploadInput;
 import fi.sangre.renesans.graphql.input.media.SurveyMediaInput;
@@ -174,6 +175,20 @@ public class AdminMutations implements GraphQLMutationResolver {
 
         final OrganizationSurvey inputSurvey = organizationSurveyAssembler
                 .fromParametersInput(id, version, input, resolverHelper.getLanguageCode(environment));
+        return organizationSurveyService.updateMetadata(inputSurvey);
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
+    public OrganizationSurvey storeOrganizationSurveyDiscussionQuestions(@NonNull final UUID id,
+                                                                         @NonNull final Long version,
+                                                                         @NonNull final List<DiscussionQuestionInput> input,
+                                                                         @Nullable final String languageCode,
+                                                                         @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        final OrganizationSurvey inputSurvey = organizationSurveyAssembler
+                .fromDiscussionQuestionInput(id, version, input, resolverHelper.getLanguageCode(environment));
         return organizationSurveyService.updateMetadata(inputSurvey);
     }
 
