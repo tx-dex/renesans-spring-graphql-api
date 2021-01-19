@@ -20,8 +20,10 @@ import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
+import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
@@ -61,6 +63,7 @@ public class AfterGameFacade {
     private final RespondentStatisticsService respondentStatisticsService;
     private final ParameterStatisticsService parameterStatisticsService;
     private final AfterGameCatalystStatisticsAssembler afterGameCatalystStatisticsAssembler;
+    private final AfterGameDiscussionAssembler afterGameDiscussionAssembler;
     private final ParameterUtils parameterUtils;
     private final SurveyUtils surveyUtils;
     private final MultilingualUtils multilingualUtils;
@@ -207,6 +210,7 @@ public class AfterGameFacade {
         return surveyStatistics;
     }
 
+    @NonNull
     private List<ParameterChild> getParameters(@NonNull final OrganizationSurvey survey, @NonNull final UserDetails principal) {
         final ImmutableList.Builder<ParameterChild> parameters = ImmutableList.builder();
 
@@ -237,7 +241,44 @@ public class AfterGameFacade {
     }
 
     @NonNull
-    public ParameterChild getGlobalYouParameter(@NonNull final OrganizationSurvey survey) {
+    public Collection<AfterGameDiscussionOutput> afterGameDiscussions(@NonNull final UUID questionnaireId,
+                                                                      @NonNull final Boolean active,
+                                                                      @NonNull final UserDetails principal) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+
+        return afterGameDiscussionAssembler.fromList(survey.getDiscussionQuestions().stream()
+                .filter(question -> active.equals(question.isActive()))
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList)));
+    }
+
+    @NonNull
+    public AfterGameDiscussionOutput afterGameDiscussion(@NonNull final UUID questionnaireId,
+                                                         @NonNull final UUID discussionId,
+                                                         @NonNull final UserDetails principal) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+
+        return afterGameDiscussionAssembler.from(survey.getDiscussionQuestions().stream()
+                .filter(question -> discussionId.equals(question.getId().getValue()))
+                .findFirst()
+                .orElseThrow(() -> new SurveyException("Cannot get discussion")));
+    }
+
+
+    @NonNull
+    public AfterGameDiscussionOutput commentOnDiscussion(@NonNull final UUID questionnaireId,
+                                                         @NonNull final UUID discussionId,
+                                                         @NonNull final UserDetails principal) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+
+        //TODO: implement
+        return afterGameDiscussionAssembler.from(survey.getDiscussionQuestions().stream()
+                .filter(question -> discussionId.equals(question.getId().getValue()))
+                .findFirst()
+                .orElseThrow(() -> new SurveyException("Cannot get discussion")));
+    }
+
+    @NonNull
+    private ParameterChild getGlobalYouParameter(@NonNull final OrganizationSurvey survey) {
         //TODO: get phrases from survey
         return ParameterItem.builder()
                 .id(ParameterId.GLOBAL_YOU_PARAMETER_ID)
@@ -246,7 +287,7 @@ public class AfterGameFacade {
     }
 
     @NonNull
-    public ParameterChild getGlobalEveryoneParameter(@NonNull final OrganizationSurvey survey) {
+    private ParameterChild getGlobalEveryoneParameter(@NonNull final OrganizationSurvey survey) {
         //TODO: get phrases from survey
         return ParameterItem.builder()
                 .id(ParameterId.GLOBAL_EVERYONE_PARAMETER_ID)

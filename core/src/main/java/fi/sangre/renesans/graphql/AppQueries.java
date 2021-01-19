@@ -4,6 +4,7 @@ import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import fi.sangre.renesans.graphql.facade.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
@@ -77,4 +78,31 @@ public class AppQueries implements GraphQLQueryResolver {
                 resolverHelper.getRequiredPrincipal(environment));
     }
 
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public Collection<AfterGameDiscussionOutput> afterGameDiscussions(@NonNull final UUID questionnaireId,
+                                                                      @NonNull final Boolean active,
+                                                                      @Nullable final String languageCode,
+                                                                      @NonNull final DataFetchingEnvironment environment) {
+        log.debug("Getting after discussions questionnaire(id={})", questionnaireId);
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return afterGameFacade.afterGameDiscussions(questionnaireId,
+                active,
+                resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public AfterGameDiscussionOutput afterGameDiscussion(@NonNull final UUID questionnaireId,
+                                                         @NonNull final UUID discussionId,
+                                                         @Nullable final String languageCode,
+                                                         @NonNull final DataFetchingEnvironment environment) {
+        log.debug("Getting after discussion questionnaire(id={}, discussionId={})", questionnaireId, discussionId);
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return afterGameFacade.afterGameDiscussion(questionnaireId,
+                discussionId,
+                resolverHelper.getRequiredPrincipal(environment));
+    }
 }

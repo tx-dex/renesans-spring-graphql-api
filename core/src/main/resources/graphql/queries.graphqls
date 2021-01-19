@@ -112,6 +112,21 @@ type Query {
     # get media url by key
     getImageUrl(key: String!, params: MediaParametersInput): Url @deprecated(reason: "Use mediaPublicUrl or mediaSignedUrl")
 
+    # Get all discussions (topics)
+    afterGameDiscussions(
+        questionnaireId: ID!
+        # True for active, false for closes (inactive)
+        active: Boolean!
+        languageCode: String
+    ): [AfterGameDiscussion!]!
+
+    # Get one discussion (topic)
+    afterGameDiscussion(
+        questionnaireId: ID!
+        discussionId: ID!
+        languageCode: String
+    ): AfterGameDiscussion!
+
 
 
 

@@ -381,7 +381,24 @@ type MediaUpload {
     url: Url!
 }
 
+type AfterGameDiscussion {
+    id: ID!
+    title: String!
+    active: Boolean!
+    # Use size == null for getting all comments
+    comments(size: Int): [AfterGameComment!]!
+    numberOfAllComments: Long
 
+}
+
+type AfterGameComment {
+    id: ID!
+    text: String
+    numberOfAllLikes: Long
+    author: String
+    # True if the comment was liked by current respondent
+    liked: Boolean!
+}
 
 
 

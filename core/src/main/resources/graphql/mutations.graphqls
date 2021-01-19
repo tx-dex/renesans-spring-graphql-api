@@ -194,8 +194,19 @@ type Mutation {
         input: MediaUploadInput!
     ): MediaUpload!
 
+    commentOnAfterGameDiscussion(
+        questionnaireId: ID!
+        discussionId: ID!
+        languageCode: String
+    ): AfterGameDiscussion!
 
-
+    # Not implemented yet
+    likeOnAfterGameComment(
+        questionnaireId: ID!
+        discussionId: ID!
+        commentId: ID!
+        languageCode: String
+    ): AfterGameComment!
 
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer  @deprecated(reason: "Will be removed")
 

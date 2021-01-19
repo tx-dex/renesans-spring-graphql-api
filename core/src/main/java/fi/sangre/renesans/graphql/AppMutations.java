@@ -2,6 +2,8 @@ package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.exception.InternalServiceException;
+import fi.sangre.renesans.graphql.facade.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;
@@ -9,6 +11,8 @@ import fi.sangre.renesans.graphql.input.answer.LikertQuestionRateInput;
 import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
+import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +30,9 @@ import java.util.UUID;
 @Component
 public class AppMutations implements GraphQLMutationResolver {
     private final QuestionnaireFacade questionnaireFacade;
+    private final AfterGameFacade afterGameFacade;
     private final ResolverHelper resolverHelper;
+
     // NOTICE!!!
     // this is public and respondent does not have token for that yet. Do not authorize it!!!
     @NonNull
@@ -76,5 +82,30 @@ public class AppMutations implements GraphQLMutationResolver {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return questionnaireFacade.answerParameter(answer, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public AfterGameDiscussionOutput commentOnAfterGameDiscussion(@NonNull final UUID questionnaireId,
+                                                                  @NonNull final UUID discussionId,
+                                                                  @Nullable final String languageCode,
+                                                                  @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return afterGameFacade.commentOnDiscussion(questionnaireId,
+                discussionId,
+                resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public AfterGameCommentOutput likeOnAfterGameComment(@NonNull final UUID questionnaireId,
+                                                         @NonNull final UUID discussionId,
+                                                         @NonNull final UUID commentId,
+                                                         @Nullable final String languageCode,
+                                                         @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+        //TODO: implement
+        throw new InternalServiceException("Not implemented yet");
     }
 }
