@@ -295,7 +295,7 @@ public class StatisticsService {
                             Map.Entry::getKey,
                             e -> QuestionStatistics.builder()
                                     .questionId(e.getValue().getQuestionId())
-                                    .rate(indexToRate(e.getValue().getRate()))
+                                    .rate(e.getValue().getRate())
                                     .avg(indexToRate(e.getValue().getAvg()))
                                     .max(indexToRate(e.getValue().getMax()))
                                     .min(indexToRate(e.getValue().getMin()))
