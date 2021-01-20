@@ -6,6 +6,7 @@ import fi.sangre.renesans.application.model.DriverId;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
+import fi.sangre.renesans.application.utils.UUIDUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -24,6 +25,7 @@ import static java.util.stream.Collectors.toMap;
 @Component
 public class QuestionsMerger {
     private final MultilingualUtils multilingualUtils;
+    private final UUIDUtils uuidUtils;
 
     @NonNull
     public List<LikertQuestion> combine(@NonNull final List<LikertQuestion> existing, @Nullable final List<LikertQuestion> inputs) {
@@ -34,30 +36,29 @@ public class QuestionsMerger {
 
             final Map<QuestionId, LikertQuestion> existingQuestions = existing.stream()
                     .collect(collectingAndThen(toMap(LikertQuestion::getId, e -> e), Collections::unmodifiableMap));
+            final Set<UUID> existingIds = new HashSet<>(uuidUtils.toUUIDs(existingQuestions.keySet()));
+
             for (final LikertQuestion input : inputs) {
-                combined.add(combine(existingQuestions, input));
+                final LikertQuestion newOrExisting;
+                if (input.getId() == null) {
+                    final UUID id = uuidUtils.generate(existingIds);
+                    newOrExisting = LikertQuestion.builder()
+                            .id(new QuestionId(id))
+                            .catalystId(input.getCatalystId())
+                            .weights(ImmutableMap.of())
+                            .titles(multilingualUtils.empty())
+                            .build();
+
+                    existingIds.add(id);
+                } else {
+                    newOrExisting = Objects.requireNonNull(existingQuestions.get(input.getId()), "Not existing question in the input");
+                }
+
+                combined.add(combine(newOrExisting, input));
             }
 
             return combined.build();
         }
-    }
-
-    @NonNull
-    private LikertQuestion combine(@NonNull final Map<QuestionId, LikertQuestion> existing, @NonNull final LikertQuestion input) {
-        final LikertQuestion newOrExisting;
-        if (input.getId() == null) {
-            newOrExisting = LikertQuestion.builder()
-                    .id(new QuestionId(UUID.randomUUID()))
-                    .catalystId(input.getCatalystId())
-                    .weights(ImmutableMap.of())
-                    .titles(multilingualUtils.empty())
-                    .build();
-        } else {
-            newOrExisting = Objects.requireNonNull(existing.get(input.getId()), "Not existing question in the input");
-        }
-
-        return combine(newOrExisting, input);
-
     }
 
     @NonNull

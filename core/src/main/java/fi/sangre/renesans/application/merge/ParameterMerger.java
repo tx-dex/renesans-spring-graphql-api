@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.application.model.ParameterId;
 import fi.sangre.renesans.application.model.parameter.*;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
+import fi.sangre.renesans.application.utils.UUIDUtils;
 import fi.sangre.renesans.exception.SurveyException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class ParameterMerger {
 
 
     private final MultilingualUtils multilingualUtils;
+    private final UUIDUtils uuidUtils;
 
     @NonNull
     public List<Parameter> combine(@NonNull final List<Parameter> existing, @Nullable final List<Parameter> inputs) {
