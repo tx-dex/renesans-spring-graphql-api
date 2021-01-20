@@ -9,6 +9,7 @@ import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionRateInput;
 import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
+import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
@@ -88,12 +89,14 @@ public class AppMutations implements GraphQLMutationResolver {
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
     public AfterGameDiscussionOutput commentOnAfterGameDiscussion(@NonNull final UUID questionnaireId,
                                                                   @NonNull final UUID discussionId,
+                                                                  @NonNull final DiscussionCommentInput input,
                                                                   @Nullable final String languageCode,
                                                                   @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return afterGameFacade.commentOnDiscussion(questionnaireId,
                 discussionId,
+                input,
                 resolverHelper.getRequiredPrincipal(environment));
     }
 

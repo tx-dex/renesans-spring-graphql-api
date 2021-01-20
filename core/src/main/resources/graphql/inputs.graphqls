@@ -187,9 +187,12 @@ input MediaDetailsInput {
     key: String!
 }
 
-
-
-
+input DiscussionCommentInput {
+    # Use null for creating a new comment, use existing id for updating comment
+    commentId: ID
+    # Must not be empty
+    text: String!
+}
 
 input CustomerInput {
     id: ID

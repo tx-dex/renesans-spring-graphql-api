@@ -434,6 +434,57 @@ create index if not exists segment_idx
 create index if not exists respondent_name_index
 	on respondent (name);
 
+create table if not exists discussion_actor
+(
+    id bigserial primary key not null,
+    survey_id uuid not null,
+    respondent_id uuid not null
+);
+
+create index if not exists discussion_actor__survey_id
+    on discussion_actor(survey_id);
+
+create unique index if not exists discussion_actor__survey_id_respondent_id
+    on discussion_actor(survey_id, respondent_id);
+
+create table if not exists discussion_comment
+(
+    id uuid primary key not null,
+    survey_id uuid not null,
+    question_id uuid not null,
+    actor_id bigint not null references discussion_actor,
+    text text not null,
+    ctm timestamp default CURRENT_TIMESTAMP not null,
+    mtm timestamp default CURRENT_TIMESTAMP not null
+);
+
+create index if not exists discussion_comment__survey_id
+    on discussion_comment(survey_id);
+
+create index if not exists discussion_actor__survey_id_question_id
+    on discussion_comment(survey_id, question_id);
+
+create index if not exists discussion_actor__survey_id_question_id_ctm
+    on discussion_comment(survey_id, question_id, ctm);
+
+create table if not exists discussion_like
+(
+    id uuid primary key not null,
+    survey_id uuid not null,
+    comment_id uuid not null references discussion_comment,
+    actor_id bigint not null references discussion_actor
+);
+
+create index if not exists discussion_like__survey_id
+    on discussion_like(survey_id);
+
+create index if not exists discussion_like__survey_id_comment_id
+    on discussion_like(survey_id, comment_id);
+
+create unique index if not exists discussion_like__survey_id_comment_id_actor_id
+    on discussion_like(survey_id, comment_id, actor_id);
+
+
 create table if not exists answer
 (
 	id bigserial primary key not null,

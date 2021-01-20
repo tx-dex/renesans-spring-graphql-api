@@ -6,13 +6,16 @@ import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.dao.AnswerDao;
+import fi.sangre.renesans.application.dao.DiscussionDao;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.ParameterId;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
+import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
+import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
@@ -22,11 +25,14 @@ import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
+import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
+import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
+import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
@@ -35,6 +41,7 @@ import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -45,6 +52,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import static fi.sangre.renesans.config.ApplicationConfig.DAO_EXECUTOR_NAME;
 import static java.util.stream.Collectors.collectingAndThen;
@@ -59,6 +67,7 @@ public class AfterGameFacade {
     private final QuestionnaireAssembler questionnaireAssembler;
     private final AnswerService answerService;
     private final AnswerDao answerDao;
+    private final DiscussionDao discussionDao;
     private final SurveyStatisticsService surveyStatisticsService;
     private final RespondentStatisticsService respondentStatisticsService;
     private final ParameterStatisticsService parameterStatisticsService;
@@ -245,10 +254,20 @@ public class AfterGameFacade {
                                                                       @NonNull final Boolean active,
                                                                       @NonNull final UserDetails principal) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyId surveyId = new SurveyId(survey.getId());
 
-        return afterGameDiscussionAssembler.fromList(survey.getDiscussionQuestions().stream()
+        final Long actorId = getActorId(principal);
+        final List<DiscussionQuestion> questions = survey.getDiscussionQuestions().stream()
                 .filter(question -> active.equals(question.isActive()))
-                .collect(collectingAndThen(toList(), Collections::unmodifiableList)));
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+        final Set<QuestionId> questionIds = questions.stream()
+                .map(DiscussionQuestion::getId)
+                .collect(Collectors.toSet());
+
+
+        final Map<QuestionId, List<CommentEntity>> discussions = discussionDao.findDiscussions(surveyId, questionIds);
+
+        return afterGameDiscussionAssembler.from(questions, discussions, actorId);
     }
 
     @NonNull
@@ -256,25 +275,64 @@ public class AfterGameFacade {
                                                          @NonNull final UUID discussionId,
                                                          @NonNull final UserDetails principal) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyId surveyId = new SurveyId(survey.getId());
 
-        return afterGameDiscussionAssembler.from(survey.getDiscussionQuestions().stream()
-                .filter(question -> discussionId.equals(question.getId().getValue()))
+        final Long actorId = getActorId(principal);
+        final DiscussionQuestion question = survey.getDiscussionQuestions().stream()
+                .filter(q -> discussionId.equals(q.getId().getValue()))
                 .findFirst()
-                .orElseThrow(() -> new SurveyException("Cannot get discussion")));
+                .orElseThrow(() -> new SurveyException("Cannot get discussion"));
+        final List<CommentEntity> discussion = ImmutableList.of();
+
+        return afterGameDiscussionAssembler.from(question, discussion, actorId);
     }
 
 
     @NonNull
     public AfterGameDiscussionOutput commentOnDiscussion(@NonNull final UUID questionnaireId,
                                                          @NonNull final UUID discussionId,
+                                                         @NonNull final DiscussionCommentInput input,
                                                          @NonNull final UserDetails principal) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyId surveyId = new SurveyId(survey.getId());
+        final String comment = Optional.ofNullable(input.getText())
+                .map(StringUtils::trimToNull)
+                .orElseThrow(() -> new SurveyException("Input.text cannot be null or empty"));
+
+        final ActorEntity actor = createActor(principal);
+        final DiscussionQuestion question = survey.getDiscussionQuestions().stream()
+                .filter(q -> discussionId.equals(q.getId().getValue()))
+                .findFirst()
+                .orElseThrow(() -> new SurveyException("Cannot get discussion"));
+
+        discussionDao.createOrUpdateComment(surveyId, question.getId(), actor, input.getCommentId(), comment);
+
+        final List<CommentEntity> discussion = discussionDao.findDiscussion(surveyId, question.getId());
 
         //TODO: implement
-        return afterGameDiscussionAssembler.from(survey.getDiscussionQuestions().stream()
-                .filter(question -> discussionId.equals(question.getId().getValue()))
-                .findFirst()
-                .orElseThrow(() -> new SurveyException("Cannot get discussion")));
+        return afterGameDiscussionAssembler.from(question, discussion, actor.getId());
+    }
+
+    @NonNull
+    public ActorEntity createActor(@NonNull final UserDetails principal) {
+        if (principal instanceof RespondentPrincipal) {
+            final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+            return discussionDao.createOrGetActor(respondent.getSurveyId(), respondent.getId());
+        } else {
+            throw new SurveyException("Admin can not comment on discussion");
+        }
+    }
+
+    @Nullable
+    private Long getActorId(@NonNull final UserDetails principal) {
+        if (principal instanceof RespondentPrincipal) {
+            final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+            return Optional.ofNullable(discussionDao.findActor(respondent.getSurveyId(), respondent.getId()))
+                    .map(ActorEntity::getId)
+                    .orElse(null);
+        } else {
+            return null;
+        }
     }
 
     @NonNull
