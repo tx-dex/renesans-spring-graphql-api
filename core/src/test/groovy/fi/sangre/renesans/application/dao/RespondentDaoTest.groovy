@@ -1,17 +1,31 @@
 package fi.sangre.renesans.application.dao
 
+import fi.sangre.renesans.application.assemble.RespondentAssembler
 import fi.sangre.renesans.application.model.respondent.RespondentId
 import fi.sangre.renesans.application.utils.RespondentUtils
 import fi.sangre.renesans.persistence.model.SurveyRespondent
 import fi.sangre.renesans.persistence.model.SurveyRespondentState
+import fi.sangre.renesans.persistence.repository.CatalystOpenQuestionAnswerRepository
+import fi.sangre.renesans.persistence.repository.LikerQuestionAnswerRepository
+import fi.sangre.renesans.persistence.repository.ParameterAnswerRepository
 import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository
 import spock.lang.Specification
 
 class RespondentDaoTest extends Specification {
     final RESPONDENT_ID = new RespondentId(UUID.randomUUID())
     final surveyRespondentRepository = Mock(SurveyRespondentRepository)
+    final likerQuestionAnswerRepository = Mock(LikerQuestionAnswerRepository);
+    final catalystOpenQuestionAnswerRepository = Mock(CatalystOpenQuestionAnswerRepository)
+    final parameterAnswerRepository = Mock(ParameterAnswerRepository)
     final respondentUtils = new RespondentUtils()
-    final instance = new RespondentDao(surveyRespondentRepository, respondentUtils)
+    final respondentAssembler = Mock(RespondentAssembler)
+
+    final instance = new RespondentDao(surveyRespondentRepository,
+            likerQuestionAnswerRepository,
+            catalystOpenQuestionAnswerRepository,
+            parameterAnswerRepository,
+            respondentUtils,
+            respondentAssembler)
 
     def "should check that respondent is invited"() {
         when:
