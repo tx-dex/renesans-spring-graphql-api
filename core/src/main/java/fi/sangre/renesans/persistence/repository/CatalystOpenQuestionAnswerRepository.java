@@ -1,5 +1,6 @@
 package fi.sangre.renesans.persistence.repository;
 
+import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import fi.sangre.renesans.persistence.model.answer.CatalystAnswerId;
 import fi.sangre.renesans.persistence.model.answer.CatalystOpenQuestionAnswerEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -21,4 +22,6 @@ public interface CatalystOpenQuestionAnswerRepository extends JpaRepository<Cata
     List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndIdRespondentIdInOrderByAnswerTimeDesc(@NonNull UUID surveyId, @NonNull Set<UUID> respondentIds);
     @NonNull
     List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndIsPublicIsTrueAndIdRespondentIdInOrderByAnswerTimeDesc(@NonNull UUID surveyId, @NonNull Set<UUID> respondentIds);
+
+    void deleteAllByRespondent(@NonNull SurveyRespondent respondent);
 }

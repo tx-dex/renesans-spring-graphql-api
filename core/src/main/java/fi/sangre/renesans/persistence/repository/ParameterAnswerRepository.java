@@ -1,5 +1,6 @@
 package fi.sangre.renesans.persistence.repository;
 
+import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import fi.sangre.renesans.persistence.model.answer.ParameterAnswerEntity;
 import fi.sangre.renesans.persistence.model.answer.ParameterAnswerId;
 import fi.sangre.renesans.persistence.model.answer.ParameterAnswerType;
@@ -26,4 +27,6 @@ public interface ParameterAnswerRepository extends JpaRepository<ParameterAnswer
                                                                               @NonNull ParameterAnswerType type);
 
     void deleteAllByRootId(@NonNull UUID rootId);
+
+    void deleteAllByRespondent(@NonNull SurveyRespondent respondent);
 }

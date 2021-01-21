@@ -245,18 +245,6 @@ public class OrganizationSurveyService {
     //TODO: move to dao
     @NonNull
     @Transactional
-    public Respondent softDeleteRespondent(@NonNull final RespondentId respondentId) {
-        final SurveyRespondent respondent = surveyRespondentRepository.findById(respondentId.getValue())
-                .orElseThrow(() -> new SurveyException("Respondent not found"));
-
-        surveyRespondentRepository.delete(respondent);
-
-        return respondentAssembler.from(respondent);
-    }
-
-    //TODO: move to dao
-    @NonNull
-    @Transactional
     public OrganizationSurvey softDeleteSurvey(@NonNull final UUID surveyId) {
         final Survey survey = getSurveyOrThrow(surveyId);
 

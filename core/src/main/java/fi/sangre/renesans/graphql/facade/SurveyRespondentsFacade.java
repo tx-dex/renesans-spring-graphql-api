@@ -3,6 +3,7 @@ package fi.sangre.renesans.graphql.facade;
 import com.google.common.collect.ImmutableList;
 import com.sangre.mail.dto.MailStatus;
 import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
@@ -45,6 +46,7 @@ public class SurveyRespondentsFacade {
     private final SurveyDao surveyDao;
     private final OrganizationSurveyService organizationSurveyService;
     private final AnswerService answerService;
+    private final RespondentDao respondentDao;
     private final RespondentOutputAssembler respondentOutputAssembler;
     private final ParameterUtils parameterUtils;
     private final InvitationService invitationService;
@@ -119,7 +121,7 @@ public class SurveyRespondentsFacade {
     @NonNull
     public RespondentOutput softDeleteRespondent(@NonNull final RespondentId id) {
         try {
-            final Respondent respondent = organizationSurveyService.softDeleteRespondent(id);
+            final Respondent respondent = respondentDao.softDeleteRespondent(id);
 
             return RespondentOutput.builder()
                     .id(id)

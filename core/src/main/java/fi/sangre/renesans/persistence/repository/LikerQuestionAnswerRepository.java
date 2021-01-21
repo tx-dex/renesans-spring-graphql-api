@@ -1,5 +1,6 @@
 package fi.sangre.renesans.persistence.repository;
 
+import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import fi.sangre.renesans.persistence.model.answer.LikertQuestionAnswerEntity;
 import fi.sangre.renesans.persistence.model.answer.QuestionAnswerId;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
@@ -34,4 +35,5 @@ public interface LikerQuestionAnswerRepository extends JpaRepository<LikertQuest
             "GROUP BY id.questionId")
     List<QuestionStatistics> getQuestionStatisticsByQuestion(@Param("surveyId") UUID surveyId);
 
+    void deleteAllByRespondent(@NonNull SurveyRespondent respondent);
 }
