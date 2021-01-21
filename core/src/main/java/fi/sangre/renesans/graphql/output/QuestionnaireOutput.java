@@ -22,6 +22,11 @@ public class QuestionnaireOutput {
     private List<QuestionnaireCatalystOutput> catalysts;
     private List<QuestionnaireParameterOutput> parameters;
     private Map<String, StaticTextGroup> staticTexts;
-    boolean finished;
-    boolean answerable;
+    private boolean finished;
+    private boolean answerable;
+    private boolean canViewAfterGame;
+    private boolean canAnswer;
+    private boolean canComment;
+
+
 }

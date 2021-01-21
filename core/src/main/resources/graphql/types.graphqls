@@ -245,7 +245,13 @@ type Questionnaire {
     parameters: [QuestionnaireParameter!]!
     media: [SurveyMedia!]!
     isFinished: Boolean!
-    isAnswerable: Boolean!
+    isAnswerable: Boolean! @deprecated(reason: "use canAsnwer")
+    # true whenever user/respondent can answer to questions or parameters
+    canAnswer: Boolean!
+    # true if user/respondent can put comments
+    canComment: Boolean!
+    # true if user/respondent can go to after game
+    canViewAfterGame: Boolean!
 }
 
 # type for the app
@@ -260,6 +266,7 @@ type QuestionnaireCatalyst {
     # and there is not support for editing/saving it in the admin
     # TODO: verify if it always must be displayed
     catalystQuestion: QuestionnaireOpenQuestion
+    # True if respondent answered all questions for the catalyst
     isAllAnswered: Boolean!
 }
 

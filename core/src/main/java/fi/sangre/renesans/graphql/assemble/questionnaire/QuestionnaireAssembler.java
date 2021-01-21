@@ -10,6 +10,7 @@ import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.graphql.assemble.SurveyMediaAssembler;
 import fi.sangre.renesans.graphql.assemble.media.MediaDetailsAssembler;
+import fi.sangre.renesans.graphql.output.QuestionnaireCatalystOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
@@ -65,10 +66,20 @@ public class QuestionnaireAssembler {
                                     @NonNull final Map<CatalystId, List<LikertQuestionAnswer>> questionsAnswers,
                                     @NonNull final Map<ParameterId, ParameterItemAnswer> parameterAnswers) {
 
+        final List<QuestionnaireCatalystOutput> catalysts = questionnaireCatalystAssembler.from(survey.getCatalysts(), openQuestionAnswers, questionsAnswers);
+        final boolean isAfterGameEnabled = false; //TODO: get from survey
+        final boolean isAllAnswered = catalysts.stream()
+                .map(QuestionnaireCatalystOutput::isAllAnswered)
+                .reduce(Boolean.TRUE, Boolean::logicalAnd);
+
         return builder(survey)
                 .id(respondentId.getValue()) // overwrite the id with the respondent one
-                .answerable(true)
-                .catalysts(questionnaireCatalystAssembler.from(survey.getCatalysts(), openQuestionAnswers, questionsAnswers))
+                .answerable(!isAfterGameEnabled)
+                .finished(isAllAnswered)
+                .canAnswer(!isAfterGameEnabled)
+                .canComment(isAfterGameEnabled && isAllAnswered)
+                .canViewAfterGame(isAfterGameEnabled && isAllAnswered)
+                .catalysts(catalysts)
                 .parameters(questionnaireParameterOutputAssembler.from(survey.getParameters(), parameterAnswers))
                 .build();
     }
@@ -80,6 +91,10 @@ public class QuestionnaireAssembler {
                 .media(surveyMediaAssembler.from(survey.getMedia()))
                 .staticTexts(survey.getStaticTexts())
                 .finished(true)
-                .answerable(false);
+                .answerable(false)
+                .canAnswer(false)
+                .canComment(false)
+                .canViewAfterGame(true);
+
     }
 }

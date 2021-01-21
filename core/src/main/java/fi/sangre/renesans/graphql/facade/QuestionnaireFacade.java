@@ -113,7 +113,7 @@ public class QuestionnaireFacade {
                 throw new InternalServiceException("Cannot get questionnaire");
             }
         } else {
-            throw new SurveyException("Only respondent can answer");
+            throw new SurveyException("Only respondent can rate");
         }
     }
 
