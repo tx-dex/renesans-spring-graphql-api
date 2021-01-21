@@ -20,4 +20,5 @@ public class QuestionnaireCatalystOutput {
     private List<QuestionnaireLikertQuestionOutput> questions;
     private List<QuestionnaireDriverOutput> drivers;
     private QuestionnaireOpenQuestionOutput catalystQuestion;
+    private boolean allAnswered;
 }

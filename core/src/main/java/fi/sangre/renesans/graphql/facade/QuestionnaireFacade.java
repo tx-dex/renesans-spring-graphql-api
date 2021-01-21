@@ -11,7 +11,7 @@ import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
-import fi.sangre.renesans.graphql.assemble.QuestionnaireAssembler;
+import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionRateInput;

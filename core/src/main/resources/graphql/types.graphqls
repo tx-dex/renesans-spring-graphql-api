@@ -260,6 +260,7 @@ type QuestionnaireCatalyst {
     # and there is not support for editing/saving it in the admin
     # TODO: verify if it always must be displayed
     catalystQuestion: QuestionnaireOpenQuestion
+    isAllAnswered: Boolean!
 }
 
 # type for the app

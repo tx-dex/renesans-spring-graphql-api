@@ -9,6 +9,7 @@ import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
 import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
+import fi.sangre.renesans.application.utils.CatalystUtils;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameDriverStatisticsOutput;
@@ -36,6 +37,7 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class AfterGameCatalystStatisticsAssembler {
     private final MultilingualUtils multilingualUtils;
+    private final CatalystUtils catalystUtils;
 
     @NonNull
     public List<AfterGameCatalystStatisticsOutput> from(@NonNull final OrganizationSurvey survey,
@@ -52,6 +54,7 @@ public class AfterGameCatalystStatisticsAssembler {
                 .orElse(ImmutableMap.of());
 
         return survey.getCatalysts().stream()
+                .filter(catalystUtils::hasQuestions)
                 .map(catalyst -> from(catalyst, respondentCatalysts, respondentGroupCatalysts))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }

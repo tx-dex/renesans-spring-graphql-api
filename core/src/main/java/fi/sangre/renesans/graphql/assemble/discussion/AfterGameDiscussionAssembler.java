@@ -57,7 +57,7 @@ public class AfterGameDiscussionAssembler {
                 .id(comment.getId())
                         .text(comment.getText())
                         .numberOfAllLikes((long) comment.getLikes().size())
-                        .liked(actorId != null ? comment.getLikes().containsKey(actorId) : false)
+                        .liked(actorId != null && comment.getLikes().containsKey(actorId))
                 .build())
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }

@@ -1,4 +1,4 @@
-package fi.sangre.renesans.graphql.assemble;
+package fi.sangre.renesans.graphql.assemble.questionnaire;
 
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.answer.AnswerStatus;

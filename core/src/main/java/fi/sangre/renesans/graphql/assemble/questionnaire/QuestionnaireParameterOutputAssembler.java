@@ -1,4 +1,4 @@
-package fi.sangre.renesans.graphql.assemble;
+package fi.sangre.renesans.graphql.assemble.questionnaire;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
