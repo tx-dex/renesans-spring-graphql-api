@@ -4,8 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.application.utils.UUIDUtils;
+import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
+import fi.sangre.renesans.persistence.discussion.model.LikeEntity;
 import fi.sangre.renesans.persistence.discussion.repository.ActorRepository;
 import fi.sangre.renesans.persistence.discussion.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ import static java.util.stream.Collectors.*;
 public class DiscussionDao {
     private final ActorRepository actorRepository;
     private final CommentRepository commentRepository;
+    private final UUIDUtils uuidUtils;
 
     @Nullable
     @Transactional(readOnly = true)
@@ -81,7 +85,7 @@ public class DiscussionDao {
     @Transactional(readOnly = true)
     public Map<QuestionId, List<CommentEntity>> findDiscussions(@NonNull final SurveyId surveyId, @NonNull final Set<QuestionId> questionIds) {
         if (!questionIds.isEmpty()) {
-            return commentRepository.findAllBySurveyIdAndQuestionIdInOrderByCreatedOnAsc(surveyId.getValue(), toUUIDs(questionIds))
+            return commentRepository.findAllBySurveyIdAndQuestionIdInOrderByCreatedOnAsc(surveyId.getValue(), uuidUtils.toUUIDs(questionIds))
                     .stream()
                     .collect(groupingBy(CommentEntity::getQuestionId))
                     .entrySet()
@@ -96,9 +100,32 @@ public class DiscussionDao {
     }
 
     @NonNull
-    private Set<UUID> toUUIDs(@NonNull final Set<QuestionId> ids) {
-        return ids.stream()
-                .map(QuestionId::getValue)
-                .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+    @Transactional
+    public CommentEntity likeComment(@NonNull final SurveyId surveyId,
+                                     @NonNull final UUID commentId,
+                                     @NonNull final ActorEntity actor,
+                                     @NonNull final Boolean liked) {
+        final CommentEntity comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new SurveyException("Comment not found"));
+
+        final Map<Long, LikeEntity> likes = comment.getLikes();
+        if (Boolean.TRUE.equals(liked)) {
+            if (!likes.containsKey(actor.getId())) {
+                likes.put(actor.getId(), LikeEntity.builder()
+                        .surveyId(surveyId.getValue())
+                        .actor(actor)
+                        .comment(comment)
+                        .build());
+            }
+        } else {
+            final LikeEntity like = likes.remove(actor.getId());
+            if (like != null) {
+                like.setComment(null);
+            }
+        }
+
+        return commentRepository.save(comment);
     }
 }
+
+

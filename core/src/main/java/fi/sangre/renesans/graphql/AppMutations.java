@@ -1,8 +1,8 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
-import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.graphql.facade.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
@@ -116,10 +116,15 @@ public class AppMutations implements GraphQLMutationResolver {
     public AfterGameCommentOutput likeOnAfterGameComment(@NonNull final UUID questionnaireId,
                                                          @NonNull final UUID discussionId,
                                                          @NonNull final UUID commentId,
+                                                         @NonNull final Boolean like,
                                                          @Nullable final String languageCode,
                                                          @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
-        //TODO: implement
-        throw new InternalServiceException("Not implemented yet");
+
+        return afterGameFacade.likeOnComment(questionnaireId,
+                new QuestionId(discussionId),
+                commentId,
+                like,
+                resolverHelper.getRequiredPrincipal(environment));
     }
 }

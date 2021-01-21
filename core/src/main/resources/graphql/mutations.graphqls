@@ -212,11 +212,12 @@ type Mutation {
         languageCode: String
     ): AfterGameDiscussion!
 
-    # Not implemented yet
     likeOnAfterGameComment(
         questionnaireId: ID!
         discussionId: ID!
         commentId: ID!
+        # true for liking, false for unliking
+        like: Boolean!
         languageCode: String
     ): AfterGameComment!
 

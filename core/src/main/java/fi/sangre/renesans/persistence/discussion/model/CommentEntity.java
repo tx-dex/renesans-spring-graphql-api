@@ -60,7 +60,7 @@ public class CommentEntity {
     @Column(name = "question_id", nullable = false, updatable = false)
     private UUID questionId;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "comment")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKeyColumn(name = "actor_id")
     private Map<Long, LikeEntity> likes;
 

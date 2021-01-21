@@ -53,12 +53,17 @@ public class AfterGameDiscussionAssembler {
     private List<AfterGameCommentOutput> from(@NonNull final List<CommentEntity> discussion,
                                               @Nullable final Long actorId) {
         return discussion.stream()
-                .map(comment -> AfterGameCommentOutput.builder()
-                .id(comment.getId())
-                        .text(comment.getText())
-                        .numberOfAllLikes((long) comment.getLikes().size())
-                        .liked(actorId != null && comment.getLikes().containsKey(actorId))
-                .build())
+                .map(comment -> from(comment, actorId))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
+
+    @NonNull
+    public AfterGameCommentOutput from(@NonNull final CommentEntity comment, @Nullable final Long actorId) {
+        return AfterGameCommentOutput.builder()
+                .id(comment.getId())
+                .text(comment.getText())
+                .numberOfAllLikes((long) comment.getLikes().size())
+                .liked(actorId != null && comment.getLikes().containsKey(actorId))
+                .build();
     }
 }

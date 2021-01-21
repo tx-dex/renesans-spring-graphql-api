@@ -27,6 +27,7 @@ import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
@@ -311,6 +312,27 @@ public class AfterGameFacade {
 
         //TODO: implement
         return afterGameDiscussionAssembler.from(question, discussion, actor.getId());
+    }
+
+    @NonNull
+    public AfterGameCommentOutput likeOnComment(@NonNull final UUID questionnaireId,
+                                                @NonNull final QuestionId questionId,
+                                                @NonNull final UUID commentId,
+                                                @NonNull final Boolean liked,
+                                                @NonNull final UserDetails principal) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyId surveyId = new SurveyId(survey.getId());
+
+        final DiscussionQuestion question = survey.getDiscussionQuestions().stream()
+                .filter(q -> q.getId().equals(questionId))
+                .findFirst()
+                .orElseThrow(() -> new SurveyException("Cannot get discussion"));
+
+        final ActorEntity actor = createActor(principal);
+
+        return afterGameDiscussionAssembler.from(discussionDao.likeComment(
+                surveyId, commentId, actor, liked),
+                actor.getId());
     }
 
     @NonNull
