@@ -1,5 +1,6 @@
 package fi.sangre.renesans.graphql.assemble.questionnaire;
 
+import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
@@ -27,6 +28,7 @@ import java.util.concurrent.Future;
 @Component
 public class QuestionnaireAssembler {
     private final OrganizationSurveyService organizationSurveyService;
+    private final RespondentDao respondentDao;
     private final AnswerService answerService;
     private final QuestionnaireCatalystAssembler questionnaireCatalystAssembler;
     private final QuestionnaireParameterOutputAssembler questionnaireParameterOutputAssembler;
@@ -63,6 +65,7 @@ public class QuestionnaireAssembler {
                                     @NonNull final Map<CatalystId, List<LikertQuestionAnswer>> questionsAnswers,
                                     @NonNull final Map<ParameterId, ParameterItemAnswer> parameterAnswers) {
 
+        final boolean isConsented = respondentDao.isConsented(respondentId);
         final List<QuestionnaireCatalystOutput> catalysts = questionnaireCatalystAssembler.from(survey.getCatalysts(), openQuestionAnswers, questionsAnswers);
         final boolean isAfterGameEnabled = SurveyState.AFTER_GAME.equals(survey.getState()); //TODO: get from survey
         final boolean isAllAnswered = catalysts.stream()
@@ -71,6 +74,7 @@ public class QuestionnaireAssembler {
 
         return builder(survey)
                 .id(respondentId.getValue()) // overwrite the id with the respondent one
+                .consented(isConsented)
                 .answerable(!isAfterGameEnabled)
                 .finished(isAllAnswered)
                 .canAnswer(!isAfterGameEnabled)
@@ -87,6 +91,7 @@ public class QuestionnaireAssembler {
                 .logo(mediaDetailsAssembler.from(survey.getLogo()))
                 .media(surveyMediaAssembler.from(survey.getMedia()))
                 .staticTexts(survey.getStaticTexts())
+                .consented(false)
                 .finished(true)
                 .answerable(false)
                 .canAnswer(false)

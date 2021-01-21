@@ -185,6 +185,11 @@ type Mutation {
     # Do not send Authorization header with this mustation!!!
     openQuestionnaire(id: ID!, invitationHash: String!): Authorization!
 
+    consentQuestionnairePolicy(
+        id: ID!
+        consent: Boolean!
+        languageCode: String): Questionnaire!
+
     answerOrSkipLikertQuestion(answer: LikertQuestionAnswerInput!, languageCode: String): Questionnaire
     rateLikertQuestion(rate: LikertQuestionRateInput!, languageCode: String): Questionnaire
 

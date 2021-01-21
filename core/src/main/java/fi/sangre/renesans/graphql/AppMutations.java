@@ -86,6 +86,17 @@ public class AppMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
+    @PreAuthorize("hasRole('RESPONDENT')")
+    public QuestionnaireOutput consentQuestionnairePolicy(@NonNull final UUID id,
+                                               @NonNull final Boolean consent,
+                                               @Nullable final String languageCode,
+                                               @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return questionnaireFacade.consentQuestionnaire(id, consent, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
     public AfterGameDiscussionOutput commentOnAfterGameDiscussion(@NonNull final UUID questionnaireId,
                                                                   @NonNull final UUID discussionId,

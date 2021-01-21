@@ -51,4 +51,21 @@ public class RespondentDao {
         return surveyRespondentRepository.findById(id.getValue())
                 .orElseThrow(() -> new SurveyException("Respondent not found"));
     }
+
+    @Transactional(readOnly = true)
+    public boolean isConsented(@NonNull final RespondentId id) {
+        return surveyRespondentRepository.findById(id.getValue())
+                .map(SurveyRespondent::getConsent)
+                .orElse(false);
+    }
+
+    @Transactional
+    public void consent(@NonNull final RespondentId id, @NonNull final Boolean consent) {
+        final SurveyRespondent respondent = surveyRespondentRepository.findById(id.getValue())
+                .orElseThrow(() -> new SurveyException("Respondent not found"));
+
+        if (!respondent.getConsent().equals(consent)) {
+            surveyRespondentRepository.save(respondent);
+        }
+    }
 }

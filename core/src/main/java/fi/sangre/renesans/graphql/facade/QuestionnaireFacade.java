@@ -5,6 +5,7 @@ import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.LikertAnswerAssembler;
 import fi.sangre.renesans.application.assemble.OpenAnswerAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
+import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.event.QuestionnaireOpenedEvent;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.parameter.Parameter;
@@ -41,6 +42,7 @@ public class QuestionnaireFacade {
     private final LikertAnswerAssembler likertAnswerAssembler;
     private final OpenAnswerAssembler openAnswerAssembler;
     private final ParameterAssembler parameterAssembler;
+    private final RespondentDao respondentDao;
     private final AnswerService answerService;
     private final TokenService tokenService;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -55,6 +57,19 @@ public class QuestionnaireFacade {
         applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(respondentId));
 
         return output;
+    }
+
+    @NonNull
+    public QuestionnaireOutput consentQuestionnaire(@NonNull final UUID id, @NonNull final Boolean consent, @NonNull final UserDetails principal) {
+        if (principal instanceof RespondentPrincipal) {
+            final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+
+            respondentDao.consent(respondent.getId(), consent);
+
+            return getQuestionnaire(respondent);
+        } else {
+            throw new SurveyException("Only respondent can consent");
+        }
     }
 
     @NonNull

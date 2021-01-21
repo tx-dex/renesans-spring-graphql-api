@@ -250,6 +250,7 @@ type Questionnaire {
     catalysts: [QuestionnaireCatalyst!]!
     parameters: [QuestionnaireParameter!]!
     media: [SurveyMedia!]!
+    isConsented: Boolean!
     isFinished: Boolean!
     isAnswerable: Boolean! @deprecated(reason: "use canAsnwer")
     # true whenever user/respondent can answer to questions or parameters
