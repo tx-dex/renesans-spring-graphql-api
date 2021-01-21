@@ -60,6 +60,10 @@ public class DiscussionDao {
                             .surveyId(surveyId.getValue())
                             .questionId(questionId.getValue())
                             .build());
+
+            if (!comment.getActor().getId().equals(actor.getId())) {
+                throw new SurveyException("Cannot update others people comment");
+            }
         } else {
             comment = CommentEntity.builder()
                     .actor(actor)
