@@ -20,6 +20,7 @@ import java.util.UUID;
 public class OrganizationSurvey {
     private UUID id;
     private Long version;
+    private SurveyState state;
     private MediaDetails logo;
     private MultilingualText titles;
     private MultilingualText descriptions;

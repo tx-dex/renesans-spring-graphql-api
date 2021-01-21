@@ -67,6 +67,12 @@ type Mutation {
         languageCode: String
     ): OrganizationSurvey!
 
+    enableAfterGame(
+        surveyId: ID!
+        version: Long!
+        languageCode: String
+    ): OrganizationSurvey!
+
     storeOrganizationSurveyParameters(
         # Survey id
         id: ID!

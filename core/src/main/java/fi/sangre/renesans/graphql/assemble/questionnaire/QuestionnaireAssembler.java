@@ -1,9 +1,6 @@
 package fi.sangre.renesans.graphql.assemble.questionnaire;
 
-import fi.sangre.renesans.application.model.CatalystId;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.ParameterId;
-import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
@@ -67,7 +64,7 @@ public class QuestionnaireAssembler {
                                     @NonNull final Map<ParameterId, ParameterItemAnswer> parameterAnswers) {
 
         final List<QuestionnaireCatalystOutput> catalysts = questionnaireCatalystAssembler.from(survey.getCatalysts(), openQuestionAnswers, questionsAnswers);
-        final boolean isAfterGameEnabled = false; //TODO: get from survey
+        final boolean isAfterGameEnabled = SurveyState.AFTER_GAME.equals(survey.getState()); //TODO: get from survey
         final boolean isAllAnswered = catalysts.stream()
                 .map(QuestionnaireCatalystOutput::isAllAnswered)
                 .reduce(Boolean.TRUE, Boolean::logicalAnd);

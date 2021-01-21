@@ -317,6 +317,7 @@ public class OrganizationSurveyService {
         return surveyRepository.save(Survey.builder()
                 .version(1L)
                 .isDefault(false)
+                .state(SurveyState.OPEN)
                 .metadata(metadata.build())
                 .build());
     }

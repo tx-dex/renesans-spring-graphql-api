@@ -55,6 +55,11 @@ enum SurveyRespondentState {
     ERROR
 }
 
+enum SurveyState {
+    OPEN
+    AFTER_GAME
+}
+
 # This will be removed
 type Customer {
     id: ID!
@@ -97,6 +102,7 @@ type OrganizationSurvey {
     id: ID!
     # Current version of the survey, it increments on survey updates
     version: Long!
+    state: SurveyState
     title: String!
     description: String
     # Custom logo url

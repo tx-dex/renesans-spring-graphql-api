@@ -175,6 +175,7 @@ public class OrganizationSurveyAssembler {
         return OrganizationSurvey.builder()
                 .id(survey.getId())
                 .version(survey.getVersion())
+                .state(survey.getState())
                 .logo(Optional.ofNullable(metadata.getLogo())
                         .map(ImageMetadata::getKey)
                         .map(key -> MediaDetails.builder()

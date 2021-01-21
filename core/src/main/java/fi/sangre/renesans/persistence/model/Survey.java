@@ -2,6 +2,7 @@ package fi.sangre.renesans.persistence.model;
 
 
 import com.google.api.client.util.Sets;
+import fi.sangre.renesans.application.model.SurveyState;
 import fi.sangre.renesans.model.*;
 import fi.sangre.renesans.persistence.auditing.SecurityAuditorAware;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
@@ -79,6 +80,10 @@ public class Survey {
     @Type(type = "jsonb")
     @Column(name = "metadata")
     private SurveyMetadata metadata;
+
+    @Column(name = "state", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private SurveyState state;
 
     @NotAudited
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "survey")

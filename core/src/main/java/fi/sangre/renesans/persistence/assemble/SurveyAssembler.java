@@ -41,6 +41,7 @@ public class SurveyAssembler {
         }
 
         entity.setVersion(model.getVersion());
+        entity.setState(model.getState());
 
         entity.setMetadata(SurveyMetadata.builder()
                 .titles(model.getTitles().getPhrases())

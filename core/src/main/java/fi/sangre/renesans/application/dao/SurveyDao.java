@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.assemble.RespondentCounterAssembler;
-import fi.sangre.renesans.application.model.OrganizationId;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.RespondentCounters;
-import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.assemble.SurveyAssembler;
@@ -65,6 +62,21 @@ public class SurveyDao {
         return surveyRepository.findById(surveyId.getValue())
                 .map(organizationSurveyAssembler::from)
                 .orElse(null);
+    }
+
+    @NonNull
+    @Transactional
+    public OrganizationSurvey enableAfterGame(@NonNull final SurveyId surveyId, @NonNull final Long version) {
+        final Survey survey = surveyRepository.findById(surveyId.getValue())
+                .orElseThrow(() -> new SurveyException("Survey not found"));
+
+        if (!survey.getVersion().equals(version)) {
+            throw new SurveyException("Not valid version. Survey was updated by someone else");
+        }
+
+        survey.setState(SurveyState.AFTER_GAME);
+
+        return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
     }
 
     @NonNull

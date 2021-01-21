@@ -12,6 +12,7 @@ import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
+import fi.sangre.renesans.graphql.facade.OrganizationSurveyFacade;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionQuestionInput;
@@ -53,6 +54,7 @@ import java.util.UUID;
 @Component
 public class AdminMutations implements GraphQLMutationResolver {
     private final OrganizationService organizationService;
+    private final OrganizationSurveyFacade organizationSurveyFacade;
     private final OrganizationOutputAssembler organizationOutputAssembler;
     private final OrganizationSurveyService organizationSurveyService;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
@@ -156,6 +158,17 @@ public class AdminMutations implements GraphQLMutationResolver {
         resolverHelper.setLanguageCode(languageCode, environment);
 
         return organizationSurveyService.storeSurvey(organizationId, input, resolverHelper.getLanguageCode(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
+    public OrganizationSurvey enableAfterGame(@NonNull final UUID id,
+                                              @NonNull final Long version,
+                                              @Nullable final String languageCode,
+                                              @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return organizationSurveyFacade.enableAfterGame(new SurveyId(id), version);
     }
 
     @NonNull

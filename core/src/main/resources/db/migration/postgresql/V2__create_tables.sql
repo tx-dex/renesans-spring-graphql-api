@@ -51,6 +51,7 @@ create table if not exists survey
 (
 	id uuid primary key not null,
 	version bigint not null,
+	state text not null,
 	is_default boolean,
 	description_id bigint
 		constraint fk6ud7ylb9rxnffuearyax4xv26
@@ -72,6 +73,7 @@ create table if not exists survey_history
     rev_type smallint not null,
     id uuid not null,
     version bigint null,
+    state text not null,
     metadata jsonb null,
     muser bigint null,
     mtm timestamp null,

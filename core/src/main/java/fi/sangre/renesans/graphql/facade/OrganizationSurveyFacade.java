@@ -82,6 +82,16 @@ public class OrganizationSurveyFacade {
     }
 
     @NonNull
+    public OrganizationSurvey enableAfterGame(@NonNull final SurveyId surveyId, @NonNull final Long version) {
+        try {
+            return surveyDao.enableAfterGame(surveyId, version);
+        } catch (final Exception ex) {
+            log.warn("Cannot enable after game for survey(id={})", surveyId, ex);
+            throw new SurveyException("Cannot enable after game");
+        }
+    }
+
+    @NonNull
     public SurveyCatalystStatisticsOutput getStatistics(@NonNull final SurveyId surveyId,
                                                         @NonNull final CatalystId catalystId,
                                                         @NonNull final List<RespondentFilter> filters,
