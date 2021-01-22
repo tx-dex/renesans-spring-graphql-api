@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql.resolver.discussion;
 
 import com.coxautodev.graphql.tools.GraphQLResolver;
+import com.google.common.collect.Lists;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.resolver.MultilingualTextResolver;
@@ -14,8 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
-import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor
@@ -33,12 +34,15 @@ public class AfterGameDiscussionResolver implements GraphQLResolver<AfterGameDis
 
     @NonNull
     public Collection<AfterGameCommentOutput> getComments(@NonNull final AfterGameDiscussionOutput output, @Nullable final Integer size) {
+        final List<AfterGameCommentOutput> comments;
         if (size != null) {
-            return output.getComments().stream()
+            comments = output.getComments().stream()
                     .limit(size)
-                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+                    .collect(toList());
         } else {
-            return output.getComments();
+            comments = output.getComments();
         }
+
+        return Collections.unmodifiableList(Lists.reverse(comments));
     }
 }

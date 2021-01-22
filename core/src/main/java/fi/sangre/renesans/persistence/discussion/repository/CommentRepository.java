@@ -17,8 +17,8 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
 
     @NonNull
     @EntityGraph(COMMENT_GRAPH)
-    List<CommentEntity> findAllBySurveyIdAndQuestionIdOrderByCreatedOnAsc(@NonNull UUID surveyId, @NonNull UUID questionId);
+    List<CommentEntity> findAllBySurveyIdAndQuestionIdOrderByCreatedOnDesc(@NonNull UUID surveyId, @NonNull UUID questionId);
     @NonNull
     @EntityGraph(COMMENT_GRAPH)
-    List<CommentEntity> findAllBySurveyIdAndQuestionIdInOrderByCreatedOnAsc(@NonNull UUID surveyId, @NonNull Set<UUID> questionIds);
+    List<CommentEntity> findAllBySurveyIdAndQuestionIdInOrderByCreatedOnDesc(@NonNull UUID surveyId, @NonNull Set<UUID> questionIds);
 }

@@ -283,7 +283,7 @@ public class AfterGameFacade {
                 .filter(q -> discussionId.equals(q.getId().getValue()))
                 .findFirst()
                 .orElseThrow(() -> new SurveyException("Cannot get discussion"));
-        final List<CommentEntity> discussion = ImmutableList.of();
+        final List<CommentEntity> discussion = discussionDao.findDiscussion(surveyId, question.getId());
 
         return afterGameDiscussionAssembler.from(question, discussion, actorId);
     }

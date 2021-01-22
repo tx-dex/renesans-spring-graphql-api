@@ -80,7 +80,7 @@ public class DiscussionDao {
     @NonNull
     @Transactional(readOnly = true)
     public List<CommentEntity> findDiscussion(@NonNull final SurveyId surveyId, @NonNull final QuestionId questionId) {
-        return commentRepository.findAllBySurveyIdAndQuestionIdOrderByCreatedOnAsc(surveyId.getValue(), questionId.getValue())
+        return commentRepository.findAllBySurveyIdAndQuestionIdOrderByCreatedOnDesc(surveyId.getValue(), questionId.getValue())
                 .stream()
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
@@ -89,7 +89,7 @@ public class DiscussionDao {
     @Transactional(readOnly = true)
     public Map<QuestionId, List<CommentEntity>> findDiscussions(@NonNull final SurveyId surveyId, @NonNull final Set<QuestionId> questionIds) {
         if (!questionIds.isEmpty()) {
-            return commentRepository.findAllBySurveyIdAndQuestionIdInOrderByCreatedOnAsc(surveyId.getValue(), uuidUtils.toUUIDs(questionIds))
+            return commentRepository.findAllBySurveyIdAndQuestionIdInOrderByCreatedOnDesc(surveyId.getValue(), uuidUtils.toUUIDs(questionIds))
                     .stream()
                     .collect(groupingBy(CommentEntity::getQuestionId))
                     .entrySet()
