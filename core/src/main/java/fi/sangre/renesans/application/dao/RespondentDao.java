@@ -74,6 +74,7 @@ public class RespondentDao {
                 .orElseThrow(() -> new SurveyException("Respondent not found"));
 
         if (!respondent.getConsent().equals(consent)) {
+            respondent.setConsent(consent);
             surveyRespondentRepository.save(respondent);
         }
     }
