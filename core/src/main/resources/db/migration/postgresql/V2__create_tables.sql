@@ -73,7 +73,7 @@ create table if not exists survey_history
     rev_type smallint not null,
     id uuid not null,
     version bigint null,
-    state text not null,
+    state text null,
     metadata jsonb null,
     muser bigint null,
     mtm timestamp null,
