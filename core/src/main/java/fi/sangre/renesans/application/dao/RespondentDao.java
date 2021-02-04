@@ -54,27 +54,33 @@ public class RespondentDao {
 
         final SurveyRespondentState currentStatus = respondent.getState();
 
-        if (SurveyRespondentState.OPENED.equals(newStatus)) {
-            if (!respondentUtils.isInvited(currentStatus)) {
+        if (!currentStatus.equals(newStatus)) {
+            if (SurveyRespondentState.OPENED.equals(newStatus)) {
+                if (!respondentUtils.isInvited(currentStatus)) {
+                    respondent.setState(newStatus);
+                }
+            } else if (SurveyRespondentState.ANSWERING_PARAMETERS.equals(newStatus)) {
+                if (respondentUtils.isOpened(currentStatus)) {
+                    respondent.setState(newStatus);
+                }
+            } else if (SurveyRespondentState.ANSWERED_PARAMETERS.equals(newStatus)) {
+                if (!respondentUtils.isAnsweringQuestions(currentStatus)) {
+                    respondent.setState(newStatus);
+                }
+            } else if (SurveyRespondentState.OPENED_QUESTIONS.equals(newStatus)) {
+                if (!respondentUtils.isAnsweringQuestions(currentStatus)) {
+                    respondent.setState(newStatus);
+                }
+            } else if (SurveyRespondentState.ANSWERING.equals(newStatus)) {
+                if (!respondentUtils.isAnswered(currentStatus)) {
+                    respondent.setState(newStatus);
+                }
+            } else {
                 respondent.setState(newStatus);
             }
-        } else if (SurveyRespondentState.ANSWERING_PARAMETERS.equals(newStatus)) {
-            if (respondentUtils.isOpened(currentStatus)) {
-                respondent.setState(newStatus);
-            }
-        } else if (SurveyRespondentState.ANSWERED_PARAMETERS.equals(newStatus)) {
-            if (!respondentUtils.isAnsweringQuestions(currentStatus)) {
-                respondent.setState(newStatus);
-            }
-        } else if (SurveyRespondentState.OPENED_QUESTIONS.equals(newStatus)) {
-            if (!respondentUtils.isAnsweringQuestions(currentStatus)) {
-                respondent.setState(newStatus);
-            }
-        } else {
-            respondent.setState(newStatus);
-        }
 
-        surveyRespondentRepository.save(respondent);
+            surveyRespondentRepository.save(respondent);
+        }
     }
 
     private SurveyRespondent getRespondentOrThrow(@NonNull final RespondentId id) {

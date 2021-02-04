@@ -140,7 +140,7 @@ public class AnswerService {
 
         if (answeredAll) {
             respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.ANSWERED);
-        } else if (!respondentDao.isAnswering(respondentId)) {
+        } else  {
             respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.ANSWERING);
         }
     }
