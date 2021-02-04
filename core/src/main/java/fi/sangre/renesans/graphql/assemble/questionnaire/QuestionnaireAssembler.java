@@ -10,6 +10,7 @@ import fi.sangre.renesans.graphql.assemble.SurveyMediaAssembler;
 import fi.sangre.renesans.graphql.assemble.media.MediaDetailsAssembler;
 import fi.sangre.renesans.graphql.output.QuestionnaireCatalystOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import lombok.RequiredArgsConstructor;
@@ -66,22 +67,29 @@ public class QuestionnaireAssembler {
                                     @NonNull final Map<ParameterId, ParameterItemAnswer> parameterAnswers) {
 
         final boolean isConsented = respondentDao.isConsented(respondentId);
+        final boolean isAnswering = respondentDao.isAnswering(respondentId);
         final List<QuestionnaireCatalystOutput> catalysts = questionnaireCatalystAssembler.from(survey.getCatalysts(), openQuestionAnswers, questionsAnswers);
+        final List<QuestionnaireParameterOutput> parameters = questionnaireParameterOutputAssembler.from(survey.getParameters(), parameterAnswers);
         final boolean isAfterGameEnabled = SurveyState.AFTER_GAME.equals(survey.getState()); //TODO: get from survey
         final boolean isAllAnswered = catalysts.stream()
                 .map(QuestionnaireCatalystOutput::isAllAnswered)
                 .reduce(Boolean.TRUE, Boolean::logicalAnd);
+        final boolean areAllParametersAnswered = parameters.stream()
+                .filter(QuestionnaireParameterOutput::isAnswered)
+                .count() == parameterAnswers.size();
 
         return builder(survey)
                 .id(respondentId.getValue()) // overwrite the id with the respondent one
                 .consented(isConsented)
                 .answerable(!isAfterGameEnabled)
                 .finished(isAllAnswered)
+                .canAnswerParameters(!isAnswering)
+                .canGoToQuestions(isConsented && areAllParametersAnswered)
                 .canAnswer(!isAfterGameEnabled)
                 .canComment(isAfterGameEnabled && isAllAnswered)
                 .canViewAfterGame(isAfterGameEnabled && isAllAnswered)
                 .catalysts(catalysts)
-                .parameters(questionnaireParameterOutputAssembler.from(survey.getParameters(), parameterAnswers))
+                .parameters(parameters)
                 .build();
     }
 
@@ -94,6 +102,8 @@ public class QuestionnaireAssembler {
                 .consented(false)
                 .finished(true)
                 .answerable(false)
+                .canAnswerParameters(false)
+                .canGoToQuestions(true)
                 .canAnswer(false)
                 .canComment(false)
                 .canViewAfterGame(true);

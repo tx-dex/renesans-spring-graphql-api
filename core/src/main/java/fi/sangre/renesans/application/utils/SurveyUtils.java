@@ -34,6 +34,10 @@ public class SurveyUtils {
                 .mapToLong(Integer::longValue).sum();
     }
 
+    public long countParameters(@NonNull final OrganizationSurvey survey) {
+        return survey.getParameters().size();
+    }
+
     @Nullable
     public MultilingualText findOpenQuestion(@NonNull final CatalystId id, @NonNull final OrganizationSurvey survey) {
         return Optional.ofNullable(survey.getCatalysts())

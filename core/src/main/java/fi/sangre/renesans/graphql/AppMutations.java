@@ -42,6 +42,18 @@ public class AppMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
+    @PreAuthorize("isAuthenticated()")
+    public QuestionnaireOutput goToQuestions(@NonNull final UUID id,
+                                             @Nullable final String languageCode,
+                                             @NonNull final DataFetchingEnvironment environment) {
+
+        log.debug("Opening questions page: questionnaire(id={})", id);
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return questionnaireFacade.goToQuestions(id , resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
     @PreAuthorize("hasRole('RESPONDENT')")
     public QuestionnaireOutput answerOrSkipLikertQuestion(@NonNull final LikertQuestionAnswerInput answer,
                                                           @Nullable final String languageCode,

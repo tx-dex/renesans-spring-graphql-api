@@ -19,6 +19,7 @@ import fi.sangre.renesans.graphql.input.answer.LikertQuestionRateInput;
 import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.persistence.model.SurveyRespondentState;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.TokenService;
@@ -57,6 +58,22 @@ public class QuestionnaireFacade {
         applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(respondentId));
 
         return output;
+    }
+
+    @NonNull
+    public QuestionnaireOutput goToQuestions(@NonNull final UUID id, @NonNull final UserDetails principal) {
+        if (principal instanceof RespondentPrincipal) {
+            try {
+                final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+
+                respondentDao.updateRespondentStatus(respondent.getId(), SurveyRespondentState.OPENED_QUESTIONS);
+            } catch (final Exception ex) {
+                log.warn("Cannot update respondent status");
+                throw new InternalServiceException("Cannot go to questions");
+            }
+        }
+
+        return getQuestionnaire(id, principal);
     }
 
     @NonNull

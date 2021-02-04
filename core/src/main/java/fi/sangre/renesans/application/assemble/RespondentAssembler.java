@@ -65,6 +65,12 @@ public class RespondentAssembler {
                 return RespondentState.INVITING;
             case OPENED:
                 return RespondentState.OPENED;
+            case ANSWERING_PARAMETERS:
+                return RespondentState.ANSWERING_PARAMETERS;
+            case ANSWERED_PARAMETERS:
+                return RespondentState.ANSWERED_PARAMETERS;
+            case OPENED_QUESTIONS:
+                return RespondentState.OPENED_QUESTIONS;
             case ANSWERING:
                 return RespondentState.ANSWERING;
             case ANSWERED:

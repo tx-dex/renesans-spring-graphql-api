@@ -25,8 +25,10 @@ public class QuestionnaireOutput {
     private boolean consented;
     private boolean finished;
     private boolean answerable;
-    private boolean canViewAfterGame;
+    private boolean canAnswerParameters;
+    private boolean canGoToQuestions;
     private boolean canAnswer;
+    private boolean canViewAfterGame;
     private boolean canComment;
 
 

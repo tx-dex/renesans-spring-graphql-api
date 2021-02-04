@@ -11,6 +11,9 @@ public enum RespondentState {
     INVITED,
     /** When respondent opened questionnaire */
     OPENED,
+    ANSWERING_PARAMETERS,
+    ANSWERED_PARAMETERS,
+    OPENED_QUESTIONS,
     /** When respondent answered first question */
     ANSWERING,
     /** When respondent answered all questions */

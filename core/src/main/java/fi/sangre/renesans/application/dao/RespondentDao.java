@@ -35,7 +35,7 @@ public class RespondentDao {
      */
     @Transactional(readOnly = true)
     public boolean isAnswering(@NonNull final RespondentId respondentId) {
-        return respondentUtils.isAnswering(getRespondentOrThrow(respondentId));
+        return respondentUtils.isAnsweringQuestions(getRespondentOrThrow(respondentId));
     }
 
     /**
@@ -52,7 +52,28 @@ public class RespondentDao {
         final SurveyRespondent respondent = surveyRespondentRepository.findById(respondentId.getValue())
                 .orElseThrow(() -> new SurveyException("Respondent not found"));
 
-        respondent.setState(newStatus);
+        final SurveyRespondentState currentStatus = respondent.getState();
+
+        if (SurveyRespondentState.OPENED.equals(newStatus)) {
+            if (!respondentUtils.isInvited(currentStatus)) {
+                respondent.setState(newStatus);
+            }
+        } else if (SurveyRespondentState.ANSWERING_PARAMETERS.equals(newStatus)) {
+            if (respondentUtils.isOpened(currentStatus)) {
+                respondent.setState(newStatus);
+            }
+        } else if (SurveyRespondentState.ANSWERED_PARAMETERS.equals(newStatus)) {
+            if (!respondentUtils.isAnsweringQuestions(currentStatus)) {
+                respondent.setState(newStatus);
+            }
+        } else if (SurveyRespondentState.OPENED_QUESTIONS.equals(newStatus)) {
+            if (!respondentUtils.isAnsweringQuestions(currentStatus)) {
+                respondent.setState(newStatus);
+            }
+        } else {
+            respondent.setState(newStatus);
+        }
+
         surveyRespondentRepository.save(respondent);
     }
 

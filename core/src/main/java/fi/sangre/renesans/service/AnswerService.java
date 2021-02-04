@@ -6,6 +6,7 @@ import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.event.RespondentAnswerEvent;
+import fi.sangre.renesans.application.event.RespondentParamenterAnswerEvent;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
@@ -121,7 +122,7 @@ public class AnswerService {
     public void answerParameter(@NonNull final Parameter answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
         try {
             answerDao.saveAnswer(answer, surveyId, respondentId);
-            applicationEventPublisher.publishEvent(new RespondentAnswerEvent(surveyId, respondentId));
+            applicationEventPublisher.publishEvent(new RespondentParamenterAnswerEvent(surveyId, respondentId));
         } catch (final Exception ex) {
             log.warn("Cannot answer parameter respondent(id={})", respondentId, ex);
             throw new InternalServiceException("Cannot answer");
@@ -141,6 +142,22 @@ public class AnswerService {
             respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.ANSWERED);
         } else if (!respondentDao.isAnswering(respondentId)) {
             respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.ANSWERING);
+        }
+    }
+
+    @EventListener
+    @Async(ASYNC_EXECUTOR_NAME)
+    public void handleAnswerEvent(@NonNull final RespondentParamenterAnswerEvent event) {
+        final RespondentId respondentId = event.getRespondentId();
+        final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(event.getSurveyId());
+        final long parametersCount = surveyUtils.countParameters(survey);
+        final long answeredCount = answerDao.countAnsweredParameters(event.getSurveyId(), respondentId);
+        final boolean answeredAll = parametersCount == answeredCount;
+
+        if (answeredAll) {
+            respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.ANSWERED_PARAMETERS);
+        } else if (!respondentDao.isAnswering(respondentId)) {
+            respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.ANSWERING_PARAMETERS);
         }
     }
 }

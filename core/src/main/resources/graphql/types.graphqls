@@ -47,6 +47,12 @@ enum SurveyRespondentState {
     INVITED
     # When respondent opened questionnaire
     OPENED
+    # When respondent starts answering parameters
+    ANSWERING_PARAMETERS
+    # When respondent answered all parameters
+    ANSWERED_PARAMETERS
+    # When respondent goes to questions
+    OPENED_QUESTIONS
     # When respondent answered first question
     ANSWERING
     # When respondend answered all questions
@@ -253,8 +259,11 @@ type Questionnaire {
     isConsented: Boolean!
     isFinished: Boolean!
     isAnswerable: Boolean! @deprecated(reason: "use canAsnwer")
-    # true whenever user/respondent can answer to questions or parameters
+    # true whenever user/respondent can answer to questions
     canAnswer: Boolean!
+    # true whenever user/respondent can answer to parameters
+    canAnswerParameters: Boolean!
+    canGoToQuestions: Boolean!
     # true if user/respondent can put comments
     canComment: Boolean!
     # true if user/respondent can go to after game

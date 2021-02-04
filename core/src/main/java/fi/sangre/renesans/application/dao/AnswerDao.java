@@ -81,6 +81,14 @@ public class AnswerDao {
         return likerQuestionAnswerRepository.countAllByIdSurveyIdAndIdRespondentId(surveyId.getValue(), respondentId.getValue());
     }
 
+    @Transactional(readOnly = true)
+    public long countAnsweredParameters(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+        return parameterAnswerRepository.countByIdSurveyIdAndIdRespondentIdAndTypeIs(
+                surveyId.getValue(),
+                respondentId.getValue(),
+                ParameterAnswerType.ITEM);
+    }
+
     @NonNull
     @Transactional(readOnly = true)
     public Set<LikertQuestionAnswer> getQuestionsAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
