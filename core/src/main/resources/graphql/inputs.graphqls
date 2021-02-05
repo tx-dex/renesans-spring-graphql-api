@@ -164,6 +164,16 @@ input RespondentInvitationInput {
     subject: String!
     body: String!
     emails: [String!]!
+    invitationLanguage: String
+}
+
+# input for sending invitations to respondents
+input MailInvitationInput {
+    subject: String!
+    inviteAll: Boolean
+    body: String!
+    emails: [String!]!
+    invitationLanguage: String
 }
 
 input SurveyMediaInput {

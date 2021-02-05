@@ -177,6 +177,21 @@ type Mutation {
         languageCode: String
     ): [SurveyRespondent!]!
 
+    inviteToAfterGame(
+        surveyId: ID!
+        invitation: MailInvitationInput!
+        # Should be used for selecting the language for the output
+        languageCode: String
+    ): OrganizationSurvey!
+
+    inviteToAfterGameDiscussion(
+        surveyId: ID!
+        questionId: ID!
+        invitation: MailInvitationInput!
+        # Should be used for selecting the language for the output
+        languageCode: String
+    ): OrganizationSurvey!
+
     removeRespondent(
         surveyId: ID!
         id: ID!

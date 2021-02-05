@@ -8,10 +8,12 @@ import fi.sangre.renesans.application.assemble.RespondentFilterAssembler;
 import fi.sangre.renesans.application.model.OrganizationId;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
+import fi.sangre.renesans.graphql.facade.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.OrganizationSurveyFacade;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;
@@ -59,6 +61,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     private final OrganizationSurveyService organizationSurveyService;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
     private final SurveyRespondentsFacade surveyRespondentsFacade;
+    private final AfterGameFacade afterGameFacade;
     private final RespondentFilterAssembler respondentFilterAssembler;
     private final ResolverHelper resolverHelper;
     private final AuthenticationManager authenticationManager;
@@ -303,6 +306,29 @@ public class AdminMutations implements GraphQLMutationResolver {
         } else {
             throw new SurveyException("Only user can invite respondents");
         }
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'INVITE')")
+    public OrganizationSurvey inviteToAfterGame(@NonNull final UUID surveyId,
+                                                @NonNull final MailInvitationInput invitation,
+                                                @NonNull final String languageCode,
+                                                @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return afterGameFacade.inviteToAfterGame(new SurveyId(surveyId), invitation, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'INVITE')")
+    public OrganizationSurvey inviteToAfterGameDiscussion(@NonNull final UUID surveyId,
+                                                          @NonNull final UUID questionId,
+                                                          @NonNull final MailInvitationInput invitation,
+                                                          @NonNull final String languageCode,
+                                                          @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return afterGameFacade.inviteToAfterGameDiscussion(new SurveyId(surveyId), new QuestionId(questionId), invitation, resolverHelper.getRequiredPrincipal(environment));
     }
 
     @NonNull

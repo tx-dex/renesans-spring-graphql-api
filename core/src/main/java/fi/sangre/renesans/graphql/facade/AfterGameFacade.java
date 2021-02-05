@@ -25,6 +25,7 @@ import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembler;
 import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
+import fi.sangre.renesans.graphql.input.MailInvitationInput;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
@@ -79,6 +80,31 @@ public class AfterGameFacade {
     private final MultilingualUtils multilingualUtils;
     @Qualifier(DAO_EXECUTOR_NAME)
     private final ThreadPoolTaskExecutor daoExecutor;
+
+    @NonNull
+    public OrganizationSurvey inviteToAfterGame(@NonNull final SurveyId surveyId,
+                                                @NonNull final MailInvitationInput invitation,
+                                                @NonNull final UserDetails principal) {
+        if (principal instanceof UserPrincipal) {
+            final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
+            return survey;
+        } else {
+            throw new SurveyException("Only admins can invite");
+        }
+    }
+
+    @NonNull
+    public OrganizationSurvey inviteToAfterGameDiscussion(@NonNull final SurveyId surveyId,
+                                                          @NonNull final QuestionId questionId,
+                                                          @NonNull final MailInvitationInput invitation,
+                                                          @NonNull final UserDetails principal) {
+        if (principal instanceof UserPrincipal) {
+            final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
+            return survey;
+        } else {
+            throw new SurveyException("Only admins can invite");
+        }
+    }
 
     @NonNull
     public Collection<AfterGameCatalystStatisticsOutput> afterGameOverviewCatalystsStatistics(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
