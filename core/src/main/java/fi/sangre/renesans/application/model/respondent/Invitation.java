@@ -15,4 +15,6 @@ public class Invitation {
     private String subject;
     private String body;
     private Set<String> emails;
+    private Boolean inviteAll;
+    private String language;
 }

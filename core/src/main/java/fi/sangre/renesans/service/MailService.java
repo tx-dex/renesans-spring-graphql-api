@@ -1,23 +1,21 @@
 package fi.sangre.renesans.service;
 
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
 import com.google.common.collect.ImmutableMap;
 import com.sangre.mail.dto.MailDto;
+import com.sangre.mail.dto.NameEmailPairDto;
 import fi.sangre.renesans.application.client.FeignMailClient;
 import fi.sangre.renesans.application.event.ActivateUserEvent;
 import fi.sangre.renesans.application.event.RequestUserPasswordResetEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -36,20 +34,10 @@ public class MailService {
     private final TokenService tokenService;
     private final MultilingualService multilingualService;
     private final FeignMailClient feignMailClient;
-    private final DefaultMustacheFactory mustacheFactory;
+    private final TemplateService templateService;
 
     @Value("${fi.sangre.renesans.admin.url}")
     private String adminAppUrl;
-
-    @NonNull
-    public String templateBody(@NonNull final String bodyTemplate, @NonNull final Map<String, Object> parameters) {
-        final Mustache body = mustacheFactory.compile(new StringReader(bodyTemplate), "body-template");
-
-        final StringWriter writer = new StringWriter();
-        body.execute(writer, parameters);
-
-        return writer.toString();
-    }
 
     @TransactionalEventListener
     public void sendResetPasswordEmail(@NonNull final RequestUserPasswordResetEvent event) {
@@ -62,13 +50,13 @@ public class MailService {
                 .fromHttpUrl(adminAppUrl)
                 .pathSegment(RESET_PASSWORD_URI_PATH, token).build().toUriString();
         final String subject = multilingualService.lookupPhrase(RESET_PASSWORD_MAIL_SUBJECT_MULTILINGUAL_KEY, event.getLocale(), DEFAULT_RESET_PASSWORD_MAIL_SUBJECT);
-        final String body = templateBody(multilingualService.lookupPhrase(RESET_PASSWORD_MAIL_BODY_MULTILINGUAL_KEY,
+        final String body = templateService.templateBody(multilingualService.lookupPhrase(RESET_PASSWORD_MAIL_BODY_MULTILINGUAL_KEY,
                 event.getLocale(),
                 DEFAULT_RESET_PASSWORD_MAIL_BODY), ImmutableMap.of(
                 "reset_link", resetLink,
                 "reset_link_expiration_time", expirationTimeText));
 
-        sendEmail(subject, body, event.getEmail(), ImmutableMap.of("email-type", "reset-password"));
+        sendEmail(event.getEmail(), subject, body, ImmutableMap.of("email-type", "reset-password"));
     }
 
     @TransactionalEventListener
@@ -82,7 +70,7 @@ public class MailService {
                 .fromHttpUrl(adminAppUrl)
                 .pathSegment(RESET_PASSWORD_URI_PATH, token).build().toUriString();
         final String subject = multilingualService.lookupPhrase(ACTIVATION_MAIL_SUBJECT_MULTILINGUAL_KEY, event.getLocale(), DEFAULT_ACTIVATION_MAIL_SUBJECT);
-        final String body = templateBody(multilingualService.lookupPhrase(ACTIVATION_MAIL_BODY_MULTILINGUAL_KEY,
+        final String body = templateService.templateBody(multilingualService.lookupPhrase(ACTIVATION_MAIL_BODY_MULTILINGUAL_KEY,
                 event.getLocale(),
                 DEFAULT_ACTIVATION_MAIL_BODY),
                 ImmutableMap.of(
@@ -90,20 +78,46 @@ public class MailService {
                         "reset_link_expiration_time", expirationTimeText,
                         "username", event.getUsername()));
 
-        sendEmail(subject, body, event.getEmail(), ImmutableMap.of("email-type", "activate-user"));
+        sendEmail(event.getEmail(), subject, body, ImmutableMap.of("email-type", "activate-user"));
     }
 
-    private void sendEmail(final String subject, final String body, final String email, final Map<String, String> tags) {
-        log.trace("Sending mail with tags: {} to: {}", tags, email);
+    private void sendEmail(final String recipient, final String subject, final String body, final Map<String, String> tags) {
+        log.trace("Sending mail with tags: {} to: {}", tags, recipient);
 
         final MailDto emailDto = MailDto.builder()
                 .subject(subject)
                 .body(body)
-                .recipient(email)
+                .recipient(recipient)
                 .tags(tags)
                 .build();
 
         feignMailClient.sendEmail(emailDto);
-        log.debug("Sent mail with tags: {} to: {}", tags, email);
+        log.debug("Sent mail with tags: {} to: {}", tags, recipient);
+    }
+
+    public void sendEmail(@NonNull final String recipient,
+                          @NonNull final String subject,
+                          @NonNull final String body,
+                          @NonNull final Map<String, String> tags,
+                          @NonNull final Pair<String, String> replyTo) {
+        log.trace("Sending mail with tags: {} to: {}", tags, recipient);
+
+        final String senderName = replyTo.getLeft() + " | Engager";
+        final MailDto message = MailDto.builder()
+                .recipient(recipient)
+                .subject(subject)
+                .body(body)
+                .sender(NameEmailPairDto.builder()
+                        .name(senderName)
+                        .build())
+                .replyTo(NameEmailPairDto.builder()
+                        .name(senderName)
+                        .email(replyTo.getRight())
+                        .build())
+                .tags(tags)
+                .build();
+
+        feignMailClient.sendEmail(message);
+        log.debug("Sent mail with tags: {} to: {}", tags, recipient);
     }
 }

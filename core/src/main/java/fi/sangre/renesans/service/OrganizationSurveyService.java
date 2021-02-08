@@ -7,7 +7,7 @@ import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
 import fi.sangre.renesans.application.assemble.RespondentAssembler;
 import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
-import fi.sangre.renesans.application.event.InviteRespondentsEvent;
+import fi.sangre.renesans.application.event.InviteToQuestionnaireEvent;
 import fi.sangre.renesans.application.event.QuestionnaireOpenedEvent;
 import fi.sangre.renesans.application.merge.OrganizationSurveyMerger;
 import fi.sangre.renesans.application.model.*;
@@ -196,14 +196,16 @@ public class OrganizationSurveyService {
                 .collect(toList());
 
         respondents.forEach(respondent -> {
-            respondent.setState(SurveyRespondentState.INVITING);
+            if (SurveyRespondentState.ERROR.equals(respondent.getState())) {
+                respondent.setState(SurveyRespondentState.INVITING);
+            }
             respondent.setInvitationError(null);
             //TODO: change hashing to nullable
             respondent.setInvitationHash(
                     Hashing.sha512().hashString(String.format("%s-%s", survey, UUID.randomUUID()), StandardCharsets.UTF_8).toString());
         });
 
-        applicationEventPublisher.publishEvent(new InviteRespondentsEvent(
+        applicationEventPublisher.publishEvent(new InviteToQuestionnaireEvent(
                 surveyId,
                 invitation.getSubject(),
                 invitation.getBody(),

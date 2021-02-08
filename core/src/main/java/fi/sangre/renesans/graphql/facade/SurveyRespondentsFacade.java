@@ -3,12 +3,12 @@ package fi.sangre.renesans.graphql.facade;
 import com.google.common.collect.ImmutableList;
 import com.sangre.mail.dto.MailStatus;
 import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.assemble.InvitationAssembler;
 import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
-import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
@@ -33,7 +33,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.*;
 
 @RequiredArgsConstructor
@@ -50,6 +49,7 @@ public class SurveyRespondentsFacade {
     private final RespondentOutputAssembler respondentOutputAssembler;
     private final ParameterUtils parameterUtils;
     private final InvitationService invitationService;
+    private final InvitationAssembler invitationAssembler;
 
     @NonNull
     public Collection<RespondentOutput> getSurveyRespondents(@NonNull final SurveyId surveyId,
@@ -96,23 +96,8 @@ public class SurveyRespondentsFacade {
                                                           @NonNull final List<RespondentFilter> filters,
                                                           @NonNull final String languageCode,
                                                           @NonNull final UserPrincipal principal) {
-        final Set<String> emails = Optional.ofNullable(invitation.getEmails())
-                .orElse(ImmutableList.of())
-                .stream()
-                .map(StringUtils::trimToNull)
-                .filter(Objects::nonNull)
-                .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
-
-        checkArgument(!emails.isEmpty(), "Non empty list of emails is required");
-        checkArgument(StringUtils.isNotBlank(invitation.getSubject()), "Subject is required");
-        checkArgument(StringUtils.isNotBlank(invitation.getBody()), "Email body is required");
-        checkArgument(StringUtils.contains(invitation.getBody(), "{{ invitation_link }}"), "Email body must contain {{ invitation_link }} placeholder"); //TODO: constant
-
-        organizationSurveyService.inviteRespondents(surveyId, Invitation.builder()
-                        .subject(StringUtils.trim(invitation.getSubject()))
-                        .body(StringUtils.trim(invitation.getBody()))
-                        .emails(emails)
-                        .build(),
+        organizationSurveyService.inviteRespondents(surveyId,
+                invitationAssembler.from(invitation),
                 Pair.of(principal.getName(), principal.getEmail()));
 
         return getSurveyRespondents(surveyId, filters, languageCode);

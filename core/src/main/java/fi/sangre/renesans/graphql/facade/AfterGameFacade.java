@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.assemble.InvitationAssembler;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.DiscussionDao;
 import fi.sangre.renesans.application.model.Catalyst;
@@ -16,6 +17,7 @@ import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
 import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
@@ -35,6 +37,7 @@ import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsO
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
+import fi.sangre.renesans.service.AfterGameService;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
@@ -44,6 +47,7 @@ import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -75,6 +79,8 @@ public class AfterGameFacade {
     private final ParameterStatisticsService parameterStatisticsService;
     private final AfterGameCatalystStatisticsAssembler afterGameCatalystStatisticsAssembler;
     private final AfterGameDiscussionAssembler afterGameDiscussionAssembler;
+    private final AfterGameService afterGameService;
+    private final InvitationAssembler invitationAssembler;
     private final ParameterUtils parameterUtils;
     private final SurveyUtils surveyUtils;
     private final MultilingualUtils multilingualUtils;
@@ -83,11 +89,21 @@ public class AfterGameFacade {
 
     @NonNull
     public OrganizationSurvey inviteToAfterGame(@NonNull final SurveyId surveyId,
-                                                @NonNull final MailInvitationInput invitation,
+                                                @NonNull final MailInvitationInput input,
                                                 @NonNull final UserDetails principal) {
         if (principal instanceof UserPrincipal) {
-            final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
-            return survey;
+            final UserPrincipal user = (UserPrincipal) principal;
+            final Invitation invitation = invitationAssembler.from(input);
+            final Pair<String, String> replyTo = Pair.of(user.getName(), user.getEmail());
+            try {
+                final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
+                afterGameService.inviteToAfterGame(surveyId, invitation, replyTo);
+
+                return survey;
+            } catch (final Exception ex) {
+                log.warn("Cannot invite to after game {}", surveyId, ex);
+                throw new InternalServiceException("Cannot invite to after game");
+            }
         } else {
             throw new SurveyException("Only admins can invite");
         }
@@ -96,11 +112,22 @@ public class AfterGameFacade {
     @NonNull
     public OrganizationSurvey inviteToAfterGameDiscussion(@NonNull final SurveyId surveyId,
                                                           @NonNull final QuestionId questionId,
-                                                          @NonNull final MailInvitationInput invitation,
+                                                          @NonNull final MailInvitationInput input,
                                                           @NonNull final UserDetails principal) {
         if (principal instanceof UserPrincipal) {
-            final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
-            return survey;
+            final UserPrincipal user = (UserPrincipal) principal;
+            final Invitation invitation = invitationAssembler.from(input);
+            final Pair<String, String> replyTo = Pair.of(user.getName(), user.getEmail());
+
+            try {
+                final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
+                afterGameService.inviteToAfterGameDiscussion(surveyId, questionId, invitation, replyTo);
+
+                return survey;
+            } catch (final Exception ex) {
+                log.warn("Cannot invite to after game {}", surveyId, ex);
+                throw new InternalServiceException("Cannot invite to after game");
+            }
         } else {
             throw new SurveyException("Only admins can invite");
         }

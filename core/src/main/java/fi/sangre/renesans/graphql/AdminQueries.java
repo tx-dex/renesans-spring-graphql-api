@@ -17,7 +17,7 @@ import fi.sangre.renesans.graphql.output.aaa.UserRoleOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.service.OrganizationSurveyService;
-import fi.sangre.renesans.service.TemplateService;
+import fi.sangre.renesans.service.SurveyTemplateService;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class AdminQueries implements GraphQLQueryResolver {
     private final OrganizationSurveyFacade organizationSurveyFacade;
     private final SurveyRespondentsFacade surveyRespondentsFacade;
     private final RespondentFilterAssembler respondentFilterAssembler;
-    private final TemplateService templateService;
+    private final SurveyTemplateService surveyTemplateService;
     private final UserDao userDao;
     private final UserOutputAssembler userOutputAssembler;
     private final ResolverHelper resolverHelper;
@@ -66,7 +66,7 @@ public class AdminQueries implements GraphQLQueryResolver {
     public List<SurveyTemplate> getSurveyTemplates(@Nullable final String languageCode, @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-        return templateService.getTemplates(resolverHelper.getLanguageCode(environment));
+        return surveyTemplateService.getTemplates(resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull

@@ -2,6 +2,7 @@ package fi.sangre.renesans.application.dao;
 
 import fi.sangre.renesans.application.assemble.RespondentAssembler;
 import fi.sangre.renesans.application.model.Respondent;
+import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.RespondentUtils;
 import fi.sangre.renesans.exception.SurveyException;
@@ -14,8 +15,15 @@ import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.Set;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toSet;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -45,6 +53,16 @@ public class RespondentDao {
     @Transactional(readOnly = true)
     public boolean isInvited(@NonNull final RespondentId respondentId) {
         return respondentUtils.isInvited(getRespondentOrThrow(respondentId));
+    }
+
+    @Transactional
+    public void updateRespondentError(@NonNull final RespondentId respondentId, @Nullable String error) {
+        final SurveyRespondent respondent = surveyRespondentRepository.findById(respondentId.getValue())
+                .orElseThrow(() -> new SurveyException("Respondent not found"));
+
+        respondent.setInvitationError(error);
+
+        surveyRespondentRepository.save(respondent);
     }
 
     @Transactional
@@ -81,6 +99,21 @@ public class RespondentDao {
 
             surveyRespondentRepository.save(respondent);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Set<RespondentId> findRespondentsByEmails(@NonNull final SurveyId surveyId, @NonNull final Set<String> emails) {
+        return surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()).stream()
+                .filter(e -> emails.contains(e.getEmail()))
+                .map(e -> new RespondentId(e.getId()))
+                .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+    }
+
+    @Transactional(readOnly = true)
+    public Set<RespondentId> findRespondents(@NonNull final SurveyId surveyId) {
+        return surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()).stream()
+                .map(e -> new RespondentId(e.getId()))
+                .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
     }
 
     private SurveyRespondent getRespondentOrThrow(@NonNull final RespondentId id) {

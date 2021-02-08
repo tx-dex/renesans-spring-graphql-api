@@ -11,4 +11,6 @@ public class RespondentInvitationInput {
     private String subject;
     private String body;
     private List<String> emails;
+    private String invitationLanguage;
+
 }
