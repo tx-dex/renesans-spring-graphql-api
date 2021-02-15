@@ -67,6 +67,12 @@ type Mutation {
         languageCode: String
     ): OrganizationSurvey!
 
+    copyOrganizationSurvey(
+        organizationId: ID!
+        input: SurveyInput!
+        languageCode: String
+    ): OrganizationSurvey!
+
     enableAfterGame(
         surveyId: ID!
         version: Long!

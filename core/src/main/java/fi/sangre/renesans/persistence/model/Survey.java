@@ -54,7 +54,8 @@ public class Survey {
 
     @Version
     @Column(name = "version", nullable = false)
-    private Long version;
+    @Builder.Default
+    private Long version = INITIAL_VERSION;
 
     @NotAudited
     @Column(name = "is_default")

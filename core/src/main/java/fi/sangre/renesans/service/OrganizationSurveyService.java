@@ -24,6 +24,7 @@ import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.graphql.input.question.QuestionDriverWeightInput;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.Weight;
+import fi.sangre.renesans.persistence.assemble.SurveyAssembler;
 import fi.sangre.renesans.persistence.model.TemplateId;
 import fi.sangre.renesans.persistence.model.*;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
@@ -79,6 +80,7 @@ public class OrganizationSurveyService {
     private final RespondentAssembler respondentAssembler;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final MultilingualUtils multilingualUtils;
+    private final SurveyAssembler surveyAssembler;
 
     @NonNull
     @Transactional(readOnly = true)
@@ -102,6 +104,34 @@ public class OrganizationSurveyService {
                 .map(organizationSurveyAssembler::from)
                 .sorted((e1,e2) -> compare(e1.getTitles().getPhrases(), e2.getTitles().getPhrases(), languageTag))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
+
+    @NonNull
+    @Transactional
+    public OrganizationSurvey copySurvey(@NonNull final OrganizationId targetId,
+                                         @NonNull final SurveyId sourceId,
+                                         @NonNull final MultilingualText titles,
+                                         @NonNull final MultilingualText descriptions) {
+        final Customer customer = customerRepository.findById(targetId.getValue())
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+
+        final OrganizationSurvey source = getSurvey(sourceId);
+
+        source.setId(null);
+        source.setVersion(1L);
+        source.setTitles(multilingualUtils.combine(source.getTitles(), titles));
+        source.setDescriptions(multilingualUtils.combine(source.getDescriptions(), descriptions));
+
+        final Survey copy = surveyAssembler.from(source);
+        copy.setState(SurveyState.OPEN);
+
+        final Survey saved = surveyRepository.saveAndFlush(copy);
+
+        customer.getSurveys().add(saved);
+
+        customerRepository.save(customer);
+
+        return organizationSurveyAssembler.from(saved);
     }
 
     @NonNull

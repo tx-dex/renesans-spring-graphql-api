@@ -164,6 +164,17 @@ public class AdminMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
+    @PreAuthorize("hasPermission(#organizationId, 'organization', 'WRITE')")
+    public OrganizationSurvey copyOrganizationSurvey(@NonNull final UUID organizationId,
+                                                     @NonNull final SurveyInput input,
+                                                     @Nullable final String languageCode,
+                                                     @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return organizationSurveyFacade.copySurvey(new OrganizationId(organizationId), input, resolverHelper.getLanguageCode(environment));
+    }
+
+    @NonNull
     @PreAuthorize("hasPermission(#id, 'survey', 'WRITE')")
     public OrganizationSurvey enableAfterGame(@NonNull final UUID id,
                                               @NonNull final Long version,

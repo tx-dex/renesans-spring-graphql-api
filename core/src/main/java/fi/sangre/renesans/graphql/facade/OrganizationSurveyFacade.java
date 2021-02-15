@@ -6,12 +6,14 @@ import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.OrganizationSurveyOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.SurveyCatalystStatisticsAssembler;
+import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyCatalystStatisticsOutput;
 import fi.sangre.renesans.service.OrganizationService;
@@ -31,6 +33,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 @RequiredArgsConstructor
 @Slf4j
 
@@ -47,6 +51,22 @@ public class OrganizationSurveyFacade {
     private final RespondentStatisticsService respondentStatisticsService;
     private final SurveyCatalystStatisticsAssembler surveyCatalystStatisticsAssembler;
     private final SurveyUtils surveyUtils;
+    private final MultilingualUtils multilingualUtils;
+
+    @NonNull
+    public OrganizationSurvey copySurvey(@NonNull final OrganizationId organizationId,
+                                         @NonNull final SurveyInput input,
+                                         @NonNull final String languageTag) {
+        checkArgument(input.getSourceSurveyId() != null, "SourceSurvetId is required");
+
+        final SurveyId sourceId = new SurveyId(input.getSourceSurveyId());
+
+        final MultilingualText titles = multilingualUtils.create(input.getTitle(), languageTag);
+        final MultilingualText descriptions = multilingualUtils.create(input.getDescription(), languageTag);
+
+        return organizationSurveyService.copySurvey(organizationId, sourceId, titles, descriptions);
+    }
+
 
     @NonNull
     public Collection<OrganizationOutput> getOrganizations() {

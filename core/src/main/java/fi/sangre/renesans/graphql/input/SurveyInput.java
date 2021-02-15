@@ -11,5 +11,6 @@ public class SurveyInput {
     private String title;
     private String description;
     private Long templateId;
+    private UUID sourceSurveyId;
 }
 

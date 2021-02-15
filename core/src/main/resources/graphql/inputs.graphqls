@@ -63,7 +63,8 @@ input SurveyInput {
     version: Long
     title: String
     description: String
-    templateId: ID
+    templateId: ID @deprecated(reason: "will be removed")
+    sourceSurveyId: ID
 }
 
 input SurveyParameterInput {
