@@ -17,23 +17,17 @@ import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
-import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.exception.ResourceNotFoundException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.graphql.input.question.QuestionDriverWeightInput;
-import fi.sangre.renesans.model.Question;
-import fi.sangre.renesans.model.Weight;
 import fi.sangre.renesans.persistence.assemble.SurveyAssembler;
-import fi.sangre.renesans.persistence.model.TemplateId;
-import fi.sangre.renesans.persistence.model.*;
-import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
-import fi.sangre.renesans.persistence.model.metadata.DriverMetadata;
+import fi.sangre.renesans.persistence.model.Customer;
+import fi.sangre.renesans.persistence.model.Survey;
+import fi.sangre.renesans.persistence.model.SurveyRespondent;
+import fi.sangre.renesans.persistence.model.SurveyRespondentState;
 import fi.sangre.renesans.persistence.model.metadata.LocalisationMetadata;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
-import fi.sangre.renesans.persistence.model.metadata.questions.LikertQuestionMetadata;
-import fi.sangre.renesans.persistence.model.metadata.questions.QuestionMetadata;
-import fi.sangre.renesans.persistence.model.metadata.references.TemplateReference;
 import fi.sangre.renesans.persistence.repository.CustomerRepository;
 import fi.sangre.renesans.persistence.repository.SurveyRepository;
 import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
@@ -74,8 +68,6 @@ public class OrganizationSurveyService {
     private final SurveyDao surveyDao;
     private final SurveyUtils surveyUtils;
     private final CustomerRepository customerRepository;
-    private final QuestionService questionService;
-    private final MultilingualService multilingualService;
     private final SurveyRespondentRepository surveyRespondentRepository;
     private final RespondentAssembler respondentAssembler;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -112,43 +104,31 @@ public class OrganizationSurveyService {
                                          @NonNull final SurveyId sourceId,
                                          @NonNull final MultilingualText titles,
                                          @NonNull final MultilingualText descriptions) {
-        final Customer customer = customerRepository.findById(targetId.getValue())
-                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+        final Survey survey = surveyRepository.saveAndFlush(createCopy(sourceId, titles, descriptions));
 
-        final OrganizationSurvey source = getSurvey(sourceId);
+        addToOrganization(targetId, survey);
 
-        source.setId(null);
-        source.setVersion(1L);
-        source.setTitles(multilingualUtils.combine(source.getTitles(), titles));
-        source.setDescriptions(multilingualUtils.combine(source.getDescriptions(), descriptions));
-
-        final Survey copy = surveyAssembler.from(source);
-        copy.setState(SurveyState.OPEN);
-
-        final Survey saved = surveyRepository.saveAndFlush(copy);
-
-        customer.getSurveys().add(saved);
-
-        customerRepository.save(customer);
-
-        return organizationSurveyAssembler.from(saved);
+        return organizationSurveyAssembler.from(survey);
     }
 
     @NonNull
     @Transactional
-    public OrganizationSurvey storeSurvey(@NonNull final UUID organizationId, @NonNull final SurveyInput input, @NonNull final String languageTag) {
-        final Customer customer = customerRepository.findById(organizationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+    public OrganizationSurvey storeSurvey(@NonNull final OrganizationId organizationId, @NonNull final SurveyInput input, @NonNull final String languageTag) {
 
         final Survey survey;
+        if (input.getId() == null) {
+            final MultilingualText titles = multilingualUtils.create(input.getTitle(), languageTag);
+            final MultilingualText descriptions = multilingualUtils.create(input.getDescription(), languageTag);
+            final SurveyId sourceId = Optional.ofNullable(input.getSourceSurveyId())
+                    .map(SurveyId::new)
+                    .orElse(null);
 
-        if (input.getId() == null) { // create
-            survey = createSurvey(customer, input, surveyRepository.findByIsDefaultTrue().orElse(null), languageTag);
+            survey = createOrCopySurvey(sourceId, titles, descriptions);
 
-            customer.getSurveys().add(survey);
-            customerRepository.save(customer);
+            addToOrganization(organizationId, survey);
         } else { // update
             checkArgument(input.getVersion() != null, "input.version cannot be null");
+
             survey = surveyRepository.findById(input.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
 
@@ -172,6 +152,42 @@ public class OrganizationSurveyService {
         }
 
         return organizationSurveyAssembler.from(survey);
+    }
+
+    @NonNull
+    private Survey createCopy(@NonNull final SurveyId sourceId,
+                              @NonNull final MultilingualText titles,
+                              @NonNull final MultilingualText descriptions) {
+        final OrganizationSurvey source = getSurvey(sourceId);
+
+        final MultilingualText newTitles;
+        if (titles.isEmpty()) {
+            newTitles = multilingualUtils.create(source.getTitles().getPhrases().entrySet().stream()
+                    .filter(e -> Objects.nonNull(e.getValue()))
+                    .map(e -> Pair.of(e.getKey(), "Copy of " + e.getValue()))
+                    .collect(toMap(Pair::getLeft, Pair::getRight)));
+        } else {
+            newTitles = multilingualUtils.combine(source.getTitles(), titles);
+        }
+
+        source.setId(null);
+        source.setVersion(1L);
+        source.setTitles(newTitles);
+        source.setDescriptions(multilingualUtils.combine(source.getDescriptions(), descriptions));
+
+        final Survey copy = surveyAssembler.from(source);
+        copy.setState(SurveyState.OPEN);
+
+        return copy;
+    }
+
+    private void addToOrganization(@NonNull final OrganizationId id, @NonNull final Survey survey) {
+        final Customer customer = customerRepository.findById(id.getValue())
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+
+        customer.getSurveys().add(survey);
+
+        customerRepository.save(customer);
     }
 
     @NonNull
@@ -290,56 +306,34 @@ public class OrganizationSurveyService {
     }
 
     @NonNull
-    private Survey createSurvey(@NonNull final Customer customer, SurveyInput input, @Nullable final Survey defaultSurvey, @NonNull final String languageTag) {
-        final MultilingualText titles = multilingualUtils.create(input.getTitle(), languageTag);
-        final MultilingualText descriptions = multilingualUtils.create(input.getDescription(), languageTag);
+    private Survey createOrCopySurvey(@Nullable final SurveyId sourceId,
+                                      @NonNull final MultilingualText titles,
+                                      @NonNull final MultilingualText descriptions) {
+        final Survey survey;
+        if (sourceId == null) {
+            if (titles.isEmpty()) {
+                throw new SurveyException("Title must not be empty");
+            }
 
-        if (titles.isEmpty()) {
-            throw new SurveyException("Title must not be empty");
+            final SurveyMetadata.SurveyMetadataBuilder metadata = SurveyMetadata
+                    .builder()
+                    .titles(titles.getPhrases())
+                    .descriptions(descriptions.getPhrases())
+                    .catalysts(ImmutableList.of())
+                    .localisation(LocalisationMetadata.builder().build())
+                    .translations(ImmutableMap.of());
+
+            survey = Survey.builder()
+                    .version(1L)
+                    .isDefault(false)
+                    .state(SurveyState.OPEN)
+                    .metadata(metadata.build())
+                    .build();
+        } else {
+            survey = createCopy(sourceId, titles, descriptions);
         }
 
-        final SurveyMetadata.SurveyMetadataBuilder metadata = SurveyMetadata
-                .builder()
-                .titles(titles.getPhrases())
-                .descriptions(descriptions.getPhrases())
-                .localisation(LocalisationMetadata.builder().build())
-                .translations(ImmutableMap.of());
-
-        final ImmutableList.Builder<CatalystMetadata> catalysts = ImmutableList.builder();
-
-        for (final CatalystDto catalyst : questionService.getCatalysts(customer)) {
-            final List<DriverMetadata> drivers = questionService.getAllCatalystDrivers(catalyst.getOldId(), customer)
-                    .stream()
-                    .map(driver -> DriverMetadata.builder()
-                            .id(driver.getId())
-                            .pdfName(driver.getPdfName())
-                            .titles(multilingualService.getPhrases(driver.getTitleId()))
-                            .descriptions(multilingualService.getPhrases(driver.getDescriptionId()))
-                            .prescriptions(multilingualService.getPhrases(driver.getPrescriptionId()))
-                            .weight(driver.getWeight())
-                            .build())
-
-                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
-
-            catalysts.add(CatalystMetadata.builder()
-                    .id(catalyst.getId().getValue())
-                    .pdfName(catalyst.getPdfName())
-                    .titles(multilingualService.getPhrases(catalyst.getTitleId()))
-                    .weight(catalyst.getWeight())
-                    .drivers(drivers)
-                    .questions(copyGenericAndSegmentQuestions(catalyst, input.getTemplateId()))
-                    .build());
-        }
-
-        //TODO: throw on required
-        metadata.catalysts(catalysts.build());
-
-        return surveyRepository.save(Survey.builder()
-                .version(1L)
-                .isDefault(false)
-                .state(SurveyState.OPEN)
-                .metadata(metadata.build())
-                .build());
+        return surveyRepository.save(survey);
     }
 
     @NonNull
@@ -379,46 +373,4 @@ public class OrganizationSurveyService {
         }
     }
 
-    @NonNull
-    private List<QuestionMetadata> copyGenericAndSegmentQuestions(@NonNull final CatalystDto catalyst, @Nullable final Long segmentId) {
-        final ImmutableList.Builder<QuestionMetadata> questions = ImmutableList.<QuestionMetadata>builder()
-                .addAll(questionService.getCatalystGenericQuestions(catalyst.getOldId())
-                .stream()
-                .map(this::fromGenericQuestion)
-                .collect(toList()));
-
-        if (segmentId != null) {
-                questions.addAll(questionService.getCatalystSegmentQuestions(catalyst.getOldId(), segmentId)
-                        .stream()
-                        .map(e -> fromSegmentQuestion(e, segmentId))
-                        .collect(toList()));
-        }
-
-        return questions.build();
-    }
-
-    private QuestionMetadata fromGenericQuestion(@NonNull final Question question) {
-        return LikertQuestionMetadata.builder()
-                .id(UUID.randomUUID())
-                .titles(multilingualService.getPhrases(question.getTitleId()))
-                .driverWeights(getQuestionDriverWeights(question))
-                .build();
-    }
-
-    private QuestionMetadata fromSegmentQuestion(@NonNull final Question question, @NonNull final Long segmentId) {
-        return LikertQuestionMetadata.builder()
-                .id(UUID.randomUUID())
-                .titles(multilingualService.getPhrases(question.getTitleId()))
-                .reference( new TemplateReference(new TemplateId(segmentId), 1L))
-                .driverWeights(getQuestionDriverWeights(question))
-                .build();
-    }
-
-    private Map<String, Double> getQuestionDriverWeights(@NonNull final Question question) {
-        return question.getWeights().stream()
-                .collect(collectingAndThen(toMap(
-                        e -> e.getQuestionGroupId().toString(),
-                        Weight::getWeight
-                ), Collections::unmodifiableMap));
-    }
 }
