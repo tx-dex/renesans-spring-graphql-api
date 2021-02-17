@@ -8,6 +8,7 @@ import fi.sangre.renesans.application.model.OrganizationId;
 import fi.sangre.renesans.application.model.SurveyState;
 import fi.sangre.renesans.application.model.SurveyTemplate;
 import fi.sangre.renesans.dto.CatalystDto;
+import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.Weight;
 import fi.sangre.renesans.persistence.model.Customer;
@@ -28,8 +29,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +42,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static fi.sangre.renesans.application.utils.MultilingualUtils.compare;
+import static fi.sangre.renesans.config.ApplicationConfig.ASYNC_EXECUTOR_NAME;
 import static java.util.stream.Collectors.*;
 
 @RequiredArgsConstructor
@@ -55,7 +59,7 @@ public class SurveyTemplateService {
     private final MultilingualService multilingualService;
 
     @NonNull
-    public List<SurveyTemplate> getTemplates(@NonNull final String languageTag) {
+    private List<SurveyTemplate> getTemplates(@NonNull final String languageTag) {
         return segmentService.getAllSegments()
                 .stream()
                 .map(e -> surveyTemplateAssembler.fromSegment(e, languageTag))
@@ -63,6 +67,7 @@ public class SurveyTemplateService {
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
+    @Async(ASYNC_EXECUTOR_NAME)
     @EventListener
     @Transactional
     public void importTemplates(@NonNull final ContextRefreshedEvent event) {
@@ -87,28 +92,53 @@ public class SurveyTemplateService {
 
     @NonNull
     private Customer getOrCreateCustomer(@NonNull final User admin) {
-        final OrganizationId id = new OrganizationId(UUID.fromString("b5d258fc-318c-4238-93da-22b1265b63dc"));
-        final Customer customer = customerRepository.findById(id.getValue())
-                .orElse(Customer.builder()
-                        .id(id.getValue())
-                        .name("Templates")
-                        .description("Old segments from previous version of the app")
-                        .owner(admin)
-                        .createdBy(admin.getId())
-                        .surveys(Sets.newHashSet())
-                        .build());
+        try {
+            final OrganizationId id = new OrganizationId(UUID.fromString("b5d258fc-318c-4238-93da-22b1265b63dc"));
+            final Customer customer = customerRepository.findById(id.getValue())
+                    .orElse(Customer.builder()
+                            .id(id.getValue())
+                            .name("Templates")
+                            .description("Old segments from previous version of the app")
+                            .owner(admin)
+                            .createdBy(admin.getId())
+                            .surveys(Sets.newHashSet())
+                            .build());
 
-        return customerRepository.saveAndFlush(customer);
+            return customerRepository.saveAndFlush(customer);
+        } catch (final DataIntegrityViolationException ex) {
+            log.warn("Cannot create template organization, it was probably removed");
+            throw new SurveyException("Cannot create customer");
+        }
     }
 
     private Survey importTemplate(@NonNull final SurveyTemplate template, @NonNull final Customer customer, @NonNull final User user) {
+        final List<CatalystMetadata> catalysts = getSegmentCatalysts(customer, template.getId().getValue());
+
         final SurveyMetadata.SurveyMetadataBuilder metadata = SurveyMetadata
                 .builder()
                 .titles(template.getTitles().getPhrases())
                 .descriptions(template.getDescriptions().getPhrases())
+                .catalysts(catalysts)
                 .localisation(LocalisationMetadata.builder().build())
                 .translations(ImmutableMap.of());
 
+        return surveyRepository.save(Survey.builder()
+                .version(1L)
+                .isDefault(false)
+                .state(SurveyState.OPEN)
+                .metadata(metadata.build())
+                .craetedBy(user.getId())
+                .modifiedBy(user.getId())
+                .build());
+    }
+
+    @NonNull
+    public List<CatalystMetadata> getDefaultCatalysts() {
+        return getSegmentCatalysts(null, null);
+    }
+
+    @NonNull
+    private List<CatalystMetadata> getSegmentCatalysts(@Nullable final Customer customer, @Nullable final Long templateId) {
         final ImmutableList.Builder<CatalystMetadata> catalysts = ImmutableList.builder();
 
         for (final CatalystDto catalyst : questionService.getCatalysts(customer)) {
@@ -131,21 +161,11 @@ public class SurveyTemplateService {
                     .titles(multilingualService.getPhrases(catalyst.getTitleId()))
                     .weight(catalyst.getWeight())
                     .drivers(drivers)
-                    .questions(copyGenericAndSegmentQuestions(catalyst, template.getId().getValue()))
+                    .questions(copyGenericAndSegmentQuestions(catalyst, templateId))
                     .build());
         }
 
-        //TODO: throw on required
-        metadata.catalysts(catalysts.build());
-
-        return surveyRepository.save(Survey.builder()
-                .version(1L)
-                .isDefault(false)
-                .state(SurveyState.OPEN)
-                .metadata(metadata.build())
-                .craetedBy(user.getId())
-                .modifiedBy(user.getId())
-                .build());
+        return catalysts.build();
     }
 
     @NonNull

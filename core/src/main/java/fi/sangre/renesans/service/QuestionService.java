@@ -139,7 +139,11 @@ public class QuestionService {
 
     @Transactional(readOnly = true)
     public List<DriverDto> getAllCatalystDrivers(final Long catalystId, final Customer customer) {
-        return getAllCatalystDrivers(catalystId, customer.getSegment(), customer);
+        return getAllCatalystDrivers(catalystId,
+                Optional.ofNullable(customer)
+                        .map(Customer::getSegment)
+                        .orElse(null),
+                customer);
     }
 
     private List<DriverDto> getAllCatalystDrivers(final Long catalystId, final Segment segment, final Customer customer) {

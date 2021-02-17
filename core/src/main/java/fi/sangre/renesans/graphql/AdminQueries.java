@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.RespondentFilterAssembler;
 import fi.sangre.renesans.application.dao.UserDao;
@@ -61,12 +62,13 @@ public class AdminQueries implements GraphQLQueryResolver {
         return organizationSurveyFacade.getOrganization(new OrganizationId(id));
     }
 
+    @Deprecated
     @NonNull
     @PreAuthorize("hasRole('SUPER_USER') or hasRole('POWER_USER')")
     public List<SurveyTemplate> getSurveyTemplates(@Nullable final String languageCode, @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
 
-        return surveyTemplateService.getTemplates(resolverHelper.getLanguageCode(environment));
+        return ImmutableList.of();
     }
 
     @NonNull

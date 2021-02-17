@@ -1,6 +1,5 @@
 package fi.sangre.renesans.service;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
 import fi.sangre.renesans.application.assemble.OrganizationSurveyAssembler;
@@ -73,6 +72,7 @@ public class OrganizationSurveyService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final MultilingualUtils multilingualUtils;
     private final SurveyAssembler surveyAssembler;
+    private final SurveyTemplateService surveyTemplateService;
 
     @NonNull
     @Transactional(readOnly = true)
@@ -319,7 +319,7 @@ public class OrganizationSurveyService {
                     .builder()
                     .titles(titles.getPhrases())
                     .descriptions(descriptions.getPhrases())
-                    .catalysts(ImmutableList.of())
+                    .catalysts(surveyTemplateService.getDefaultCatalysts())
                     .localisation(LocalisationMetadata.builder().build())
                     .translations(ImmutableMap.of());
 

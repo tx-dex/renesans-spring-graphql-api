@@ -58,7 +58,7 @@ type Query {
     # Get the survey by id, throws if not found
     organizationSurvey(id: ID!, languageCode: String): OrganizationSurvey!
     # Get list of survey templates
-    surveyTemplates(languageCode: String): [SurveyTemplate!]!
+    surveyTemplates(languageCode: String): [SurveyTemplate!]! @deprecated(reason: "will be removed")
     # Get list of respondents based on provided filters
     surveyRespondents(
         surveyId: ID!
