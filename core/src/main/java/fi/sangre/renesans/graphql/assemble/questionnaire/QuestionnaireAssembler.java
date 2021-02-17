@@ -86,8 +86,8 @@ public class QuestionnaireAssembler {
                 .canAnswerParameters(!isAnswering)
                 .canGoToQuestions(isConsented && areAllParametersAnswered)
                 .canAnswer(!isAfterGameEnabled)
-                .canComment(isAfterGameEnabled && isAllAnswered)
-                .canViewAfterGame(isAfterGameEnabled && isAllAnswered)
+                .canComment(isAfterGameEnabled)
+                .canViewAfterGame(isAfterGameEnabled)
                 .catalysts(catalysts)
                 .parameters(parameters)
                 .build();

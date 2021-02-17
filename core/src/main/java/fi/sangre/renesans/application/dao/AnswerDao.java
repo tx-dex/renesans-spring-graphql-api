@@ -21,11 +21,13 @@ import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.persistence.model.QSurveyRespondent;
 import fi.sangre.renesans.persistence.model.SurveyRespondentState;
 import fi.sangre.renesans.persistence.model.answer.*;
 import fi.sangre.renesans.persistence.repository.CatalystOpenQuestionAnswerRepository;
 import fi.sangre.renesans.persistence.repository.LikerQuestionAnswerRepository;
 import fi.sangre.renesans.persistence.repository.ParameterAnswerRepository;
+import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -47,6 +49,7 @@ public class AnswerDao {
     private final ParameterAnswerRepository parameterAnswerRepository;
     private final RespondentAssembler respondentAssembler;
     private final ParameterAnswerAssembler parameterAnswerAssembler;
+    private final SurveyRespondentRepository surveyRespondentRepository;
     private final ParameterUtils parameterUtils;
 
     @NonNull
@@ -152,26 +155,31 @@ public class AnswerDao {
     @NonNull
     @Transactional(readOnly = true)
     public Set<RespondentId> getAnsweredRespondentIds(@NonNull final SurveyId surveyId, @NonNull final List<RespondentFilter> filters) {
-        final BooleanBuilder filter = new BooleanBuilder(QParameterAnswerEntity.parameterAnswerEntity.survey.id.eq(surveyId.getValue()))
-                .and(QParameterAnswerEntity.parameterAnswerEntity.type.eq(ParameterAnswerType.ITEM)) // There always should be only one last child selected with ITEM type
-                .and(QParameterAnswerEntity.parameterAnswerEntity.respondent.state.eq(SurveyRespondentState.ANSWERED))
-                .and(createRespondentFilters(surveyId, filters));
+        if (filters.isEmpty()) {
+            return getAnsweredRespondentIds(surveyId);
+        } else {
+            final BooleanBuilder filter = new BooleanBuilder(QParameterAnswerEntity.parameterAnswerEntity.survey.id.eq(surveyId.getValue()))
+                    .and(QParameterAnswerEntity.parameterAnswerEntity.type.eq(ParameterAnswerType.ITEM)) // There always should be only one last child selected with ITEM type
+                    .and(QParameterAnswerEntity.parameterAnswerEntity.respondent.state.eq(SurveyRespondentState.ANSWERED))
+                    .and(createRespondentFilters(surveyId, filters));
 
-        return StreamSupport.stream(parameterAnswerRepository.findAll(filter).spliterator(), false)
-                .collect(groupingBy(e -> new RespondentId(e.getId().getRespondentId())))
-                .keySet();
+            return StreamSupport.stream(parameterAnswerRepository.findAll(filter).spliterator(), false)
+                    .collect(groupingBy(e -> new RespondentId(e.getId().getRespondentId())))
+                    .keySet();
+        }
     }
 
     @NonNull
     @Transactional(readOnly = true)
     public Set<RespondentId> getAnsweredRespondentIds(@NonNull final SurveyId surveyId) {
-        final BooleanBuilder filter = new BooleanBuilder(QParameterAnswerEntity.parameterAnswerEntity.survey.id.eq(surveyId.getValue()))
-                .and(QParameterAnswerEntity.parameterAnswerEntity.type.eq(ParameterAnswerType.ITEM)) // There always should be only one last child selected with ITEM type
-                .and(QParameterAnswerEntity.parameterAnswerEntity.respondent.state.eq(SurveyRespondentState.ANSWERED));
+        final QSurveyRespondent respondent = QSurveyRespondent.surveyRespondent;
 
-        return StreamSupport.stream(parameterAnswerRepository.findAll(filter).spliterator(), false)
-                .collect(groupingBy(e -> new RespondentId(e.getId().getRespondentId())))
-                .keySet();
+        final BooleanBuilder filter = new BooleanBuilder(respondent.surveyId.eq(surveyId.getValue())
+                .and(respondent.state.eq(SurveyRespondentState.ANSWERED)));
+
+        return StreamSupport.stream(surveyRespondentRepository.findAll(filter).spliterator(), false)
+                .map(v -> new RespondentId(v.getId()))
+                .collect(toSet());
     }
 
     @NonNull

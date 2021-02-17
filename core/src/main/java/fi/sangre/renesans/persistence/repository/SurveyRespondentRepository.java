@@ -4,6 +4,7 @@ import fi.sangre.renesans.persistence.model.RespondentStateCounters;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Repository
-public interface SurveyRespondentRepository extends JpaRepository<SurveyRespondent, UUID> {
+public interface SurveyRespondentRepository extends JpaRepository<SurveyRespondent, UUID>, QuerydslPredicateExecutor<SurveyRespondent> {
     @NonNull
     List<SurveyRespondent> findAllBySurveyId(@NonNull UUID surveyId);
 
