@@ -53,13 +53,11 @@ import java.util.UUID;
 @Where(clause = "archived = false")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @DynamicUpdate
-@GenericGenerator(name = "custom_identity_generator",
-        strategy = "fi.sangre.renesans.persistence.hibernate.UseExistingIdIdentityGenerator")
 public class Customer extends BaseModel {
     @Id
     @GenericGenerator(name = "uuid", strategy = "uuid2")
-    @GeneratedValue(generator = "custom_identity_generator")
-    @Column(name = "id", unique = true, nullable = false, updatable = false,  columnDefinition = "uuid")
+    @GeneratedValue(generator = "uuid")
+    @Column(name = "id", unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
     private UUID id;
     private String name;
     private String description;

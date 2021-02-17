@@ -2,7 +2,6 @@ package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import fi.sangre.renesans.application.assemble.SurveyTemplateAssembler;
 import fi.sangre.renesans.application.model.OrganizationId;
 import fi.sangre.renesans.application.model.SurveyState;
@@ -29,7 +28,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Async;
@@ -73,7 +71,9 @@ public class SurveyTemplateService {
     public void importTemplates(@NonNull final ContextRefreshedEvent event) {
         final User admin = userRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
-        final Customer customer = getOrCreateCustomer(admin);
+        final OrganizationId id = new OrganizationId(UUID.fromString("b5d258fc-318c-4238-93da-22b1265b63dc"));
+        final Customer customer = customerRepository.findById(id.getValue())
+                .orElseThrow(() -> new SurveyException("Cannot find template organization"));
 
         if (customer.getSurveys().isEmpty()) {
             log.info("Importing templates");
@@ -87,27 +87,6 @@ public class SurveyTemplateService {
             });
         } else {
             log.info("Templates already imported");
-        }
-    }
-
-    @NonNull
-    private Customer getOrCreateCustomer(@NonNull final User admin) {
-        try {
-            final OrganizationId id = new OrganizationId(UUID.fromString("b5d258fc-318c-4238-93da-22b1265b63dc"));
-            final Customer customer = customerRepository.findById(id.getValue())
-                    .orElse(Customer.builder()
-                            .id(id.getValue())
-                            .name("Templates")
-                            .description("Old segments from previous version of the app")
-                            .owner(admin)
-                            .createdBy(admin.getId())
-                            .surveys(Sets.newHashSet())
-                            .build());
-
-            return customerRepository.saveAndFlush(customer);
-        } catch (final DataIntegrityViolationException ex) {
-            log.warn("Cannot create template organization, it was probably removed");
-            throw new SurveyException("Cannot create customer");
         }
     }
 
