@@ -3,7 +3,10 @@ package fi.sangre.renesans.aaa;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.persistence.model.User;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,7 +20,7 @@ import java.util.Optional;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor
 @ToString(doNotUseGetters = true, exclude = "password")
 @Getter
 @EqualsAndHashCode(of = "id")

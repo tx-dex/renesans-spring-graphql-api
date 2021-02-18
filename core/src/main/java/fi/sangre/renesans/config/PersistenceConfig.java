@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.lang.NonNull;
 
 @EnableJpaAuditing(auditorAwareRef = "security-auditor")
+//@EnableTransactionManagement //TODO: verify it, it was giving lazy-init issue on UserPrincipalService loadByUsername on user.getRoles
+// It happened only on installed dev environment, couldn't reproduce it locally
 @Configuration
 public class PersistenceConfig {
 

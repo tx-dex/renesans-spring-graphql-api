@@ -1,6 +1,7 @@
-package fi.sangre.renesans.aaa;
+package fi.sangre.test.aaa;
 
 import com.google.common.collect.ImmutableList;
+import fi.sangre.renesans.aaa.UserPrincipal;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +17,10 @@ public class WithMockSuperUserSecurityContextFactory implements WithSecurityCont
 
         UserPrincipal principal = new UserPrincipal(superUser.id(),
                 superUser.username(),
+                superUser.fistName() + " " + superUser.lastName(),
+                superUser.fistName(),
+                superUser.lastName(),
+                superUser.email(),
                 new BCryptPasswordEncoder().encode(superUser.password()),
                 true,
                 ImmutableList.of(new SimpleGrantedAuthority("ROLE_SUPER_USER")));
