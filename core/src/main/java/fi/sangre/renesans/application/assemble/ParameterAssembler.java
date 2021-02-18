@@ -210,6 +210,8 @@ public class ParameterAssembler {
             parameter.setChildren(children.stream()
                     .map(e -> from(e, root != null ? root : parameter, parameter))
                     .collect(collectingAndThen(toList(), Collections::unmodifiableList)));
+        } else {
+            parameter.setChildren(ImmutableList.of());
         }
 
         return parameter;
