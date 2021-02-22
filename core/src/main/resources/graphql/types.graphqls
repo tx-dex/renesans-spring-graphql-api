@@ -116,6 +116,7 @@ type OrganizationSurvey {
     logo: MediaDetails
     media: [SurveyMedia!]!
     catalysts: [Catalyst!]!
+    hideCatalystThemePages: Boolean!
     staticTexts: [SurveyStaticTextGroup!]!
     # List of parameters
     parameters: [SurveyParameter!]!
@@ -254,6 +255,7 @@ type Questionnaire {
     logo: MediaDetails
     staticTexts: Translation!
     catalysts: [QuestionnaireCatalyst!]!
+    hideCatalystThemePages: Boolean!
     parameters: [QuestionnaireParameter!]!
     media: [SurveyMedia!]!
     isConsented: Boolean!

@@ -10,6 +10,7 @@ public class SurveyInput {
     private Long version;
     private String title;
     private String description;
+    private SurveyPropertiesInput properties;
     private Long templateId;
     private UUID sourceSurveyId;
 }

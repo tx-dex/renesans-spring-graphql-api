@@ -9,6 +9,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Slf4j
 
@@ -27,6 +29,8 @@ public class OrganizationSurveyMerger {
         existing.setLogo(combine(existing.getLogo(), input.getLogo()));
         existing.setMedia(mediaMerger.combine(existing.getMedia(), input.getMedia()));
         existing.setCatalysts(catalystMerger.combine(existing.getCatalysts(), input.getCatalysts()));
+        existing.setHideCatalystThemePages(Boolean.TRUE.equals(Optional.ofNullable(input.getHideCatalystThemePages())
+                .orElse(existing.getHideCatalystThemePages())));
         existing.setParameters(parameterMerger.combine(existing.getParameters(), input.getParameters()));
         existing.setStaticTexts(staticTextMerger.combine(existing.getStaticTexts(), input.getStaticTexts()));
         existing.setDiscussionQuestions(discussionQuestionMerger.combine(existing.getDiscussionQuestions(), input.getDiscussionQuestions()));

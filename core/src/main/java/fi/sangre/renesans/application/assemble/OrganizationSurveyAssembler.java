@@ -186,6 +186,7 @@ public class OrganizationSurveyAssembler {
                 .descriptions(multilingualUtils.create(metadata.getDescriptions()))
                 .media(mediaAssembler.fromMetadata(metadata.getMedia()))
                 .catalysts(catalystAssembler.fromMetadata(metadata.getCatalysts()))
+                .hideCatalystThemePages(Boolean.TRUE.equals(metadata.getHideCatalystThemePages()))
                 .parameters(parameterAssembler.fromMetadata(metadata.getParameters()))
                 .discussionQuestions(discussionQuestionAssembler.fromMetadata(metadata.getDiscussionQuestions()))
                 .staticTexts(staticTextAssembler.fromMetadata(metadata.getTranslations()))

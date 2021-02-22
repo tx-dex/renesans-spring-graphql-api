@@ -63,8 +63,17 @@ input SurveyInput {
     version: Long
     title: String
     description: String
+    # some properties of the survey that may be changed
+    # This will update only properties if set!!!
+    # Skip it for updating just the survey info like title or description
+    properties: SurveyPropertiesInput
     templateId: ID @deprecated(reason: "will be removed")
+    # Data is copied from this source survey if set
     sourceSurveyId: ID
+}
+
+input SurveyPropertiesInput {
+    hideCatalystThemePages: Boolean
 }
 
 input SurveyParameterInput {

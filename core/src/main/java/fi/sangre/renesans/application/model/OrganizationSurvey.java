@@ -26,6 +26,7 @@ public class OrganizationSurvey {
     private MultilingualText descriptions;
     private List<Media> media;
     private List<Catalyst> catalysts;
+    private Boolean hideCatalystThemePages;
     private List<Parameter> parameters;
     private Map<String, StaticTextGroup> staticTexts;
     private List<DiscussionQuestion> discussionQuestions;

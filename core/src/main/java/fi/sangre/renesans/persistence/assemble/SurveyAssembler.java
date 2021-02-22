@@ -52,6 +52,7 @@ public class SurveyAssembler {
                                 .key(key)
                                 .build())
                         .orElse(null))
+                .hideCatalystThemePages(Boolean.TRUE.equals(model.getHideCatalystThemePages()))
                 .media(mediaMetadataAssembler.from(model.getMedia()))
                 .catalysts(catalystMetadataAssembler.from(model.getCatalysts()))
                 .parameters(parameterMetadataAssembler.from(model.getParameters()))

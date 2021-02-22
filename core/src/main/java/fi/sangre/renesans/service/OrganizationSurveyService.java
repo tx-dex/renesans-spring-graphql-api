@@ -131,21 +131,33 @@ public class OrganizationSurveyService {
 
             survey = surveyRepository.findById(input.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Survey not found"));
-
-            final SurveyMetadata metadata = copy(survey.getMetadata());
-            final MultilingualText titles = multilingualUtils.combine(
-                    multilingualUtils.create(metadata.getTitles()),
-                    multilingualUtils.create(input.getTitle(), languageTag));
-            final MultilingualText descriptions = multilingualUtils.combine(
-                    multilingualUtils.create(metadata.getDescriptions()),
-                    multilingualUtils.create(input.getDescription(), languageTag));
-
-            if (titles.isEmpty()) {
-                throw new SurveyException("Title must not be empty");
+            if (!input.getVersion().equals(survey.getVersion())) {
+                throw new SurveyException("Invalid survey version");
             }
 
-            metadata.setTitles(titles.getPhrases());
-            metadata.setDescriptions(descriptions.getPhrases());
+            final SurveyMetadata metadata = copyMetadata(survey.getMetadata())
+                    .build();
+
+            if (input.getProperties() != null) { // update only properties
+                Optional.ofNullable(input.getProperties().getHideCatalystThemePages())
+                        .ifPresent(metadata::setHideCatalystThemePages);
+
+            } else {
+                final MultilingualText titles = multilingualUtils.combine(
+                        multilingualUtils.create(metadata.getTitles()),
+                        multilingualUtils.create(input.getTitle(), languageTag));
+                final MultilingualText descriptions = multilingualUtils.combine(
+                        multilingualUtils.create(metadata.getDescriptions()),
+                        multilingualUtils.create(input.getDescription(), languageTag));
+
+                if (titles.isEmpty()) {
+                    throw new SurveyException("Title must not be empty");
+                }
+
+                metadata.setTitles(titles.getPhrases());
+                metadata.setDescriptions(descriptions.getPhrases());
+            }
+
             survey.setMetadata(metadata);
 
             surveyRepository.saveAndFlush(survey);
@@ -315,13 +327,12 @@ public class OrganizationSurveyService {
                 throw new SurveyException("Title must not be empty");
             }
 
-            final SurveyMetadata.SurveyMetadataBuilder metadata = SurveyMetadata
-                    .builder()
+            final SurveyMetadata.SurveyMetadataBuilder metadata = copyMetadata(null)
                     .titles(titles.getPhrases())
                     .descriptions(descriptions.getPhrases())
-                    .catalysts(surveyTemplateService.getDefaultCatalysts())
-                    .localisation(LocalisationMetadata.builder().build())
-                    .translations(ImmutableMap.of());
+                    .catalysts(surveyTemplateService.getDefaultCatalysts());
+
+
 
             survey = Survey.builder()
                     .version(1L)
@@ -358,18 +369,21 @@ public class OrganizationSurveyService {
     }
 
     @NonNull
-    private SurveyMetadata copy(@Nullable final SurveyMetadata metadata) {
+    private SurveyMetadata.SurveyMetadataBuilder copyMetadata(@Nullable final SurveyMetadata metadata) {
         if (metadata == null) {
-            return SurveyMetadata.builder().build();
+            return SurveyMetadata.builder()
+                    .hideCatalystThemePages(Boolean.FALSE)
+                    .localisation(LocalisationMetadata.builder().build())
+                    .translations(ImmutableMap.of());
         } else {
             return SurveyMetadata.builder()
                     .titles(metadata.getTitles())
                     .descriptions(metadata.getDescriptions())
                     .catalysts(metadata.getCatalysts())
+                    .hideCatalystThemePages(Boolean.TRUE.equals(metadata.getHideCatalystThemePages()))
                     .parameters(metadata.getParameters())
                     .localisation(metadata.getLocalisation())
-                    .translations(metadata.getTranslations())
-                    .build();
+                    .translations(metadata.getTranslations());
         }
     }
 

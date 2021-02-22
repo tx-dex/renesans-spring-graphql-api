@@ -30,6 +30,7 @@ public class SurveyMetadata implements Serializable {
     private ImageMetadata logo;
     private List<MediaMetadata> media;
     private List<CatalystMetadata> catalysts;
+    private Boolean hideCatalystThemePages;
     private List<ParameterMetadata> parameters;
     private List<DiscussionQuestionMetadata> discussionQuestions;
     private LocalisationMetadata localisation;

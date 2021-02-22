@@ -20,6 +20,7 @@ public class QuestionnaireOutput {
     private MediaDetailsOutput logo;
     private List<SurveyMediaOutput> media;
     private List<QuestionnaireCatalystOutput> catalysts;
+    private boolean hideCatalystThemePages;
     private List<QuestionnaireParameterOutput> parameters;
     private Map<String, StaticTextGroup> staticTexts;
     private boolean consented;
