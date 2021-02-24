@@ -6,12 +6,14 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode
 @ToString
 @Builder
 public class SurveyOpenQuestionStatisticsOutput {
+    private UUID id;
     private String title;
     private List<String> answers;
 }

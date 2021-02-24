@@ -19,6 +19,8 @@ public class QuestionnaireCatalystOutput {
     private MultilingualText descriptions;
     private List<QuestionnaireLikertQuestionOutput> questions;
     private List<QuestionnaireDriverOutput> drivers;
-    private QuestionnaireOpenQuestionOutput catalystQuestion;
+    private List<QuestionnaireOpenQuestionOutput> openQuestions;
     private boolean allAnswered;
+    @Deprecated
+    private QuestionnaireOpenQuestionOutput catalystQuestion;
 }

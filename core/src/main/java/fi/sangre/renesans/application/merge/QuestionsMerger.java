@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.DriverId;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.UUIDUtils;
@@ -27,8 +28,51 @@ public class QuestionsMerger {
     private final MultilingualUtils multilingualUtils;
     private final UUIDUtils uuidUtils;
 
+
+    @Nullable
+    public List<OpenQuestion>  combineOpen(@NonNull final List<OpenQuestion> existing, @Nullable final List<OpenQuestion> inputs) {
+        if (inputs == null) {
+            return ImmutableList.copyOf(existing);
+        } else {
+            final ImmutableList.Builder<OpenQuestion> combined = ImmutableList.builder();
+
+            final Map<QuestionId, OpenQuestion> existingQuestions = existing.stream()
+                    .collect(collectingAndThen(toMap(OpenQuestion::getId, e -> e), Collections::unmodifiableMap));
+            final Set<UUID> existingIds = new HashSet<>(uuidUtils.toUUIDs(existingQuestions.keySet()));
+
+            for (final OpenQuestion input : inputs) {
+                final OpenQuestion newOrExisting;
+                if (input.getId() == null) {
+                    final UUID id = uuidUtils.generate(existingIds);
+                    newOrExisting = OpenQuestion.builder()
+                            .id(new QuestionId(id))
+                            .catalystId(input.getCatalystId())
+                            .titles(multilingualUtils.empty())
+                            .build();
+
+                    existingIds.add(id);
+                } else {
+                    newOrExisting = Objects.requireNonNull(existingQuestions.get(input.getId()), "Not existing question in the input");
+                }
+
+                combined.add(combine(newOrExisting, input));
+            }
+
+            return combined.build();
+        }
+    }
+
+
     @NonNull
-    public List<LikertQuestion> combine(@NonNull final List<LikertQuestion> existing, @Nullable final List<LikertQuestion> inputs) {
+    private OpenQuestion combine(@NonNull final OpenQuestion existing, @NonNull final OpenQuestion input) {
+        return OpenQuestion.builder()
+                .id(existing.getId())
+                .titles(multilingualUtils.combine(existing.getTitles(), input.getTitles()))
+                .build();
+    }
+
+    @NonNull
+    public List<LikertQuestion> combineLikert(@NonNull final List<LikertQuestion> existing, @Nullable final List<LikertQuestion> inputs) {
         if (inputs == null) {
             return ImmutableList.copyOf(existing); // just return existing is user was not changing the questions
         } else {

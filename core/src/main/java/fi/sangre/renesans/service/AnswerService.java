@@ -49,12 +49,12 @@ public class AnswerService {
 
     @NonNull
     @Async(DAO_EXECUTOR_NAME)
-    public Future<Map<CatalystId, OpenQuestionAnswer>> getCatalystsQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+    public Future<Map<CatalystId, List<OpenQuestionAnswer>>> getCatalystsQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
         log.debug("Getting list of catalyst open questions answers for respondent(id={}, survey_id={})", respondentId, surveyId);
 
-        return new AsyncResult<>(answerDao.getCatalystsQuestionsAnswers(surveyId, respondentId)
+        return new AsyncResult<>(answerDao.getOpenAnswers(surveyId, respondentId)
                 .stream()
-                .collect(collectingAndThen(toMap(OpenQuestionAnswer::getCatalystId, e -> e), Collections::unmodifiableMap)));
+                .collect(collectingAndThen(groupingBy(OpenQuestionAnswer::getCatalystId), Collections::unmodifiableMap)));
     }
 
     public void answerQuestion(@NonNull final OpenQuestionAnswer answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
@@ -72,9 +72,9 @@ public class AnswerService {
     public Future<Map<CatalystId, List<LikertQuestionAnswer>>> getQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
         log.debug("Getting list of likert questions answers for respondent(id={}, survey_id={})", respondentId, surveyId);
 
-        return new AsyncResult<>(answerDao.getQuestionsAnswers(surveyId, respondentId)
+        return new AsyncResult<>(answerDao.getLikertAnswers(surveyId, respondentId)
                 .stream()
-                .collect(groupingBy(LikertQuestionAnswer::getCatalystId)));
+                .collect(collectingAndThen(groupingBy(LikertQuestionAnswer::getCatalystId), Collections::unmodifiableMap)));
     }
 
     public void answerQuestion(@NonNull final LikertQuestionAnswer answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {

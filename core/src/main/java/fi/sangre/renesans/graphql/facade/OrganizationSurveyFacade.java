@@ -1,10 +1,12 @@
 package fi.sangre.renesans.graphql.facade;
 
+import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.OrganizationDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
+import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
@@ -124,16 +126,21 @@ public class OrganizationSurveyFacade {
         final SurveyResult statistics;
         if (filters.isEmpty()) {
             statistics = surveyStatisticsService.calculateStatistics(survey);
-        } else  {
+        } else {
             //TODO: We can verify also if the filter contains only one parameter. in that case we could use parameterStatisticsService which caches data
-            statistics =  respondentStatisticsService.calculateStatistics(survey, filters);
+            statistics = respondentStatisticsService.calculateStatistics(survey, filters);
         }
 
         final SurveyCatalystStatisticsOutput output = surveyCatalystStatisticsAssembler.from(catalyst, statistics, languageTag);
 
-        if (output.getOpenQuestion() != null) {
-            Try.ofSupplier(() -> answerDao.getAllOpenQuestionAnswers(surveyId, statistics.getRespondentIds()))
-                    .onSuccess(answers -> output.getOpenQuestion().setAnswers(answers))
+        if (output.getOpenQuestions() != null) {
+            Try.ofSupplier(() -> answerDao.getAllOpenAnswers(surveyId, catalystId, statistics.getRespondentIds()))
+                    .onSuccess(answers -> {
+                        output.getOpenQuestions().forEach(question -> {
+                            final QuestionId id = new QuestionId(question.getId());
+                            question.setAnswers(answers.getOrDefault(id, ImmutableList.of()));
+                        });
+                    })
                     .onFailure(ex -> log.warn("Cannot get answers", ex))
                     .getOrElseThrow(ex -> new SurveyException("Cannot get answers"));
         }

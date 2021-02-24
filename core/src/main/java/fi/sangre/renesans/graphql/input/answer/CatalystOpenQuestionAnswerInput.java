@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @ToString
 public class CatalystOpenQuestionAnswerInput {
-    private UUID catalystId;
+    private UUID questionId;
     private String response;
     @Accessors(prefix = "_")
     private Boolean _public;

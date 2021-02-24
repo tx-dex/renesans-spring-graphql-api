@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.graphql.output.DriverProxy;
@@ -17,9 +18,9 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static fi.sangre.renesans.graphql.output.DriverProxy.toProxies;
 
@@ -60,9 +61,14 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         return strategies.get(proxy.getObject().getClass()).getQuestions(proxy);
     }
 
+    @Deprecated
     @Nullable
     public String getCatalystQuestion(@NonNull final CatalystProxy proxy, @NonNull final DataFetchingEnvironment environment) {
-        return strategies.get(proxy.getObject().getClass()).getCatalystQuestion(proxy, resolverHelper.getLanguageCode(environment));
+        return null;
+    }
+
+    public Collection<OpenQuestion> getOpenQuestions(@NonNull final CatalystProxy proxy) {
+        return strategies.get(proxy.getObject().getClass()).getOpenQuestions(proxy);
     }
 
 
@@ -77,6 +83,7 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         @NonNull List<DriverProxy> getDrivers(@NonNull T output);
         @NonNull List<LikertQuestion> getQuestions(@NonNull T output);
         @Nullable String getCatalystQuestion(@NonNull T output, @NonNull String languageTag);
+        @NonNull List<OpenQuestion> getOpenQuestions(@NonNull T output);
     }
 
     private class CatalystDtoStrategy implements CatalystStrategy<CatalystProxy> {
@@ -110,6 +117,12 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         @Override
         public String getCatalystQuestion(@NonNull final CatalystProxy proxy, @NonNull final  String languageTag) {
             return null;
+        }
+
+        @NonNull
+        @Override
+        public List<OpenQuestion> getOpenQuestions(@NonNull final CatalystProxy proxy) {
+            return ImmutableList.of();
         }
     }
 
@@ -145,10 +158,14 @@ public class CatalystResolver implements GraphQLResolver<CatalystProxy> {
         @Nullable
         @Override
         public String getCatalystQuestion(@NonNull final CatalystProxy proxy, @NonNull final String languageTag) {
+            return null;
+        }
+
+        @NonNull
+        @Override
+        public List<OpenQuestion> getOpenQuestions(@NonNull final CatalystProxy proxy) {
             final Catalyst catalyst = (Catalyst) proxy.getObject();
-            return Optional.ofNullable(catalyst.getOpenQuestion())
-                    .map(e -> multilingualTextResolver.getOptionalText(e.getPhrases(), languageTag))
-                    .orElse(null);
+            return catalyst.getOpenQuestions();
         }
     }
 }

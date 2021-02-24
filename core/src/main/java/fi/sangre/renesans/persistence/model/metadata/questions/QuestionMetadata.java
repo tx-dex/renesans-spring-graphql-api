@@ -15,6 +15,7 @@ import java.util.UUID;
         property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = LikertQuestionMetadata.class, name = "likert"),
+        @JsonSubTypes.Type(value = OpenQuestionMetadata.class, name = "open"),
 })
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public interface QuestionMetadata extends Serializable {

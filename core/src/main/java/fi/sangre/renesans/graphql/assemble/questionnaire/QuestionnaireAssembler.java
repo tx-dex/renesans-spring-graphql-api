@@ -53,7 +53,7 @@ public class QuestionnaireAssembler {
     public QuestionnaireOutput from(@NonNull final RespondentId respondentId, @NonNull final OrganizationSurvey survey) throws InterruptedException, ExecutionException {
         final SurveyId surveyId = new SurveyId(survey.getId());
         final Future<Map<CatalystId, List<LikertQuestionAnswer>>> questionsAnswers = answerService.getQuestionsAnswersAsync(surveyId, respondentId);
-        final Future<Map<CatalystId, OpenQuestionAnswer>> catalystAnswers = answerService.getCatalystsQuestionsAnswersAsync(surveyId, respondentId);
+        final Future<Map<CatalystId, List<OpenQuestionAnswer>>> catalystAnswers = answerService.getCatalystsQuestionsAnswersAsync(surveyId, respondentId);
         final Future<Map<ParameterId, ParameterItemAnswer>> parameterAnswers = answerService.getParametersAnswersAsync(surveyId, respondentId);
 
         return from(respondentId, survey, catalystAnswers.get(), questionsAnswers.get(), parameterAnswers.get());
@@ -62,7 +62,7 @@ public class QuestionnaireAssembler {
     @NonNull
     public QuestionnaireOutput from(@NonNull final RespondentId respondentId,
                                     @NonNull final OrganizationSurvey survey,
-                                    @NonNull final Map<CatalystId, OpenQuestionAnswer> openQuestionAnswers,
+                                    @NonNull final Map<CatalystId, List<OpenQuestionAnswer>> openQuestionAnswers,
                                     @NonNull final Map<CatalystId, List<LikertQuestionAnswer>> questionsAnswers,
                                     @NonNull final Map<ParameterId, ParameterItemAnswer> parameterAnswers) {
 

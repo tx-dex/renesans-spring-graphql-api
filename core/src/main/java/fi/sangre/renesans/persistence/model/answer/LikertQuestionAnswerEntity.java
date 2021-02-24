@@ -28,12 +28,15 @@ import java.util.UUID;
 )
 
 @Entity
-@Table(name = "question_answer")
+@Table(name = "likert_question_answer")
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
 public class LikertQuestionAnswerEntity {
     @EmbeddedId
     protected QuestionAnswerId id;
+
+    @Column(name = "catalyst_id", updatable = false, nullable = false)
+    private UUID catalystId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "survey_id", updatable = false, insertable = false)
@@ -42,9 +45,6 @@ public class LikertQuestionAnswerEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "respondent_id", updatable = false, insertable = false)
     private SurveyRespondent respondent;
-
-    @Column(name = "catalyst_id", updatable = false, nullable = false)
-    private UUID catalystId;
 
     @Column(name = "rate")
     private Integer rate;

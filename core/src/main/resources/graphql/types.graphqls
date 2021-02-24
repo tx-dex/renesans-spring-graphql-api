@@ -186,6 +186,11 @@ type SurveyStaticTextGroup {
     texts: [SurveyStaticText!]!
 }
 
+type OpenQuestion {
+    id: ID!
+    title: String!
+}
+
 type LikertQuestion {
     id: ID!
     title: String!
@@ -283,7 +288,8 @@ type QuestionnaireCatalyst {
     # now it may be null as we don't have it in the db yet.
     # and there is not support for editing/saving it in the admin
     # TODO: verify if it always must be displayed
-    catalystQuestion: QuestionnaireOpenQuestion
+    catalystQuestion: QuestionnaireOpenQuestion @deprecated(reason: "use openQuestions")
+    openQuestions: [QuestionnaireOpenQuestion!]!
     # True if respondent answered all questions for the catalyst
     isAllAnswered: Boolean!
 }
@@ -371,7 +377,8 @@ type AfterGameCatalystStatistics {
     respondentGroupResult: Float
     drivers: [AfterGameDriverStatistics!]!
     questions: [AfterGameQuestionStatistics]!
-    openQuestion: AfterGameOpenQuestion
+    openQuestion: AfterGameOpenQuestion @deprecated(reason: "use openQuestions")
+    openQuestions: [AfterGameOpenQuestion!]!
 }
 
 type AfterGameDriverStatistics {
@@ -510,6 +517,7 @@ type Weight {
     weight: Float
 }
 
+# This is used by admin
 type Catalyst {
     id: ID!
     title: String!
@@ -518,10 +526,12 @@ type Catalyst {
     pdfName: String @deprecated(reason: "This was static text used for displayin it on the reports. Will be removed")
     questions: [LikertQuestion!]!
     # Catalyst/Theme open question displayed at the end
-    catalystQuestion: String
+    catalystQuestion: String @deprecated(reason: "use openQuestions")
+    openQuestions: [OpenQuestion]!
     drivers: [Driver!]!
 }
 
+# This is used by admin
 type Driver {
     id: ID!
     title: String!

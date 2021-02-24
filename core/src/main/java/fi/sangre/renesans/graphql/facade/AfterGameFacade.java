@@ -8,10 +8,7 @@ import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.InvitationAssembler;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.DiscussionDao;
-import fi.sangre.renesans.application.model.Catalyst;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.ParameterId;
-import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
@@ -164,16 +161,23 @@ public class AfterGameFacade {
 
         final AfterGameCatalystStatisticsOutput output = afterGameCatalystStatisticsAssembler.from(catalyst, null, statistics);
 
-
-        if (output.getOpenQuestion() != null && statistics != null) {
+        if (output.getOpenQuestions() != null && statistics != null) {
             Try.ofSupplier(() -> {
-                if (ParameterId.GLOBAL_YOU_PARAMETER_ID.equals(parameterId)) { // return open answer for parameter if respondend is checking "you"
-                    return answerDao.getAllOpenQuestionAnswers(surveyId, statistics.getRespondentIds());
+                if (ParameterId.GLOBAL_YOU_PARAMETER_ID.equals(parameterId)) { // return open answer for parameter if respondent is checking "you"
+                    return answerDao.getAllOpenAnswers(surveyId,
+                            new CatalystId(catalystId),
+                            statistics.getRespondentIds());
                 } else {
-                    return answerDao.getPublicOpenQuestionAnswers(surveyId, statistics.getRespondentIds());
+                    return answerDao.getPublicOpenAnswers(surveyId,
+                            new CatalystId(catalystId),
+                            statistics.getRespondentIds());
                 }
             })
-                    .onSuccess(answers -> output.getOpenQuestion().setAnswers(answers))
+                    .onSuccess(answers -> {
+                        output.getOpenQuestions().forEach(question -> {
+                            question.setAnswers(answers.getOrDefault(question.getId(), ImmutableList.of()));
+                        });
+                    })
                     .onFailure(ex -> log.warn("Cannot get answers", ex))
                     .getOrElseThrow(ex -> new SurveyException("Cannot get answers"));
         }

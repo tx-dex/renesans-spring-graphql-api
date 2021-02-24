@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,12 +30,15 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name = "catalyst_answer")
+@Table(name = "open_question_answer")
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
 public class CatalystOpenQuestionAnswerEntity {
     @EmbeddedId
-    protected CatalystAnswerId id;
+    protected QuestionAnswerId id;
+
+    @Column(name = "catalyst_id", updatable = false, nullable = false)
+    private UUID catalystId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "survey_id", updatable = false, insertable = false)

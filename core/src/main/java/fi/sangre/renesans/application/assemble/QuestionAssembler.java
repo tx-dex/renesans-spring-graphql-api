@@ -5,11 +5,14 @@ import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.DriverId;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.question.LikertQuestionInput;
+import fi.sangre.renesans.graphql.input.question.OpenQuestionInput;
 import fi.sangre.renesans.persistence.model.metadata.questions.LikertQuestionMetadata;
+import fi.sangre.renesans.persistence.model.metadata.questions.OpenQuestionMetadata;
 import fi.sangre.renesans.persistence.model.metadata.questions.QuestionMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +32,35 @@ public class QuestionAssembler {
     private final MultilingualUtils multilingualUtils;
 
     @Nullable
-    public List<LikertQuestion> fromInput(@NonNull final CatalystId catalystId, @Nullable final List<LikertQuestionInput> inputs, @NonNull final String languageTag) {
+    public List<OpenQuestion> fromOpenInput(@NonNull final CatalystId catalystId, @Nullable final List<OpenQuestionInput> inputs, @NonNull final String languageTag) {
+        if (inputs != null) {
+            if (new HashSet<>(inputs).size() != inputs.size()) {
+                throw new SurveyException("Duplicated questions keys in the input");
+            }
+
+            return inputs.stream()
+                    .map(e -> from(catalystId, e, languageTag))
+                    .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+        } else {
+            return null;
+        }
+    }
+
+    @NonNull
+    public OpenQuestion from(@NonNull final CatalystId catalystId, @NonNull final OpenQuestionInput input, @NonNull final String languageTag) {
+        final QuestionId questionId = Optional.ofNullable(input.getId())
+                .map(QuestionId::new)
+                .orElse(null);
+
+        return OpenQuestion.builder()
+                .id(questionId)
+                .catalystId(catalystId)
+                .titles(multilingualUtils.create(input.getTitle(), languageTag))
+                .build();
+    }
+
+    @Nullable
+    public List<LikertQuestion> fromLikertInput(@NonNull final CatalystId catalystId, @Nullable final List<LikertQuestionInput> inputs, @NonNull final String languageTag) {
         if (inputs != null) {
             if (new HashSet<>(inputs).size() != inputs.size()) {
                 throw new SurveyException("Duplicated questions keys in the input");
@@ -53,27 +84,55 @@ public class QuestionAssembler {
                 .id(questionId)
                 .catalystId(catalystId)
                 .titles(multilingualUtils.create(input.getTitle(), languageTag))
-                //TODO: get weights from input
                 .build();
     }
 
     @NonNull
-    public List<LikertQuestion> fromMetadata(@Nullable final List<QuestionMetadata> metadata) {
+    public List<OpenQuestion> fromOpenMetadata(@Nullable final List<QuestionMetadata> metadata) {
         return Optional.ofNullable(metadata)
                 .orElse(ImmutableList.of())
                 .stream()
-                .map(this::from)
+                .map(this::fromOpen)
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
+
     @NonNull
-    private LikertQuestion from(@NonNull final QuestionMetadata metadata) {
+    private OpenQuestion fromOpen(@NonNull final QuestionMetadata metadata) {
+        if (metadata instanceof OpenQuestionMetadata) {
+            return from((OpenQuestionMetadata) metadata);
+        } else {
+            // TODO: implement later if needed
+            throw new SurveyException("Invalid question type");
+        }
+    }
+
+    @NonNull
+    public List<LikertQuestion> fromLikertMetadata(@Nullable final List<QuestionMetadata> metadata) {
+        return Optional.ofNullable(metadata)
+                .orElse(ImmutableList.of())
+                .stream()
+                .map(this::fromLikert)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
+
+
+    @NonNull
+    private LikertQuestion fromLikert(@NonNull final QuestionMetadata metadata) {
         if (metadata instanceof LikertQuestionMetadata) {
             return from((LikertQuestionMetadata) metadata);
         } else {
             // TODO: implement later if needed
             throw new SurveyException("Invalid question type");
         }
+    }
+
+    @NonNull
+    private OpenQuestion from(@NonNull final OpenQuestionMetadata metadata) {
+        return OpenQuestion.builder()
+                .id(new QuestionId(metadata.getId()))
+                .titles(multilingualUtils.create(metadata.getTitles()))
+                .build();
     }
 
     @NonNull

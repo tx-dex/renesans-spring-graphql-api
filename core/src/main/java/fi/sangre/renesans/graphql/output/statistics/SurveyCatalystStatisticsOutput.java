@@ -17,5 +17,7 @@ public class SurveyCatalystStatisticsOutput {
     private Double result;
     private Collection<SurveyDriverStatisticsOutput> drivers;
     private Collection<SurveyQuestionStatisticsOutput> questions;
+    private Collection<SurveyOpenQuestionStatisticsOutput> openQuestions;
+    @Deprecated
     private SurveyOpenQuestionStatisticsOutput openQuestion;
 }

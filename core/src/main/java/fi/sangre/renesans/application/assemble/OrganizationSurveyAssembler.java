@@ -76,8 +76,8 @@ public class OrganizationSurveyAssembler {
                 .catalysts(catalystAssembler.fromInputs(input, languageTag).stream()
                         .peek(e -> {
                             // we don't want to update questions here
-                            e.setOpenQuestion(multilingualUtils.empty());
                             e.setQuestions(null);
+                            e.setOpenQuestions(null);
                         })
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
                 .build();

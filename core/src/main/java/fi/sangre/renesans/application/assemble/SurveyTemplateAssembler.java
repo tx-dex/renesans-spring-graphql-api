@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 
+@Deprecated
 @Component
 public class SurveyTemplateAssembler {
     private final MultilingualUtils multilingualUtils;

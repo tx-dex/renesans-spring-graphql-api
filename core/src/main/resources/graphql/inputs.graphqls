@@ -108,8 +108,8 @@ input SurveyCatalystInput {
     drivers: [SurveyDriverInput!]
     # Use when storing questions, otherise should be null
     questions: [LikertQuestionInput!]
-    # Open question at the end of catalyst questions
-    # if null it will be removed
+    openQuestions: [OpenQuestionInput!]
+    # TODO: remove
     catalystQuestion: String
 }
 
@@ -123,6 +123,12 @@ input SurveyDriverInput {
 }
 
 input LikertQuestionInput {
+    # Question Id, if null the question is created and generated id is returned
+    id: ID
+    title: String!
+}
+
+input OpenQuestionInput {
     # Question Id, if null the question is created and generated id is returned
     id: ID
     title: String!
@@ -148,7 +154,9 @@ input LikertQuestionRateInput {
 }
 
 input CatalystOpenQuestionAnswerInput {
-    catalystId: ID!
+    questionId: ID!
+    # TODO: remove in next changes now keeping it so frontend will not brake
+    catalystId: ID
     # Free text
     # Set null for skipping the question
     response: String

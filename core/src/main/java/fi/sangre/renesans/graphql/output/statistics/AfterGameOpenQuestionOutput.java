@@ -1,5 +1,6 @@
 package fi.sangre.renesans.graphql.output.statistics;
 
+import fi.sangre.renesans.application.model.questions.QuestionId;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,6 +14,7 @@ import java.util.Map;
 @ToString
 @Builder
 public class AfterGameOpenQuestionOutput {
+    private QuestionId id;
     private Map<String, String> titles;
     private Collection<String> answers;
 }

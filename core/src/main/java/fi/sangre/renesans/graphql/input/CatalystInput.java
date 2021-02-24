@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql.input;
 
 import fi.sangre.renesans.graphql.input.question.LikertQuestionInput;
+import fi.sangre.renesans.graphql.input.question.OpenQuestionInput;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,5 +20,5 @@ public class CatalystInput {
     private String description;
     private List<DriverInput> drivers;
     private List<LikertQuestionInput> questions;
-    private String catalystQuestion;
+    private List<OpenQuestionInput> openQuestions;
 }

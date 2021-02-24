@@ -29,7 +29,7 @@ public class LikertQuestionResolver implements GraphQLResolver<LikertQuestion> {
 
     @NonNull
     public String getId(@NonNull final LikertQuestion output) {
-        return output.getId().getValue().toString();
+        return output.getId().asString();
     }
 
     @NonNull

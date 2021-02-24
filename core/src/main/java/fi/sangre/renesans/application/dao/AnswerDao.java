@@ -1,6 +1,7 @@
 package fi.sangre.renesans.application.dao;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import fi.sangre.renesans.application.assemble.ParameterAnswerAssembler;
@@ -54,12 +55,42 @@ public class AnswerDao {
 
     @NonNull
     @Transactional(readOnly = true)
-    public Set<OpenQuestionAnswer> getCatalystsQuestionsAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+    public Map<QuestionId, List<String>> getAllOpenAnswers(@NonNull final SurveyId surveyId, @NonNull final CatalystId catalystId, @NonNull final Set<RespondentId> respondentIds) {
+        if (respondentIds.size() > 0) {
+            final List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository
+                    .findAllByIdSurveyIdAndCatalystIdAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(),
+                            catalystId.getValue(),
+                            RespondentId.toUUIDs(respondentIds));
+
+            return from(answers);
+        } else {
+            return ImmutableMap.of();
+        }
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public Map<QuestionId, List<String>> getPublicOpenAnswers(@NonNull final SurveyId surveyId, @NonNull final CatalystId catalystId, @NonNull final Set<RespondentId> respondentIds) {
+        if (respondentIds.size() > 0) {
+            final List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository
+                    .findAllByIdSurveyIdAndCatalystIdAndIsPublicIsTrueAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(),
+                            catalystId.getValue(),
+                            RespondentId.toUUIDs(respondentIds));
+            return from(answers);
+        } else {
+            return ImmutableMap.of();
+        }
+    }
+
+
+    @NonNull
+    @Transactional(readOnly = true)
+    public Set<OpenQuestionAnswer> getOpenAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
         return catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIdRespondentId(surveyId.getValue(), respondentId.getValue())
                 .stream()
                 .map(e -> OpenQuestionAnswer.builder()
-                        .id(new QuestionId(e.getId().getCatalystId()))
-                        .catalystId(new CatalystId(e.getId().getCatalystId()))
+                        .id(new QuestionId(e.getId().getQuestionId()))
+                        .catalystId(new CatalystId(e.getCatalystId()))
                         .status(e.getStatus())
                         .isPublic(e.isPublic())
                         .response(e.getResponse())
@@ -69,9 +100,11 @@ public class AnswerDao {
 
     @Transactional
     public void saveAnswer(@NonNull final OpenQuestionAnswer answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
-        final CatalystAnswerId id = new CatalystAnswerId(surveyId.getValue(), respondentId.getValue(), answer.getCatalystId().getValue());
+        final QuestionAnswerId id = new QuestionAnswerId(surveyId.getValue(), respondentId.getValue(), answer.getId().getValue());
+
         final CatalystOpenQuestionAnswerEntity entity = CatalystOpenQuestionAnswerEntity.builder()
                 .id(id)
+                .catalystId(answer.getCatalystId().getValue())
                 .response(answer.getResponse())
                 .status(answer.getStatus())
                 .isPublic(answer.isPublic())
@@ -94,7 +127,7 @@ public class AnswerDao {
 
     @NonNull
     @Transactional(readOnly = true)
-    public Set<LikertQuestionAnswer> getQuestionsAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+    public Set<LikertQuestionAnswer> getLikertAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
         return likerQuestionAnswerRepository.findAllByIdSurveyIdAndIdRespondentId(surveyId.getValue(), respondentId.getValue())
                 .stream()
                 .map(e -> LikertQuestionAnswer.builder()
@@ -149,7 +182,7 @@ public class AnswerDao {
                 .and(createRespondentFilters(surveyId, filters));
 
         return respondentAssembler.from(StreamSupport.stream(parameterAnswerRepository.findAll(filter).spliterator(), false)
-                        .collect(groupingBy(ParameterAnswerEntity::getRespondent)));
+                .collect(groupingBy(ParameterAnswerEntity::getRespondent)));
     }
 
     @NonNull
@@ -183,35 +216,15 @@ public class AnswerDao {
     }
 
     @NonNull
-    @Transactional(readOnly = true)
-    public List<String> getAllOpenQuestionAnswers(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> respondentIds) {
-        if (respondentIds.size() > 0) {
-            final List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository
-                    .findAllByIdSurveyIdAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), RespondentId.toUUIDs(respondentIds));
-
-            return from(answers);
-        } else {
-            return ImmutableList.of();
-        }
-    }
-
-    @NonNull
-    @Transactional(readOnly = true)
-    public List<String> getPublicOpenQuestionAnswers(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> respondentIds) {
-        if (respondentIds.size() > 0) {
-            final List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository
-                    .findAllByIdSurveyIdAndIsPublicIsTrueAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), RespondentId.toUUIDs(respondentIds));
-            return from(answers);
-        } else {
-            return ImmutableList.of();
-        }
-    }
-
-    @NonNull
-    private List<String> from(@NonNull final List<CatalystOpenQuestionAnswerEntity> answers) {
+    private Map<QuestionId, List<String>> from(@NonNull final List<CatalystOpenQuestionAnswerEntity> answers) {
         return answers.stream()
-                .map(CatalystOpenQuestionAnswerEntity::getResponse)
-                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+                .collect(groupingBy(v -> v.getId().getQuestionId()))
+                .entrySet().stream()
+                .collect(collectingAndThen(toMap(
+                        e -> new QuestionId(e.getKey()),
+                        e -> e.getValue().stream()
+                                .map(CatalystOpenQuestionAnswerEntity::getResponse)
+                                .collect(collectingAndThen(toList(), Collections::unmodifiableList))), Collections::unmodifiableMap));
     }
 
     @NonNull

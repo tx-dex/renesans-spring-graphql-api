@@ -30,6 +30,7 @@ public class CatalystMetadata implements Serializable {
     private List<DriverMetadata> drivers;
     private List<QuestionMetadata> questions;
     private Map<String, String> openQuestion;
+    private List<QuestionMetadata> openQuestions;
     @Builder.Default
     private Double weight = 0.5;
 }

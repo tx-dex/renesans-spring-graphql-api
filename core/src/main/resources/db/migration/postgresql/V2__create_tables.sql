@@ -141,7 +141,7 @@ create table if not exists question_group
 	mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
-create table if not exists question_answer
+create table if not exists likert_question_answer
 (
     survey_id uuid not null
         constraint question_answer_survey_id_fkey
@@ -149,10 +149,8 @@ create table if not exists question_answer
     respondent_id uuid not null
         constraint question_answer_respondent_id_fkey
             references survey_respondent,
+    catalyst_id uuid not null,
     question_id uuid not null,
-    catalyst_id uuid
-        constraint question_answer_catalyst_id_fkey
-            references question_group(uuid),
     rate integer null,
     status integer not null,
     likert_response integer null,
@@ -160,13 +158,13 @@ create table if not exists question_answer
 );
 
 create unique index if not exists question_answer__survey_id_respondent_id_question_id_uidx
-    on question_answer(survey_id, respondent_id, question_id);
+    on likert_question_answer(survey_id, respondent_id, question_id);
 
 create index if not exists question_answer__survey_id_respondent_id_idx
-    on question_answer(survey_id, respondent_id);
+    on likert_question_answer(survey_id, respondent_id);
 
 
-create table if not exists catalyst_answer
+create table if not exists open_question_answer
 (
     survey_id uuid not null
         constraint catalyst_answer_survey_id_fkey
@@ -174,9 +172,8 @@ create table if not exists catalyst_answer
     respondent_id uuid not null
         constraint catalyst_answer_respondent_id_fkey
             references survey_respondent,
-    catalyst_id uuid not null
-        constraint catalyst_answer_catalyst_id_fkey
-            references question_group(uuid),
+    catalyst_id uuid not null,
+    question_id uuid not null,
     status integer not null,
     is_public bool not null default false,
     open_response text null,
@@ -184,10 +181,10 @@ create table if not exists catalyst_answer
 );
 
 create unique index if not exists catalyst_answer_survey_id_respondent_id_catalyst_id_uidx
-    on catalyst_answer(survey_id, respondent_id, catalyst_id);
+    on open_question_answer(survey_id, respondent_id, catalyst_id);
 
 create index if not exists catalyst_answer_survey_id_respondent_id_idx
-    on catalyst_answer(survey_id, respondent_id);
+    on open_question_answer(survey_id, respondent_id);
 
 create table if not exists parameter_answer
 (

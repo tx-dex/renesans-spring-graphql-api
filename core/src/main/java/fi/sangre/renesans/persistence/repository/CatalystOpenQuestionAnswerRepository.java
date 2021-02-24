@@ -19,9 +19,14 @@ public interface CatalystOpenQuestionAnswerRepository extends JpaRepository<Cata
     List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndIdRespondentId(@NonNull UUID surveyId, @NonNull UUID respondentId);
 
     @NonNull
-    List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndIdRespondentIdInOrderByAnswerTimeDesc(@NonNull UUID surveyId, @NonNull Set<UUID> respondentIds);
+    List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndCatalystIdAndIdRespondentIdInOrderByAnswerTimeDesc(@NonNull UUID surveyId
+            , @NonNull UUID catalystId
+            , @NonNull Set<UUID> respondentIds);
+
     @NonNull
-    List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndIsPublicIsTrueAndIdRespondentIdInOrderByAnswerTimeDesc(@NonNull UUID surveyId, @NonNull Set<UUID> respondentIds);
+    List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndCatalystIdAndIsPublicIsTrueAndIdRespondentIdInOrderByAnswerTimeDesc(@NonNull UUID surveyId
+            , @NonNull UUID catalystId
+            , @NonNull Set<UUID> respondentIds);
 
     void deleteAllByRespondent(@NonNull SurveyRespondent respondent);
 }

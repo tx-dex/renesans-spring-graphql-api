@@ -1,6 +1,7 @@
 package fi.sangre.renesans.application.model;
 
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.graphql.output.CatalystOutput;
 import lombok.*;
 
@@ -19,6 +20,6 @@ public class Catalyst implements CatalystOutput {
     private MultilingualText descriptions;
     private List<Driver> drivers;
     private List<LikertQuestion> questions;
-    private MultilingualText openQuestion;
+    private List<OpenQuestion> openQuestions;
     private Double weight;
 }

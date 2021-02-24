@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
 import fi.sangre.renesans.application.model.statistics.DriverStatistics;
@@ -36,6 +37,8 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class AfterGameCatalystStatisticsAssembler {
+    private final static List<String> EMPTY = ImmutableList.of();
+
     private final MultilingualUtils multilingualUtils;
     private final CatalystUtils catalystUtils;
 
@@ -97,12 +100,20 @@ public class AfterGameCatalystStatisticsAssembler {
                                 respondentCatalyst.getQuestions(),
                                 respondentGroupCatalyst.getQuestions())))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
-                .openQuestion(Optional.ofNullable(multilingualUtils.emptyToNull(catalyst.getOpenQuestion()))
-                        .map(phrases -> AfterGameOpenQuestionOutput.builder()
-                                .titles(phrases)
-                        .answers(ImmutableList.of())
-                        .build())
-                .orElse(null))
+                .openQuestions(catalyst.getOpenQuestions().stream()
+                        .map((question -> from(question, ImmutableMap.of()))) // TODO: provide this
+                        .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
+                .build();
+    }
+
+
+    @NonNull
+    private AfterGameOpenQuestionOutput from(@NonNull final OpenQuestion question,
+                                             @NonNull final Map<QuestionId, List<String>> answers) {
+        return AfterGameOpenQuestionOutput.builder()
+                .id(question.getId())
+                .titles(question.getTitles().getPhrases())
+                .answers(answers.getOrDefault(question.getId(), EMPTY))
                 .build();
     }
 

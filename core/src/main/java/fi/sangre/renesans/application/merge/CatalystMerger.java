@@ -3,7 +3,6 @@ package fi.sangre.renesans.application.merge;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.CatalystId;
-import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.exception.SurveyException;
 import lombok.RequiredArgsConstructor;
@@ -66,24 +65,9 @@ public class CatalystMerger {
                 .titles(multilingualUtils.combine(existing.getTitles(), input.getTitles()))
                 .descriptions(multilingualUtils.combine(existing.getDescriptions(), input.getDescriptions()))
                 .drivers(driverMerger.combine(existing.getDrivers(), input.getDrivers()))
-                .questions(questionsMerger.combine(existing.getQuestions(), input.getQuestions()))
-                .openQuestion(combineOpenQuestion(existing.getOpenQuestion(), input.getOpenQuestion()))
+                .questions(questionsMerger.combineLikert(existing.getQuestions(), input.getQuestions()))
+                .openQuestions(questionsMerger.combineOpen(existing.getOpenQuestions(), input.getOpenQuestions()))
                 .weight(input.getWeight())
                 .build();
-    }
-
-    @Nullable
-    private MultilingualText combineOpenQuestion(@Nullable final MultilingualText existing, final @Nullable MultilingualText input) {
-        if (input == null) {
-            return null;
-        } else {
-            final MultilingualText combined = multilingualUtils.combine(existing, input);
-
-            if (combined.isEmpty()) {
-                return null;
-            } else {
-                return combined;
-            }
-        }
     }
 }

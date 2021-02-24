@@ -36,10 +36,12 @@ public class QuestionnaireCatalystAssembler {
 
     @NonNull
     public List<QuestionnaireCatalystOutput> from(@NonNull final List<Catalyst> catalysts,
-                                                  @NonNull final Map<CatalystId, OpenQuestionAnswer> catalystAnswers,
+                                                  @NonNull final Map<CatalystId, List<OpenQuestionAnswer>> openQuestionAnswers,
                                                   @NonNull final Map<CatalystId, List<LikertQuestionAnswer>> questionAnswers) {
         return catalysts.stream()
-                .map(e -> from(e, catalystAnswers.get(e.getId()), questionAnswers.getOrDefault(e.getId(), ImmutableList.of())))
+                .map(e -> from(e,
+                        openQuestionAnswers.getOrDefault(e.getId(), ImmutableList.of()),
+                        questionAnswers.getOrDefault(e.getId(), ImmutableList.of())))
                 .filter(catalystUtils::hasQuestions)
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
@@ -55,7 +57,7 @@ public class QuestionnaireCatalystAssembler {
     @NonNull
     private QuestionnaireCatalystOutput from(@NonNull final Catalyst catalyst) {
         final List<QuestionnaireLikertQuestionOutput> questions = questionnaireLikertQuestionAssembler.from(catalyst.getQuestions());
-        final QuestionnaireOpenQuestionOutput openQuestion = questionnaireOpenQuestionAssembler.from(catalyst, null);
+        final List<QuestionnaireOpenQuestionOutput> openQuestions = questionnaireOpenQuestionAssembler.from(catalyst.getOpenQuestions());
 
         return QuestionnaireCatalystOutput.builder()
                 .id(catalyst.getId().getValue())
@@ -63,22 +65,24 @@ public class QuestionnaireCatalystAssembler {
                 .descriptions(catalyst.getDescriptions())
                 .drivers(fromDrivers(catalyst.getDrivers()))
                 .questions(questions)
-                .catalystQuestion(openQuestion)
+                .openQuestions(openQuestions)
                 .allAnswered(false)
                 .build();
     }
 
     @NonNull
     private QuestionnaireCatalystOutput from(@NonNull final Catalyst catalyst,
-                                             @Nullable final OpenQuestionAnswer catalystAnswer,
-                                             @NonNull final List<LikertQuestionAnswer> questionAnswers) {
-        final List<QuestionnaireLikertQuestionOutput> questions = questionnaireLikertQuestionAssembler.from(catalyst.getQuestions(), questionAnswers);
-        final QuestionnaireOpenQuestionOutput openQuestion = questionnaireOpenQuestionAssembler.from(catalyst, catalystAnswer);
+                                             @NonNull final List<OpenQuestionAnswer> openAnswers,
+                                             @NonNull final List<LikertQuestionAnswer> likertAnswers) {
+        final List<QuestionnaireLikertQuestionOutput> questions = questionnaireLikertQuestionAssembler.from(catalyst.getQuestions(), likertAnswers);
+        final List<QuestionnaireOpenQuestionOutput> openQuestions = questionnaireOpenQuestionAssembler.from(catalyst.getOpenQuestions(), openAnswers);
 
         final boolean allAnswered = questions.stream()
                 .map(this::isAnsweredOrSkipped)
                 .reduce(Boolean.TRUE, Boolean::logicalAnd)
-                && isAnsweredOrSkipped(openQuestion);
+                && openQuestions.stream()
+                .map(this::isAnsweredOrSkipped)
+                .reduce(Boolean.TRUE, Boolean::logicalAnd);
 
         return QuestionnaireCatalystOutput.builder()
                 .id(catalyst.getId().getValue())
@@ -86,7 +90,7 @@ public class QuestionnaireCatalystAssembler {
                 .descriptions(catalyst.getDescriptions())
                 .drivers(fromDrivers(catalyst.getDrivers()))
                 .questions(questions)
-                .catalystQuestion(openQuestion)
+                .openQuestions(openQuestions)
                 .allAnswered(allAnswered)
                 .build();
     }

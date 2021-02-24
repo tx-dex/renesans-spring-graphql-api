@@ -10,7 +10,6 @@ import fi.sangre.renesans.graphql.input.CatalystInput;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -49,9 +48,11 @@ public class CatalystAssembler {
                 .titles(multilingualUtils.create(input.getTitle(), languageTag))
                 .descriptions(multilingualUtils.create(input.getDescription(), languageTag))
                 .drivers(driverAssembler.fromInput(input.getDrivers(), languageTag))
-                .questions(questionAssembler.fromInput(catalystId, input.getQuestions(), languageTag))
-                .openQuestion(Optional.ofNullable(StringUtils.trimToNull(input.getCatalystQuestion()))
-                        .map(e -> multilingualUtils.create(e, languageTag))
+                .questions(Optional.ofNullable(input.getQuestions())
+                        .map(questions -> questionAssembler.fromLikertInput(catalystId, questions, languageTag))
+                        .orElse(null))
+                .openQuestions(Optional.ofNullable(input.getOpenQuestions())
+                        .map(questions -> questionAssembler.fromOpenInput(catalystId, questions, languageTag))
                         .orElse(null))
                 .build();
     }
@@ -73,8 +74,8 @@ public class CatalystAssembler {
                 .titles(multilingualUtils.create(metadata.getTitles()))
                 .descriptions(multilingualUtils.create(metadata.getDescriptions()))
                 .drivers(driverAssembler.fromMetadata(metadata.getDrivers()))
-                .questions(questionAssembler.fromMetadata(metadata.getQuestions()))
-                .openQuestion(multilingualUtils.create(metadata.getOpenQuestion()))
+                .questions(questionAssembler.fromLikertMetadata(metadata.getQuestions()))
+                .openQuestions(questionAssembler.fromOpenMetadata(metadata.getOpenQuestions()))
                 .weight(metadata.getWeight())
                 .build();
     }

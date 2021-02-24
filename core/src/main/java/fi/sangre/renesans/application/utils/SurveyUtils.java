@@ -1,9 +1,13 @@
 package fi.sangre.renesans.application.utils;
 
 import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.application.model.*;
+import fi.sangre.renesans.application.model.Catalyst;
+import fi.sangre.renesans.application.model.CatalystId;
+import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.ParameterId;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +15,10 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -39,14 +46,12 @@ public class SurveyUtils {
     }
 
     @Nullable
-    public MultilingualText findOpenQuestion(@NonNull final CatalystId id, @NonNull final OrganizationSurvey survey) {
+    public OpenQuestion findOpenQuestion(@NonNull final QuestionId id, @NonNull final OrganizationSurvey survey) {
         return Optional.ofNullable(survey.getCatalysts())
                 .orElse(ImmutableList.of())
                 .stream()
+                .flatMap(s -> s.getOpenQuestions().stream())
                 .filter(e -> e.getId().equals(id))
-                .map(Catalyst::getOpenQuestion)
-                .filter(Objects::nonNull)
-                .filter(e -> !e.isEmpty())
                 .findAny()
                 .orElse(null);
     }

@@ -1,10 +1,9 @@
 package fi.sangre.renesans.application.assemble;
 
-import fi.sangre.renesans.application.model.CatalystId;
-import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.answer.AnswerStatus;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
+import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.SurveyException;
@@ -27,14 +26,14 @@ public class OpenAnswerAssembler {
 
     @NonNull
     public OpenQuestionAnswer from(@NonNull CatalystOpenQuestionAnswerInput answer, @NonNull final OrganizationSurvey survey) {
-        final CatalystId catalystId = new CatalystId(Objects.requireNonNull(answer.getCatalystId(), "answer.catalystId is required"));
+        final QuestionId questionId = new QuestionId(Objects.requireNonNull(answer.getQuestionId(), "answer.questionId is required"));
 
-        final MultilingualText question = Optional.ofNullable(surveyUtils.findOpenQuestion(catalystId, survey))
+        final OpenQuestion question = Optional.ofNullable(surveyUtils.findOpenQuestion(questionId, survey))
                 .orElseThrow(() -> new SurveyException("Open question not found"));
 
         final OpenQuestionAnswer.OpenQuestionAnswerBuilder builder = OpenQuestionAnswer.builder()
-                .id(new QuestionId(answer.getCatalystId()))
-                .catalystId(catalystId)
+                .id(new QuestionId(answer.getQuestionId()))
+                .catalystId(question.getCatalystId())
                 .isPublic(Boolean.TRUE.equals(answer.getPublic()))
                 .status(AnswerStatus.SKIPPED);
 

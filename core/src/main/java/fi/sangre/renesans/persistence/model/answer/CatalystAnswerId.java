@@ -25,4 +25,7 @@ public class CatalystAnswerId implements Serializable {
 
     @Column(name = "catalyst_id", updatable = false, nullable = false)
     private UUID catalystId;
+
+    @Column(name = "question_id", updatable = false, nullable = false)
+    private UUID questionId;
 }

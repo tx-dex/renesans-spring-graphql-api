@@ -5,7 +5,10 @@ import fi.sangre.renesans.graphql.output.QuestionnaireCatalystOutput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -13,16 +16,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class CatalystUtils {
     public boolean hasQuestions(@NonNull final Catalyst catalyst) {
-        final boolean hasLikertQuestions = catalyst.getQuestions() != null && catalyst.getQuestions().size() > 0;
-        final boolean hasOpenQuestion = catalyst.getOpenQuestion() != null && !catalyst.getOpenQuestion().isEmpty();
-
-        return hasLikertQuestions || hasOpenQuestion;
+        return isNotEmpty(catalyst.getQuestions())
+                || isNotEmpty(catalyst.getOpenQuestions());
     }
 
     public boolean hasQuestions(@NonNull final QuestionnaireCatalystOutput catalyst) {
-        final boolean hasLikertQuestions = catalyst.getQuestions() != null && catalyst.getQuestions().size() > 0;
-        final boolean hasOpenQuestion = catalyst.getCatalystQuestion() != null;
+        return isNotEmpty(catalyst.getQuestions())
+                || isNotEmpty(catalyst.getOpenQuestions());
+    }
 
-        return hasLikertQuestions || hasOpenQuestion;
+    private <T> boolean isNotEmpty(@Nullable final Collection<T> collection) {
+        return collection != null && !collection.isEmpty();
     }
 }
