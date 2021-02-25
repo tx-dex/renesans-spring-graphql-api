@@ -217,6 +217,7 @@ public class AfterGameFacade {
         if (isAllSuccess(tries)) {
             return tries.stream()
                     .map(Try::get)
+                    .filter(v -> Objects.nonNull(v.getResult())) // skipping empty results from the list
                     .collect(collectingAndThen(toList(), Collections::unmodifiableList));
         } else {
             throw new SurveyException("Cannot get statistics");
