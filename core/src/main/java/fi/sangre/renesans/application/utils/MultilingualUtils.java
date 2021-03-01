@@ -98,6 +98,11 @@ public class MultilingualUtils {
     }
 
     @NonNull
+    public MultilingualText combine(@Nullable final MultilingualText existing, @Nullable final Map<String, String> input) {
+        return combineMaps(existing != null ? existing.getPhrases() : null, input);
+    }
+
+    @NonNull
     private MultilingualText combineMaps(@Nullable final Map<String, String> existing, @Nullable final Map<String, String> input) {
         final Map<String, String> phrases = new LinkedHashMap<>();
         if (existing != null) {

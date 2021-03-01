@@ -143,6 +143,9 @@ public class QuestionAssembler {
                 .id(new QuestionId(metadata.getId()))
                 .catalystId(catalyst.getId())
                 .titles(multilingualUtils.create(metadata.getTitles()))
+                .subTitles(multilingualUtils.create(metadata.getSubTitles()))
+                .lowEndLabels(multilingualUtils.create(metadata.getLowEndLabels()))
+                .highEndLabels(multilingualUtils.create(metadata.getHighEndLabels()))
                 .weights(Optional.ofNullable(metadata.getDriverWeights())
                         .orElse(ImmutableMap.of()).entrySet().stream()
                         .collect(collectingAndThen(toMap(

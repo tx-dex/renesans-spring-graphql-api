@@ -14,4 +14,7 @@ import java.util.UUID;
 public class LikertQuestionInput {
     private UUID id;
     private String title;
+    private String subTitle;
+    private String lowEndLabel;
+    private String highEndLabel;
 }

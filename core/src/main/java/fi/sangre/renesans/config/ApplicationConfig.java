@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import feign.Logger;
 import fi.sangre.renesans.application.model.TranslationMap;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.config.properties.StatisticsProperties;
 import fi.sangre.renesans.service.TranslationService;
 import lombok.extern.slf4j.Slf4j;
@@ -82,7 +83,8 @@ public class ApplicationConfig {
 
     @Bean
     public TranslationService translationService(@NonNull final ResourcePatternResolver resolver,
-                                                 @NonNull final ObjectMapper objectMapper) throws IOException {
+                                                 @NonNull final ObjectMapper objectMapper,
+                                                 @NonNull final MultilingualUtils multilingualUtils) throws IOException {
         final List<Resource> translations = ImmutableList.copyOf(resolver.getResources("classpath:translations/texts/*.json"));
 
         final ImmutableMap.Builder<String, TranslationMap> builder = ImmutableMap.builder();
@@ -92,6 +94,6 @@ public class ApplicationConfig {
             builder.put(languageTag, map);
         }
 
-        return new TranslationService(builder.build());
+        return new TranslationService(builder.build(), multilingualUtils);
     }
 }

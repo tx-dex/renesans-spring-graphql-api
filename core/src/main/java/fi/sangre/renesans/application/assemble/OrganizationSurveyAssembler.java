@@ -172,6 +172,8 @@ public class OrganizationSurveyAssembler {
     public OrganizationSurvey from(@NonNull final Survey survey) {
         final SurveyMetadata metadata = survey.getMetadata();
 
+
+
         return OrganizationSurvey.builder()
                 .id(survey.getId())
                 .version(survey.getVersion())

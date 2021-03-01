@@ -22,7 +22,12 @@ public class TranslationMap {
     private final Map<String, Map<String, TranslationText>> translations = Maps.newHashMap();
 
     @JsonAnySetter
-    public void setTranslations(@NonNull final String key, @NonNull final Map<String, TranslationText> value) {
-        this.translations.put(key, value);
+    public void setTranslations(@NonNull final String group, @NonNull final Map<String, TranslationText> value) {
+        this.translations.put(group, value);
+    }
+
+    @NonNull
+    public Map<String, Map<String, TranslationText>>  getTranslations() {
+        return translations;
     }
 }

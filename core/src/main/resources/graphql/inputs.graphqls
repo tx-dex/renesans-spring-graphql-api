@@ -126,6 +126,9 @@ input LikertQuestionInput {
     # Question Id, if null the question is created and generated id is returned
     id: ID
     title: String!
+    subTitle: String
+    lowEndLabel: String
+    highEndLabel: String
 }
 
 input OpenQuestionInput {

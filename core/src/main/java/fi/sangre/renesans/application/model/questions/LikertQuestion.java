@@ -16,5 +16,8 @@ public class LikertQuestion {
     private QuestionId id;
     private CatalystId catalystId;
     private MultilingualText titles;
+    private MultilingualText subTitles;
+    private MultilingualText lowEndLabels;
+    private MultilingualText highEndLabels;
     private Map<DriverId, Double> weights;
 }
