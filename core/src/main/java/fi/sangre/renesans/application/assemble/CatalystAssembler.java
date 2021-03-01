@@ -3,6 +3,8 @@ package fi.sangre.renesans.application.assemble;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.CatalystId;
+import fi.sangre.renesans.application.model.questions.LikertQuestion;
+import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.exception.MissingIdException;
 import fi.sangre.renesans.exception.SurveyException;
@@ -68,15 +70,21 @@ public class CatalystAssembler {
 
     @NonNull
     private Catalyst from(@NonNull final CatalystMetadata metadata) {
-        return Catalyst.builder()
+        final Catalyst catalyst = Catalyst.builder()
                 .id(new CatalystId(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER)))
                 .pdfName(metadata.getPdfName())
                 .titles(multilingualUtils.create(metadata.getTitles()))
                 .descriptions(multilingualUtils.create(metadata.getDescriptions()))
                 .drivers(driverAssembler.fromMetadata(metadata.getDrivers()))
-                .questions(questionAssembler.fromLikertMetadata(metadata.getQuestions()))
-                .openQuestions(questionAssembler.fromOpenMetadata(metadata.getOpenQuestions()))
                 .weight(metadata.getWeight())
                 .build();
+
+        final List<LikertQuestion> likertQuestions = questionAssembler.fromLikertMetadata(catalyst, metadata.getQuestions());
+        final List<OpenQuestion> openQuestions = questionAssembler.fromOpenMetadata(catalyst, metadata.getOpenQuestions());
+
+        catalyst.setQuestions(likertQuestions);
+        catalyst.setOpenQuestions(openQuestions);
+
+        return catalyst;
     }
 }

@@ -35,9 +35,20 @@ public class SurveyUtils {
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
+    public long countAllQuestions(@NonNull final OrganizationSurvey survey) {
+        return countLikertQuestions(survey)
+                + countOpenQuestions(survey);
+    }
+
     public long countLikertQuestions(@NonNull final OrganizationSurvey survey) {
         return survey.getCatalysts().stream()
                 .map(catalyst -> catalyst.getQuestions().size())
+                .mapToLong(Integer::longValue).sum();
+    }
+
+    public long countOpenQuestions(@NonNull final OrganizationSurvey survey) {
+        return survey.getCatalysts().stream()
+                .map(catalyst -> catalyst.getOpenQuestions().size())
                 .mapToLong(Integer::longValue).sum();
     }
 
@@ -46,32 +57,25 @@ public class SurveyUtils {
     }
 
     @Nullable
-    public OpenQuestion findOpenQuestion(@NonNull final QuestionId id, @NonNull final OrganizationSurvey survey) {
+    public OpenQuestion findOpenQuestion(@NonNull final QuestionId questionId, @NonNull final OrganizationSurvey survey) {
         return Optional.ofNullable(survey.getCatalysts())
                 .orElse(ImmutableList.of())
                 .stream()
                 .flatMap(s -> s.getOpenQuestions().stream())
-                .filter(e -> e.getId().equals(id))
+                .filter(e -> e.getId().equals(questionId))
                 .findAny()
                 .orElse(null);
     }
 
     @Nullable
     public LikertQuestion findQuestion(@NonNull final QuestionId questionId, @NonNull final OrganizationSurvey survey) {
-        for(final Catalyst catalyst : survey.getCatalysts()) {
-            final LikertQuestion question = catalyst.getQuestions().stream()
-                    .filter(e -> questionId.equals(e.getId()))
-                    .findFirst()
-                    .orElse(null);
-
-            if (question != null) {
-                question.setCatalystId(catalyst.getId());
-
-                return question;
-            }
-        }
-
-        return null;
+        return Optional.ofNullable(survey.getCatalysts())
+                .orElse(ImmutableList.of())
+                .stream()
+                .flatMap(s -> s.getQuestions().stream())
+                .filter(e -> e.getId().equals(questionId))
+                .findAny()
+                .orElse(null);
     }
 
     @Nullable

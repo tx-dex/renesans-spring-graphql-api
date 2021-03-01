@@ -49,7 +49,7 @@ public class AnswerService {
 
     @NonNull
     @Async(DAO_EXECUTOR_NAME)
-    public Future<Map<CatalystId, List<OpenQuestionAnswer>>> getCatalystsQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+    public Future<Map<CatalystId, List<OpenQuestionAnswer>>> getOpenQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
         log.debug("Getting list of catalyst open questions answers for respondent(id={}, survey_id={})", respondentId, surveyId);
 
         return new AsyncResult<>(answerDao.getOpenAnswers(surveyId, respondentId)
@@ -69,7 +69,7 @@ public class AnswerService {
 
     @NonNull
     @Async(DAO_EXECUTOR_NAME)
-    public Future<Map<CatalystId, List<LikertQuestionAnswer>>> getQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+    public Future<Map<CatalystId, List<LikertQuestionAnswer>>> getLikerQuestionsAnswersAsync(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
         log.debug("Getting list of likert questions answers for respondent(id={}, survey_id={})", respondentId, surveyId);
 
         return new AsyncResult<>(answerDao.getLikertAnswers(surveyId, respondentId)
@@ -134,8 +134,8 @@ public class AnswerService {
     public void handleAnswerEvent(@NonNull final RespondentAnswerEvent event) {
         final RespondentId respondentId = event.getRespondentId();
         final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(event.getSurveyId());
-        final long questionsCount = surveyUtils.countLikertQuestions(survey);
-        final long answeredCount = answerDao.countRespondentAnswers(event.getSurveyId(), respondentId);
+        final long questionsCount = surveyUtils.countAllQuestions(survey);
+        final long answeredCount = answerDao.countAllRespondentAnswers(event.getSurveyId(), respondentId);
         final boolean answeredAll = questionsCount == answeredCount;
 
         if (answeredAll) {

@@ -113,8 +113,9 @@ public class AnswerDao {
     }
 
     @Transactional(readOnly = true)
-    public long countRespondentAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
-        return likerQuestionAnswerRepository.countAllByIdSurveyIdAndIdRespondentId(surveyId.getValue(), respondentId.getValue());
+    public long countAllRespondentAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+        return likerQuestionAnswerRepository.countAllByIdSurveyIdAndIdRespondentId(surveyId.getValue(), respondentId.getValue())
+                + catalystOpenQuestionAnswerRepository.countAllByIdSurveyIdAndIdRespondentId(surveyId.getValue(), respondentId.getValue());
     }
 
     @Transactional(readOnly = true)

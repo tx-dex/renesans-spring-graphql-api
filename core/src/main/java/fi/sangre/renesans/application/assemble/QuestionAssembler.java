@@ -2,6 +2,7 @@ package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.DriverId;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
@@ -88,19 +89,19 @@ public class QuestionAssembler {
     }
 
     @NonNull
-    public List<OpenQuestion> fromOpenMetadata(@Nullable final List<QuestionMetadata> metadata) {
+    public List<OpenQuestion> fromOpenMetadata(@NonNull final Catalyst catalyst, @Nullable final List<QuestionMetadata> metadata) {
         return Optional.ofNullable(metadata)
                 .orElse(ImmutableList.of())
                 .stream()
-                .map(this::fromOpen)
+                .map(v -> fromOpen(catalyst, v))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
 
     @NonNull
-    private OpenQuestion fromOpen(@NonNull final QuestionMetadata metadata) {
+    private OpenQuestion fromOpen(@NonNull final Catalyst catalyst, @NonNull final QuestionMetadata metadata) {
         if (metadata instanceof OpenQuestionMetadata) {
-            return from((OpenQuestionMetadata) metadata);
+            return from(catalyst, (OpenQuestionMetadata) metadata);
         } else {
             // TODO: implement later if needed
             throw new SurveyException("Invalid question type");
@@ -108,19 +109,19 @@ public class QuestionAssembler {
     }
 
     @NonNull
-    public List<LikertQuestion> fromLikertMetadata(@Nullable final List<QuestionMetadata> metadata) {
+    public List<LikertQuestion> fromLikertMetadata(@NonNull final Catalyst catalyst, @Nullable final List<QuestionMetadata> metadata) {
         return Optional.ofNullable(metadata)
                 .orElse(ImmutableList.of())
                 .stream()
-                .map(this::fromLikert)
+                .map(v -> fromLikert(catalyst, v))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
 
     @NonNull
-    private LikertQuestion fromLikert(@NonNull final QuestionMetadata metadata) {
+    private LikertQuestion fromLikert(@NonNull final Catalyst catalyst, @NonNull final QuestionMetadata metadata) {
         if (metadata instanceof LikertQuestionMetadata) {
-            return from((LikertQuestionMetadata) metadata);
+            return from(catalyst, (LikertQuestionMetadata) metadata);
         } else {
             // TODO: implement later if needed
             throw new SurveyException("Invalid question type");
@@ -128,17 +129,19 @@ public class QuestionAssembler {
     }
 
     @NonNull
-    private OpenQuestion from(@NonNull final OpenQuestionMetadata metadata) {
+    private OpenQuestion from(@NonNull final Catalyst catalyst, @NonNull final OpenQuestionMetadata metadata) {
         return OpenQuestion.builder()
                 .id(new QuestionId(metadata.getId()))
+                .catalystId(catalyst.getId())
                 .titles(multilingualUtils.create(metadata.getTitles()))
                 .build();
     }
 
     @NonNull
-    private LikertQuestion from(@NonNull final LikertQuestionMetadata metadata) {
+    private LikertQuestion from(@NonNull final Catalyst catalyst, @NonNull final LikertQuestionMetadata metadata) {
         return LikertQuestion.builder()
                 .id(new QuestionId(metadata.getId()))
+                .catalystId(catalyst.getId())
                 .titles(multilingualUtils.create(metadata.getTitles()))
                 .weights(Optional.ofNullable(metadata.getDriverWeights())
                         .orElse(ImmutableMap.of()).entrySet().stream()
