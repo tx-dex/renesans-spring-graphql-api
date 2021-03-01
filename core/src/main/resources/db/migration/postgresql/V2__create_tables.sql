@@ -180,7 +180,7 @@ create table if not exists open_question_answer
     answer_time timestamp default CURRENT_TIMESTAMP not null
 );
 
-create unique index if not exists catalyst_answer_survey_id_respondent_id_catalyst_id_uidx
+create index if not exists catalyst_answer_survey_id_respondent_id_catalyst_id_uidx
     on open_question_answer(survey_id, respondent_id, catalyst_id);
 
 create index if not exists catalyst_answer_survey_id_respondent_id_idx
