@@ -21,4 +21,23 @@ class MultilingualUtilsTest extends Specification {
         instance.create(null, "fi").getPhrases() == [:]
         instance.create("   ", "fi").getPhrases() == ["fi":null]
     }
+
+    def "should texts be the same"() {
+        when:
+        def actual = instance.isSameText(instance.create(v1), instance.create(v2))
+
+        then:
+        expected == actual
+
+        where:
+        v1                     | v2                     || expected
+        ["fi": "1"]            | ["fi": "1"]            || true
+        ["fi": "1", "en": "1"] | ["en": "1", "fi": "1"] || true
+        ["fi": "1"]            | ["en": "1"]            || false
+        ["fi": "1"]            | ["fi": "2"]            || false
+        ["fi": "1"]            | ["fi": "1", "en": "1"] || false
+        null                   | ["fi": "1", "en": "1"] || false
+        null                   | null                   || true
+        null                   | [:]                    || true
+    }
 }

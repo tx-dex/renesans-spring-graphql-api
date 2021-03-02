@@ -14,6 +14,7 @@ import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import fi.sangre.renesans.persistence.model.metadata.media.ImageMetadata;
+import fi.sangre.renesans.service.TranslationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,10 +22,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -34,13 +32,16 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class OrganizationSurveyAssembler {
+    private static final StaticTextGroup EMPTY_GROUP = StaticTextGroup.builder()
+            .texts(ImmutableMap.of())
+            .build();
+
     private final MediaAssembler mediaAssembler;
     private final ParameterAssembler parameterAssembler;
     private final StaticTextAssembler staticTextAssembler;
     private final CatalystAssembler catalystAssembler;
     private final DiscussionQuestionAssembler discussionQuestionAssembler;
     private final MultilingualUtils multilingualUtils;
-
 
     @NonNull
     public OrganizationSurvey fromQuestionsInput(@NonNull final UUID id,
@@ -172,7 +173,8 @@ public class OrganizationSurveyAssembler {
     public OrganizationSurvey from(@NonNull final Survey survey) {
         final SurveyMetadata metadata = survey.getMetadata();
 
-
+        final Map<String, StaticTextGroup> texts = staticTextAssembler.fromMetadata(metadata.getTranslations());
+        final StaticTextGroup questionsGroup = texts.getOrDefault(TranslationService.QUESTIONS_TRANSLATION_GROUP, EMPTY_GROUP);
 
         return OrganizationSurvey.builder()
                 .id(survey.getId())
@@ -187,11 +189,11 @@ public class OrganizationSurveyAssembler {
                 .titles(multilingualUtils.create(metadata.getTitles()))
                 .descriptions(multilingualUtils.create(metadata.getDescriptions()))
                 .media(mediaAssembler.fromMetadata(metadata.getMedia()))
-                .catalysts(catalystAssembler.fromMetadata(metadata.getCatalysts()))
+                .catalysts(catalystAssembler.fromMetadata(metadata.getCatalysts(), questionsGroup))
                 .hideCatalystThemePages(Boolean.TRUE.equals(metadata.getHideCatalystThemePages()))
                 .parameters(parameterAssembler.fromMetadata(metadata.getParameters()))
                 .discussionQuestions(discussionQuestionAssembler.fromMetadata(metadata.getDiscussionQuestions()))
-                .staticTexts(staticTextAssembler.fromMetadata(metadata.getTranslations()))
+                .staticTexts(texts)
                 .build();
     }
 }

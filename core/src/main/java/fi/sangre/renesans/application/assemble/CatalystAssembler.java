@@ -3,6 +3,8 @@ package fi.sangre.renesans.application.assemble;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.CatalystId;
+import fi.sangre.renesans.application.model.MultilingualText;
+import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -10,6 +12,7 @@ import fi.sangre.renesans.exception.MissingIdException;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.input.CatalystInput;
 import fi.sangre.renesans.persistence.model.metadata.CatalystMetadata;
+import fi.sangre.renesans.service.TranslationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -60,16 +63,31 @@ public class CatalystAssembler {
     }
 
     @NonNull
-    public List<Catalyst> fromMetadata(@Nullable final List<CatalystMetadata> metadata) {
+    public List<Catalyst> fromMetadata(@Nullable final List<CatalystMetadata> metadata,
+                                       @NonNull final StaticTextGroup textGroup) {
+        final MultilingualText subTitle = Optional.ofNullable(textGroup.getTexts())
+                .map(v -> v.get(TranslationService.QUESTIONS_SUB_TITLE_TRANSLATION_KEY))
+                .orElse(multilingualUtils.empty());
+        final MultilingualText lowEndLabel = Optional.ofNullable(textGroup.getTexts())
+                .map(v -> v.get(TranslationService.QUESTIONS_LOW_LABEL_TRANSLATION_KEY))
+                .orElse(multilingualUtils.empty());
+        final MultilingualText highEndLabel = Optional.ofNullable(textGroup.getTexts())
+                .map(v -> v.get(TranslationService.QUESTIONS_HIGH_LABEL_TRANSLATION_KEY))
+                .orElse(multilingualUtils.empty());
+
         return Optional.ofNullable(metadata)
                 .orElse(ImmutableList.of())
                 .stream()
-                .map(this::from)
+                .map(v -> from(v, subTitle, lowEndLabel, highEndLabel))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull
-    private Catalyst from(@NonNull final CatalystMetadata metadata) {
+    private Catalyst from(@NonNull final CatalystMetadata metadata,
+                          @NonNull final MultilingualText subTitle,
+                          @NonNull final MultilingualText lowEndLabel,
+                          @NonNull final MultilingualText highEndLabel) {
+
         final Catalyst catalyst = Catalyst.builder()
                 .id(new CatalystId(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER)))
                 .pdfName(metadata.getPdfName())
@@ -79,7 +97,11 @@ public class CatalystAssembler {
                 .weight(metadata.getWeight())
                 .build();
 
-        final List<LikertQuestion> likertQuestions = questionAssembler.fromLikertMetadata(catalyst, metadata.getQuestions());
+        final List<LikertQuestion> likertQuestions = questionAssembler.fromLikertMetadata(catalyst,
+                metadata.getQuestions(),
+                subTitle,
+                lowEndLabel,
+                highEndLabel);
         final List<OpenQuestion> openQuestions = questionAssembler.fromOpenMetadata(catalyst, metadata.getOpenQuestions());
 
         catalyst.setQuestions(likertQuestions);

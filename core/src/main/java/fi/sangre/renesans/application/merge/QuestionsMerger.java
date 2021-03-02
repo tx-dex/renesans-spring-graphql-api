@@ -110,6 +110,9 @@ public class QuestionsMerger {
         return LikertQuestion.builder()
                 .id(existing.getId())
                 .titles(multilingualUtils.combine(existing.getTitles(), input.getTitles()))
+                .subTitles(multilingualUtils.combine(existing.getSubTitles(), input.getSubTitles()))
+                .lowEndLabels(multilingualUtils.combine(existing.getLowEndLabels(), input.getLowEndLabels()))
+                .highEndLabels(multilingualUtils.combine(input.getHighEndLabels(), input.getHighEndLabels()))
                 .weights(combineWeights(existing.getWeights(), input.getWeights()))
                 .build();
     }

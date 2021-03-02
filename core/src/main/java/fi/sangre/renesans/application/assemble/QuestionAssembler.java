@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.DriverId;
+import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
@@ -85,6 +86,9 @@ public class QuestionAssembler {
                 .id(questionId)
                 .catalystId(catalystId)
                 .titles(multilingualUtils.create(input.getTitle(), languageTag))
+                .subTitles(multilingualUtils.create(input.getSubTitle(), languageTag))
+                .lowEndLabels(multilingualUtils.create(input.getLowEndLabel(), languageTag))
+                .highEndLabels(multilingualUtils.create(input.getHighEndLabel(), languageTag))
                 .build();
     }
 
@@ -109,19 +113,26 @@ public class QuestionAssembler {
     }
 
     @NonNull
-    public List<LikertQuestion> fromLikertMetadata(@NonNull final Catalyst catalyst, @Nullable final List<QuestionMetadata> metadata) {
+    public List<LikertQuestion> fromLikertMetadata(@NonNull final Catalyst catalyst,
+                                                   @Nullable final List<QuestionMetadata> metadata,
+                                                   @NonNull final MultilingualText subTitle,
+                                                   @NonNull final MultilingualText lowEndLabel,
+                                                   @NonNull final MultilingualText highEndLabel) {
         return Optional.ofNullable(metadata)
                 .orElse(ImmutableList.of())
                 .stream()
-                .map(v -> fromLikert(catalyst, v))
+                .map(v -> fromLikert(catalyst, v, subTitle, lowEndLabel, highEndLabel))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
 
     @NonNull
-    private LikertQuestion fromLikert(@NonNull final Catalyst catalyst, @NonNull final QuestionMetadata metadata) {
+    private LikertQuestion fromLikert(@NonNull final Catalyst catalyst, @NonNull final QuestionMetadata metadata,
+                                      @NonNull final MultilingualText subTitle,
+                                      @NonNull final MultilingualText lowEndLabel,
+                                      @NonNull final MultilingualText highEndLabel) {
         if (metadata instanceof LikertQuestionMetadata) {
-            return from(catalyst, (LikertQuestionMetadata) metadata);
+            return from(catalyst, (LikertQuestionMetadata) metadata, subTitle, lowEndLabel, highEndLabel);
         } else {
             // TODO: implement later if needed
             throw new SurveyException("Invalid question type");
@@ -138,14 +149,26 @@ public class QuestionAssembler {
     }
 
     @NonNull
-    private LikertQuestion from(@NonNull final Catalyst catalyst, @NonNull final LikertQuestionMetadata metadata) {
+    private LikertQuestion from(@NonNull final Catalyst catalyst,
+                                @NonNull final LikertQuestionMetadata metadata,
+                                @NonNull final MultilingualText defaultSubTitle,
+                                @NonNull final MultilingualText defaultLowEndLabel,
+                                @NonNull final MultilingualText defaultHighEndLabel) {
+
+        final MultilingualText subTitle = multilingualUtils.combine(defaultSubTitle,
+                multilingualUtils.create(metadata.getSubTitles()));
+       final MultilingualText lowEndLabel = multilingualUtils.combine(defaultLowEndLabel,
+               multilingualUtils.create(metadata.getLowEndLabels()));
+        final MultilingualText highEndLabel = multilingualUtils.combine(defaultHighEndLabel,
+                multilingualUtils.create(metadata.getHighEndLabels()));
+
         return LikertQuestion.builder()
                 .id(new QuestionId(metadata.getId()))
                 .catalystId(catalyst.getId())
                 .titles(multilingualUtils.create(metadata.getTitles()))
-                .subTitles(multilingualUtils.create(metadata.getSubTitles()))
-                .lowEndLabels(multilingualUtils.create(metadata.getLowEndLabels()))
-                .highEndLabels(multilingualUtils.create(metadata.getHighEndLabels()))
+                .subTitles(subTitle)
+                .lowEndLabels(lowEndLabel)
+                .highEndLabels(highEndLabel)
                 .weights(Optional.ofNullable(metadata.getDriverWeights())
                         .orElse(ImmutableMap.of()).entrySet().stream()
                         .collect(collectingAndThen(toMap(

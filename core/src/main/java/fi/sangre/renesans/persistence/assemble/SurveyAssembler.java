@@ -1,11 +1,14 @@
 package fi.sangre.renesans.persistence.assemble;
 
+import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.StaticTextGroup;
 import fi.sangre.renesans.application.model.media.MediaDetails;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import fi.sangre.renesans.persistence.model.metadata.media.ImageMetadata;
+import fi.sangre.renesans.service.TranslationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -18,6 +21,11 @@ import java.util.Optional;
 
 @Component
 public class SurveyAssembler {
+    private static final StaticTextGroup EMPTY_GROUP = StaticTextGroup.builder()
+            .texts(ImmutableMap.of())
+            .build();
+
+
     private final CatalystMetadataAssembler catalystMetadataAssembler;
     private final ParameterMetadataAssembler parameterMetadataAssembler;
     private final MediaMetadataAssembler mediaMetadataAssembler;
@@ -43,6 +51,10 @@ public class SurveyAssembler {
         entity.setVersion(model.getVersion());
         entity.setState(model.getState());
 
+        final StaticTextGroup questions = Optional.ofNullable(model.getStaticTexts())
+                .map(v -> v.get(TranslationService.QUESTIONS_TRANSLATION_GROUP))
+                .orElse(EMPTY_GROUP);
+
         entity.setMetadata(SurveyMetadata.builder()
                 .titles(model.getTitles().getPhrases())
                 .descriptions(model.getDescriptions().getPhrases())
@@ -54,7 +66,7 @@ public class SurveyAssembler {
                         .orElse(null))
                 .hideCatalystThemePages(Boolean.TRUE.equals(model.getHideCatalystThemePages()))
                 .media(mediaMetadataAssembler.from(model.getMedia()))
-                .catalysts(catalystMetadataAssembler.from(model.getCatalysts()))
+                .catalysts(catalystMetadataAssembler.from(model.getCatalysts(), questions))
                 .parameters(parameterMetadataAssembler.from(model.getParameters()))
                 .translations(translationMetadataAssembler.from(model.getStaticTexts()))
                 .discussionQuestions(discussionQuestionMetadataAssembler.from(model.getDiscussionQuestions()))
