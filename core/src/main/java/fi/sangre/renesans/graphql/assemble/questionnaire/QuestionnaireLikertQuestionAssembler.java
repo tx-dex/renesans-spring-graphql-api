@@ -50,6 +50,9 @@ public class QuestionnaireLikertQuestionAssembler {
         final QuestionnaireLikertQuestionOutput.QuestionnaireLikertQuestionOutputBuilder output = QuestionnaireLikertQuestionOutput.builder()
                 .id(question.getId())
                 .titles(question.getTitles().getPhrases())
+                .subTitles(question.getSubTitles().getPhrases())
+                .lowEndLabels(question.getLowEndLabels().getPhrases())
+                .highEndLabels(question.getHighEndLabels().getPhrases())
                 .answered(false)
                 .skipped(false)
                 .response(null);
