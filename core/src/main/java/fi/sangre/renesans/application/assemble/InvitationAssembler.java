@@ -42,7 +42,6 @@ public class InvitationAssembler {
 
         checkArgument(StringUtils.isNotBlank(input.getSubject()), "Subject is required");
         checkArgument(StringUtils.isNotBlank(input.getBody()), "Email body is required");
-        checkArgument(StringUtils.contains(input.getBody(), "{{ invitation_link }}"), "Email body must contain {{ invitation_link }} placeholder"); //TODO: constant
 
         return Invitation.builder()
                 .subject(StringUtils.trim(input.getSubject()))
@@ -66,7 +65,6 @@ public class InvitationAssembler {
         checkArgument(!emails.isEmpty(), "Non empty list of emails is required");
         checkArgument(StringUtils.isNotBlank(input.getSubject()), "Subject is required");
         checkArgument(StringUtils.isNotBlank(input.getBody()), "Email body is required");
-        checkArgument(StringUtils.contains(input.getBody(), "{{ invitation_link }}"), "Email body must contain {{ invitation_link }} placeholder"); //TODO: constant
 
         return Invitation.builder()
                 .subject(StringUtils.trim(input.getSubject()))

@@ -1,9 +1,11 @@
 package fi.sangre.renesans.service;
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sangre.mail.dto.MailDto;
 import com.sangre.mail.dto.NameEmailPairDto;
+import com.sangre.mail.dto.attachements.Base64AttachmentDto;
 import fi.sangre.renesans.application.client.FeignMailClient;
 import fi.sangre.renesans.application.event.ActivateUserEvent;
 import fi.sangre.renesans.application.event.RequestUserPasswordResetEvent;
@@ -31,6 +33,7 @@ public class MailService {
     private static final String ACTIVATION_MAIL_BODY_MULTILINGUAL_KEY = "user_activation_mail_body";
     private static final String DEFAULT_ACTIVATION_MAIL_SUBJECT = "Account activation for WeCan";
     private static final String DEFAULT_ACTIVATION_MAIL_BODY = "<h2>Greetings from weCan!</h2><p>A weCan Key User account has been created for you with username: {{ username }}. To start using the account you need to set up a password. You can do that here:</p><p><a href=\"{{ reset_link }}\">Activate account</a></p><p>The link will be valid for {{ reset_link_expiration_time }}.</p><p>Best,<br/>weCan<br/>www.wecan5.com</p>";
+
     private final TokenService tokenService;
     private final MultilingualService multilingualService;
     private final FeignMailClient feignMailClient;
@@ -86,8 +89,8 @@ public class MailService {
 
         final MailDto emailDto = MailDto.builder()
                 .subject(subject)
-                .body(body)
-                .recipient(recipient)
+                .htmlBody(body)
+                .recipients(ImmutableList.of(recipient))
                 .tags(tags)
                 .build();
 
@@ -97,16 +100,19 @@ public class MailService {
 
     public void sendEmail(@NonNull final String recipient,
                           @NonNull final String subject,
-                          @NonNull final String body,
+                          @NonNull final String htmlBody,
+                          @NonNull final String textBody,
                           @NonNull final Map<String, String> tags,
-                          @NonNull final Pair<String, String> replyTo) {
+                          @NonNull final Pair<String, String> replyTo,
+                          @NonNull final Base64AttachmentDto logo) {
         log.trace("Sending mail with tags: {} to: {}", tags, recipient);
 
         final String senderName = replyTo.getLeft() + " | Engager";
         final MailDto message = MailDto.builder()
-                .recipient(recipient)
+                .recipients(ImmutableList.of(recipient))
                 .subject(subject)
-                .body(body)
+                .htmlBody(htmlBody)
+                .textBody(textBody)
                 .sender(NameEmailPairDto.builder()
                         .name(senderName)
                         .build())
@@ -114,6 +120,7 @@ public class MailService {
                         .name(senderName)
                         .email(replyTo.getRight())
                         .build())
+                .attachments(ImmutableList.of(logo))
                 .tags(tags)
                 .build();
 

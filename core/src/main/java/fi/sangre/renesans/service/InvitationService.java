@@ -3,6 +3,7 @@ package fi.sangre.renesans.service;
 import com.google.common.collect.ImmutableMap;
 import com.sangre.mail.dto.MailInfoDto;
 import com.sangre.mail.dto.MailStatus;
+import com.sangre.mail.dto.attachements.Base64AttachmentDto;
 import fi.sangre.renesans.application.client.FeignMailClient;
 import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.event.InviteToAfterGameDiscussionEvent;
@@ -18,6 +19,7 @@ import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
@@ -43,6 +46,9 @@ import static java.util.stream.Collectors.toMap;
 
 @Service
 public class InvitationService {
+    private static final Base64AttachmentDto LOGO = new Base64AttachmentDto("logo", "image/png", "logo.png", resourceToString("/templates/email-logo.base64"));
+    private static final String HTML_BASE_TEMPLATE = resourceToString("/templates/email-template.html");
+
     private static final String MAIL_TYPE_TAG = "email-type";
     private static final String MAIL_TYPE_QUESTIONNAIRE_INVITATION_VALUE = "survey-invitation";
     private static final String MAIL_TYPE_AFTER_GAME_INVITATION_VALUE = "after-game-invitation";
@@ -129,11 +135,13 @@ public class InvitationService {
 
         mailService.sendEmail(respondent.getEmail(),
                 subject,
-                composeBody(invitationLink, body),
+                composeHtmlBody(invitationLink, body),
+                null,
                 ImmutableMap.of(MAIL_TYPE_TAG, MAIL_TYPE_QUESTIONNAIRE_INVITATION_VALUE,
                         SURVEY_ID_TAG, surveyId.asString(),
                         RESPONDENT_ID_TAG, respondentId.asString()),
-                replyTo);
+                replyTo,
+                LOGO);
     }
 
     private void sendAfterGameInvitation(@NonNull final IdValueObject<? extends UUID> id,
@@ -148,12 +156,14 @@ public class InvitationService {
 
             mailService.sendEmail(respondent.getEmail(),
                     subject,
-                    composeBody(invitationLink, body),
+                    composeHtmlBody(invitationLink, body),
+                    null,
                     ImmutableMap.of(
                             MAIL_TYPE_TAG, MAIL_TYPE_AFTER_GAME_INVITATION_VALUE
                             , SURVEY_ID_TAG, surveyId.asString()
                             , RESPONDENT_ID_TAG, respondentId.asString()
-                    ), replyTo);
+                    ), replyTo,
+                    LOGO);
         }
     }
 
@@ -170,13 +180,15 @@ public class InvitationService {
 
             mailService.sendEmail(respondent.getEmail(),
                     subject,
-                    composeBody(invitationLink, body),
+                    composeHtmlBody(invitationLink, body),
+                    null,
                     ImmutableMap.of(
                             MAIL_TYPE_TAG, MAIL_TYPE_AFTER_GAME_DISCUSSION_INVITATION_VALUE
                             , SURVEY_ID_TAG, surveyId.asString()
                             , RESPONDENT_ID_TAG, respondentId.asString()
                             , DISCUSSION_ID_TAG, questionId.asString()
-                    ), replyTo);
+                    ), replyTo,
+                    LOGO);
         }
     }
 
@@ -217,8 +229,10 @@ public class InvitationService {
     }
 
     @NonNull
-    private String composeBody(@NonNull final String invitationLink, @NonNull final String bodyTemplate) {
-        return templateService.templateBody(bodyTemplate, ImmutableMap.of("invitation_link", invitationLink));
+    private String composeHtmlBody(@NonNull final String invitationLink, @NonNull final String bodyText) {
+        return templateService.templateBody(HTML_BASE_TEMPLATE,  ImmutableMap.of(
+                "invitation_link", invitationLink,
+                "email_content", bodyText));
     }
 
     private void setErrorSilently(@NonNull final IdValueObject<? extends UUID> id, @NonNull final String error) {
@@ -229,6 +243,15 @@ public class InvitationService {
             }
         } catch (final Exception ex) {
             log.warn("Cannot update status on error '{}'", id, ex);
+        }
+    }
+
+    private static String resourceToString(@NonNull final String resource) {
+        try {
+            return IOUtils.resourceToString(resource, StandardCharsets.UTF_8);
+        } catch (final Exception ex) {
+            log.warn("cannot load resource", ex);
+            throw new RuntimeException("Cannot load resource", ex);
         }
     }
 }
