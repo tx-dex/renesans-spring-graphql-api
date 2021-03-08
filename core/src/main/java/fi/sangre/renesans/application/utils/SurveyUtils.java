@@ -114,4 +114,12 @@ public class SurveyUtils {
                 .findFirst()
                 .orElse(null);
     }
+
+    @NonNull
+    public List<Driver> getAllDrivers(@NonNull final OrganizationSurvey survey) {
+        return Optional.ofNullable(survey.getCatalysts())
+                .orElse(ImmutableList.of()).stream()
+                .flatMap(v -> v.getDrivers().stream())
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
 }

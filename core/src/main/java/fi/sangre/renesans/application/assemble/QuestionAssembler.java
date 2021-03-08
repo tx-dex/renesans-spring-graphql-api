@@ -31,6 +31,7 @@ import static java.util.stream.Collectors.*;
 
 @Component
 public class QuestionAssembler {
+    private static final double DEFAULT_CATALYST_DRIVER_WEIGHT = 0d;
     private final MultilingualUtils multilingualUtils;
 
     @Nullable
@@ -114,25 +115,38 @@ public class QuestionAssembler {
 
     @NonNull
     public List<LikertQuestion> fromLikertMetadata(@NonNull final Catalyst catalyst,
+                                                   @NonNull final Map<DriverId, Double> allDriverWeights,
                                                    @Nullable final List<QuestionMetadata> metadata,
                                                    @NonNull final MultilingualText subTitle,
                                                    @NonNull final MultilingualText lowEndLabel,
                                                    @NonNull final MultilingualText highEndLabel) {
+        final Map<DriverId, Double> defaultDriverWeights = new LinkedHashMap<>(allDriverWeights);
+        defaultDriverWeights.putAll(Optional.ofNullable(catalyst.getDrivers())
+                .orElse(ImmutableList.of()).stream()
+                .collect(toMap(v -> new DriverId(v.getId()), v -> DEFAULT_CATALYST_DRIVER_WEIGHT)));
+
         return Optional.ofNullable(metadata)
                 .orElse(ImmutableList.of())
                 .stream()
-                .map(v -> fromLikert(catalyst, v, subTitle, lowEndLabel, highEndLabel))
+                .map(v -> fromLikert(catalyst,
+                        Collections.unmodifiableMap(defaultDriverWeights),
+                        v,
+                        subTitle,
+                        lowEndLabel,
+                        highEndLabel))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
 
     @NonNull
-    private LikertQuestion fromLikert(@NonNull final Catalyst catalyst, @NonNull final QuestionMetadata metadata,
+    private LikertQuestion fromLikert(@NonNull final Catalyst catalyst,
+                                      @NonNull final Map<DriverId, Double> defaultDriverWeights,
+                                      @NonNull final QuestionMetadata metadata,
                                       @NonNull final MultilingualText subTitle,
                                       @NonNull final MultilingualText lowEndLabel,
                                       @NonNull final MultilingualText highEndLabel) {
         if (metadata instanceof LikertQuestionMetadata) {
-            return from(catalyst, (LikertQuestionMetadata) metadata, subTitle, lowEndLabel, highEndLabel);
+            return from(catalyst, defaultDriverWeights, (LikertQuestionMetadata) metadata, subTitle, lowEndLabel, highEndLabel);
         } else {
             // TODO: implement later if needed
             throw new SurveyException("Invalid question type");
@@ -150,6 +164,7 @@ public class QuestionAssembler {
 
     @NonNull
     private LikertQuestion from(@NonNull final Catalyst catalyst,
+                                @NonNull final Map<DriverId, Double> defaultDriverWeigths,
                                 @NonNull final LikertQuestionMetadata metadata,
                                 @NonNull final MultilingualText defaultSubTitle,
                                 @NonNull final MultilingualText defaultLowEndLabel,
@@ -157,10 +172,18 @@ public class QuestionAssembler {
 
         final MultilingualText subTitle = multilingualUtils.combine(defaultSubTitle,
                 multilingualUtils.create(metadata.getSubTitles()));
-       final MultilingualText lowEndLabel = multilingualUtils.combine(defaultLowEndLabel,
-               multilingualUtils.create(metadata.getLowEndLabels()));
+        final MultilingualText lowEndLabel = multilingualUtils.combine(defaultLowEndLabel,
+                multilingualUtils.create(metadata.getLowEndLabels()));
         final MultilingualText highEndLabel = multilingualUtils.combine(defaultHighEndLabel,
                 multilingualUtils.create(metadata.getHighEndLabels()));
+
+        final Map<DriverId, Double> driverWeights = new LinkedHashMap<>(defaultDriverWeigths);
+        driverWeights.putAll(Optional.ofNullable(metadata.getDriverWeights())
+                .orElse(ImmutableMap.of()).entrySet().stream()
+                .collect(toMap(
+                        e -> new DriverId(Long.parseLong(e.getKey())),
+                        Map.Entry::getValue
+                )));
 
         return LikertQuestion.builder()
                 .id(new QuestionId(metadata.getId()))
@@ -169,14 +192,7 @@ public class QuestionAssembler {
                 .subTitles(subTitle)
                 .lowEndLabels(lowEndLabel)
                 .highEndLabels(highEndLabel)
-                .weights(Optional.ofNullable(metadata.getDriverWeights())
-                        .orElse(ImmutableMap.of()).entrySet().stream()
-                        .collect(collectingAndThen(toMap(
-                                e -> new DriverId(Long.parseLong(e.getKey())),
-                                Map.Entry::getValue,
-                                (e1, e2) -> e1,
-                                LinkedHashMap::new
-                        ), Collections::unmodifiableMap)))
+                .weights(Collections.unmodifiableMap(driverWeights))
                 .build();
     }
 }

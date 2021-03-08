@@ -1,10 +1,7 @@
 package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.application.model.Catalyst;
-import fi.sangre.renesans.application.model.CatalystId;
-import fi.sangre.renesans.application.model.MultilingualText;
-import fi.sangre.renesans.application.model.StaticTextGroup;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.OpenQuestion;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -21,14 +18,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 @RequiredArgsConstructor
 @Slf4j
 
 @Component
 public class CatalystAssembler {
+    private static final double DEFAULT_ALL_DRIVER_WEIGHT = 0d;
     private final QuestionAssembler questionAssembler;
     private final DriverAssembler driverAssembler;
     private final MultilingualUtils multilingualUtils;
@@ -75,15 +72,25 @@ public class CatalystAssembler {
                 .map(v -> v.get(TranslationService.QUESTIONS_HIGH_LABEL_TRANSLATION_KEY))
                 .orElse(multilingualUtils.empty());
 
+        final Map<DriverId, Double> defaultDriverWeights = Optional.ofNullable(metadata)
+                .orElse(ImmutableList.of()).stream()
+                .flatMap(v -> Optional.ofNullable(v.getDrivers()).orElse(ImmutableList.of()).stream())
+                .collect(toMap(v -> new DriverId(v.getId()), v -> DEFAULT_ALL_DRIVER_WEIGHT, (v1, v2) -> v2, LinkedHashMap::new));
+
         return Optional.ofNullable(metadata)
                 .orElse(ImmutableList.of())
                 .stream()
-                .map(v -> from(v, subTitle, lowEndLabel, highEndLabel))
+                .map(v -> from(v,
+                        Collections.unmodifiableMap(defaultDriverWeights),
+                        subTitle,
+                        lowEndLabel,
+                        highEndLabel))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull
     private Catalyst from(@NonNull final CatalystMetadata metadata,
+                          @NonNull final Map<DriverId, Double> defaultAllDriverWeights,
                           @NonNull final MultilingualText subTitle,
                           @NonNull final MultilingualText lowEndLabel,
                           @NonNull final MultilingualText highEndLabel) {
@@ -98,6 +105,7 @@ public class CatalystAssembler {
                 .build();
 
         final List<LikertQuestion> likertQuestions = questionAssembler.fromLikertMetadata(catalyst,
+                defaultAllDriverWeights,
                 metadata.getQuestions(),
                 subTitle,
                 lowEndLabel,
