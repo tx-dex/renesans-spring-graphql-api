@@ -435,7 +435,8 @@ public class AfterGameFacade {
         //TODO: get phrases from survey
         return ParameterItem.builder()
                 .id(ParameterId.GLOBAL_YOU_PARAMETER_ID)
-                .label(multilingualUtils.create(ImmutableMap.of("en", "you")))
+                .label(multilingualUtils.create(ImmutableMap.of("en", "You",
+                        "fi", "Sinä")))
                 .build();
     }
 
@@ -444,7 +445,8 @@ public class AfterGameFacade {
         //TODO: get phrases from survey
         return ParameterItem.builder()
                 .id(ParameterId.GLOBAL_EVERYONE_PARAMETER_ID)
-                .label(multilingualUtils.create(ImmutableMap.of("en", "Everyone")))
+                .label(multilingualUtils.create(ImmutableMap.of("en", "Everyone",
+                        "fi", "Kaikki")))
                 .build();
     }
 
