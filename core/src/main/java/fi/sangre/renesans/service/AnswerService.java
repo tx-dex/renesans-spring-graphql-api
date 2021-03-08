@@ -134,8 +134,8 @@ public class AnswerService {
     public void handleAnswerEvent(@NonNull final RespondentAnswerEvent event) {
         final RespondentId respondentId = event.getRespondentId();
         final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(event.getSurveyId());
-        final long questionsCount = surveyUtils.countAllQuestions(survey);
-        final long answeredCount = answerDao.countAllRespondentAnswers(event.getSurveyId(), respondentId);
+        final long questionsCount = surveyUtils.countLikertQuestions(survey);
+        final long answeredCount = answerDao.countLikertRespondentAnswers(event.getSurveyId(), respondentId);
         final boolean answeredAll = questionsCount == answeredCount;
 
         if (answeredAll) {
