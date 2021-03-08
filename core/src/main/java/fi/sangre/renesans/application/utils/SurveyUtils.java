@@ -1,10 +1,7 @@
 package fi.sangre.renesans.application.utils;
 
 import com.google.common.collect.ImmutableList;
-import fi.sangre.renesans.application.model.Catalyst;
-import fi.sangre.renesans.application.model.CatalystId;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.ParameterId;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.OpenQuestion;
@@ -28,6 +25,14 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class SurveyUtils {
+    public boolean isAfterGameEnabled(@Nullable final OrganizationSurvey survey) {
+        if (survey != null) {
+            return SurveyState.AFTER_GAME.equals(survey.getState());
+        } else {
+            return false;
+        }
+    }
+
 
     public List<LikertQuestion> getAllQuestions(@NonNull final OrganizationSurvey survey) {
         return survey.getCatalysts().stream()
