@@ -20,10 +20,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -114,6 +115,13 @@ public class RespondentDao {
         return surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()).stream()
                 .map(e -> new RespondentId(e.getId()))
                 .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+    }
+
+    @Transactional(readOnly = true)
+    public <T> Map<RespondentId, T> findRespondents(@NonNull final SurveyId surveyId,
+                                                    @NonNull final Function<SurveyRespondent, T> mapper) {
+        return surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()).stream()
+                .collect(collectingAndThen(toMap(v -> new RespondentId(v.getId()), mapper), Collections::unmodifiableMap));
     }
 
     private SurveyRespondent getRespondentOrThrow(@NonNull final RespondentId id) {

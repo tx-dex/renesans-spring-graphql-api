@@ -39,7 +39,6 @@ public class ExcelRespondentListWriter {
             Sheet sheet = workbook.createSheet("Sheet1");
 
             final List<ExcelColumn> columns = prepareHeader(parameters);
-//            final Map<String, ExcelRespondent> rows = prepareRows(respondents);
 
             writeHeader(workbook, sheet, columns);
             writeRows(workbook, sheet, columns, respondents);
