@@ -26,6 +26,16 @@ public class MultilingualUtils {
         return StringUtils.compare(getText(e1, languageTag), getText(e2, languageTag), true);
     }
 
+    @NonNull
+    public String getTextOrDefault(@NonNull final MultilingualText text, @NonNull final String languageTag, @NonNull final String defaultText) {
+        final Map<String, String> phrases = Objects.requireNonNull(text.getPhrases());
+
+        return Optional.ofNullable(phrases.get(languageTag))
+                .orElseGet(() -> Optional.ofNullable(phrases.get(DEFAULT_LANGUAGE_TAG))
+                        .orElseGet(() -> phrases.values().stream().findAny()
+                                .orElse(defaultText)));
+    }
+
     @Nullable
     public static String getText(@NonNull final Map<String, String> phrases, @NonNull final String languageTag) {
         return Optional.ofNullable(phrases.get(languageTag))
