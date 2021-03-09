@@ -1,10 +1,13 @@
 package fi.sangre.renesans.graphql.assemble.questionnaire;
 
+import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.dao.GuestDao;
 import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.LikertQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.OpenQuestionAnswer;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
+import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.graphql.assemble.SurveyMediaAssembler;
 import fi.sangre.renesans.graphql.assemble.media.MediaDetailsAssembler;
@@ -30,6 +33,7 @@ import java.util.concurrent.Future;
 public class QuestionnaireAssembler {
     private final OrganizationSurveyService organizationSurveyService;
     private final RespondentDao respondentDao;
+    private final GuestDao guestDao;
     private final AnswerService answerService;
     private final QuestionnaireCatalystAssembler questionnaireCatalystAssembler;
     private final QuestionnaireParameterOutputAssembler questionnaireParameterOutputAssembler;
@@ -41,6 +45,50 @@ public class QuestionnaireAssembler {
         return builder(survey)
                 .catalysts(questionnaireCatalystAssembler.from(survey.getCatalysts()))
                 .parameters(questionnaireParameterOutputAssembler.from(survey.getParameters()))
+                .build();
+    }
+
+    @NonNull
+    public QuestionnaireOutput from(@NonNull final GuestId guestId, @NonNull final SurveyId surveyId) throws InterruptedException, ExecutionException {
+        final Future<Map<ParameterId, ParameterItemAnswer>> parameterAnswers = answerService.getParametersAnswersAsync(surveyId, guestId);
+        final OrganizationSurvey survey = organizationSurveyService.getSurvey(surveyId);
+
+        return from(guestId, survey, parameterAnswers.get());
+    }
+
+    @NonNull
+    public QuestionnaireOutput from(@NonNull final GuestId guestId,
+                                     @NonNull final OrganizationSurvey survey) throws InterruptedException, ExecutionException {
+        return from(guestId, survey, answerService.getParametersAnswersAsync(new SurveyId(survey.getId()), guestId).get());
+    }
+
+    @NonNull
+    public QuestionnaireOutput from(@NonNull final GuestId guestId,
+                                     @NonNull final OrganizationSurvey survey,
+                                     @NonNull final Map<ParameterId, ParameterItemAnswer> parameterAnswers) {
+
+        final QuestionnaireUserState state = guestDao.getState(guestId);
+        final boolean isConsented = state.isConsented();
+        final boolean isViewingAfterGame = state.isViewingAfterGame();
+        final List<QuestionnaireCatalystOutput> catalysts = questionnaireCatalystAssembler.from(survey.getCatalysts(), ImmutableMap.of(), ImmutableMap.of());
+        final List<QuestionnaireParameterOutput> parameters = questionnaireParameterOutputAssembler.from(survey.getParameters(), parameterAnswers);
+        final boolean isAfterGameEnabled = SurveyState.AFTER_GAME.equals(survey.getState());
+        final boolean areAllParametersAnswered = parameters.stream()
+                .filter(QuestionnaireParameterOutput::isAnswered)
+                .count() == parameters.size();
+
+        return builder(survey)
+                .id(guestId.getValue()) // overwrite the id with the respondent one
+                .consented(isConsented)
+                .answerable(!isAfterGameEnabled)
+                .finished(true)
+                .canAnswerParameters(!isViewingAfterGame)
+                .canGoToQuestions(false) //This should be false
+                .canViewAfterGame(isAfterGameEnabled && isConsented && areAllParametersAnswered)
+                .canAnswer(false)
+                .canComment(isAfterGameEnabled)
+                .catalysts(catalysts)
+                .parameters(parameters)
                 .build();
     }
 
@@ -66,8 +114,9 @@ public class QuestionnaireAssembler {
                                     @NonNull final Map<CatalystId, List<LikertQuestionAnswer>> questionsAnswers,
                                     @NonNull final Map<ParameterId, ParameterItemAnswer> parameterAnswers) {
 
-        final boolean isConsented = respondentDao.isConsented(respondentId);
-        final boolean isAnswering = respondentDao.isAnswering(respondentId);
+        final QuestionnaireUserState state = respondentDao.getState(respondentId);
+        final boolean isConsented = state.isConsented();
+        final boolean isAnswering = state.isAnsweringQuestions();
         final List<QuestionnaireCatalystOutput> catalysts = questionnaireCatalystAssembler.from(survey.getCatalysts(), openQuestionAnswers, questionsAnswers);
         final List<QuestionnaireParameterOutput> parameters = questionnaireParameterOutputAssembler.from(survey.getParameters(), parameterAnswers);
         final boolean isAfterGameEnabled = SurveyState.AFTER_GAME.equals(survey.getState()); //TODO: get from survey
@@ -76,7 +125,7 @@ public class QuestionnaireAssembler {
                 .reduce(Boolean.TRUE, Boolean::logicalAnd);
         final boolean areAllParametersAnswered = parameters.stream()
                 .filter(QuestionnaireParameterOutput::isAnswered)
-                .count() == parameterAnswers.size();
+                .count() == parameters.size();
 
         return builder(survey)
                 .id(respondentId.getValue()) // overwrite the id with the respondent one
@@ -87,7 +136,7 @@ public class QuestionnaireAssembler {
                 .canGoToQuestions(isConsented && areAllParametersAnswered)
                 .canAnswer(!isAfterGameEnabled)
                 .canComment(isAfterGameEnabled)
-                .canViewAfterGame(isAfterGameEnabled)
+                .canViewAfterGame(isAfterGameEnabled && isConsented && areAllParametersAnswered)
                 .catalysts(catalysts)
                 .parameters(parameters)
                 .build();

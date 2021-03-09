@@ -57,6 +57,10 @@ public class RespondentUtils {
                 || state == SurveyRespondentState.OPENED_QUESTIONS;
     }
 
+    public boolean isViewingAfterGame(@NonNull final SurveyRespondentState state) {
+        return state == SurveyRespondentState.OPENED_AFTER_GAME;
+    }
+
     public boolean isAnswered(@Nullable final SurveyRespondent respondent) {
         if (respondent == null) {
             return false;

@@ -2,7 +2,7 @@ package fi.sangre.renesans.aaa;
 
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.SurveyId;
-import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.application.model.respondent.GuestId;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,15 +12,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+import static fi.sangre.renesans.aaa.Permissions.ROLE_GUEST;
+
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class GuestPrincipal implements UserDetails {
-    private static final List<SimpleGrantedAuthority> GUEST_ROLE = ImmutableList.of(new SimpleGrantedAuthority("ROLE_GUEST"));
+    private static final List<SimpleGrantedAuthority> GUEST_ROLE = ImmutableList.of(new SimpleGrantedAuthority(ROLE_GUEST));
 
-    private final RespondentId id;
+    private final GuestId id;
     private final String email;
     private final SurveyId surveyId;
 
-    public RespondentId getId() {
+    public GuestId getId() {
         return id;
     }
 

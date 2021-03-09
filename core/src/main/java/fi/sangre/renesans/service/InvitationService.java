@@ -13,9 +13,12 @@ import fi.sangre.renesans.application.model.IdValueObject;
 import fi.sangre.renesans.application.model.RespondentEmail;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.InternalServiceException;
+import fi.sangre.renesans.persistence.model.SurveyGuest;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
+import fi.sangre.renesans.persistence.repository.SurveyGuestRepository;
 import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,10 +58,12 @@ public class InvitationService {
     private static final String MAIL_TYPE_AFTER_GAME_DISCUSSION_INVITATION_VALUE = "discussion-invitation";
     private static final String SURVEY_ID_TAG = "survey-id";
     private static final String RESPONDENT_ID_TAG = "respondent-id";
+    private static final String GUEST_ID_TAG = "guest-id";
     private static final String DISCUSSION_ID_TAG = "discussion-id";
     private static final String INVITATION_PATH = "invitation";
 
     private final SurveyRespondentRepository surveyRespondentRepository;
+    private final SurveyGuestRepository surveyGuestRepository;
     private final MailService mailService;
     private final FeignMailClient feignMailClient;
     private final RespondentDao respondentDao;
@@ -72,7 +77,7 @@ public class InvitationService {
         log.debug("Getting emails statuses list");
         return new AsyncResult<>(feignMailClient.findLatestEmails(ImmutableMap.of(SURVEY_ID_TAG, surveyId.asString()
                 , MAIL_TYPE_TAG, MAIL_TYPE_QUESTIONNAIRE_INVITATION_VALUE
-                )).stream()
+        )).stream()
                 .collect(collectingAndThen(toMap(e -> new RespondentEmail(e.getRecipient()), MailInfoDto::getStatus), Collections::unmodifiableMap)));
     }
 
@@ -148,23 +153,44 @@ public class InvitationService {
                                          @NonNull final String subject,
                                          @NonNull final String body,
                                          @NonNull final Pair<String, String> replyTo) {
+        final SurveyId surveyId;
+        final String email;
+        final String invitationLink;
+        final Map<String, String> tags;
+
         if (id instanceof RespondentId) {
             final RespondentId respondentId = (RespondentId) id;
             final SurveyRespondent respondent = getRespondent(respondentId);
-            final SurveyId surveyId = new SurveyId(respondent.getSurveyId());
-            final String invitationLink = getAfterGameInvitationLink(respondentId, respondent.getInvitationHash());
-
-            mailService.sendEmail(respondent.getEmail(),
-                    subject,
-                    composeHtmlBody(invitationLink, body),
-                    null,
-                    ImmutableMap.of(
-                            MAIL_TYPE_TAG, MAIL_TYPE_AFTER_GAME_INVITATION_VALUE
-                            , SURVEY_ID_TAG, surveyId.asString()
-                            , RESPONDENT_ID_TAG, respondentId.asString()
-                    ), replyTo,
-                    LOGO);
+            email = respondent.getEmail();
+            surveyId = new SurveyId(respondent.getSurveyId());
+            invitationLink = getAfterGameInvitationLink(respondentId, respondent.getInvitationHash());
+            tags = ImmutableMap.of(
+                    MAIL_TYPE_TAG, MAIL_TYPE_AFTER_GAME_INVITATION_VALUE
+                    , SURVEY_ID_TAG, surveyId.asString()
+                    , RESPONDENT_ID_TAG, id.asString()
+            );
+        } else if (id instanceof GuestId) {
+            final GuestId guestId = (GuestId) id;
+            final SurveyGuest guest = getGuest(guestId);
+            email = guest.getEmail();
+            surveyId = new SurveyId(guest.getSurveyId());
+            invitationLink = getAfterGameInvitationLink(guestId, guest.getInvitationHash());
+            tags = ImmutableMap.of(
+                    MAIL_TYPE_TAG, MAIL_TYPE_AFTER_GAME_INVITATION_VALUE
+                    , SURVEY_ID_TAG, surveyId.asString()
+                    , GUEST_ID_TAG, id.asString()
+            );
+        } else {
+            throw new RuntimeException("Invalid id");
         }
+
+        mailService.sendEmail(email,
+                subject,
+                composeHtmlBody(invitationLink, body),
+                null,
+                tags,
+                replyTo,
+                LOGO);
     }
 
     private void sendAfterGameDiscussionInvitation(@NonNull final IdValueObject<? extends UUID> id,
@@ -172,30 +198,58 @@ public class InvitationService {
                                                    @NonNull final String subject,
                                                    @NonNull final String body,
                                                    @NonNull final Pair<String, String> replyTo) {
+        final SurveyId surveyId;
+        final String email;
+        final String invitationLink;
+        final Map<String, String> tags;
+
         if (id instanceof RespondentId) {
             final RespondentId respondentId = (RespondentId) id;
             final SurveyRespondent respondent = getRespondent(respondentId);
-            final SurveyId surveyId = new SurveyId(respondent.getSurveyId());
-            final String invitationLink = getAfterGameDiscussionInvitationLink(respondentId, respondent.getInvitationHash(), questionId);
-
-            mailService.sendEmail(respondent.getEmail(),
-                    subject,
-                    composeHtmlBody(invitationLink, body),
-                    null,
-                    ImmutableMap.of(
-                            MAIL_TYPE_TAG, MAIL_TYPE_AFTER_GAME_DISCUSSION_INVITATION_VALUE
-                            , SURVEY_ID_TAG, surveyId.asString()
-                            , RESPONDENT_ID_TAG, respondentId.asString()
-                            , DISCUSSION_ID_TAG, questionId.asString()
-                    ), replyTo,
-                    LOGO);
+            email = respondent.getEmail();
+            surveyId = new SurveyId(respondent.getSurveyId());
+            invitationLink = getAfterGameDiscussionInvitationLink(respondentId, respondent.getInvitationHash(), questionId);
+            tags = ImmutableMap.of(
+                    MAIL_TYPE_TAG, MAIL_TYPE_AFTER_GAME_DISCUSSION_INVITATION_VALUE
+                    , SURVEY_ID_TAG, surveyId.asString()
+                    , RESPONDENT_ID_TAG, respondentId.asString()
+                    , DISCUSSION_ID_TAG, questionId.asString()
+            );
+        } else if (id instanceof GuestId) {
+            final GuestId guestId = (GuestId) id;
+            final SurveyGuest guest = getGuest(guestId);
+            email = guest.getEmail();
+            surveyId = new SurveyId(guest.getSurveyId());
+            invitationLink = getAfterGameInvitationLink(guestId, guest.getInvitationHash());
+            tags = ImmutableMap.of(
+                    MAIL_TYPE_TAG, MAIL_TYPE_AFTER_GAME_DISCUSSION_INVITATION_VALUE
+                    , SURVEY_ID_TAG, surveyId.asString()
+                    , GUEST_ID_TAG, id.asString()
+                    , DISCUSSION_ID_TAG, questionId.asString()
+            );
+        } else {
+            throw new RuntimeException("Invalid id");
         }
+
+        mailService.sendEmail(email,
+                subject,
+                composeHtmlBody(invitationLink, body),
+                null,
+                tags,
+                replyTo,
+                LOGO);
     }
 
     @NonNull
     private SurveyRespondent getRespondent(@NonNull final RespondentId respondentId) {
         return surveyRespondentRepository.findById(respondentId.getValue())
                 .orElseThrow(() -> new InternalServiceException("Cannot get respondent"));
+    }
+
+    @NonNull
+    private SurveyGuest getGuest(@NonNull final GuestId guestId) {
+        return surveyGuestRepository.findById(guestId.getValue())
+                .orElseThrow(() -> new InternalServiceException("Cannot get guest"));
     }
 
     @NonNull
@@ -230,7 +284,7 @@ public class InvitationService {
 
     @NonNull
     private String composeHtmlBody(@NonNull final String invitationLink, @NonNull final String bodyText) {
-        return templateService.templateBody(HTML_BASE_TEMPLATE,  ImmutableMap.of(
+        return templateService.templateBody(HTML_BASE_TEMPLATE, ImmutableMap.of(
                 "invitation_link", invitationLink,
                 "email_content", bodyText));
     }

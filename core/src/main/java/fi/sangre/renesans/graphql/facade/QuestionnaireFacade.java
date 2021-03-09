@@ -1,14 +1,17 @@
 package fi.sangre.renesans.graphql.facade;
 
+import fi.sangre.renesans.aaa.GuestPrincipal;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.LikertAnswerAssembler;
 import fi.sangre.renesans.application.assemble.OpenAnswerAssembler;
 import fi.sangre.renesans.application.assemble.ParameterAssembler;
+import fi.sangre.renesans.application.dao.GuestDao;
 import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.event.QuestionnaireOpenedEvent;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.parameter.Parameter;
+import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
@@ -44,18 +47,33 @@ public class QuestionnaireFacade {
     private final OpenAnswerAssembler openAnswerAssembler;
     private final ParameterAssembler parameterAssembler;
     private final RespondentDao respondentDao;
+    private final GuestDao guestDao;
     private final AnswerService answerService;
     private final TokenService tokenService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @NonNull
-    public AuthorizationOutput openQuestionnaire(@NonNull final RespondentId respondentId, @NonNull final String invitationHash) {
+    public AuthorizationOutput openQuestionnaire(@NonNull final UUID id, @NonNull final String invitationHash) {
+        final RespondentId respondentId = respondentDao.findRespondent(new RespondentId(id), invitationHash);
+        final String token;
+
+        if (respondentId == null) {
+            final GuestId guestId = guestDao.findGuest(new GuestId(id), invitationHash);
+            if (guestId != null) {
+                token = tokenService.generateQuestionnaireToken(guestId);
+                applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(guestId));
+            } else {
+                throw new SurveyException("Cannot open questionnaire");
+            }
+        } else {
+            token = tokenService.generateQuestionnaireToken(respondentId);
+            applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(respondentId));
+        }
+
         final AuthorizationOutput output = AuthorizationOutput.builder()
                 // TODO: provide invitation hash for the user so it can refresh token
-                .token(tokenService.generateQuestionnaireToken(respondentId, invitationHash))
+                .token(token)
                 .build();
-
-        applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(respondentId));
 
         return output;
     }
@@ -84,6 +102,12 @@ public class QuestionnaireFacade {
             respondentDao.consent(respondent.getId(), consent);
 
             return getQuestionnaire(respondent);
+        } else if (principal instanceof GuestPrincipal) {
+            final GuestPrincipal guest = (GuestPrincipal) principal;
+
+            guestDao.consent(guest.getId(), consent);
+
+            return getQuestionnaire(guest);
         } else {
             throw new SurveyException("Only respondent can consent");
         }
@@ -93,11 +117,23 @@ public class QuestionnaireFacade {
     public QuestionnaireOutput getQuestionnaire(@NonNull final UUID id, @NonNull final UserDetails principal) {
         if (principal instanceof RespondentPrincipal) {
             return getQuestionnaire((RespondentPrincipal) principal);
+        } else if (principal instanceof GuestPrincipal) {
+            return getQuestionnaire((GuestPrincipal) principal);
         } else if (principal instanceof UserPrincipal) {
             return questionnaireAssembler.from(
                     organizationSurveyService.getSurvey(id));
         } else {
             throw new SurveyException("Invalid principal");
+        }
+    }
+
+    @NonNull
+    private QuestionnaireOutput getQuestionnaire(@NonNull final GuestPrincipal guest) {
+        try {
+            return questionnaireAssembler.from(guest.getId(), guest.getSurveyId());
+        } catch (final InterruptedException | ExecutionException ex) {
+            log.warn("Cannot get questionnaire for guest(id={})", guest.getId());
+            throw new InternalServiceException("Cannot get questionnaire");
         }
     }
 
@@ -181,6 +217,19 @@ public class QuestionnaireFacade {
                 return questionnaireAssembler.from(respondent.getId(), survey);
             } catch (final InterruptedException | ExecutionException ex) {
                 log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
+                throw new InternalServiceException("Cannot get questionnaire");
+            }
+        } else if (principal instanceof GuestPrincipal) {
+            final GuestPrincipal guest = (GuestPrincipal) principal;
+            try {
+                final OrganizationSurvey survey = organizationSurveyService.getSurvey(guest.getSurveyId());
+
+                final Parameter answer = parameterAssembler.fromInput(input, survey);
+                answerService.answerParameter(answer, guest.getSurveyId(), guest.getId());
+
+                return questionnaireAssembler.from(guest.getId(), survey);
+            } catch (final InterruptedException | ExecutionException ex) {
+                log.warn("Cannot get questionnaire for guest(id={})", guest.getId());
                 throw new InternalServiceException("Cannot get questionnaire");
             }
         } else {

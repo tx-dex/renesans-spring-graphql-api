@@ -2,7 +2,7 @@ package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.aaa.JwtTokenService;
-import fi.sangre.renesans.application.model.Respondent;
+import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +11,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 
 import static fi.sangre.renesans.application.utils.TokenUtils.*;
@@ -20,6 +21,10 @@ import static fi.sangre.renesans.application.utils.TokenUtils.*;
 
 @Service
 public class TokenService {
+    public static final String QUESTIONNAIRE_USER_TYPE = "user";
+    public static final String QUESTIONNAIRE_RESPONDENT_USER = "respondent";
+    public static final String QUESTIONNAIRE_GUEST_USER = "guest";
+
     private static final Map<String, Object> QUESTIONNAIRE_TOKEN_CLAIMS = ImmutableMap.of(
             TOKEN_TYPE_CLAIM_KEY, QUESTIONNAIRE_TOKEN_TYPE);
     private static final Map<String, Object> RESET_PASSWORD_TOKEN_CLAIMS = ImmutableMap.of(
@@ -37,11 +42,22 @@ public class TokenService {
     private Duration activationTokenDuration;
 
     @NonNull
-    public String generateQuestionnaireToken(@NonNull final RespondentId respondentId , @NonNull final String invitationHash) {
-        final Respondent respondent = organizationSurveyService.getRespondent(respondentId, invitationHash);
+    public String generateQuestionnaireToken(@NonNull final RespondentId id) {
+        final Map<String, Object> claims = new HashMap<>(QUESTIONNAIRE_TOKEN_CLAIMS);
+        claims.put(QUESTIONNAIRE_USER_TYPE, QUESTIONNAIRE_RESPONDENT_USER);
 
-        return jwtTokenService.generateToken(respondent.getId().toString()
-                , QUESTIONNAIRE_TOKEN_CLAIMS
+        return jwtTokenService.generateToken(id.asString()
+                , claims
+                , Duration.ofDays(7).toMillis());
+    }
+
+    @NonNull
+    public String generateQuestionnaireToken(@NonNull final GuestId id) {
+        final Map<String, Object> claims = new HashMap<>(QUESTIONNAIRE_TOKEN_CLAIMS);
+        claims.put(QUESTIONNAIRE_USER_TYPE, QUESTIONNAIRE_GUEST_USER);
+
+        return jwtTokenService.generateToken(id.asString()
+                , claims
                 , Duration.ofDays(7).toMillis());
     }
 

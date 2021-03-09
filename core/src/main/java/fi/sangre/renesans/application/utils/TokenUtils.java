@@ -1,5 +1,7 @@
 package fi.sangre.renesans.application.utils;
 
+import fi.sangre.renesans.application.model.IdValueObject;
+import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import io.jsonwebtoken.Claims;
 import org.springframework.lang.NonNull;
@@ -7,6 +9,9 @@ import org.springframework.lang.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
+
+import static fi.sangre.renesans.service.TokenService.QUESTIONNAIRE_GUEST_USER;
+import static fi.sangre.renesans.service.TokenService.QUESTIONNAIRE_USER_TYPE;
 
 public class TokenUtils {
     public static final String SUBJECT_CLAIM_KEY = "sub";
@@ -48,11 +53,34 @@ public class TokenUtils {
     }
 
     @NonNull
-    public static RespondentId getRespondent(@Nullable final Claims claims) {
+    public static IdValueObject<UUID> getQuestionnaireUserId(@Nullable final Claims claims) {
+        final boolean isGuest = Optional.ofNullable(claims)
+                .map(claim -> claim.get(QUESTIONNAIRE_USER_TYPE, String.class))
+                .map(QUESTIONNAIRE_GUEST_USER::equalsIgnoreCase)
+                .orElse(false);
+
+        if (isGuest) {
+            return getGuestId(claims);
+        } else {
+            return getRespondentId(claims);
+        }
+    }
+
+    @NonNull
+    private static GuestId getGuestId(@Nullable final Claims claims) {
+        return Optional.ofNullable(claims)
+                .map(claim -> claim.get(SUBJECT_CLAIM_KEY, String.class))
+                .map(UUID::fromString)
+                .map(GuestId::new)
+                .orElseThrow(() -> new RuntimeException("Cannot get guest id from token"));
+    }
+
+    @NonNull
+    private static RespondentId getRespondentId(@Nullable final Claims claims) {
         return Optional.ofNullable(claims)
                 .map(claim -> claim.get(SUBJECT_CLAIM_KEY, String.class))
                 .map(UUID::fromString)
                 .map(RespondentId::new)
-                .orElseThrow(() -> new RuntimeException("Cannot get reposndent id from token"));
+                .orElseThrow(() -> new RuntimeException("Cannot get respondent id from token"));
     }
 }

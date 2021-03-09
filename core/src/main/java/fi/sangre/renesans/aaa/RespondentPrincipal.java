@@ -12,9 +12,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+import static fi.sangre.renesans.aaa.Permissions.ROLE_RESPONDENT;
+
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class RespondentPrincipal implements UserDetails {
-    private static final List<SimpleGrantedAuthority> RESPONDENT_ROLE = ImmutableList.of(new SimpleGrantedAuthority("ROLE_RESPONDENT"));
+    private static final List<SimpleGrantedAuthority> RESPONDENT_ROLE = ImmutableList.of(new SimpleGrantedAuthority(ROLE_RESPONDENT));
 
     private final RespondentId id;
     private final String email;

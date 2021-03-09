@@ -25,6 +25,7 @@ public class Permissions implements PermissionEvaluator {
     public static final String SUPER_USER = "ROLE_SUPER_USER";
     public static final String POWER_USER = "ROLE_POWER_USER";
     public static final String ROLE_RESPONDENT = "ROLE_RESPONDENT";
+    public static final String ROLE_GUEST = "ROLE_GUEST";
 
     public static final String ORGANIZATION_TARGET = "organization";
     public static final String SURVEY_TARGET = "survey";
@@ -50,6 +51,12 @@ public class Permissions implements PermissionEvaluator {
     private RespondentPrincipal respondent(final @NonNull Authentication authentication) {
         return (RespondentPrincipal) authentication.getPrincipal();
     }
+
+    @NonNull
+    private GuestPrincipal guest(final @NonNull Authentication authentication) {
+        return (GuestPrincipal) authentication.getPrincipal();
+    }
+
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -91,6 +98,10 @@ public class Permissions implements PermissionEvaluator {
             if (SURVEY_TARGET.equalsIgnoreCase(targetType)) {
                 return permitSurvey(respondent(authentication), (UUID) targetId, authentication, permission);
             }
+        } else if (hasRole(authentication.getAuthorities(), ROLE_GUEST)) {
+            if (SURVEY_TARGET.equalsIgnoreCase(targetType)) {
+                return permitSurvey(guest(authentication), (UUID) targetId, authentication, permission);
+            }
         }
 
         return false;
@@ -110,6 +121,13 @@ public class Permissions implements PermissionEvaluator {
                                  @NonNull final Authentication authentication,
                                  @NonNull final Object permission) {
         return respondent.getId().getValue().equals(questionnaireId);
+    }
+
+    private boolean permitSurvey(@NonNull final GuestPrincipal guest,
+                                 @NonNull final UUID questionnaireId,
+                                 @NonNull final Authentication authentication,
+                                 @NonNull final Object permission) {
+        return guest.getId().getValue().equals(questionnaireId);
     }
 
     private boolean permitSurvey(@NonNull final UserPrincipal user,

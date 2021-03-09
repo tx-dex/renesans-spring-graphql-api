@@ -3,6 +3,7 @@ package fi.sangre.renesans.graphql.facade;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.aaa.GuestPrincipal;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.InvitationAssembler;
@@ -240,6 +241,8 @@ public class AfterGameFacade {
         final OrganizationSurvey survey;
         if (principal instanceof RespondentPrincipal) {
             survey = organizationSurveyService.getSurvey(((RespondentPrincipal) principal).getSurveyId());
+        } else if (principal instanceof GuestPrincipal) {
+            survey = organizationSurveyService.getSurvey(((GuestPrincipal) principal).getSurveyId());
         } else if (principal instanceof UserPrincipal) {
             survey = organizationSurveyService.getSurvey(questionnaireId);
         } else {
@@ -270,8 +273,6 @@ public class AfterGameFacade {
         log.debug("Start getting stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameterId);
         final SurveyResult surveyStatistics;
 
-
-
         if (ParameterId.GLOBAL_YOU_PARAMETER_ID.equals(parameterId)) {
             surveyStatistics = getRespondentStatistics(survey, principal);
         } else if (ParameterId.GLOBAL_EVERYONE_PARAMETER_ID.equals(parameterId)) {
@@ -297,28 +298,42 @@ public class AfterGameFacade {
     private List<ParameterChild> getParameters(@NonNull final OrganizationSurvey survey, @NonNull final UserDetails principal) {
         final ImmutableList.Builder<ParameterChild> parameters = ImmutableList.builder();
 
+        final QuestionnaireOutput questionnaire;
         if (principal instanceof RespondentPrincipal) {
             final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+            parameters.add(getGlobalYouParameter(survey));
 
             try {
                 final Future<Map<ParameterId, ParameterItemAnswer>> parameterAnswers = answerService.getParametersAnswersAsync(respondent.getSurveyId(), respondent.getId());
-                final QuestionnaireOutput questionnaire = questionnaireAssembler.from(respondent.getId(), survey, ImmutableMap.of(), ImmutableMap.of(), parameterAnswers.get());
+                questionnaire = questionnaireAssembler.from(respondent.getId(), survey, ImmutableMap.of(), ImmutableMap.of(), parameterAnswers.get());
+            } catch (final InterruptedException | ExecutionException ex) {
+                log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
+                throw new InternalServiceException("Cannot get questionnaire");
+            }
+        } else if (principal instanceof GuestPrincipal) {
+            final GuestPrincipal guest = (GuestPrincipal) principal;
 
-                parameters.add(getGlobalYouParameter(survey));
+            try {
+                final Future<Map<ParameterId, ParameterItemAnswer>> parameterAnswers = answerService.getParametersAnswersAsync(guest.getSurveyId(), guest.getId());
+                questionnaire = questionnaireAssembler.from(guest.getId(), survey, parameterAnswers.get());
+            } catch (final InterruptedException | ExecutionException ex) {
+                log.warn("Cannot get questionnaire for guest(id={})", guest.getId());
+                throw new InternalServiceException("Cannot get questionnaire");
+            }
+        } else {
+            questionnaire = null;
+        }
+
+        if (questionnaire != null) {
                 parameters.addAll(questionnaire.getParameters().stream()
                         .filter(QuestionnaireParameterOutput::isAnswered)
                         .map(parameter -> parameterUtils.findChildren(ParameterId.fromUUID(parameter.getSelectedAnswer()), surveyUtils.findParameter(parameter.getValue(), survey)))
                         .flatMap(Collection::stream)
                         .collect(toList()));
 
-                parameters.add(getGlobalEveryoneParameter(survey));
-            } catch (final InterruptedException | ExecutionException ex) {
-                log.warn("Cannot get questionnaire for respondent(id={})", respondent.getId());
-                throw new InternalServiceException("Cannot get questionnaire");
-            }
-        } else if (principal instanceof UserPrincipal) {
-            parameters.add(getGlobalEveryoneParameter(survey));
         }
+
+        parameters.add(getGlobalEveryoneParameter(survey));
 
         return parameters.build();
     }

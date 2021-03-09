@@ -31,7 +31,7 @@ public class RespondentAssembler {
     @NonNull
     public List<Respondent> from(@NonNull final Map<SurveyRespondent, List<ParameterAnswerEntity>> answers) {
         return answers.entrySet().stream()
-                .map(e -> from(e.getKey(), parameterAnswerAssembler.fromEntities(e.getValue())))
+                .map(e -> from(e.getKey(), parameterAnswerAssembler.fromRespondentAnswers(e.getValue())))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 

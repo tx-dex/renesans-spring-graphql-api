@@ -1,7 +1,7 @@
 package fi.sangre.renesans.application.model.answer;
 
 import fi.sangre.renesans.application.model.ParameterId;
-import fi.sangre.renesans.application.model.RespondentParameterId;
+import fi.sangre.renesans.application.model.QuestionnaireUserParameterId;
 import lombok.*;
 
 @NoArgsConstructor
@@ -10,6 +10,6 @@ import lombok.*;
 @EqualsAndHashCode(of = "rootId")
 @Builder
 public class ParameterItemAnswer {
-    private RespondentParameterId rootId;
+    private QuestionnaireUserParameterId rootId;
     private ParameterId response;
 }

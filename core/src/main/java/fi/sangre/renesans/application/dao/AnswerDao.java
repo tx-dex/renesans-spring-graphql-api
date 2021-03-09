@@ -19,16 +19,14 @@ import fi.sangre.renesans.application.model.filter.RespondentParameterFilter;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
 import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.model.QSurveyRespondent;
 import fi.sangre.renesans.persistence.model.SurveyRespondentState;
 import fi.sangre.renesans.persistence.model.answer.*;
-import fi.sangre.renesans.persistence.repository.CatalystOpenQuestionAnswerRepository;
-import fi.sangre.renesans.persistence.repository.LikerQuestionAnswerRepository;
-import fi.sangre.renesans.persistence.repository.ParameterAnswerRepository;
-import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
+import fi.sangre.renesans.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -48,6 +46,7 @@ public class AnswerDao {
     private final CatalystOpenQuestionAnswerRepository catalystOpenQuestionAnswerRepository;
     private final LikerQuestionAnswerRepository likerQuestionAnswerRepository;
     private final ParameterAnswerRepository parameterAnswerRepository;
+    private final GuestParameterAnswerRepository guestParameterAnswerRepository;
     private final RespondentAssembler respondentAssembler;
     private final ParameterAnswerAssembler parameterAnswerAssembler;
     private final SurveyRespondentRepository surveyRespondentRepository;
@@ -263,15 +262,55 @@ public class AnswerDao {
 
     @NonNull
     @Transactional(readOnly = true)
+    public Collection<ParameterItemAnswer> getParametersAnswers(@NonNull final SurveyId surveyId, @NonNull final GuestId guestId) {
+        return parameterAnswerAssembler.fromGuestAnswers(
+                guestParameterAnswerRepository.findAllByIdSurveyIdAndIdGuestIdAndTypeIs(surveyId.getValue(),
+                        guestId.getValue(),
+                        ParameterAnswerType.ITEM));
+    }
+
+    @NonNull
+    @Transactional(readOnly = true)
     public Collection<ParameterItemAnswer> getParametersAnswers(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
-        return parameterAnswerAssembler.fromEntities(
+        return parameterAnswerAssembler.fromRespondentAnswers(
                 parameterAnswerRepository.findAllByIdSurveyIdAndIdRespondentIdAndTypeIs(surveyId.getValue(),
                         respondentId.getValue(),
                         ParameterAnswerType.ITEM));
     }
 
     @Transactional
-    public void saveAnswer(@NonNull final Parameter answer, @NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
+    public void saveAnswer(@NonNull final Parameter answer, @NonNull final SurveyId surveyId, @NonNull final GuestId guestId) {
+        if (answer instanceof ParameterItem) {
+            final ParameterItem parameter = (ParameterItem) answer;
+            final ParameterId parameterId = Objects.requireNonNull(parameter.getId());
+            final ParameterId parentId = Objects.requireNonNull(parameter.getParent()).getId();
+            final ParameterId rootId = Objects.requireNonNull(parameter.getRoot()).getId();
+
+            final ImmutableList.Builder<GuestParameterAnswerEntity> answers = ImmutableList.builder();
+            final GuestParameterAnswerEntity item = GuestParameterAnswerEntity.builder()
+                    .id(new GuestParameterAnswerId(surveyId.getValue(), guestId.getValue(), parameterId.getValue()))
+                    .type(ParameterAnswerType.ITEM)
+                    .parentId(parentId.getValue())
+                    .rootId(rootId.getValue())
+                    .build();
+            answers.add(item);
+
+            Parameter parent = parameterUtils.getParent(parameter);
+            while (parent != null) {
+                answers.add(getParentEntity(parent, surveyId.getValue(), guestId, rootId.getValue()));
+                parent = parameterUtils.getParent(parent);
+            }
+
+            guestParameterAnswerRepository.deleteAllByRootId(rootId.getValue());
+            guestParameterAnswerRepository.saveAll(answers.build());
+        } else {
+            throw new SurveyException("Can only answer to the last child (with no children)");
+        }
+    }
+
+    @Transactional
+    public void saveAnswer(@NonNull final Parameter answer, @NonNull final SurveyId surveyId,
+                           @NonNull final RespondentId respondentId) {
         if (answer instanceof ParameterItem) {
             final ParameterItem parameter = (ParameterItem) answer;
             final ParameterId parameterId = Objects.requireNonNull(parameter.getId());
@@ -289,7 +328,7 @@ public class AnswerDao {
 
             Parameter parent = parameterUtils.getParent(parameter);
             while (parent != null) {
-                answers.add(getParentEntity(parent, surveyId.getValue(), respondentId.getValue(), rootId.getValue()));
+                answers.add(getParentEntity(parent, surveyId.getValue(), respondentId, rootId.getValue()));
                 parent = parameterUtils.getParent(parent);
             }
 
@@ -303,19 +342,42 @@ public class AnswerDao {
     @NonNull
     private ParameterAnswerEntity getParentEntity(@NonNull final Parameter parameter,
                                                   @NonNull final UUID surveyId,
-                                                  @NonNull final UUID respondentId,
+                                                  @NonNull final RespondentId respondentId,
                                                   @NonNull final UUID rootId) {
         final Parameter parent = parameterUtils.getParent(parameter);
         if (parent != null) {
             return ParameterAnswerEntity.builder()
-                    .id(new ParameterAnswerId(surveyId, respondentId, parameter.getId().getValue()))
+                    .id(new ParameterAnswerId(surveyId, respondentId.getValue(), parameter.getId().getValue()))
                     .type(ParameterAnswerType.PARENT)
                     .parentId(parent.getId().getValue())
                     .rootId(rootId)
                     .build();
         } else {
             return ParameterAnswerEntity.builder()
-                    .id(new ParameterAnswerId(surveyId, respondentId, rootId))
+                    .id(new ParameterAnswerId(surveyId, respondentId.getValue(), rootId))
+                    .type(ParameterAnswerType.ROOT)
+                    .parentId(null)
+                    .rootId(null)
+                    .build();
+        }
+    }
+
+    @NonNull
+    private GuestParameterAnswerEntity getParentEntity(@NonNull final Parameter parameter,
+                                                  @NonNull final UUID surveyId,
+                                                  @NonNull final GuestId guestId,
+                                                  @NonNull final UUID rootId) {
+        final Parameter parent = parameterUtils.getParent(parameter);
+        if (parent != null) {
+            return GuestParameterAnswerEntity.builder()
+                    .id(new GuestParameterAnswerId(surveyId, guestId.getValue(), parameter.getId().getValue()))
+                    .type(ParameterAnswerType.PARENT)
+                    .parentId(parent.getId().getValue())
+                    .rootId(rootId)
+                    .build();
+        } else {
+            return GuestParameterAnswerEntity.builder()
+                    .id(new GuestParameterAnswerId(surveyId, guestId.getValue(), rootId))
                     .type(ParameterAnswerType.ROOT)
                     .parentId(null)
                     .rootId(null)

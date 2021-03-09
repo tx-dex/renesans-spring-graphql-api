@@ -1,6 +1,7 @@
 package fi.sangre.renesans.application.dao;
 
 import fi.sangre.renesans.application.assemble.RespondentAssembler;
+import fi.sangre.renesans.application.model.QuestionnaireUserState;
 import fi.sangre.renesans.application.model.Respondent;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
@@ -37,6 +38,16 @@ public class RespondentDao {
     private final ParameterAnswerRepository parameterAnswerRepository;
     private final RespondentUtils respondentUtils;
     private final RespondentAssembler respondentAssembler;
+
+    @Transactional(readOnly = true)
+    public QuestionnaireUserState getState(@NonNull final RespondentId id) {
+        return getRespondent(id, entity -> QuestionnaireUserState.builder()
+                .consented(Boolean.TRUE.equals(entity.getConsent()))
+                .answeringParameters(respondentUtils.isAnsweringParameters(entity.getState()))
+                .answeringQuestions(respondentUtils.isAnsweringQuestions(entity.getState()))
+                .viewingAfterGame(respondentUtils.isViewingAfterGame(entity.getState()))
+                .build());
+    }
 
     /**
      * @param respondentId Respondent Id
@@ -102,6 +113,14 @@ public class RespondentDao {
         }
     }
 
+    @Nullable
+    @Transactional(readOnly = true)
+    public RespondentId findRespondent(@NonNull final RespondentId respondentId, @NonNull final String invitationHash) {
+        return surveyRespondentRepository.findByIdAndInvitationHash(respondentId.getValue(), invitationHash)
+                .map(v -> new RespondentId(v.getId()))
+                .orElse(null);
+    }
+
     @Transactional(readOnly = true)
     public Set<RespondentId> findRespondentsByEmails(@NonNull final SurveyId surveyId, @NonNull final Set<String> emails) {
         return surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()).stream()
@@ -129,11 +148,12 @@ public class RespondentDao {
                 .orElseThrow(() -> new SurveyException("Respondent not found"));
     }
 
+    @NonNull
     @Transactional(readOnly = true)
-    public boolean isConsented(@NonNull final RespondentId id) {
+    public <T> T getRespondent(@NonNull final RespondentId id, @NonNull final Function<SurveyRespondent, T> mapper) {
         return surveyRespondentRepository.findById(id.getValue())
-                .map(SurveyRespondent::getConsent)
-                .orElse(false);
+                .map(mapper)
+                .orElseThrow(() -> new SurveyException("Respondent not found"));
     }
 
     @Transactional

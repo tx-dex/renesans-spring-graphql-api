@@ -2,7 +2,6 @@ package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.application.model.questions.QuestionId;
-import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.graphql.facade.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
@@ -38,7 +37,7 @@ public class AppMutations implements GraphQLMutationResolver {
     // this is public and respondent does not have token for that yet. Do not authorize it!!!
     @NonNull
     public AuthorizationOutput openQuestionnaire(@NonNull final UUID id, @NonNull final String invitationHash) {
-        return questionnaireFacade.openQuestionnaire(new RespondentId(id), invitationHash);
+        return questionnaireFacade.openQuestionnaire(id, invitationHash);
     }
 
     @NonNull
@@ -87,7 +86,7 @@ public class AppMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
-    @PreAuthorize("hasRole('RESPONDENT')")
+    @PreAuthorize("hasRole('RESPONDENT') or hasRole('GUEST')")
     public QuestionnaireOutput answerParameter(@NonNull final ParameterAnswerInput answer,
                                                @Nullable final String languageCode,
                                                @NonNull final DataFetchingEnvironment environment) {
@@ -98,7 +97,7 @@ public class AppMutations implements GraphQLMutationResolver {
     }
 
     @NonNull
-    @PreAuthorize("hasRole('RESPONDENT')")
+    @PreAuthorize("hasRole('RESPONDENT') or hasRole('GUEST')")
     public QuestionnaireOutput consentQuestionnairePolicy(@NonNull final UUID id,
                                                @NonNull final Boolean consent,
                                                @Nullable final String languageCode,

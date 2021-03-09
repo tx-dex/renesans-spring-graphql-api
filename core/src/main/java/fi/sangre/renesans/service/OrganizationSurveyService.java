@@ -12,6 +12,7 @@ import fi.sangre.renesans.application.merge.OrganizationSurveyMerger;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -289,14 +290,6 @@ public class OrganizationSurveyService {
     //TODO: move to dao
     @NonNull
     @Transactional(readOnly = true)
-    public Respondent getRespondent(@NonNull final RespondentId respondentId, @NonNull final String invitationHash) {
-        return respondentAssembler.from(surveyRespondentRepository.findByIdAndInvitationHash(respondentId.getValue(), invitationHash)
-                .orElseThrow(() -> new SurveyException("Respondent not found")));
-    }
-
-    //TODO: move to dao
-    @NonNull
-    @Transactional(readOnly = true)
     public Respondent getRespondent(@NonNull final RespondentId respondentId) {
         return respondentAssembler.from(surveyRespondentRepository.findById(respondentId.getValue())
                 .orElseThrow(() -> new SurveyException("Respondent not found")));
@@ -361,10 +354,18 @@ public class OrganizationSurveyService {
     @EventListener
     @Async(ASYNC_EXECUTOR_NAME)
     public void handleOpenedEvent(@NonNull final QuestionnaireOpenedEvent event) {
-        final RespondentId respondentId = event.getRespondentId();
+        final IdValueObject<UUID> id = event.getRespondentId();
 
-        if (!respondentDao.isInvited(respondentId)) {
-            respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.OPENED);
+        if (id instanceof RespondentId) {
+            final RespondentId respondentId = (RespondentId) id;
+            if (!respondentDao.isInvited(respondentId)) {
+                respondentDao.updateRespondentStatus(respondentId, SurveyRespondentState.OPENED);
+            }
+        } else if (id instanceof GuestId) {
+            final GuestId guestId = (GuestId) id;
+            //TODO: update status
+        } else {
+            throw new SurveyException("Invalid id");
         }
     }
 

@@ -1,8 +1,14 @@
 package fi.sangre.renesans.aaa;
 
+import fi.sangre.renesans.application.dao.GuestDao;
+import fi.sangre.renesans.application.model.IdValueObject;
 import fi.sangre.renesans.application.model.Respondent;
+import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.TokenUtils;
+import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.persistence.model.SurveyGuest;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -25,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -33,6 +40,7 @@ import java.util.Optional;
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenService tokenService;
     private final OrganizationSurveyService organizationSurveyService;
+    private final GuestDao guestDao;
     private final UserPrincipalService userPrincipalService;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
@@ -47,11 +55,19 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             if (token != null) {
                 final UserDetails userDetails;
                 if (TokenUtils.isQuestionnaireToken(token.getBody())) {
-                    final RespondentId respondentId = TokenUtils.getRespondent(token.getBody());
-                    final Respondent respondent = organizationSurveyService.getRespondent(respondentId);
-                    userDetails = new RespondentPrincipal(respondentId,
-                            respondent.getEmail(),
-                            respondent.getSurveyId());
+                    final IdValueObject<UUID> id = TokenUtils.getQuestionnaireUserId(token.getBody());
+                    if (id instanceof RespondentId) {
+                        final RespondentId respondentId = (RespondentId) id;
+                        final Respondent respondent = organizationSurveyService.getRespondent(respondentId);
+                        userDetails = new RespondentPrincipal(respondentId,
+                                respondent.getEmail(),
+                                respondent.getSurveyId());
+                    } else if (id instanceof GuestId) {
+                        final GuestId guestId = (GuestId) id;
+                        userDetails = guestDao.getGuest(guestId, this::getGuest);
+                    } else {
+                        throw new SurveyException("Invalid id");
+                    }
                 } else {
                     final Long userId = TokenUtils.getUserId(token.getBody());
                     userDetails = userPrincipalService.loadUserById(userId);
@@ -86,5 +102,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    @NonNull
+    private GuestPrincipal getGuest(@NonNull final SurveyGuest entity) {
+        return new GuestPrincipal(new GuestId(entity.getId()), entity.getEmail(), new SurveyId(entity.getSurveyId()));
     }
 }
