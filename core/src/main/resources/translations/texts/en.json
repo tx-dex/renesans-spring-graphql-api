@@ -109,9 +109,6 @@
     }
   },
   "questions": {
-    "sub_title": {
-      "text": "How important is this question to me?"
-    },
     "low_end_label": {
       "text": "Unacceptable"
     },

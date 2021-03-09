@@ -117,7 +117,6 @@ public class QuestionAssembler {
     public List<LikertQuestion> fromLikertMetadata(@NonNull final Catalyst catalyst,
                                                    @NonNull final Map<DriverId, Double> allDriverWeights,
                                                    @Nullable final List<QuestionMetadata> metadata,
-                                                   @NonNull final MultilingualText subTitle,
                                                    @NonNull final MultilingualText lowEndLabel,
                                                    @NonNull final MultilingualText highEndLabel) {
         final Map<DriverId, Double> defaultDriverWeights = new LinkedHashMap<>(allDriverWeights);
@@ -131,7 +130,6 @@ public class QuestionAssembler {
                 .map(v -> fromLikert(catalyst,
                         Collections.unmodifiableMap(defaultDriverWeights),
                         v,
-                        subTitle,
                         lowEndLabel,
                         highEndLabel))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
@@ -142,11 +140,10 @@ public class QuestionAssembler {
     private LikertQuestion fromLikert(@NonNull final Catalyst catalyst,
                                       @NonNull final Map<DriverId, Double> defaultDriverWeights,
                                       @NonNull final QuestionMetadata metadata,
-                                      @NonNull final MultilingualText subTitle,
                                       @NonNull final MultilingualText lowEndLabel,
                                       @NonNull final MultilingualText highEndLabel) {
         if (metadata instanceof LikertQuestionMetadata) {
-            return from(catalyst, defaultDriverWeights, (LikertQuestionMetadata) metadata, subTitle, lowEndLabel, highEndLabel);
+            return from(catalyst, defaultDriverWeights, (LikertQuestionMetadata) metadata, lowEndLabel, highEndLabel);
         } else {
             // TODO: implement later if needed
             throw new SurveyException("Invalid question type");
@@ -166,12 +163,9 @@ public class QuestionAssembler {
     private LikertQuestion from(@NonNull final Catalyst catalyst,
                                 @NonNull final Map<DriverId, Double> defaultDriverWeigths,
                                 @NonNull final LikertQuestionMetadata metadata,
-                                @NonNull final MultilingualText defaultSubTitle,
                                 @NonNull final MultilingualText defaultLowEndLabel,
                                 @NonNull final MultilingualText defaultHighEndLabel) {
 
-        final MultilingualText subTitle = multilingualUtils.combine(defaultSubTitle,
-                multilingualUtils.create(metadata.getSubTitles()));
         final MultilingualText lowEndLabel = multilingualUtils.combine(defaultLowEndLabel,
                 multilingualUtils.create(metadata.getLowEndLabels()));
         final MultilingualText highEndLabel = multilingualUtils.combine(defaultHighEndLabel,
@@ -189,7 +183,7 @@ public class QuestionAssembler {
                 .id(new QuestionId(metadata.getId()))
                 .catalystId(catalyst.getId())
                 .titles(multilingualUtils.create(metadata.getTitles()))
-                .subTitles(subTitle)
+                .subTitles(multilingualUtils.create(metadata.getSubTitles()))
                 .lowEndLabels(lowEndLabel)
                 .highEndLabels(highEndLabel)
                 .weights(Collections.unmodifiableMap(driverWeights))

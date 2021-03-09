@@ -62,9 +62,6 @@ public class CatalystAssembler {
     @NonNull
     public List<Catalyst> fromMetadata(@Nullable final List<CatalystMetadata> metadata,
                                        @NonNull final StaticTextGroup textGroup) {
-        final MultilingualText subTitle = Optional.ofNullable(textGroup.getTexts())
-                .map(v -> v.get(TranslationService.QUESTIONS_SUB_TITLE_TRANSLATION_KEY))
-                .orElse(multilingualUtils.empty());
         final MultilingualText lowEndLabel = Optional.ofNullable(textGroup.getTexts())
                 .map(v -> v.get(TranslationService.QUESTIONS_LOW_LABEL_TRANSLATION_KEY))
                 .orElse(multilingualUtils.empty());
@@ -82,7 +79,6 @@ public class CatalystAssembler {
                 .stream()
                 .map(v -> from(v,
                         Collections.unmodifiableMap(defaultDriverWeights),
-                        subTitle,
                         lowEndLabel,
                         highEndLabel))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
@@ -91,7 +87,6 @@ public class CatalystAssembler {
     @NonNull
     private Catalyst from(@NonNull final CatalystMetadata metadata,
                           @NonNull final Map<DriverId, Double> defaultAllDriverWeights,
-                          @NonNull final MultilingualText subTitle,
                           @NonNull final MultilingualText lowEndLabel,
                           @NonNull final MultilingualText highEndLabel) {
 
@@ -107,7 +102,6 @@ public class CatalystAssembler {
         final List<LikertQuestion> likertQuestions = questionAssembler.fromLikertMetadata(catalyst,
                 defaultAllDriverWeights,
                 metadata.getQuestions(),
-                subTitle,
                 lowEndLabel,
                 highEndLabel);
         final List<OpenQuestion> openQuestions = questionAssembler.fromOpenMetadata(catalyst, metadata.getOpenQuestions());

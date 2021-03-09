@@ -43,22 +43,18 @@ public class QuestionMetadataAssembler {
 
     @NonNull
     public List<QuestionMetadata> fromLikert(@NonNull final List<LikertQuestion> questions,
-                                             @NonNull final MultilingualText subTitle,
                                              @NonNull final MultilingualText lowEndLabel,
                                              @NonNull final MultilingualText highEndLabel) {
         return questions.stream()
-                .map(v -> from(v, subTitle, lowEndLabel, highEndLabel))
+                .map(v -> from(v, lowEndLabel, highEndLabel))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull
     private QuestionMetadata from(@NonNull final LikertQuestion question,
-                                  @NonNull final MultilingualText defaultSubTitle,
                                   @NonNull final MultilingualText defaultLowEndLabel,
                                   @NonNull final MultilingualText defaultHighEndLabel) {
 
-        final Map<String, String> subTitles = multilingualUtils.isSameText(defaultSubTitle, question.getSubTitles())
-                ? null : question.getSubTitles().getPhrases();
         final Map<String, String> lowEndLabels = multilingualUtils.isSameText(defaultLowEndLabel, question.getLowEndLabels())
                 ? null : question.getLowEndLabels().getPhrases();
         final Map<String, String> highEndLabels = multilingualUtils.isSameText(defaultHighEndLabel, question.getHighEndLabels())
@@ -67,7 +63,7 @@ public class QuestionMetadataAssembler {
         return LikertQuestionMetadata.builder()
                 .id(question.getId().getValue())
                 .titles(question.getTitles().getPhrases())
-                .subTitles(subTitles)
+                .subTitles(emtpyToNull(question.getSubTitles()))
                 .lowEndLabels(lowEndLabels)
                 .highEndLabels(highEndLabels)
                 .driverWeights(fromWeights(question.getWeights()))
@@ -86,5 +82,14 @@ public class QuestionMetadataAssembler {
                                 LinkedHashMap::new
                         ), Collections::unmodifiableMap)))
                 .orElse(null);
+    }
+
+    @Nullable
+    private Map<String, String> emtpyToNull(@Nullable final MultilingualText text) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        } else {
+            return text.getPhrases();
+        }
     }
 }

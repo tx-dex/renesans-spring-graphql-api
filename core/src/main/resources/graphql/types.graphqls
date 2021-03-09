@@ -194,7 +194,7 @@ type OpenQuestion {
 type LikertQuestion {
     id: ID!
     title: String!
-    subTitle: String!
+    subTitle: String
     lowEndLabel: String!
     highEndLabel: String!
     weights: QuestionDriverWeights!
@@ -316,7 +316,7 @@ interface IQuestionnaireQuestion {
 type QuestionnaireLikertQuestion implements IQuestionnaireQuestion {
     id: ID!
     title: String!
-    subTitle: String!
+    subTitle: String
     lowEndLabel: String!
     highEndLabel: String!
     answered: Boolean!

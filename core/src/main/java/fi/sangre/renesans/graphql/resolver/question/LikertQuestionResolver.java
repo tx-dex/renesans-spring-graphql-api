@@ -13,6 +13,7 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -43,12 +44,9 @@ public class LikertQuestionResolver implements GraphQLResolver<LikertQuestion> {
         return multilingualTextResolver.getRequiredText(output.getTitles(), resolverHelper.getLanguageCode(environment));
     }
 
-    @NonNull
+    @Nullable
     public String getSubTitle(@NonNull final LikertQuestion output, @NonNull final DataFetchingEnvironment environment) {
-        final MultilingualText defaults = translationService.getPhrases(QUESTIONS_TRANSLATION_GROUP, QUESTIONS_SUB_TITLE_TRANSLATION_KEY);
-        final MultilingualText combined = multilingualUtils.combine(defaults, output.getSubTitles());
-
-        return multilingualTextResolver.getRequiredText(combined, resolverHelper.getLanguageCode(environment));
+        return multilingualTextResolver.getOptionalText(output.getSubTitles(), resolverHelper.getLanguageCode(environment));
     }
 
     @NonNull

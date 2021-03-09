@@ -32,14 +32,9 @@ public class CatalystMetadataAssembler {
     public List<CatalystMetadata> from(@NonNull final List<Catalyst> catalysts,
                                        @NonNull final StaticTextGroup textGroup) {
 
-
-        final MultilingualText globalSubTitle = translationService.getPhrases(TranslationService.QUESTIONS_TRANSLATION_GROUP, TranslationService.QUESTIONS_SUB_TITLE_TRANSLATION_KEY);
         final MultilingualText globalLowEndLabel = translationService.getPhrases(TranslationService.QUESTIONS_TRANSLATION_GROUP, TranslationService.QUESTIONS_LOW_LABEL_TRANSLATION_KEY);
         final MultilingualText globalHighEndLabel = translationService.getPhrases(TranslationService.QUESTIONS_TRANSLATION_GROUP, TranslationService.QUESTIONS_HIGH_LABEL_TRANSLATION_KEY);
 
-        final MultilingualText subTitle = Optional.ofNullable(textGroup.getTexts())
-                .map(v -> v.get(TranslationService.QUESTIONS_SUB_TITLE_TRANSLATION_KEY))
-                .orElse(multilingualUtils.empty());
         final MultilingualText lowEndLabel = Optional.ofNullable(textGroup.getTexts())
                 .map(v -> v.get(TranslationService.QUESTIONS_LOW_LABEL_TRANSLATION_KEY))
                 .orElse(multilingualUtils.empty());
@@ -49,7 +44,6 @@ public class CatalystMetadataAssembler {
 
         return catalysts.stream()
                 .map(v -> from(v,
-                        multilingualUtils.combine(globalSubTitle, subTitle),
                         multilingualUtils.combine(globalLowEndLabel, lowEndLabel),
                         multilingualUtils.combine(globalHighEndLabel, highEndLabel)))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
@@ -57,7 +51,6 @@ public class CatalystMetadataAssembler {
 
     @NonNull
     public CatalystMetadata from(@NonNull final Catalyst catalyst,
-                                 @NonNull final MultilingualText subTitle,
                                  @NonNull final MultilingualText lowEndLabel,
                                  @NonNull final MultilingualText highEndLabel) {
         return CatalystMetadata.builder()
@@ -66,7 +59,6 @@ public class CatalystMetadataAssembler {
                 .descriptions(catalyst.getDescriptions().getPhrases())
                 .drivers(driverMetadataAssembler.from(catalyst.getDrivers()))
                 .questions(questionMetadataAssembler.fromLikert(catalyst.getQuestions(),
-                        subTitle,
                         lowEndLabel,
                         highEndLabel))
                 .openQuestion(null)
