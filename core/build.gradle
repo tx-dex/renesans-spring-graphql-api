@@ -94,6 +94,7 @@ dependencies {
     implementation("com.google.guava:guava:${guavaVersion}")
     implementation("org.apache.commons:commons-lang3:${commonsLangVersion}")
     implementation("org.apache.commons:commons-math3:${commonsMathVersion}")
+    implementation("commons-io:commons-io:${commonsIoVersion}")
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("org.apache.poi:poi-ooxml:${poiOoxmlVersion}")
     implementation("com.github.ben-manes.caffeine:caffeine:${caffeineVersion}")
