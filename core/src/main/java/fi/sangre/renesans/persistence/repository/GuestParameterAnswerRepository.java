@@ -31,7 +31,9 @@ public interface GuestParameterAnswerRepository extends JpaRepository<GuestParam
                                                 @NonNull ParameterAnswerType type);
 
 
-    void deleteAllByRootId(@NonNull UUID rootId);
+    void deleteAllByIdSurveyIdAndIdGuestIdAndRootId(@NonNull UUID surveyId,
+                                                    @NonNull UUID guestId,
+                                                    @NonNull UUID rootId);
 
     void deleteAllByGuest(@NonNull SurveyGuest guest);
 }

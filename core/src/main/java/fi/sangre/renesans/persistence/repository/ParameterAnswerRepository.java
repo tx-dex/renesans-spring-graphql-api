@@ -31,7 +31,9 @@ public interface ParameterAnswerRepository extends JpaRepository<ParameterAnswer
                                                      @NonNull ParameterAnswerType type);
 
 
-    void deleteAllByRootId(@NonNull UUID rootId);
+    void deleteAllByIdSurveyIdAndIdRespondentIdAndRootId(@NonNull UUID surveyId,
+                                                         @NonNull UUID respondentId,
+                                                         @NonNull UUID rootId);
 
     void deleteAllByRespondent(@NonNull SurveyRespondent respondent);
 }

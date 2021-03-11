@@ -301,7 +301,7 @@ public class AnswerDao {
                 parent = parameterUtils.getParent(parent);
             }
 
-            guestParameterAnswerRepository.deleteAllByRootId(rootId.getValue());
+            guestParameterAnswerRepository.deleteAllByIdSurveyIdAndIdGuestIdAndRootId(surveyId.getValue(), guestId.getValue(), rootId.getValue());
             guestParameterAnswerRepository.saveAll(answers.build());
         } else {
             throw new SurveyException("Can only answer to the last child (with no children)");
@@ -332,7 +332,7 @@ public class AnswerDao {
                 parent = parameterUtils.getParent(parent);
             }
 
-            parameterAnswerRepository.deleteAllByRootId(rootId.getValue());
+            parameterAnswerRepository.deleteAllByIdSurveyIdAndIdRespondentIdAndRootId(surveyId.getValue(), respondentId.getValue(), rootId.getValue());
             parameterAnswerRepository.saveAll(answers.build());
         } else {
             throw new SurveyException("Can only answer to the last child (with no children)");
