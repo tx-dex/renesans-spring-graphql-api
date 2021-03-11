@@ -43,7 +43,7 @@ import static java.util.stream.Collectors.*;
 
 @Service
 public class StatisticsService {
-    public final static Double MAX_ANSWER_VALUE = 5d;
+    public final static Double MAX_ANSWER_VALUE = 4d;
     public final static Comparator<StatisticsQuestion> QUESTION_COMPARATOR = Comparator.comparingDouble(e -> e.getAnswer().getAvg() != null ? e.getAnswer().getAvg() : 0);
     private final static Double MEDIAN_PERCENTILE_VALUE = 50d;
     private final static Double DEFAULT_WEIGHT_VALUE = 1d;
@@ -245,20 +245,24 @@ public class StatisticsService {
 
         // Sums all question results and weights per driver to calculate weighted average after all
         for (final Map.Entry<QuestionId, QuestionStatistics> entry : questionStatistics.entrySet()) {
-            final Map<DriverId, Double> weights = questionWeights.get(entry.getKey());
+            final Double questionAverage = entry.getValue().getAvg();
 
-            weights.forEach((driverId, questionWeight) -> {
-                final Double questionAverage = entry.getValue().getAvg();
-                sumOfQuestionsWeightsPerDriver.computeIfPresent(driverId, (k, v) -> v + questionWeight);
+            // do not count skipped question, null is set for questions that does not concern respondents.
+            // This is only case when it can be null, as we always calculate stats for respondents that finished questionnaire
+            if (questionAverage != null) {
+                final Map<DriverId, Double> weights = questionWeights.get(entry.getKey());
 
-                if (questionAverage != null) { // may happen if there are no answers for the question
-                    final Double driverWeightModifier = driversStatistics.get(driverId).getWeightModifier();
-                    final Double questionResult = questionAverage / MAX_ANSWER_VALUE;
+                weights.forEach((driverId, questionWeight) -> {
+                    if (questionWeight > 0) { //  weight = 0 can be skipped as it does not change results
+                        final Double driverWeightModifier = driversStatistics.get(driverId).getWeightModifier();
+                        final Double questionRate = questionAverage / MAX_ANSWER_VALUE;
 
-                    sumOfQuestionsResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * questionResult));
-                    sumOfQuestionsWeighedResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * calculateWeighedQuestionResult(questionResult, driverWeightModifier)));
-                }
-            });
+                        sumOfQuestionsWeightsPerDriver.computeIfPresent(driverId, (k, v) -> v + questionWeight);
+                        sumOfQuestionsResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * questionRate));
+                        sumOfQuestionsWeighedResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * calculateWeighedQuestionResult(questionRate, driverWeightModifier)));
+                    }
+                });
+            }
         }
 
         // Just calculates weighted average for each driver
@@ -768,9 +772,8 @@ public class StatisticsService {
     }
 
     private Double calculateWeighedQuestionResult(final Double questionAverage, final Double driverWeightModifier) {
-        final double value = (questionAverage - NORMALIZED_MIN_ANSWER_VALUE) / NORMALIZED_RESULT_RANGE;
-
-        return NORMALIZED_RESULT_RANGE * Math.pow(value, driverWeightModifier) + NORMALIZED_MIN_ANSWER_VALUE;
+        // Average is from 0 to 1, but for 0 we want to have like min 20% so we must normalize the result
+        return NORMALIZED_RESULT_RANGE * Math.pow(questionAverage, driverWeightModifier) + NORMALIZED_MIN_ANSWER_VALUE;
     }
 
     private int getUniqueCount(List list) {

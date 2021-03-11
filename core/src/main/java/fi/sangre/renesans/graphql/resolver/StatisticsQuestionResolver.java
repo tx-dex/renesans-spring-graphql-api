@@ -6,9 +6,9 @@ import fi.sangre.renesans.service.StatisticsService;
 import fi.sangre.renesans.statistics.StatisticsQuestion;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@Deprecated
 @RequiredArgsConstructor
 @Component
 public class StatisticsQuestionResolver implements GraphQLResolver<StatisticsQuestion> {
