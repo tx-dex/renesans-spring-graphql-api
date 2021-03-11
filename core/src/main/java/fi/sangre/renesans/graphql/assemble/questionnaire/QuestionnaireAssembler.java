@@ -117,6 +117,7 @@ public class QuestionnaireAssembler {
         final QuestionnaireUserState state = respondentDao.getState(respondentId);
         final boolean isConsented = state.isConsented();
         final boolean isAnswering = state.isAnsweringQuestions();
+        final boolean isViewingAfterGame = state.isViewingAfterGame();
         final List<QuestionnaireCatalystOutput> catalysts = questionnaireCatalystAssembler.from(survey.getCatalysts(), openQuestionAnswers, questionsAnswers);
         final List<QuestionnaireParameterOutput> parameters = questionnaireParameterOutputAssembler.from(survey.getParameters(), parameterAnswers);
         final boolean isAfterGameEnabled = SurveyState.AFTER_GAME.equals(survey.getState()); //TODO: get from survey
@@ -132,8 +133,8 @@ public class QuestionnaireAssembler {
                 .consented(isConsented)
                 .answerable(!isAfterGameEnabled)
                 .finished(isAllAnswered)
-                .canAnswerParameters(!isAnswering)
-                .canGoToQuestions(isConsented && areAllParametersAnswered)
+                .canAnswerParameters(!isAnswering && !isViewingAfterGame)
+                .canGoToQuestions(isConsented && areAllParametersAnswered && !isAfterGameEnabled)
                 .canAnswer(!isAfterGameEnabled)
                 .canComment(isAfterGameEnabled)
                 .canViewAfterGame(isAfterGameEnabled && isConsented && areAllParametersAnswered)
