@@ -15,7 +15,13 @@ import java.util.UUID;
 @Component
 public class RespondentParameterAnswerResolver implements GraphQLResolver<RespondentParameterAnswerOutput> {
     @NonNull
+    @Deprecated
     public UUID getId(@NonNull final RespondentParameterAnswerOutput output) {
-        return output.getId().getValue();
+        return output.getRootId().getValue();
+    }
+
+    @NonNull
+    public UUID getRootId(@NonNull final RespondentParameterAnswerOutput output) {
+        return output.getRootId().getValue();
     }
 }

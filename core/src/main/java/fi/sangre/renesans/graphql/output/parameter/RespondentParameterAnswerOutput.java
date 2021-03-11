@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class RespondentParameterAnswerOutput {
-    private ParameterId id;
+    private ParameterId rootId;
     private String response;
 }

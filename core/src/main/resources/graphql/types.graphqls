@@ -214,7 +214,8 @@ type RespondentParameterAnswer {
     # The parameter id from the table header/filter
     # This is the root value (SurveyParameter.value) when TREE or LIST parameter is used
     # this should be used to match the proper column in the frontend
-    id: ID!
+    rootId: ID!
+    id: ID! @deprecated(reason: "Use rootId as id causes caching issues")
     # Actual user answer value to display
     # when TREE or LIST parameter is used, it is the SurveyParameter.label value from checked child
     response: String

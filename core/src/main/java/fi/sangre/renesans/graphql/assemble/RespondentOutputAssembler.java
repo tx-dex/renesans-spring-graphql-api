@@ -50,7 +50,7 @@ public class RespondentOutputAssembler {
                 .email(respondent.getEmail())
                 .parameterAnswers(respondent.getParameterAnswers().stream()
                         .map(answer -> RespondentParameterAnswerOutput.builder()
-                                .id(answer.getRootId().getParameterId())
+                                .rootId(answer.getRootId().getParameterId())
                                 .response(parameters.get(answer.getResponse()))
                                 .build())
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))

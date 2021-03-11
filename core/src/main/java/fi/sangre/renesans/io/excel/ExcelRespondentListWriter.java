@@ -115,7 +115,7 @@ public class ExcelRespondentListWriter {
 
             final Map<ParameterId, String> answers = Optional.ofNullable(respondent.getParameterAnswers())
                     .orElse(ImmutableList.of()).stream()
-                    .collect(toMap(RespondentParameterAnswerOutput::getId, RespondentParameterAnswerOutput::getResponse));
+                    .collect(toMap(RespondentParameterAnswerOutput::getRootId, RespondentParameterAnswerOutput::getResponse));
 
             for (int i = columnNum; i < columns.size(); i++) {
                 final ExcelColumn column = columns.get(i);
