@@ -77,10 +77,8 @@ public class QuestionnaireCatalystAssembler {
         final List<QuestionnaireLikertQuestionOutput> questions = questionnaireLikertQuestionAssembler.from(catalyst.getQuestions(), likertAnswers);
         final List<QuestionnaireOpenQuestionOutput> openQuestions = questionnaireOpenQuestionAssembler.from(catalyst.getOpenQuestions(), openAnswers);
 
+        // Take only likert questions into account as answering open questions is not required
         final boolean allAnswered = questions.stream()
-                .map(this::isAnsweredOrSkipped)
-                .reduce(Boolean.TRUE, Boolean::logicalAnd)
-                && openQuestions.stream()
                 .map(this::isAnsweredOrSkipped)
                 .reduce(Boolean.TRUE, Boolean::logicalAnd);
 
