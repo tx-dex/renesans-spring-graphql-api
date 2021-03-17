@@ -123,5 +123,16 @@
     "everyone": {
       "text": "Kaikki"
     }
+  },
+  "email_template": {
+    "heading_title": {
+      "text": "Your personal invitiation"
+    },
+    "heading_paragraph": {
+      "text": "Come along, join our network of business builders - let’s start building our future organisation!"
+    },
+    "invitation_button": {
+      "text": "Yes, I’m in!"
+    }
   }
 }

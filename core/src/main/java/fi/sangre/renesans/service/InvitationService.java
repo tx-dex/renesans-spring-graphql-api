@@ -6,15 +6,15 @@ import com.sangre.mail.dto.MailStatus;
 import com.sangre.mail.dto.attachements.Base64AttachmentDto;
 import fi.sangre.renesans.application.client.FeignMailClient;
 import fi.sangre.renesans.application.dao.RespondentDao;
+import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.event.InviteToAfterGameDiscussionEvent;
 import fi.sangre.renesans.application.event.InviteToAfterGameEvent;
 import fi.sangre.renesans.application.event.InviteToQuestionnaireEvent;
-import fi.sangre.renesans.application.model.IdValueObject;
-import fi.sangre.renesans.application.model.RespondentEmail;
-import fi.sangre.renesans.application.model.SurveyId;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.persistence.model.SurveyGuest;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
@@ -36,6 +36,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
@@ -52,6 +53,12 @@ public class InvitationService {
     private static final Base64AttachmentDto LOGO = new Base64AttachmentDto("logo", "image/png", "logo.png", resourceToString("/templates/email-logo.base64"));
     private static final String HTML_BASE_TEMPLATE = resourceToString("/templates/email-template.html");
 
+    private static final String MAIL_TEMPLATE_TEXT_GROUP = "email_template";
+    private static final String HEADING_TITLE_KEY = "heading_title";
+    private static final String HEADING_PARAGRAPH_KEY = "heading_paragraph";
+    private static final String INVITATION_BUTTON_KEY = "invitation_button";
+
+
     private static final String MAIL_TYPE_TAG = "email-type";
     private static final String MAIL_TYPE_QUESTIONNAIRE_INVITATION_VALUE = "survey-invitation";
     private static final String MAIL_TYPE_AFTER_GAME_INVITATION_VALUE = "after-game-invitation";
@@ -67,7 +74,10 @@ public class InvitationService {
     private final MailService mailService;
     private final FeignMailClient feignMailClient;
     private final RespondentDao respondentDao;
+    private final SurveyDao surveyDao;
     private final TemplateService templateService;
+    private final TranslationService translationService;
+    private final MultilingualUtils multilingualUtils;
 
     @Value("${fi.sangre.renesans.survey.url}")
     private String surveyUrl;
@@ -138,9 +148,12 @@ public class InvitationService {
         final SurveyId surveyId = new SurveyId(respondent.getSurveyId());
         final String invitationLink = getQuestionnaireInvitationLink(respondentId, respondent.getInvitationHash());
 
+        final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(surveyId);
+        //TODO: get language tag from "respondent"
+
         mailService.sendEmail(respondent.getEmail(),
                 subject,
-                composeHtmlBody(invitationLink, body),
+                composeHtmlBody(invitationLink, body, survey, "en"),
                 null,
                 ImmutableMap.of(MAIL_TYPE_TAG, MAIL_TYPE_QUESTIONNAIRE_INVITATION_VALUE,
                         SURVEY_ID_TAG, surveyId.asString(),
@@ -184,9 +197,11 @@ public class InvitationService {
             throw new RuntimeException("Invalid id");
         }
 
+        final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(surveyId);
+
         mailService.sendEmail(email,
                 subject,
-                composeHtmlBody(invitationLink, body),
+                composeHtmlBody(invitationLink, body, survey, "en"),
                 null,
                 tags,
                 replyTo,
@@ -231,9 +246,11 @@ public class InvitationService {
             throw new RuntimeException("Invalid id");
         }
 
+        final OrganizationSurvey survey = surveyDao.getSurveyOrThrow(surveyId);
+
         mailService.sendEmail(email,
                 subject,
-                composeHtmlBody(invitationLink, body),
+                composeHtmlBody(invitationLink, body, survey, "en"),
                 null,
                 tags,
                 replyTo,
@@ -283,8 +300,25 @@ public class InvitationService {
     }
 
     @NonNull
-    private String composeHtmlBody(@NonNull final String invitationLink, @NonNull final String bodyText) {
+    private String composeHtmlBody(@NonNull final String invitationLink,
+                                   @NonNull final String bodyText,
+                                   @NonNull final OrganizationSurvey survey,
+                                   @NonNull final String languageTag) {
+        final Map<String, MultilingualText> texts = Optional.ofNullable(survey.getStaticTexts())
+                .map(v -> v.get(MAIL_TEMPLATE_TEXT_GROUP))
+                .map(StaticTextGroup::getTexts)
+                .orElse(StaticTextGroup.EMPTY);
+        final MultilingualText defaultHeadingTitle = translationService.getPhrases(MAIL_TEMPLATE_TEXT_GROUP, HEADING_TITLE_KEY);
+        final MultilingualText defaultHeadingParagraph = translationService.getPhrases(MAIL_TEMPLATE_TEXT_GROUP, HEADING_PARAGRAPH_KEY);
+        final MultilingualText defaultInvitationButton = translationService.getPhrases(MAIL_TEMPLATE_TEXT_GROUP, INVITATION_BUTTON_KEY);
+        final MultilingualText headingTitle = texts.getOrDefault(HEADING_TITLE_KEY, multilingualUtils.empty());
+        final MultilingualText headingParagraph = texts.getOrDefault(HEADING_PARAGRAPH_KEY, multilingualUtils.empty());
+        final MultilingualText invitationButton = texts.getOrDefault(INVITATION_BUTTON_KEY, multilingualUtils.empty());
+
         return templateService.templateBody(HTML_BASE_TEMPLATE, ImmutableMap.of(
+                HEADING_TITLE_KEY, multilingualUtils.combine(defaultHeadingTitle, headingTitle).getPhrase(languageTag),
+                HEADING_PARAGRAPH_KEY, multilingualUtils.combine(defaultHeadingParagraph, headingParagraph).getPhrase(languageTag),
+                INVITATION_BUTTON_KEY, multilingualUtils.combine(defaultInvitationButton, invitationButton).getPhrase(languageTag),
                 "invitation_link", invitationLink,
                 "email_content", bodyText));
     }
