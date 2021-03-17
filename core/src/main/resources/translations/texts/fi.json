@@ -118,10 +118,10 @@
   },
   "after_game_default_groups": {
     "you": {
-      "text": "You"
+      "text": "Sinä"
     },
     "everyone": {
-      "text": "Everyone"
+      "text": "Kaikki"
     }
   }
 }

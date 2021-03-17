@@ -38,6 +38,7 @@ import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.service.AfterGameService;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
+import fi.sangre.renesans.service.TranslationService;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
 import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
@@ -67,6 +68,10 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class AfterGameFacade {
+    private static final String PARAMETER_GROUP = "after_game_default_groups";
+    private static final String YOU_PARAMETER_KEY = "you";
+    private static final String EVERYONE_PARAMETER_KEY = "everyone";
+
     private final OrganizationSurveyService organizationSurveyService;
     private final QuestionnaireAssembler questionnaireAssembler;
     private final AnswerService answerService;
@@ -82,6 +87,7 @@ public class AfterGameFacade {
     private final ParameterUtils parameterUtils;
     private final SurveyUtils surveyUtils;
     private final MultilingualUtils multilingualUtils;
+    private final TranslationService translationService;
     @Qualifier(DAO_EXECUTOR_NAME)
     private final ThreadPoolTaskExecutor daoExecutor;
 
@@ -447,22 +453,32 @@ public class AfterGameFacade {
 
     @NonNull
     private ParameterChild getGlobalYouParameter(@NonNull final OrganizationSurvey survey) {
-        //TODO: get phrases from survey
         return ParameterItem.builder()
                 .id(ParameterId.GLOBAL_YOU_PARAMETER_ID)
-                .label(multilingualUtils.create(ImmutableMap.of("en", "You",
-                        "fi", "Sinä")))
+                .label(getParametersText(survey, YOU_PARAMETER_KEY))
                 .build();
     }
 
     @NonNull
     private ParameterChild getGlobalEveryoneParameter(@NonNull final OrganizationSurvey survey) {
-        //TODO: get phrases from survey
         return ParameterItem.builder()
                 .id(ParameterId.GLOBAL_EVERYONE_PARAMETER_ID)
-                .label(multilingualUtils.create(ImmutableMap.of("en", "Everyone",
-                        "fi", "Kaikki")))
+                .label(getParametersText(survey, EVERYONE_PARAMETER_KEY))
                 .build();
+    }
+
+    @NonNull
+    private MultilingualText getParametersText(@NonNull final OrganizationSurvey survey, @NonNull final String parameter) {
+        final MultilingualText defaults = translationService.getPhrases(PARAMETER_GROUP, parameter);
+
+        final MultilingualText surveySpecific = Optional.ofNullable(survey)
+                .map(OrganizationSurvey::getStaticTexts)
+                .map(v -> v.get(PARAMETER_GROUP))
+                .map(StaticTextGroup::getTexts)
+                .map(v -> v.get(parameter))
+                .orElseGet(multilingualUtils::empty);
+
+        return multilingualUtils.combine(defaults, surveySpecific);
     }
 
 }
