@@ -30,6 +30,7 @@ public class AfterGameService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final RespondentDao respondentDao;
     private final GuestDao guestDao;
+    private final TranslationService translationService;
 
     public void inviteToAfterGame(@NonNull final SurveyId surveyId
             , @NonNull final Invitation invitation
@@ -63,6 +64,8 @@ public class AfterGameService {
 
     @NonNull
     private Set<IdValueObject<UUID>> register(@NonNull final SurveyId surveyId,@NonNull final Invitation invitation) {
+        final String languageTag = translationService.getLanguageTagOrDefault(invitation.getLanguage());
+
         final Map<RespondentId, String> existing = respondentDao.findRespondents(surveyId, SurveyRespondent::getEmail);
 
         final Set<IdValueObject<UUID>> toInvite = new HashSet<>();
@@ -80,7 +83,7 @@ public class AfterGameService {
 
         final Set<String> guestEmails = Sets.difference(invitationEmail, new HashSet<>(existing.values()));
 
-        toInvite.addAll(guestDao.registerGuests(surveyId, guestEmails));
+        toInvite.addAll(guestDao.registerGuests(surveyId, guestEmails, languageTag));
 
         return Collections.unmodifiableSet(toInvite);
     }

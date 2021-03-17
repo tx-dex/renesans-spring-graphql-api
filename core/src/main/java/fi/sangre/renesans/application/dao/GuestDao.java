@@ -71,7 +71,9 @@ public class GuestDao {
 
     @NonNull
     @Transactional
-    public Set<GuestId> registerGuests(@NonNull final SurveyId surveyId, @NonNull final Set<String> emails) {
+    public Set<GuestId> registerGuests(@NonNull final SurveyId surveyId,
+                                       @NonNull final Set<String> emails,
+                                       @NonNull final String languageTag) {
 
         final Map<String, SurveyGuest> existing = surveyGuestRepository.findAllBySurveyIdAndEmailIn(surveyId.getValue(), emails)
                 .stream()
@@ -82,6 +84,7 @@ public class GuestDao {
                         .surveyId(surveyId.getValue())
                         .email(v)
                         .state(SurveyRespondentState.INVITING)
+                        .languageTag(languageTag)
                         .consent(false)
                         .build()))
                 .map(v -> registerGuest(surveyId, v))

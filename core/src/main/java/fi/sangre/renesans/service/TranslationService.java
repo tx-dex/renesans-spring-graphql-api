@@ -22,10 +22,8 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 public class TranslationService {
     public static final String QUESTIONS_TRANSLATION_GROUP = "questions";
-    public static final String QUESTIONS_SUB_TITLE_TRANSLATION_KEY = "sub_title";
     public static final String QUESTIONS_LOW_LABEL_TRANSLATION_KEY = "low_end_label";
     public static final String QUESTIONS_HIGH_LABEL_TRANSLATION_KEY = "high_end_label";
-
 
     private static final String DEFAULT_LANGUAGE = "en";
     private static final String SPACE = " ";
@@ -34,6 +32,20 @@ public class TranslationService {
             .trimResults();
     private final Map<String, TranslationMap> translations;
     private final MultilingualUtils multilingualUtils;
+
+    public String getLanguageTagOrDefault(@Nullable final String languageTag) {
+        final String languageTagOrDefault = Optional.ofNullable(languageTag)
+                .map(StringUtils::trimToNull)
+                .map(StringUtils::lowerCase)
+                .orElse(DEFAULT_LANGUAGE);
+
+        if (translations.containsKey(languageTagOrDefault)) {
+            return languageTagOrDefault;
+        } else {
+            log.warn("Invalid language tag: '{}'", languageTag);
+            return DEFAULT_LANGUAGE;
+        }
+    }
 
     @NonNull
     public Map<String, Map<String, TranslationText>> getTranslations(@NonNull final String languageTag) {

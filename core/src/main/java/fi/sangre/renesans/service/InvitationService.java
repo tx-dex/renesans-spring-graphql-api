@@ -145,6 +145,7 @@ public class InvitationService {
                                      @NonNull final Pair<String, String> replyTo) {
         final SurveyRespondent respondent = surveyRespondentRepository.findById(respondentId.getValue())
                 .orElseThrow(() -> new InternalServiceException("Cannot get respondent"));
+        final String languageTag = respondent.getLanguageTag();
         final SurveyId surveyId = new SurveyId(respondent.getSurveyId());
         final String invitationLink = getQuestionnaireInvitationLink(respondentId, respondent.getInvitationHash());
 
@@ -153,7 +154,7 @@ public class InvitationService {
 
         mailService.sendEmail(respondent.getEmail(),
                 subject,
-                composeHtmlBody(invitationLink, body, survey, "en"),
+                composeHtmlBody(invitationLink, body, survey, languageTag),
                 null,
                 ImmutableMap.of(MAIL_TYPE_TAG, MAIL_TYPE_QUESTIONNAIRE_INVITATION_VALUE,
                         SURVEY_ID_TAG, surveyId.asString(),
@@ -167,6 +168,7 @@ public class InvitationService {
                                          @NonNull final String body,
                                          @NonNull final Pair<String, String> replyTo) {
         final SurveyId surveyId;
+        final String languageTag;
         final String email;
         final String invitationLink;
         final Map<String, String> tags;
@@ -174,6 +176,7 @@ public class InvitationService {
         if (id instanceof RespondentId) {
             final RespondentId respondentId = (RespondentId) id;
             final SurveyRespondent respondent = getRespondent(respondentId);
+            languageTag = respondent.getLanguageTag();
             email = respondent.getEmail();
             surveyId = new SurveyId(respondent.getSurveyId());
             invitationLink = getAfterGameInvitationLink(respondentId, respondent.getInvitationHash());
@@ -185,6 +188,7 @@ public class InvitationService {
         } else if (id instanceof GuestId) {
             final GuestId guestId = (GuestId) id;
             final SurveyGuest guest = getGuest(guestId);
+            languageTag = guest.getLanguageTag();
             email = guest.getEmail();
             surveyId = new SurveyId(guest.getSurveyId());
             invitationLink = getAfterGameInvitationLink(guestId, guest.getInvitationHash());
@@ -201,7 +205,7 @@ public class InvitationService {
 
         mailService.sendEmail(email,
                 subject,
-                composeHtmlBody(invitationLink, body, survey, "en"),
+                composeHtmlBody(invitationLink, body, survey, languageTag),
                 null,
                 tags,
                 replyTo,
@@ -217,10 +221,12 @@ public class InvitationService {
         final String email;
         final String invitationLink;
         final Map<String, String> tags;
+        final String languageTag;
 
         if (id instanceof RespondentId) {
             final RespondentId respondentId = (RespondentId) id;
             final SurveyRespondent respondent = getRespondent(respondentId);
+            languageTag = respondent.getLanguageTag();
             email = respondent.getEmail();
             surveyId = new SurveyId(respondent.getSurveyId());
             invitationLink = getAfterGameDiscussionInvitationLink(respondentId, respondent.getInvitationHash(), questionId);
@@ -233,6 +239,7 @@ public class InvitationService {
         } else if (id instanceof GuestId) {
             final GuestId guestId = (GuestId) id;
             final SurveyGuest guest = getGuest(guestId);
+            languageTag = guest.getLanguageTag();
             email = guest.getEmail();
             surveyId = new SurveyId(guest.getSurveyId());
             invitationLink = getAfterGameInvitationLink(guestId, guest.getInvitationHash());
@@ -250,7 +257,7 @@ public class InvitationService {
 
         mailService.sendEmail(email,
                 subject,
-                composeHtmlBody(invitationLink, body, survey, "en"),
+                composeHtmlBody(invitationLink, body, survey, languageTag),
                 null,
                 tags,
                 replyTo,

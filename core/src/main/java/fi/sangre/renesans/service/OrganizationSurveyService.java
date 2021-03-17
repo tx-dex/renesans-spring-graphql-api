@@ -74,6 +74,7 @@ public class OrganizationSurveyService {
     private final MultilingualUtils multilingualUtils;
     private final SurveyAssembler surveyAssembler;
     private final SurveyTemplateService surveyTemplateService;
+    private final TranslationService translationService;
 
     @NonNull
     @Transactional(readOnly = true)
@@ -238,6 +239,7 @@ public class OrganizationSurveyService {
     public void inviteRespondents(@NonNull final SurveyId surveyId
             , @NonNull final Invitation invitation
             , @NonNull final Pair<String, String> replyTo) {
+        final String languageTag = translationService.getLanguageTagOrDefault(invitation.getLanguage());
         final Survey survey = getSurveyOrThrow(surveyId);
 
         final Map<String, SurveyRespondent> existing = surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()).stream()
@@ -249,6 +251,7 @@ public class OrganizationSurveyService {
                         .surveyId(surveyId.getValue())
                         .email(StringUtils.trim(e))
                         .state(SurveyRespondentState.INVITING)
+                        .languageTag(languageTag)
                         .consent(false)
                         .archived(false)
                         .build()))

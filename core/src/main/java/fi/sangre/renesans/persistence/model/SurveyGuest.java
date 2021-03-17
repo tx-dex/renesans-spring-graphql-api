@@ -58,6 +58,10 @@ public class SurveyGuest {
     @Column(name = "state", nullable = false)
     private SurveyRespondentState state = SurveyRespondentState.INVITING;
 
+    @Column(name = "language_tag", nullable = false)
+    @Builder.Default
+    private String languageTag = "en";
+
     @Builder.Default
     @Column(name = "archived", nullable = false)
     private Boolean archived = false;
