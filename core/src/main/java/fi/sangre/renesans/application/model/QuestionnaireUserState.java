@@ -12,4 +12,5 @@ public class QuestionnaireUserState {
     private boolean answeringParameters;
     private boolean answeringQuestions;
     private boolean viewingAfterGame;
+    private String languageTag;
 }

@@ -39,6 +39,7 @@ public class GuestDao {
                 .answeringParameters(respondentUtils.isAnsweringParameters(entity.getState()))
                 .answeringQuestions(respondentUtils.isAnsweringQuestions(entity.getState()))
                 .viewingAfterGame(respondentUtils.isViewingAfterGame(entity.getState()))
+                .languageTag(entity.getLanguageTag())
                 .build());
     }
 

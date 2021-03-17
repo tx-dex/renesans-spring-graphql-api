@@ -16,6 +16,7 @@ import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
+import fi.sangre.renesans.service.TranslationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -79,6 +80,7 @@ public class QuestionnaireAssembler {
 
         return builder(survey)
                 .id(guestId.getValue()) // overwrite the id with the respondent one
+                .selectedLanguage(state.getLanguageTag())
                 .consented(isConsented)
                 .answerable(!isAfterGameEnabled)
                 .finished(true)
@@ -130,6 +132,7 @@ public class QuestionnaireAssembler {
 
         return builder(survey)
                 .id(respondentId.getValue()) // overwrite the id with the respondent one
+                .selectedLanguage(state.getLanguageTag())
                 .consented(isConsented)
                 .answerable(!isAfterGameEnabled)
                 .finished(isAllAnswered)
@@ -146,6 +149,7 @@ public class QuestionnaireAssembler {
     private QuestionnaireOutput.QuestionnaireOutputBuilder builder(@NonNull final OrganizationSurvey survey) {
         return QuestionnaireOutput.builder()
                 .id(survey.getId())
+                .selectedLanguage(TranslationService.DEFAULT_LANGUAGE)
                 .logo(mediaDetailsAssembler.from(survey.getLogo()))
                 .media(surveyMediaAssembler.from(survey.getMedia()))
                 .staticTexts(survey.getStaticTexts())

@@ -262,6 +262,7 @@ type Questionnaire {
     # Custom logo url
     # This field should be fetched in a seperate query
     logo: MediaDetails
+    selectedLanguage: String!
     staticTexts: Translation!
     catalysts: [QuestionnaireCatalyst!]!
     hideCatalystThemePages: Boolean!

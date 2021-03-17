@@ -17,6 +17,7 @@ import java.util.UUID;
 @Builder
 public class QuestionnaireOutput {
     private UUID id;
+    private String selectedLanguage;
     private MediaDetailsOutput logo;
     private List<SurveyMediaOutput> media;
     private List<QuestionnaireCatalystOutput> catalysts;
