@@ -39,7 +39,8 @@ public class GuestDao {
                 .answeringParameters(respondentUtils.isAnsweringParameters(entity.getState()))
                 .answeringQuestions(respondentUtils.isAnsweringQuestions(entity.getState()))
                 .viewingAfterGame(respondentUtils.isViewingAfterGame(entity.getState()))
-                .languageTag(entity.getLanguageTag())
+                .languageTag(Optional.ofNullable(entity.getSelectedLanguageTag())
+                        .orElse(entity.getInvitationLanguageTag()))
                 .build());
     }
 
@@ -85,10 +86,9 @@ public class GuestDao {
                         .surveyId(surveyId.getValue())
                         .email(v)
                         .state(SurveyRespondentState.INVITING)
-                        .languageTag(languageTag)
                         .consent(false)
                         .build()))
-                .map(v -> registerGuest(surveyId, v))
+                .map(v -> registerGuest(surveyId, v, languageTag))
                 .collect(Collectors.toList());
 
         return surveyGuestRepository.saveAll(toRegister).stream()
@@ -97,9 +97,13 @@ public class GuestDao {
     }
 
     @NonNull
-    private SurveyGuest registerGuest(@NonNull final SurveyId surveyId, @NonNull final SurveyGuest newOrExisting) {
+    private SurveyGuest registerGuest(@NonNull final SurveyId surveyId,
+                                      @NonNull final SurveyGuest newOrExisting,
+                                      @NonNull final String invitationLanguageTag) {
         newOrExisting.setInvitationHash(
                 Hashing.sha512().hashString(String.format("%s-%s", surveyId.asString(), UUID.randomUUID()), StandardCharsets.UTF_8).toString());
+
+        newOrExisting.setInvitationLanguageTag(invitationLanguageTag);
 
         return newOrExisting;
     }

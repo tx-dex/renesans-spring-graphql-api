@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -46,7 +47,8 @@ public class RespondentDao {
                 .answeringParameters(respondentUtils.isAnsweringParameters(entity.getState()))
                 .answeringQuestions(respondentUtils.isAnsweringQuestions(entity.getState()))
                 .viewingAfterGame(respondentUtils.isViewingAfterGame(entity.getState()))
-                .languageTag(entity.getLanguageTag())
+                .languageTag(Optional.ofNullable(entity.getSelectedLanguageTag())
+                        .orElse(entity.getInvitationLanguageTag()))
                 .build());
     }
 

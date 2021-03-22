@@ -145,7 +145,7 @@ public class InvitationService {
                                      @NonNull final Pair<String, String> replyTo) {
         final SurveyRespondent respondent = surveyRespondentRepository.findById(respondentId.getValue())
                 .orElseThrow(() -> new InternalServiceException("Cannot get respondent"));
-        final String languageTag = respondent.getLanguageTag();
+        final String languageTag = getLanguageTag(respondent);
         final SurveyId surveyId = new SurveyId(respondent.getSurveyId());
         final String invitationLink = getQuestionnaireInvitationLink(respondentId, respondent.getInvitationHash());
 
@@ -176,7 +176,7 @@ public class InvitationService {
         if (id instanceof RespondentId) {
             final RespondentId respondentId = (RespondentId) id;
             final SurveyRespondent respondent = getRespondent(respondentId);
-            languageTag = respondent.getLanguageTag();
+            languageTag = getLanguageTag(respondent);
             email = respondent.getEmail();
             surveyId = new SurveyId(respondent.getSurveyId());
             invitationLink = getAfterGameInvitationLink(respondentId, respondent.getInvitationHash());
@@ -188,7 +188,7 @@ public class InvitationService {
         } else if (id instanceof GuestId) {
             final GuestId guestId = (GuestId) id;
             final SurveyGuest guest = getGuest(guestId);
-            languageTag = guest.getLanguageTag();
+            languageTag = getLanguageTag(guest);
             email = guest.getEmail();
             surveyId = new SurveyId(guest.getSurveyId());
             invitationLink = getAfterGameInvitationLink(guestId, guest.getInvitationHash());
@@ -226,7 +226,7 @@ public class InvitationService {
         if (id instanceof RespondentId) {
             final RespondentId respondentId = (RespondentId) id;
             final SurveyRespondent respondent = getRespondent(respondentId);
-            languageTag = respondent.getLanguageTag();
+            languageTag = getLanguageTag(respondent);
             email = respondent.getEmail();
             surveyId = new SurveyId(respondent.getSurveyId());
             invitationLink = getAfterGameDiscussionInvitationLink(respondentId, respondent.getInvitationHash(), questionId);
@@ -239,7 +239,7 @@ public class InvitationService {
         } else if (id instanceof GuestId) {
             final GuestId guestId = (GuestId) id;
             final SurveyGuest guest = getGuest(guestId);
-            languageTag = guest.getLanguageTag();
+            languageTag = getLanguageTag(guest);
             email = guest.getEmail();
             surveyId = new SurveyId(guest.getSurveyId());
             invitationLink = getAfterGameInvitationLink(guestId, guest.getInvitationHash());
@@ -262,6 +262,16 @@ public class InvitationService {
                 tags,
                 replyTo,
                 LOGO);
+    }
+
+    @NonNull
+    private String getLanguageTag(@NonNull final SurveyRespondent respondent) {
+        return respondent.getInvitationLanguageTag(); //TODO: use selected language tag if language was changed
+    }
+
+    @NonNull
+    private String getLanguageTag(@NonNull final SurveyGuest guest) {
+        return guest.getInvitationLanguageTag(); //TODO: use selected language tag if language was changed
     }
 
     @NonNull

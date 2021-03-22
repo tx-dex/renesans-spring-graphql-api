@@ -251,7 +251,6 @@ public class OrganizationSurveyService {
                         .surveyId(surveyId.getValue())
                         .email(StringUtils.trim(e))
                         .state(SurveyRespondentState.INVITING)
-                        .languageTag(languageTag)
                         .consent(false)
                         .archived(false)
                         .build()))
@@ -261,6 +260,7 @@ public class OrganizationSurveyService {
             if (SurveyRespondentState.ERROR.equals(respondent.getState())) {
                 respondent.setState(SurveyRespondentState.INVITING);
             }
+            respondent.setInvitationLanguageTag(languageTag);
             respondent.setInvitationError(null);
             //TODO: change hashing to nullable
             respondent.setInvitationHash(

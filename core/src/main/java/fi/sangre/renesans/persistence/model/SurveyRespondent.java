@@ -58,9 +58,12 @@ public class SurveyRespondent {
     @Column(name = "state", nullable = false)
     private SurveyRespondentState state = SurveyRespondentState.INVITING;
 
-    @Column(name = "language_tag", nullable = false)
+    @Column(name = "language_tag")
+    private String selectedLanguageTag;
+
+    @Column(name = "invitation_language_tag", nullable = false)
     @Builder.Default
-    private String languageTag = "en";
+    private String invitationLanguageTag = "en";
 
     @Builder.Default
     @Column(name = "archived", nullable = false)
