@@ -1,9 +1,9 @@
 package fi.sangre.renesans.application.dao;
 
 import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.IdValueObject;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.questions.QuestionId;
-import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.utils.UUIDUtils;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
@@ -33,18 +33,18 @@ public class DiscussionDao {
 
     @Nullable
     @Transactional(readOnly = true)
-    public ActorEntity findActor(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
-        return actorRepository.findBySurveyIdAndRespondentId(surveyId.getValue(), respondentId.getValue())
+    public ActorEntity findActor(@NonNull final SurveyId surveyId, @NonNull final IdValueObject<UUID> questionnaireUserId) {
+        return actorRepository.findBySurveyIdAndRespondentId(surveyId.getValue(), questionnaireUserId.getValue())
                 .orElse(null);
     }
 
     @NonNull
     @Transactional
-    public ActorEntity createOrGetActor(@NonNull final SurveyId surveyId, @NonNull final RespondentId respondentId) {
-        final ActorEntity actor = actorRepository.findBySurveyIdAndRespondentId(surveyId.getValue(), respondentId.getValue())
+    public ActorEntity createOrGetActor(@NonNull final SurveyId surveyId, @NonNull final IdValueObject<UUID> questionnaireUserId) {
+        final ActorEntity actor = actorRepository.findBySurveyIdAndRespondentId(surveyId.getValue(), questionnaireUserId.getValue())
                 .orElse(ActorEntity.builder()
                         .surveyId(surveyId.getValue())
-                        .respondentId(respondentId.getValue())
+                        .respondentId(questionnaireUserId.getValue())
                         .build());
 
         return actorRepository.save(actor);

@@ -434,6 +434,9 @@ public class AfterGameFacade {
         if (principal instanceof RespondentPrincipal) {
             final RespondentPrincipal respondent = (RespondentPrincipal) principal;
             return discussionDao.createOrGetActor(respondent.getSurveyId(), respondent.getId());
+        } else if (principal instanceof GuestPrincipal) {
+            final GuestPrincipal guest = (GuestPrincipal) principal;
+            return discussionDao.createOrGetActor(guest.getSurveyId(), guest.getId());
         } else {
             throw new SurveyException("Admin can not comment on discussion");
         }
