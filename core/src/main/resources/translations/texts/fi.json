@@ -78,6 +78,12 @@
     },
     "submit": {
       "text": "Submit and start Engager"
+    },
+    "confirm_leave_text": {
+      "text": "After submitting your selection you will not be able to change your parameters, are you sure you wish to continue ?"
+    },
+    "continue": {
+      "text": "Continue"
     }
   },
   "privacy_policy": {
@@ -109,19 +115,44 @@
     }
   },
   "questions": {
-    "low_end_label": {
+    "hearts_label": {
+      "text": "Tap a heart to rate"
+    },
+    "question_importance": {
+      "text": "How important is this issue to you?"
+    },
+    "unacceptable": {
       "text": "Unacceptable"
     },
-    "high_end_label": {
-      "text": "Excellent"
-    }
-  },
-  "after_game_default_groups": {
-    "you": {
-      "text": "Sinä"
+    "needs_improvement": {
+      "text": "Needs improvement"
     },
-    "everyone": {
-      "text": "Kaikki"
+    "acceptable": {
+      "text": "Acceptable"
+    },
+    "good": {
+      "text": "Good"
+    },
+    "excellent": {
+      "text": "Excellent"
+    },
+    "submit": {
+      "text": "Submit"
+    },
+    "submit_survey": {
+      "text": "Submit survey"
+    },
+    "make_public": {
+      "text": "Make public"
+    },
+    "open_question_placeholder": {
+      "text": "Write your answer here"
+    },
+    "no_concern": {
+      "text": "Does not concern me"
+    },
+    "theme": {
+      "text": "THEME"
     }
   },
   "email_template": {
@@ -133,6 +164,91 @@
     },
     "invitation_button": {
       "text": "Yes, I’m in!"
+    }
+  },
+  "finish": {
+    "game_on": {
+      "text": "Game is on !"
+    },
+    "results": {
+      "text": "Your results !"
+    },
+    "results_description": {
+      "text": "Label for unfinished results"
+    },
+    "description": {
+      "text": "Now it’s time to participate! <br/> Please find the survey result below and your own answers compared to your reference groups."
+    },
+    "drivers": {
+      "text": "Drivers"
+    },
+    "more_details": {
+      "text": "More details"
+    },
+    "overview": {
+      "text": "Overview"
+    },
+    "discussion": {
+      "text": "Discussion"
+    },
+    "overview_for": {
+      "text": "Overview result for"
+    },
+    "questions": {
+      "text": "Questions"
+    },
+    "discussions": {
+      "text": "Open discussions"
+    },
+    "likes": {
+      "text": "like(s)"
+    },
+    "comments": {
+      "text": "comment(s)"
+    },
+    "you": {
+      "text": "Sinä"
+    },
+    "everyone": {
+      "text": "Kaikki"
+    },
+    "rating": {
+      "text": "Rating"
+    }
+  },
+  "discussion": {
+    "title": {
+      "text": "Discussion"
+    },
+    "description": {
+      "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet"
+    },
+    "answers": {
+      "text": "answer(s)"
+    },
+    "view": {
+      "text": "View"
+    },
+    "no_answers": {
+      "text": "No comments yet!"
+    },
+    "more_answers": {
+      "text": "more answer(s)"
+    },
+    "back": {
+      "text": "Back to discussion"
+    },
+    "reply": {
+      "text": "Comment"
+    },
+    "cancel": {
+      "text": "Cancel"
+    },
+    "write": {
+      "text": "Write your comment..."
+    },
+    "add_comment": {
+      "text": "Add a comment"
     }
   }
 }

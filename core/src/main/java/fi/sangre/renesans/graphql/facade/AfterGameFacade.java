@@ -68,7 +68,7 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class AfterGameFacade {
-    private static final String PARAMETER_GROUP = "after_game_default_groups";
+    private static final String PARAMETER_GROUP = "finish";
     private static final String YOU_PARAMETER_KEY = "you";
     private static final String EVERYONE_PARAMETER_KEY = "everyone";
 

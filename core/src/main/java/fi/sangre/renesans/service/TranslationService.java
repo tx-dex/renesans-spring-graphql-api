@@ -23,8 +23,8 @@ import static java.util.stream.Collectors.toMap;
 public class TranslationService {
     public static final String DEFAULT_LANGUAGE = "en";
     public static final String QUESTIONS_TRANSLATION_GROUP = "questions";
-    public static final String QUESTIONS_LOW_LABEL_TRANSLATION_KEY = "low_end_label";
-    public static final String QUESTIONS_HIGH_LABEL_TRANSLATION_KEY = "high_end_label";
+    public static final String QUESTIONS_LOW_LABEL_TRANSLATION_KEY = "unacceptable";
+    public static final String QUESTIONS_HIGH_LABEL_TRANSLATION_KEY = "excellent";
 
     private static final String SPACE = " ";
     private static final Splitter TITLE_SPLITTER = Splitter.on("_")
