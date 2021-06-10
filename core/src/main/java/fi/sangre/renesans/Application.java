@@ -9,7 +9,7 @@ import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
 @SpringBootApplication
-@PropertySource("file:${RENESANS_ETC:core/etc}/application.properties")
+@PropertySource("file:${RENESANS_ETC:etc}/application.properties")
 @EnableCaching
 public class Application {
 
