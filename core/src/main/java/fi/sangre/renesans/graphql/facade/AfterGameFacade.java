@@ -9,6 +9,7 @@ import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.InvitationAssembler;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.DiscussionDao;
+import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
@@ -32,9 +33,11 @@ import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
+import fi.sangre.renesans.persistence.model.RespondentStateCounters;
 import fi.sangre.renesans.service.AfterGameService;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
@@ -71,12 +74,14 @@ public class AfterGameFacade {
     private static final String PARAMETER_GROUP = "finish";
     private static final String YOU_PARAMETER_KEY = "you";
     private static final String EVERYONE_PARAMETER_KEY = "everyone";
+    private static final Integer LATEST_DISCUSSIONS_LIMIT = 2;
 
     private final OrganizationSurveyService organizationSurveyService;
     private final QuestionnaireAssembler questionnaireAssembler;
     private final AnswerService answerService;
     private final AnswerDao answerDao;
     private final DiscussionDao discussionDao;
+    private final SurveyDao surveyDao;
     private final SurveyStatisticsService surveyStatisticsService;
     private final RespondentStatisticsService respondentStatisticsService;
     private final ParameterStatisticsService parameterStatisticsService;
@@ -363,6 +368,41 @@ public class AfterGameFacade {
         final Map<QuestionId, List<CommentEntity>> discussions = discussionDao.findDiscussions(surveyId, questionIds);
 
         return afterGameDiscussionAssembler.from(questions, discussions, actorId);
+    }
+
+    @NonNull
+    public Collection<AfterGameDiscussionOutput> afterGameLatestActiveDiscussions(@NonNull final UUID questionnaireId,
+                                                                            @NonNull final UserDetails principal) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyId surveyId = new SurveyId(survey.getId());
+
+        final Long actorId = getActorId(principal);
+        final List<DiscussionQuestion> questions = survey.getDiscussionQuestions().stream()
+                .filter(DiscussionQuestion::isActive)
+                .sorted(Comparator.nullsLast(Comparator.comparing(DiscussionQuestion::getCreatedDate).reversed()))
+                .limit(LATEST_DISCUSSIONS_LIMIT)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+
+        final Set<QuestionId> questionIds = questions.stream()
+                .map(DiscussionQuestion::getId)
+                .collect(Collectors.toSet());
+
+        final Map<QuestionId, List<CommentEntity>> discussions = discussionDao.findDiscussions(surveyId, questionIds);
+
+        return afterGameDiscussionAssembler.from(questions, discussions, actorId);
+    }
+
+    @NonNull
+    public AfterGameOverviewParticipantsOutput afterGameParticipantsOverview(
+            @NonNull final UUID questionnaireId,
+            @NonNull final UserDetails principal
+    ) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyId surveyId = new SurveyId(survey.getId());
+
+        final RespondentStateCounters counters = surveyDao.countRespondentsBySurvey(surveyId);
+
+        return afterGameDiscussionAssembler.from(counters);
     }
 
     @NonNull

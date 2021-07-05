@@ -101,6 +101,10 @@ type Query {
         languageCode: String
     ): [AfterGameParameterStatistics]!
 
+    afterGameOverviewParticipants(
+        questionnaireId: ID!
+    ): AfterGameOverviewParticipantsOutput
+
     # get media public url by key, this should be used for logo
     mediaPublicUrl(key: String!, params: MediaParametersInput): Url!
 
@@ -127,7 +131,11 @@ type Query {
         languageCode: String
     ): AfterGameDiscussion!
 
-
+    # Get two latest discussions (topics)
+    afterGameOverviewLatestDiscussions(
+        questionnaireId: ID!
+        languageCode: String
+    ): [AfterGameDiscussion!]!
 
 
 
