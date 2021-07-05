@@ -50,6 +50,7 @@ public class DiscussionQuestionAssembler {
                             .id(new QuestionId(question.getId()))
                             .title(multilingualUtils.create(question.getTitles()))
                             .active(Boolean.TRUE.equals(question.getActive()))
+                            .createdDate(question.getCreatedDate())
                             .build())
                     .collect(collectingAndThen(toList(), Collections::unmodifiableList));
         }

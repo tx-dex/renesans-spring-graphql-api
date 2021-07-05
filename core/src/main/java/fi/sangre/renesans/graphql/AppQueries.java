@@ -6,6 +6,7 @@ import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import graphql.schema.DataFetchingEnvironment;
@@ -104,5 +105,32 @@ public class AppQueries implements GraphQLQueryResolver {
         return afterGameFacade.afterGameDiscussion(questionnaireId,
                 discussionId,
                 resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public AfterGameOverviewParticipantsOutput afterGameOverviewParticipants(
+            @NonNull final UUID questionnaireId,
+            @NonNull final DataFetchingEnvironment environment
+    ) {
+        log.debug("Getting after game participants overview for questionnaire(id={})", questionnaireId);
+
+        return afterGameFacade.afterGameParticipantsOverview(
+                questionnaireId,
+                resolverHelper.getRequiredPrincipal(environment)
+        );
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public Collection<AfterGameDiscussionOutput> afterGameOverviewLatestDiscussions(
+            @NonNull final UUID questionnaireId,
+            @Nullable final String languageCode,
+            @NonNull final DataFetchingEnvironment environment
+    ) {
+        log.debug("Getting two latest after game discussions for questionnaire(id={})", questionnaireId);
+
+        resolverHelper.setLanguageCode(languageCode, environment);
+        return afterGameFacade.afterGameLatestActiveDiscussions(questionnaireId, resolverHelper.getRequiredPrincipal(environment));
     }
 }

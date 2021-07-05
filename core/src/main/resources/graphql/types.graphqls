@@ -441,6 +441,13 @@ type AfterGameComment {
     liked: Boolean!
 }
 
+type AfterGameOverviewParticipantsOutput {
+    id: ID
+    participantsCount: Long
+    invitedParticipantsCount: Long
+    engagementRatio: Long
+}
+
 
 
 
