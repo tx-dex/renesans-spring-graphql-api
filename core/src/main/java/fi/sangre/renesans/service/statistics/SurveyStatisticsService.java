@@ -1,14 +1,11 @@
 package fi.sangre.renesans.service.statistics;
 
-import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.StatisticsDao;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
-import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
-import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.config.properties.StatisticsProperties;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
@@ -18,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
