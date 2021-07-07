@@ -3,6 +3,7 @@ package fi.sangre.renesans.graphql.facade;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.aaa.GuestPrincipal;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
@@ -17,6 +18,8 @@ import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.Invitation;
+import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
+import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
@@ -34,14 +37,13 @@ import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewVisionAttainmentIndicatorOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.RespondentStateCounters;
-import fi.sangre.renesans.service.AfterGameService;
-import fi.sangre.renesans.service.AnswerService;
-import fi.sangre.renesans.service.OrganizationSurveyService;
-import fi.sangre.renesans.service.TranslationService;
+import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
+import fi.sangre.renesans.service.*;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
 import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
@@ -82,6 +84,7 @@ public class AfterGameFacade {
     private final AnswerDao answerDao;
     private final DiscussionDao discussionDao;
     private final SurveyDao surveyDao;
+    private final StatisticsService statisticsService;
     private final SurveyStatisticsService surveyStatisticsService;
     private final RespondentStatisticsService respondentStatisticsService;
     private final ParameterStatisticsService parameterStatisticsService;
@@ -510,6 +513,22 @@ public class AfterGameFacade {
                 .build();
     }
 
+    public AfterGameOverviewVisionAttainmentIndicatorOutput afterGameOverviewVisionAttainmentIndicator(
+            @NonNull final UUID questionnaireId,
+            @NonNull final UserDetails principal
+    ) {
+        if (!(principal instanceof RespondentPrincipal)) {
+            throw new SurveyException("VAI calculation is possible for respondent only");
+        }
+
+        final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+
+        return AfterGameOverviewVisionAttainmentIndicatorOutput.builder()
+                .value(respondentStatisticsService.calculateVisionAttainmentIndicator(survey, respondent.getId()))
+                .build();
+    }
+
     @NonNull
     private MultilingualText getParametersText(@NonNull final OrganizationSurvey survey, @NonNull final String parameter) {
         final MultilingualText defaults = translationService.getPhrases(PARAMETER_GROUP, parameter);
@@ -523,5 +542,4 @@ public class AfterGameFacade {
 
         return multilingualUtils.combine(defaults, surveySpecific);
     }
-
 }

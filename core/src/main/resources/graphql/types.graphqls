@@ -448,6 +448,10 @@ type AfterGameOverviewParticipantsOutput {
     engagementRatio: Long
 }
 
+type AfterGameOverviewVisionAttainmentIndicatorOutput {
+   id: ID
+   value: Float
+}
 
 
 
