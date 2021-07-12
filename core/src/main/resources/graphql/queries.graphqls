@@ -94,6 +94,14 @@ type Query {
         languageCode: String
     ) : AfterGameCatalystStatistics!
 
+    # Returns a collection of question statistics for specific questionnaire and parameter
+    afterGameDetailedQuestionsStatistics(
+        questionnaireId: ID!
+        # Selected parameter value
+        parameterValue: ID
+        languageCode: String
+    ) : [AfterGameQuestionStatistics]!
+
     # Gets the list of selected by reposndent parameters and its overall rate
     afterGameRespondentParametersStatistics(
         questionnaireId: ID!
@@ -103,7 +111,9 @@ type Query {
 
     afterGameOverviewParticipants(
         questionnaireId: ID!
-    ): AfterGameOverviewParticipantsOutput
+    ): AfterGameOverviewParticipants
+
+
 
     # get media public url by key, this should be used for logo
     mediaPublicUrl(key: String!, params: MediaParametersInput): Url!

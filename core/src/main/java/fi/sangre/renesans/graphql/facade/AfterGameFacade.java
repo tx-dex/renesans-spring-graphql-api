@@ -9,6 +9,7 @@ import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.assemble.InvitationAssembler;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.DiscussionDao;
+import fi.sangre.renesans.application.dao.StatisticsDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
@@ -26,6 +27,7 @@ import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembler;
 import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
+import fi.sangre.renesans.graphql.assemble.statistics.AfterGameQuestionsStatisticsAssembler;
 import fi.sangre.renesans.graphql.input.MailInvitationInput;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
@@ -35,6 +37,7 @@ import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameQuestionStatisticsOutput;
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.RespondentStateCounters;
@@ -82,10 +85,12 @@ public class AfterGameFacade {
     private final AnswerDao answerDao;
     private final DiscussionDao discussionDao;
     private final SurveyDao surveyDao;
+    private final StatisticsDao statisticsDao;
     private final SurveyStatisticsService surveyStatisticsService;
     private final RespondentStatisticsService respondentStatisticsService;
     private final ParameterStatisticsService parameterStatisticsService;
     private final AfterGameCatalystStatisticsAssembler afterGameCatalystStatisticsAssembler;
+    private final AfterGameQuestionsStatisticsAssembler afterGameQuestionsStatisticsAssembler;
     private final AfterGameDiscussionAssembler afterGameDiscussionAssembler;
     private final AfterGameService afterGameService;
     private final InvitationAssembler invitationAssembler;
@@ -93,6 +98,7 @@ public class AfterGameFacade {
     private final SurveyUtils surveyUtils;
     private final MultilingualUtils multilingualUtils;
     private final TranslationService translationService;
+
     @Qualifier(DAO_EXECUTOR_NAME)
     private final ThreadPoolTaskExecutor daoExecutor;
 
@@ -173,7 +179,7 @@ public class AfterGameFacade {
             statistics = null;
         } else {
             parameterId = new ParameterId(parameterValue);
-            statistics = getParameterStatistics(survey, catalyst, parameterId, principal);
+            statistics = getParameterStatistics(survey, parameterId, principal);
         }
 
         final AfterGameCatalystStatisticsOutput output = afterGameCatalystStatisticsAssembler.from(catalyst, null, statistics);
@@ -203,6 +209,39 @@ public class AfterGameFacade {
     }
 
     @NonNull
+    public Collection<AfterGameQuestionStatisticsOutput> afterGameDetailedQuestionsStatistics(
+            @NonNull final UUID questionnaireId,
+            @Nullable final UUID parameterValue,
+            @NonNull final UserDetails principal
+    ) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+
+        if (!surveyUtils.isAfterGameEnabled(survey)) {
+            throw new SurveyException("Aftergame is not enabled for this survey!");
+        }
+
+        final SurveyId surveyId = new SurveyId(survey.getId());
+        final ParameterId parameterId;
+
+        if (parameterValue == null) {
+            parameterId = new ParameterId(ParameterId.GLOBAL_EVERYONE_PARAMETER_ID);
+        } else {
+            parameterId = new ParameterId(parameterValue);
+        }
+
+        SurveyResult statistics = getParameterStatistics(survey, parameterId, principal);
+
+        if (statistics == null) {
+            throw new SurveyException("Statistics are missing for this survey and parameter.");
+        }
+
+        return afterGameQuestionsStatisticsAssembler.from(
+                statisticsDao.getQuestionStatistics(surveyId, statistics.getRespondentIds()),
+                survey
+        );
+    }
+
+    @NonNull
     public Collection<AfterGameParameterStatisticsOutput> afterGameRespondentParametersStatistics(@NonNull final UUID questionnaireId,
                                                                                                   @NonNull final UUID catalystId,
                                                                                                   @NonNull final UserDetails principal) {
@@ -216,7 +255,7 @@ public class AfterGameFacade {
         parameters.forEach(parameter -> {
             log.debug("Get async stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameter.getId());
             futures.add(io.vavr.concurrent.Future.of(daoExecutor, () -> {
-                final SurveyResult statistics = getParameterStatistics(survey, catalyst, parameter.getId(), principal);
+                final SurveyResult statistics = getParameterStatistics(survey, parameter.getId(), principal);
                 final AfterGameCatalystStatisticsOutput output = afterGameCatalystStatisticsAssembler.from(catalyst, null, statistics);
                 return AfterGameParameterStatisticsOutput.builder()
                         .titles(parameter.getLabel().getPhrases())
@@ -278,10 +317,9 @@ public class AfterGameFacade {
 
     @Nullable
     private SurveyResult getParameterStatistics(@NonNull final OrganizationSurvey survey,
-                                                @NonNull final Catalyst catalyst,
                                                 @NonNull final ParameterId parameterId,
                                                 @NonNull final UserDetails principal) {
-        log.debug("Start getting stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameterId);
+        log.debug("Start getting stats for Survey(id={}), Parameter(id={})", survey.getId(), parameterId);
         final SurveyResult surveyStatistics;
 
         if (ParameterId.GLOBAL_YOU_PARAMETER_ID.equals(parameterId)) {
@@ -300,7 +338,7 @@ public class AfterGameFacade {
             }
         }
 
-        log.debug("Finished getting stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameterId);
+        log.debug("Finished getting stats for Survey(id={}), Parameter(id={})", survey.getId(), parameterId);
 
         return surveyStatistics;
     }

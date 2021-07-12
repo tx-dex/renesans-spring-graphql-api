@@ -7,6 +7,7 @@ import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
 import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
+import fi.sangre.renesans.application.utils.StatisticsUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.DriverDto;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static fi.sangre.renesans.application.utils.StatisticsUtils.MAX_ANSWER_VALUE;
 import static java.util.stream.Collectors.*;
 
 @Slf4j
@@ -43,7 +45,6 @@ import static java.util.stream.Collectors.*;
 
 @Service
 public class StatisticsService {
-    public final static Double MAX_ANSWER_VALUE = 4d;
     public final static Comparator<StatisticsQuestion> QUESTION_COMPARATOR = Comparator.comparingDouble(e -> e.getAnswer().getAvg() != null ? e.getAnswer().getAvg() : 0);
     private final static Double MEDIAN_PERCENTILE_VALUE = 50d;
     private final static Double DEFAULT_WEIGHT_VALUE = 1d;
@@ -300,9 +301,9 @@ public class StatisticsService {
                             e -> QuestionStatistics.builder()
                                     .questionId(e.getValue().getQuestionId())
                                     .rate(e.getValue().getRate())
-                                    .avg(indexToRate(e.getValue().getAvg()))
-                                    .max(indexToRate(e.getValue().getMax()))
-                                    .min(indexToRate(e.getValue().getMin()))
+                                    .avg(StatisticsUtils.indexToRate(e.getValue().getAvg()))
+                                    .max(StatisticsUtils.indexToRate(e.getValue().getMax()))
+                                    .min(StatisticsUtils.indexToRate(e.getValue().getMin()))
                                     .count(e.getValue().getCount())
                             .build(),
                             (e1, e2) -> e1
@@ -345,24 +346,6 @@ public class StatisticsService {
         });
 
         return catalysts;
-    }
-
-    @Nullable
-    private Double indexToRate(@Nullable final Double value) {
-        if (value == null) {
-            return null;
-        } else {
-            return value / MAX_ANSWER_VALUE;
-        }
-    }
-
-    @Nullable
-    private Integer indexToRate(@Nullable final Integer value) {
-        if (value == null) {
-            return null;
-        } else {
-            return Double.valueOf(value / MAX_ANSWER_VALUE).intValue();
-        }
     }
 
     private Double calculateTotalResult(final List<CatalystStatistics> catalysts) {
