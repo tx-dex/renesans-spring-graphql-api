@@ -7,7 +7,6 @@ import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
 import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
-import fi.sangre.renesans.application.utils.StatisticsUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.DriverDto;
@@ -39,6 +38,7 @@ import java.util.*;
 
 import static fi.sangre.renesans.application.utils.StatisticsUtils.MAX_ANSWER_VALUE;
 import static java.util.stream.Collectors.*;
+import static fi.sangre.renesans.application.utils.StatisticsUtils.indexToRate;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -301,9 +301,9 @@ public class StatisticsService {
                             e -> QuestionStatistics.builder()
                                     .questionId(e.getValue().getQuestionId())
                                     .rate(e.getValue().getRate())
-                                    .avg(StatisticsUtils.indexToRate(e.getValue().getAvg()))
-                                    .max(StatisticsUtils.indexToRate(e.getValue().getMax()))
-                                    .min(StatisticsUtils.indexToRate(e.getValue().getMin()))
+                                    .avg(indexToRate(e.getValue().getAvg()))
+                                    .max(indexToRate(e.getValue().getMax()))
+                                    .min(indexToRate(e.getValue().getMin()))
                                     .count(e.getValue().getCount())
                             .build(),
                             (e1, e2) -> e1
