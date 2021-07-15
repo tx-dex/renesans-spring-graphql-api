@@ -5,6 +5,7 @@ import fi.sangre.renesans.graphql.facade.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
+import fi.sangre.renesans.graphql.output.parameter.SurveyParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
@@ -132,5 +133,18 @@ public class AppQueries implements GraphQLQueryResolver {
 
         resolverHelper.setLanguageCode(languageCode, environment);
         return afterGameFacade.afterGameLatestActiveDiscussions(questionnaireId, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public Collection<SurveyParameterOutput> afterGameParameters(
+            @NonNull final UUID questionnaireId,
+            @Nullable final String languageCode,
+            @NonNull final DataFetchingEnvironment environment
+    ) {
+        log.debug("Getting parameters list for questionnaire(id={})", questionnaireId);
+
+        resolverHelper.setLanguageCode(languageCode, environment);
+        return afterGameFacade.afterGameParameters(questionnaireId, resolverHelper.getRequiredPrincipal(environment));
     }
 }

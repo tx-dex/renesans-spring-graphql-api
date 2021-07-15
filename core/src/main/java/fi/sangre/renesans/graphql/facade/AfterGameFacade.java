@@ -23,6 +23,7 @@ import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.assemble.SurveyParameterOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembler;
 import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
@@ -32,6 +33,7 @@ import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
+import fi.sangre.renesans.graphql.output.parameter.SurveyParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
@@ -87,6 +89,7 @@ public class AfterGameFacade {
     private final ParameterStatisticsService parameterStatisticsService;
     private final AfterGameCatalystStatisticsAssembler afterGameCatalystStatisticsAssembler;
     private final AfterGameDiscussionAssembler afterGameDiscussionAssembler;
+    private final SurveyParameterOutputAssembler surveyParameterOutputAssembler;
     private final AfterGameService afterGameService;
     private final InvitationAssembler invitationAssembler;
     private final ParameterUtils parameterUtils;
@@ -422,6 +425,15 @@ public class AfterGameFacade {
         return afterGameDiscussionAssembler.from(question, discussion, actorId);
     }
 
+    @NonNull
+    public Collection<SurveyParameterOutput> afterGameParameters(
+            @NonNull final UUID questionnaireId,
+            @NonNull final UserDetails principal
+    ) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+
+        return surveyParameterOutputAssembler.from(survey.getParameters());
+    }
 
     @NonNull
     public AfterGameDiscussionOutput commentOnDiscussion(@NonNull final UUID questionnaireId,
@@ -523,5 +535,4 @@ public class AfterGameFacade {
 
         return multilingualUtils.combine(defaults, surveySpecific);
     }
-
 }
