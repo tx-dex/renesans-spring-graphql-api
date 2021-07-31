@@ -311,7 +311,7 @@ public class StatisticsService {
             Catalyst catalyst = survey.getCatalysts().stream()
                     .filter(ct -> ct.getId().equals(driverStatistics.getCatalystId()))
                     .findFirst()
-                    .orElseThrow(() -> new SurveyException("LikertQuestion is linked to a non-existing catalyst!"));
+                    .orElseThrow(() -> new SurveyException("Catalyst with id " + driverStatistics.getCatalystId() + " does not exist."));
 
             for (Map.Entry<QuestionId, QuestionStatistics> questionStatisticsEntry : questionStatistics.entrySet()) {
                 QuestionId questionStatisticsEntryKey = questionStatisticsEntry.getKey();
