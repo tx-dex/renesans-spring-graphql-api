@@ -94,6 +94,13 @@ type Query {
         languageCode: String
     ) : AfterGameCatalystStatistics!
 
+    afterGameDetailedDriversStatistics(
+        questionnaireId: ID!
+        # Selected parameter value
+        parameterValue: ID
+        languageCode: String
+    ) : [AfterGameDetailedDriverStatistics]!
+
     # Returns a collection of question statistics for specific questionnaire and parameter
     afterGameDetailedQuestionsStatistics(
         questionnaireId: ID!
