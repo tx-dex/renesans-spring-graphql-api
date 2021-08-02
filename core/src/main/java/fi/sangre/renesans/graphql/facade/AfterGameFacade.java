@@ -27,6 +27,7 @@ import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembler;
 import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
+import fi.sangre.renesans.graphql.assemble.statistics.AfterGameDetailedDriversStatisticsAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameQuestionsStatisticsAssembler;
 import fi.sangre.renesans.graphql.input.MailInvitationInput;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
@@ -34,17 +35,12 @@ import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameQuestionStatisticsOutput;
+import fi.sangre.renesans.graphql.output.statistics.*;
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.RespondentStateCounters;
-import fi.sangre.renesans.service.AfterGameService;
-import fi.sangre.renesans.service.AnswerService;
-import fi.sangre.renesans.service.OrganizationSurveyService;
-import fi.sangre.renesans.service.TranslationService;
+import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
+import fi.sangre.renesans.service.*;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
 import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
@@ -91,6 +87,7 @@ public class AfterGameFacade {
     private final ParameterStatisticsService parameterStatisticsService;
     private final AfterGameCatalystStatisticsAssembler afterGameCatalystStatisticsAssembler;
     private final AfterGameQuestionsStatisticsAssembler afterGameQuestionsStatisticsAssembler;
+    private final AfterGameDetailedDriversStatisticsAssembler afterGameDetailedDriversStatisticsAssembler;
     private final AfterGameDiscussionAssembler afterGameDiscussionAssembler;
     private final AfterGameService afterGameService;
     private final InvitationAssembler invitationAssembler;
@@ -98,6 +95,7 @@ public class AfterGameFacade {
     private final SurveyUtils surveyUtils;
     private final MultilingualUtils multilingualUtils;
     private final TranslationService translationService;
+    private final StatisticsService statisticsService;
 
     @Qualifier(DAO_EXECUTOR_NAME)
     private final ThreadPoolTaskExecutor daoExecutor;
@@ -209,31 +207,31 @@ public class AfterGameFacade {
     }
 
     @NonNull
+    public Collection<AfterGameDetailedDriverStatisticsOutput> afterGameDetailedDriversStatistics(
+            @NonNull final UUID questionnaireId,
+            @NonNull final UserDetails principal,
+            @Nullable final UUID parameterValue
+    ) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyResult statistics = getSurveyResultForAfterGame(survey, principal, parameterValue);
+        final SurveyId surveyId = new SurveyId(survey.getId());
+        final Map<QuestionId, QuestionStatistics> questionStatisticsMap = statisticsDao.getQuestionStatistics(surveyId, statistics.getRespondentIds());
+
+        return afterGameDetailedDriversStatisticsAssembler.from(
+                statisticsService.calculateDetailedDriversStatistics(survey, questionStatisticsMap),
+                survey
+        );
+    }
+
+    @NonNull
     public Collection<AfterGameQuestionStatisticsOutput> afterGameDetailedQuestionsStatistics(
             @NonNull final UUID questionnaireId,
             @Nullable final UUID parameterValue,
             @NonNull final UserDetails principal
     ) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
-
-        if (!surveyUtils.isAfterGameEnabled(survey)) {
-            throw new SurveyException("Aftergame is not enabled for this survey!");
-        }
-
+        final SurveyResult statistics = getSurveyResultForAfterGame(survey, principal, parameterValue);
         final SurveyId surveyId = new SurveyId(survey.getId());
-        final ParameterId parameterId;
-
-        if (parameterValue == null) {
-            parameterId = new ParameterId(ParameterId.GLOBAL_EVERYONE_PARAMETER_ID);
-        } else {
-            parameterId = new ParameterId(parameterValue);
-        }
-
-        SurveyResult statistics = getParameterStatistics(survey, parameterId, principal);
-
-        if (statistics == null) {
-            throw new SurveyException("Statistics are missing for this survey and parameter.");
-        }
 
         return afterGameQuestionsStatisticsAssembler.from(
                 statisticsDao.getQuestionStatistics(surveyId, statistics.getRespondentIds()),
@@ -562,4 +560,30 @@ public class AfterGameFacade {
         return multilingualUtils.combine(defaults, surveySpecific);
     }
 
+    @NonNull
+    private SurveyResult getSurveyResultForAfterGame(
+            @NonNull final OrganizationSurvey survey,
+            @NonNull final UserDetails principal,
+            @Nullable final UUID parameterValue
+    ) {
+        if (!surveyUtils.isAfterGameEnabled(survey)) {
+            throw new SurveyException("Aftergame is not enabled for this survey!");
+        }
+
+        final ParameterId parameterId;
+
+        if (parameterValue == null) {
+            parameterId = new ParameterId(ParameterId.GLOBAL_EVERYONE_PARAMETER_ID);
+        } else {
+            parameterId = new ParameterId(parameterValue);
+        }
+
+        SurveyResult statistics = getParameterStatistics(survey, parameterId, principal);
+
+        if (statistics == null || statistics.getRespondentIds().size() == 0) {
+            throw new SurveyException("Statistics are missing for this survey and parameter.");
+        }
+
+        return statistics;
+    }
 }

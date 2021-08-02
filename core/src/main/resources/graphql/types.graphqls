@@ -448,7 +448,13 @@ type AfterGameOverviewParticipants {
     engagementRatio: Long
 }
 
-
+type AfterGameDetailedDriverStatistics {
+    id: ID
+    catalyst: Catalyst
+    questionsStatistics: [AfterGameQuestionStatistics!]!
+    title: String
+    result: Float
+}
 
 
 

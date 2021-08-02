@@ -5,8 +5,10 @@ import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
+import fi.sangre.renesans.application.model.statistics.DetailedDriverStatistics;
 import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
+import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.dto.CatalystDto;
 import fi.sangre.renesans.dto.DriverDto;
@@ -14,6 +16,9 @@ import fi.sangre.renesans.dto.FiltersDto;
 import fi.sangre.renesans.exception.InputArgumentsValidationException;
 import fi.sangre.renesans.exception.RespondentGroupNotFoundException;
 import fi.sangre.renesans.exception.RespondentNotFoundException;
+import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.output.CatalystOutput;
+import fi.sangre.renesans.graphql.output.CatalystProxy;
 import fi.sangre.renesans.model.Question;
 import fi.sangre.renesans.model.Respondent;
 import fi.sangre.renesans.model.RespondentGroup;
@@ -279,6 +284,56 @@ public class StatisticsService {
         }
 
         return ImmutableList.copyOf(driversStatistics.values());
+    }
+
+    public List<DetailedDriverStatistics> calculateDetailedDriversStatistics(
+            @NonNull final OrganizationSurvey survey,
+            @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics
+        ) {
+        List<DriverStatistics> driverStatisticsList = calculateDriversStatistics(survey, questionStatistics);
+
+        final Map<QuestionId, Map<DriverId, Double>> questionWeights = surveyUtils.getAllQuestions(survey).stream()
+                .collect(collectingAndThen(toMap(
+                        LikertQuestion::getId,
+                        LikertQuestion::getWeights,
+                        (v1, v2) -> v1
+                ), Collections::unmodifiableMap));
+
+        List<DetailedDriverStatistics> detailedDriverStatisticsList = new ArrayList<>();
+
+        for (DriverStatistics driverStatistics : driverStatisticsList) {
+            // ignore drivers that do not have any statistics yet
+            if (driverStatistics.getResult() == null) {
+                continue;
+            }
+
+            Map<QuestionId, QuestionStatistics> relatedQuestionsStatistics = new HashMap<>();
+            Catalyst catalyst = survey.getCatalysts().stream()
+                    .filter(ct -> ct.getId().equals(driverStatistics.getCatalystId()))
+                    .findFirst()
+                    .orElseThrow(() -> new SurveyException("Catalyst with id " + driverStatistics.getCatalystId() + " does not exist."));
+
+            for (Map.Entry<QuestionId, QuestionStatistics> questionStatisticsEntry : questionStatistics.entrySet()) {
+                QuestionId questionStatisticsEntryKey = questionStatisticsEntry.getKey();
+                QuestionStatistics questionStatisticsObject = questionStatisticsEntry.getValue();
+
+                Double questionDriverWeight = questionWeights.get(questionStatisticsEntryKey).get(driverStatistics.getId());
+
+                if (questionDriverWeight > 0.0 && questionStatisticsObject.getAvg() != null) {
+                    relatedQuestionsStatistics.put(questionStatisticsEntryKey, questionStatisticsObject);
+                }
+            }
+
+            DetailedDriverStatistics detailedDriverStatistics = DetailedDriverStatistics.builder()
+                    .titles(driverStatistics.getTitles())
+                    .result(driverStatistics.getResult())
+                    .catalyst(catalyst)
+                    .questionsStatistics(relatedQuestionsStatistics)
+                    .build();
+            detailedDriverStatisticsList.add(detailedDriverStatistics);
+        }
+
+        return detailedDriverStatisticsList;
     }
 
     private List<CatalystStatistics> calculateCatalystsStatistics(@NonNull final OrganizationSurvey survey,
