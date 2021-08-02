@@ -8,6 +8,8 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import static fi.sangre.renesans.application.utils.StatisticsUtils.MAX_ANSWER_VALUE;
+
 @Deprecated
 @RequiredArgsConstructor
 @Component
@@ -28,7 +30,7 @@ public class StatisticsQuestionResolver implements GraphQLResolver<StatisticsQue
     }
 
     public Double getAvg(final StatisticsQuestion question) {
-        return question.getAnswer().getAvg() != null ? question.getAnswer().getAvg() / StatisticsService.MAX_ANSWER_VALUE : null;
+        return question.getAnswer().getAvg() != null ? question.getAnswer().getAvg() / MAX_ANSWER_VALUE : null;
     }
 
     public Long getCount(final StatisticsQuestion question) {

@@ -3,7 +3,7 @@ package fi.sangre.renesans.graphql.assemble.discussion;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
-import fi.sangre.renesans.application.calculations.AfterGameCalculations;
+import fi.sangre.renesans.application.utils.StatisticsUtils;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
@@ -73,7 +73,7 @@ public class AfterGameDiscussionAssembler {
     @NonNull
     public AfterGameOverviewParticipantsOutput from(@NonNull final RespondentStateCounters counters) {
         return AfterGameOverviewParticipantsOutput.builder()
-                .engagementRatio(AfterGameCalculations.calculateEngagementRatio(counters.getAnswered(), counters.getAll()))
+                .engagementRatio(StatisticsUtils.calculateEngagementRatio(counters.getAnswered(), counters.getAll()))
                 .invitedParticipantsCount(counters.getAll())
                 .participantsCount(counters.getAnswered())
                 .build();
