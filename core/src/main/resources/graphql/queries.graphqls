@@ -101,6 +101,11 @@ type Query {
         languageCode: String
     ): [AfterGameParameterStatistics]!
 
+    afterGameParameters(
+        questionnaireId: ID!
+        languageCode: String
+    ): [SurveyParameter!]!
+
     afterGameOverviewParticipants(
         questionnaireId: ID!
     ): AfterGameOverviewParticipantsOutput

@@ -451,7 +451,6 @@ type AfterGameOverviewParticipantsOutput {
 
 
 
-
 type Answer {
     id: ID!
     answerValue: Long
