@@ -211,7 +211,7 @@ public class StatisticsService {
         }
     }
 
-    private List<DriverStatistics> calculateDriversStatistics(@NonNull final OrganizationSurvey survey, @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
+    public List<DriverStatistics> calculateDriversStatistics(@NonNull final OrganizationSurvey survey, @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
         final Map<DriverId, DriverStatistics> driversStatistics = Maps.newHashMap();
         final Map<DriverId, Double> driverWeights = Maps.newHashMap();
         final Map<DriverId, Double> sumOfQuestionsWeightsPerDriver = Maps.newHashMap();
@@ -280,7 +280,7 @@ public class StatisticsService {
         return ImmutableList.copyOf(driversStatistics.values());
     }
 
-    private List<CatalystStatistics> calculateCatalystsStatistics(@NonNull final OrganizationSurvey survey,
+    public List<CatalystStatistics> calculateCatalystsStatistics(@NonNull final OrganizationSurvey survey,
                                                                   @NonNull final List<DriverStatistics> driverStatistics,
                                                                   @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
         final double allDriverWeightSum = driverStatistics.stream().mapToDouble(DriverStatistics::getWeight).sum();
@@ -365,14 +365,24 @@ public class StatisticsService {
         }
     }
 
-    private Double calculateTotalResult(final List<CatalystStatistics> catalysts) {
-        final List<CatalystStatistics> enabledCatalysts = catalysts.stream()
-                .filter(catalyst -> catalyst.getResult() > 0)
-                .collect(toList());
+    private List<CatalystStatistics> findEnabledCatalysts(final List<CatalystStatistics> catalysts) {
+        return catalysts.stream()
+            .filter(catalyst -> catalyst.getResult() > 0)
+            .collect(toList());
+    }
 
+    private Double calculateTotalResult(final List<CatalystStatistics> catalysts) {
+        final List<CatalystStatistics> enabledCatalysts = findEnabledCatalysts(catalysts);
         final double ratio = enabledCatalysts.size() > 0 ? enabledCatalysts.size() : 1d;
 
         return catalysts.stream().mapToDouble(CatalystStatistics::getWeighedResult).sum() / ratio;
+    }
+
+    public Double calculateVisionAttainmentIndicator(final List<CatalystStatistics> catalysts) {
+        final List<CatalystStatistics> enabledCatalysts = findEnabledCatalysts(catalysts);
+        final double ratio = enabledCatalysts.size() > 0 ? enabledCatalysts.size() : 1d;
+
+        return catalysts.stream().mapToDouble(CatalystStatistics::getResult).sum() / ratio;
     }
 
     private Map<Question, StatisticsAnswer> getAnswerStatistics(final Set<Question> questions, final List<Respondent> respondents) {

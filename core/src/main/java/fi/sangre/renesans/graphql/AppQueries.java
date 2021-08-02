@@ -8,6 +8,7 @@ import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.parameter.SurveyParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewVisionAttainmentIndicatorOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import graphql.schema.DataFetchingEnvironment;
@@ -133,6 +134,18 @@ public class AppQueries implements GraphQLQueryResolver {
 
         resolverHelper.setLanguageCode(languageCode, environment);
         return afterGameFacade.afterGameLatestActiveDiscussions(questionnaireId, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public AfterGameOverviewVisionAttainmentIndicatorOutput afterGameOverviewVisionAttainmentIndicator(
+            @NonNull final UUID questionnaireId,
+            @NonNull final DataFetchingEnvironment environment
+    ) {
+        return afterGameFacade.afterGameOverviewVisionAttainmentIndicator(
+                questionnaireId,
+                resolverHelper.getRequiredPrincipal(environment)
+        );
     }
 
     @NonNull

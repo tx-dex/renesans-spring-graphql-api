@@ -36,14 +36,12 @@ import fi.sangre.renesans.graphql.output.parameter.QuestionnaireParameterOutput;
 import fi.sangre.renesans.graphql.output.parameter.SurveyParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewVisionAttainmentIndicatorOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatisticsOutput;
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.RespondentStateCounters;
-import fi.sangre.renesans.service.AfterGameService;
-import fi.sangre.renesans.service.AnswerService;
-import fi.sangre.renesans.service.OrganizationSurveyService;
-import fi.sangre.renesans.service.TranslationService;
+import fi.sangre.renesans.service.*;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
 import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
@@ -519,6 +517,22 @@ public class AfterGameFacade {
         return ParameterItem.builder()
                 .id(ParameterId.GLOBAL_EVERYONE_PARAMETER_ID)
                 .label(getParametersText(survey, EVERYONE_PARAMETER_KEY))
+                .build();
+    }
+
+    public AfterGameOverviewVisionAttainmentIndicatorOutput afterGameOverviewVisionAttainmentIndicator(
+            @NonNull final UUID questionnaireId,
+            @NonNull final UserDetails principal
+    ) {
+        if (!(principal instanceof RespondentPrincipal)) {
+            throw new SurveyException("VAI calculation is possible for respondent only");
+        }
+
+        final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+
+        return AfterGameOverviewVisionAttainmentIndicatorOutput.builder()
+                .value(respondentStatisticsService.calculateVisionAttainmentIndicator(survey, respondent.getId()))
                 .build();
     }
 

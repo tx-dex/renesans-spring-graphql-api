@@ -8,6 +8,8 @@ import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.application.model.statistics.CatalystStatistics;
+import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.config.properties.StatisticsProperties;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
@@ -56,5 +58,16 @@ public class RespondentStatisticsService {
                     .statistics(statisticsService.calculateStatistics(survey, results))
                     .build();
         }
+    }
+
+
+    @NonNull
+    public Double calculateVisionAttainmentIndicator(@NonNull final OrganizationSurvey survey, @NonNull final RespondentId respondentId) {
+        final SurveyId surveyId = new SurveyId(survey.getId());
+        final Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, ImmutableSet.of(respondentId));
+        final List<DriverStatistics> driverStatistics = statisticsService.calculateDriversStatistics(survey, questionStatistics);
+        final List<CatalystStatistics> catalystsStatistics = statisticsService.calculateCatalystsStatistics(survey, driverStatistics, questionStatistics);
+
+        return statisticsService.calculateVisionAttainmentIndicator(catalystsStatistics);
     }
 }

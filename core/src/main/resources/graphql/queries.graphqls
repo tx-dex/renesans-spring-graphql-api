@@ -142,6 +142,11 @@ type Query {
         languageCode: String
     ): [AfterGameDiscussion!]!
 
+    # Get VAI value for survey
+    afterGameOverviewVisionAttainmentIndicator(
+        questionnaireId: ID!
+    ): AfterGameOverviewVisionAttainmentIndicatorOutput!
+
 
 
     customer(
