@@ -94,12 +94,38 @@ type Query {
         languageCode: String
     ) : AfterGameCatalystStatistics!
 
+    afterGameDetailedDriversStatistics(
+        questionnaireId: ID!
+        # Selected parameter value
+        parameterValue: ID
+        languageCode: String
+    ) : [AfterGameDetailedDriverStatistics]!
+
+    # Returns a collection of question statistics for specific questionnaire and parameter
+    afterGameDetailedQuestionsStatistics(
+        questionnaireId: ID!
+        # Selected parameter value
+        parameterValue: ID
+        languageCode: String
+    ) : [AfterGameQuestionStatistics]!
+
     # Gets the list of selected by reposndent parameters and its overall rate
     afterGameRespondentParametersStatistics(
         questionnaireId: ID!
         catalystId: ID!
         languageCode: String
     ): [AfterGameParameterStatistics]!
+
+    afterGameParameters(
+        questionnaireId: ID!
+        languageCode: String
+    ): [SurveyParameter!]!
+
+    afterGameOverviewParticipants(
+        questionnaireId: ID!
+    ): AfterGameOverviewParticipants
+
+
 
     # get media public url by key, this should be used for logo
     mediaPublicUrl(key: String!, params: MediaParametersInput): Url!
@@ -127,7 +153,16 @@ type Query {
         languageCode: String
     ): AfterGameDiscussion!
 
+    # Get two latest discussions (topics)
+    afterGameOverviewLatestDiscussions(
+        questionnaireId: ID!
+        languageCode: String
+    ): [AfterGameDiscussion!]!
 
+    # Get VAI value for survey
+    afterGameOverviewVisionAttainmentIndicator(
+        questionnaireId: ID!
+    ): AfterGameOverviewVisionAttainmentIndicatorOutput!
 
 
 

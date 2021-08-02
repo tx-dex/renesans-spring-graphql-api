@@ -50,6 +50,7 @@ public class DiscussionQuestionMerger {
                 newOrExisting = DiscussionQuestion.builder()
                         .id(new QuestionId(id))
                         .active(input.isActive())
+                        .createdDate(new Date())
                         .title(input.getTitle())
                         .build();
 
@@ -70,6 +71,7 @@ public class DiscussionQuestionMerger {
                 .id(existing.getId())
                 .active(input.isActive())
                 .title(multilingualUtils.combine(existing.getTitle(), input.getTitle()))
+                .createdDate(existing.getCreatedDate())
                 .build();
     }
 }

@@ -441,8 +441,25 @@ type AfterGameComment {
     liked: Boolean!
 }
 
+type AfterGameOverviewParticipants {
+    id: ID
+    participantsCount: Long
+    invitedParticipantsCount: Long
+    engagementRatio: Long
+}
 
+type AfterGameDetailedDriverStatistics {
+    id: ID
+    catalyst: Catalyst
+    questionsStatistics: [AfterGameQuestionStatistics!]!
+    title: String
+    result: Float
+}
 
+type AfterGameOverviewVisionAttainmentIndicatorOutput {
+   id: ID
+   value: Float
+}
 
 
 type Answer {

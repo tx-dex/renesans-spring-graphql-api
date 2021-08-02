@@ -3,9 +3,12 @@ package fi.sangre.renesans.graphql.assemble.discussion;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.application.utils.StatisticsUtils;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
+import fi.sangre.renesans.graphql.output.statistics.AfterGameOverviewParticipantsOutput;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
+import fi.sangre.renesans.persistence.model.RespondentStateCounters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -64,6 +67,15 @@ public class AfterGameDiscussionAssembler {
                 .text(comment.getText())
                 .numberOfAllLikes((long) comment.getLikes().size())
                 .liked(actorId != null && comment.getLikes().containsKey(actorId))
+                .build();
+    }
+
+    @NonNull
+    public AfterGameOverviewParticipantsOutput from(@NonNull final RespondentStateCounters counters) {
+        return AfterGameOverviewParticipantsOutput.builder()
+                .engagementRatio(StatisticsUtils.calculateEngagementRatio(counters.getAnswered(), counters.getAll()))
+                .invitedParticipantsCount(counters.getAll())
+                .participantsCount(counters.getAnswered())
                 .build();
     }
 }

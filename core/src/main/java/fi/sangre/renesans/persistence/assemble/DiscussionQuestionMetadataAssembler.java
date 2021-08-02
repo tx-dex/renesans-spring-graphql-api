@@ -29,6 +29,7 @@ public class DiscussionQuestionMetadataAssembler {
                             .id(Objects.requireNonNull(question.getId().getValue()))
                             .titles(question.getTitle().getPhrases())
                             .active(question.isActive())
+                            .createdDate(question.getCreatedDate())
                             .build())
                     .collect(collectingAndThen(toList(), Collections::unmodifiableList));
         }
