@@ -82,15 +82,10 @@ public class SurveyDao {
     @Nullable
     @Transactional(readOnly = true)
     public RespondentStateCounters countRespondentsBySurvey(@NonNull final SurveyId surveyId) {
-        Set<UUID> countSurveyRespondents = new HashSet<>();
-        countSurveyRespondents.add(surveyId.getValue());
-        List<RespondentStateCounters> counters = surveyRespondentRepository.countSurveyRespondents(countSurveyRespondents);
-
-        if (counters.isEmpty()) {
-            throw new SurveyException("Respondents counter cannot be null in the aftergame phase");
-        }
-
-        return counters.get(0);
+        return surveyRespondentRepository.countSurveyRespondents(ImmutableSet.of(surveyId.getValue()))
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new SurveyException("Respondents counter cannot be null in the aftergame phase"));
     }
 
 

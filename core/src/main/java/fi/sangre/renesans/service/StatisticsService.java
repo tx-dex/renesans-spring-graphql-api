@@ -38,9 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static fi.sangre.renesans.application.utils.StatisticsUtils.MAX_ANSWER_VALUE;
+import static fi.sangre.renesans.application.utils.StatisticsUtils.*;
 import static java.util.stream.Collectors.*;
-import static fi.sangre.renesans.application.utils.StatisticsUtils.indexToRate;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -417,7 +416,7 @@ public class StatisticsService {
         final List<CatalystStatistics> enabledCatalysts = findEnabledCatalysts(catalysts);
         final double ratio = enabledCatalysts.size() > 0 ? enabledCatalysts.size() : 1d;
 
-        return catalysts.stream().mapToDouble(CatalystStatistics::getResult).sum() / ratio;
+        return rateToPercent(catalysts.stream().mapToDouble(CatalystStatistics::getResult).sum() / ratio);
     }
 
     private Map<Question, StatisticsAnswer> getAnswerStatistics(final Set<Question> questions, final List<Respondent> respondents) {

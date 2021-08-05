@@ -73,7 +73,7 @@ public class AfterGameDiscussionAssembler {
     @NonNull
     public AfterGameOverviewParticipantsOutput from(@NonNull final RespondentStateCounters counters) {
         return AfterGameOverviewParticipantsOutput.builder()
-                .engagementRatio(StatisticsUtils.calculateEngagementRatio(counters.getAnswered(), counters.getAll()))
+                .engagementRatio(StatisticsUtils.engagementRatio(counters.getAnswered(), counters.getAll()))
                 .invitedParticipantsCount(counters.getAll())
                 .participantsCount(counters.getAnswered())
                 .build();
