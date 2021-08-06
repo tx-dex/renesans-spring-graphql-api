@@ -3,6 +3,7 @@ package fi.sangre.renesans.graphql.facade;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import fi.sangre.renesans.aaa.GuestPrincipal;
 import fi.sangre.renesans.aaa.RespondentPrincipal;
 import fi.sangre.renesans.aaa.UserPrincipal;
@@ -18,6 +19,7 @@ import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.Invitation;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
@@ -216,13 +218,16 @@ public class AfterGameFacade {
     @NonNull
     public Collection<AfterGameDetailedDriverStatisticsOutput> afterGameDetailedDriversStatistics(
             @NonNull final UUID questionnaireId,
-            @NonNull final UserDetails principal,
-            @Nullable final UUID parameterValue
+            @Nullable final UUID parameterValue,
+            @NonNull final UserDetails principal
     ) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
-        final SurveyResult statistics = getSurveyResultForAfterGame(survey, principal, parameterValue);
+        final Set<RespondentId> respondentIds = getRespondentIdsFromStatistics(
+                getSurveyResultForAfterGame(survey, principal, parameterValue)
+        );
+
         final SurveyId surveyId = new SurveyId(survey.getId());
-        final Map<QuestionId, QuestionStatistics> questionStatisticsMap = statisticsDao.getQuestionStatistics(surveyId, statistics.getRespondentIds());
+        final Map<QuestionId, QuestionStatistics> questionStatisticsMap = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
 
         return afterGameDetailedDriversStatisticsAssembler.from(
                 statisticsService.calculateDetailedDriversStatistics(survey, questionStatisticsMap),
@@ -237,11 +242,14 @@ public class AfterGameFacade {
             @NonNull final UserDetails principal
     ) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
-        final SurveyResult statistics = getSurveyResultForAfterGame(survey, principal, parameterValue);
+        final Set<RespondentId> respondentIds = getRespondentIdsFromStatistics(
+                getSurveyResultForAfterGame(survey, principal, parameterValue)
+        );
+
         final SurveyId surveyId = new SurveyId(survey.getId());
 
         return afterGameQuestionsStatisticsAssembler.from(
-                statisticsDao.getQuestionStatistics(surveyId, statistics.getRespondentIds()),
+                statisticsDao.getQuestionStatistics(surveyId, respondentIds),
                 survey
         );
     }
@@ -592,7 +600,7 @@ public class AfterGameFacade {
         return multilingualUtils.combine(defaults, surveySpecific);
     }
 
-    @NonNull
+    @Nullable
     private SurveyResult getSurveyResultForAfterGame(
             @NonNull final OrganizationSurvey survey,
             @NonNull final UserDetails principal,
@@ -610,12 +618,11 @@ public class AfterGameFacade {
             parameterId = new ParameterId(parameterValue);
         }
 
-        SurveyResult statistics = getParameterStatistics(survey, parameterId, principal);
+        return getParameterStatistics(survey, parameterId, principal);
+    }
 
-        if (statistics == null || statistics.getRespondentIds().size() == 0) {
-            throw new SurveyException("Statistics are missing for this survey and parameter.");
-        }
-
-        return statistics;
+    @NonNull
+    private Set<RespondentId> getRespondentIdsFromStatistics(SurveyResult statistics) {
+        return statistics == null ? ImmutableSet.of() : ImmutableSet.copyOf(statistics.getRespondentIds());
     }
 }

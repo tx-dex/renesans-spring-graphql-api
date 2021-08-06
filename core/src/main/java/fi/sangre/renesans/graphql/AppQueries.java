@@ -75,8 +75,8 @@ public class AppQueries implements GraphQLQueryResolver {
 
         return afterGameFacade.afterGameDetailedDriversStatistics(
                 questionnaireId,
-                resolverHelper.getRequiredPrincipal(environment),
-                parameterValue
+                parameterValue,
+                resolverHelper.getRequiredPrincipal(environment)
         );
     }
 

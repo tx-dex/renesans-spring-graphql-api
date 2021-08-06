@@ -6,8 +6,10 @@ public class StatisticsUtils {
     private static final Double HUNDRED_D = 100d;
     public final static Double MAX_ANSWER_VALUE = 4d;
 
-    public static Long calculateEngagementRatio(Long participantsAnsweredCount, Long allParticipantsCount) {
-        return Math.round((double) participantsAnsweredCount / (double) allParticipantsCount * 100.0);
+    @Nullable
+    public static Long engagementRatio(Long participantsAnsweredCount, Long allParticipantsCount) {
+        Double engagementRatio = rateToPercent((double) participantsAnsweredCount / allParticipantsCount);
+        return engagementRatio == null ? null : Math.round(engagementRatio);
     }
 
     @Nullable
