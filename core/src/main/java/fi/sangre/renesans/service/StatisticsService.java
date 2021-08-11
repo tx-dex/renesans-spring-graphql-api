@@ -416,7 +416,7 @@ public class StatisticsService {
         final List<CatalystStatistics> enabledCatalysts = findEnabledCatalysts(catalysts);
         final double ratio = enabledCatalysts.size() > 0 ? enabledCatalysts.size() : 1d;
 
-        return rateToPercent(catalysts.stream().mapToDouble(CatalystStatistics::getResult).sum() / ratio);
+        return catalysts.stream().mapToDouble(CatalystStatistics::getResult).sum() / ratio;
     }
 
     private Map<Question, StatisticsAnswer> getAnswerStatistics(final Set<Question> questions, final List<Respondent> respondents) {
