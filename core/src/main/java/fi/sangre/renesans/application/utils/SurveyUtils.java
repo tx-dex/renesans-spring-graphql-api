@@ -25,15 +25,6 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class SurveyUtils {
-    public boolean isAfterGameEnabled(@Nullable final OrganizationSurvey survey) {
-        if (survey != null) {
-            return SurveyState.AFTER_GAME.equals(survey.getState());
-        } else {
-            return false;
-        }
-    }
-
-
     public List<LikertQuestion> getAllQuestions(@NonNull final OrganizationSurvey survey) {
         return survey.getCatalysts().stream()
                 .flatMap(catalyst -> catalyst.getQuestions().stream())

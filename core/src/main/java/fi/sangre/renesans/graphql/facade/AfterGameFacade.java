@@ -161,11 +161,8 @@ public class AfterGameFacade {
 
         final SurveyResult respondentStatistics = getRespondentStatistics(survey, principal);
         final SurveyResult allRespondentStatistics;
-        if (surveyUtils.isAfterGameEnabled(survey)) {
-            allRespondentStatistics = surveyStatisticsService.calculateStatistics(survey);
-        } else {
-            allRespondentStatistics = null;
-        }
+
+        allRespondentStatistics = surveyStatisticsService.calculateStatistics(survey);
 
         return afterGameCatalystStatisticsAssembler.from(survey, respondentStatistics, allRespondentStatistics);
     }
@@ -338,17 +335,9 @@ public class AfterGameFacade {
         if (ParameterId.GLOBAL_YOU_PARAMETER_ID.equals(parameterId)) {
             surveyStatistics = getRespondentStatistics(survey, principal);
         } else if (ParameterId.GLOBAL_EVERYONE_PARAMETER_ID.equals(parameterId)) {
-            if (surveyUtils.isAfterGameEnabled(survey)) {
-                surveyStatistics = surveyStatisticsService.calculateStatistics(survey);
-            } else {
-                surveyStatistics = null;
-            }
+            surveyStatistics = surveyStatisticsService.calculateStatistics(survey);
         } else {
-            if (surveyUtils.isAfterGameEnabled(survey)) {
-                surveyStatistics = parameterStatisticsService.calculateStatistics(survey, parameterId);
-            } else {
-                surveyStatistics = null;
-            }
+            surveyStatistics = parameterStatisticsService.calculateStatistics(survey, parameterId);
         }
 
         log.debug("Finished getting stats for Survey(id={}), Parameter(id={})", survey.getId(), parameterId);
