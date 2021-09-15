@@ -606,10 +606,6 @@ public class AfterGameFacade {
             @NonNull final UserDetails principal,
             @Nullable final UUID parameterValue
     ) {
-        if (!surveyUtils.isAfterGameEnabled(survey)) {
-            throw new SurveyException("Aftergame is not enabled for this survey!");
-        }
-
         final ParameterId parameterId;
 
         if (parameterValue == null) {
