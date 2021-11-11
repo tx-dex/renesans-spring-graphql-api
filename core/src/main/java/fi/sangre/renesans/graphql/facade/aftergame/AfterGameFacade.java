@@ -1,4 +1,4 @@
-package fi.sangre.renesans.graphql.facade;
+package fi.sangre.renesans.graphql.facade.aftergame;
 
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableList;

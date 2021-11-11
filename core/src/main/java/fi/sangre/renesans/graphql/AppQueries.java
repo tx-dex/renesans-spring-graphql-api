@@ -1,7 +1,7 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
-import fi.sangre.renesans.graphql.facade.AfterGameFacade;
+import fi.sangre.renesans.graphql.facade.aftergame.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;

@@ -13,7 +13,7 @@ import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
-import fi.sangre.renesans.graphql.facade.AfterGameFacade;
+import fi.sangre.renesans.graphql.facade.aftergame.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.OrganizationSurveyFacade;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
 import fi.sangre.renesans.graphql.input.*;

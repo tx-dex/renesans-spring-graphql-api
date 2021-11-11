@@ -7,8 +7,10 @@ create table if not exists dialogue_topic
     survey_id uuid
         constraint dialogue_topic_survey
             references survey,
-    active boolean default true not null,
-    sort_order integer not null
+    active boolean default false,
+    sort_order integer,
+    ctm timestamp default CURRENT_TIMESTAMP not null,
+    mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
 create table if not exists dialogue_topic_question
@@ -19,8 +21,10 @@ create table if not exists dialogue_topic_question
     dialogue_topic_id uuid
         constraint dialogue_topic_question_topic
             references dialogue_topic,
-    active boolean default true not null,
-    sort_order integer not null
+    active boolean default false,
+    sort_order integer,
+    ctm timestamp default CURRENT_TIMESTAMP not null,
+    mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
 create table if not exists dialogue_tip
@@ -31,7 +35,9 @@ create table if not exists dialogue_tip
     dialogue_topic_id uuid
         constraint dialogue_tip_topic
             references dialogue_topic,
-    text text
+    text text,
+    ctm timestamp default CURRENT_TIMESTAMP not null,
+    mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
 create table if not exists dialogue_comment
@@ -46,7 +52,9 @@ create table if not exists dialogue_comment
         constraint dialogue_comment_parent
             references dialogue_comment,
     color text not null,
-    text text
+    text text,
+    ctm timestamp default CURRENT_TIMESTAMP not null,
+    mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
 create table if not exists dialogue_like
@@ -59,6 +67,8 @@ create table if not exists dialogue_like
             references dialogue_comment,
     survey_respondent_id uuid
         constraint dialogue_like_survey_respondent
-            references survey_respondent
+            references survey_respondent,
+    ctm timestamp default CURRENT_TIMESTAMP not null,
+    mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
