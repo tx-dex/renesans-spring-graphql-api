@@ -563,10 +563,6 @@ public class AfterGameFacade {
             @NonNull final UUID questionnaireId,
             @NonNull final UserDetails principal
     ) {
-        if (!(principal instanceof RespondentPrincipal)) {
-            throw new SurveyException("VAI calculation is possible for respondent only");
-        }
-
         final RespondentPrincipal respondent = (RespondentPrincipal) principal;
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
 
