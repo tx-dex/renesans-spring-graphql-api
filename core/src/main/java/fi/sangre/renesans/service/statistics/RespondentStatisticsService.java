@@ -62,9 +62,9 @@ public class RespondentStatisticsService {
 
 
     @NonNull
-    public Double calculateVisionAttainmentIndicator(@NonNull final OrganizationSurvey survey, @NonNull final RespondentId respondentId) {
+    public Double calculateVisionAttainmentIndicator(@NonNull final OrganizationSurvey survey) {
         final SurveyId surveyId = new SurveyId(survey.getId());
-        final Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, ImmutableSet.of(respondentId));
+        final Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId);
         final List<DriverStatistics> driverStatistics = statisticsService.calculateDriversStatistics(survey, questionStatistics);
         final List<CatalystStatistics> catalystsStatistics = statisticsService.calculateCatalystsStatistics(survey, driverStatistics, questionStatistics);
 

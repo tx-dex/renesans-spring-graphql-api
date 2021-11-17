@@ -563,11 +563,10 @@ public class AfterGameFacade {
             @NonNull final UUID questionnaireId,
             @NonNull final UserDetails principal
     ) {
-        final RespondentPrincipal respondent = (RespondentPrincipal) principal;
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
 
         return AfterGameOverviewVisionAttainmentIndicatorOutput.builder()
-                .value(respondentStatisticsService.calculateVisionAttainmentIndicator(survey, respondent.getId()))
+                .value(respondentStatisticsService.calculateVisionAttainmentIndicator(survey))
                 .build();
     }
 
