@@ -280,6 +280,9 @@ type Questionnaire {
     canComment: Boolean!
     # true if user/respondent can go to after game
     canViewAfterGame: Boolean!
+    # determines whether the user has been invited to view the aftergame, or not;
+    # a top-priority flag compared to isFinished and canViewAfterGame
+    isAfterGameGuest: Boolean!
 }
 
 # type for the app

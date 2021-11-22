@@ -83,7 +83,8 @@ public class QuestionnaireAssembler {
                 .selectedLanguage(state.getLanguageTag())
                 .consented(isConsented)
                 .answerable(!isAfterGameEnabled)
-                .finished(true)
+                .finished(false)
+                .isAfterGameGuest(true)
                 .canAnswerParameters(!isViewingAfterGame)
                 .canGoToQuestions(false) //This should be false
                 .canViewAfterGame(isAfterGameEnabled && isConsented && areAllParametersAnswered)
@@ -141,6 +142,7 @@ public class QuestionnaireAssembler {
                 .canAnswer(!isAfterGameEnabled)
                 .canComment(isAfterGameEnabled)
                 .canViewAfterGame(isAfterGameEnabled && isConsented && areAllParametersAnswered)
+                .isAfterGameGuest(false)
                 .catalysts(catalysts)
                 .parameters(parameters)
                 .build();
@@ -161,7 +163,7 @@ public class QuestionnaireAssembler {
                 .canGoToQuestions(true)
                 .canAnswer(false)
                 .canComment(false)
-                .canViewAfterGame(true);
-
+                .canViewAfterGame(true)
+                .isAfterGameGuest(true);
     }
 }

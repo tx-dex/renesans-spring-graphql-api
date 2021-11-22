@@ -26,6 +26,7 @@ public class QuestionnaireOutput {
     private Map<String, StaticTextGroup> staticTexts;
     private boolean consented;
     private boolean finished;
+    private boolean isAfterGameGuest;
     private boolean answerable;
     private boolean canAnswerParameters;
     private boolean canGoToQuestions;
