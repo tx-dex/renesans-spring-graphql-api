@@ -1,7 +1,6 @@
 package fi.sangre.renesans.persistence.dialogue.model;
 
 import fi.sangre.renesans.persistence.auditing.SecurityAuditorAware;
-import fi.sangre.renesans.persistence.discussion.model.LikeEntity;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -11,7 +10,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -22,33 +20,22 @@ import java.util.UUID;
 @EqualsAndHashCode(of = "id", callSuper = false)
 
 @Entity
-@Table(name = "dialogue_comment")
+@Table(name = "dialogue_comment_like")
 @EntityListeners({ AuditingEntityListener.class, SecurityAuditorAware.class })
-public class DialogueCommentEntity {
+public class DialogueCommentLikeEntity {
     @Id
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @GeneratedValue(generator = "uuid")
     @Column(name = "id", unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @ManyToOne
-    private DialogueCommentEntity parent;
-
-    @OneToMany(mappedBy="parent")
-    private Map<UUID, DialogueCommentEntity> replies;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Map<Long, LikeEntity> likes;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private DialogueTopicQuestionEntity question;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "survey_respondent_id", referencedColumnName = "id")
     private SurveyRespondent respondent;
 
-    @Column(name = "text")
-    private String text;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dialogue_comment_id", referencedColumnName = "id")
+    private DialogueCommentEntity comment;
 
     @CreatedDate
     @Column(name = "ctm", nullable = false, updatable = false)

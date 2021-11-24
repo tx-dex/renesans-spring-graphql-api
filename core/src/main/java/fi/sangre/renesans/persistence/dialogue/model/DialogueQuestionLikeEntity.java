@@ -20,9 +20,9 @@ import java.util.UUID;
 @EqualsAndHashCode(of = "id", callSuper = false)
 
 @Entity
-@Table(name = "dialogue_like")
+@Table(name = "dialogue_question_like")
 @EntityListeners({ AuditingEntityListener.class, SecurityAuditorAware.class })
-public class DialogueLikeEntity {
+public class DialogueQuestionLikeEntity {
     @Id
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @GeneratedValue(generator = "uuid")
@@ -34,8 +34,8 @@ public class DialogueLikeEntity {
     private SurveyRespondent respondent;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dialogue_comment_id", referencedColumnName = "id")
-    private DialogueCommentEntity comment;
+    @JoinColumn(name = "dialogue_question_id", referencedColumnName = "id")
+    private DialogueTopicQuestionEntity question;
 
     @CreatedDate
     @Column(name = "ctm", nullable = false, updatable = false)

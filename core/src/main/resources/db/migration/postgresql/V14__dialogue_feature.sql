@@ -51,13 +51,15 @@ create table if not exists dialogue_comment
     parent_id uuid
         constraint dialogue_comment_parent
             references dialogue_comment,
-    color text not null,
+    respondent_id uuid not null
+        constraint dialogue_comment_survey_respondent
+            references survey_respondent,
     text text,
     ctm timestamp default CURRENT_TIMESTAMP not null,
     mtm timestamp default CURRENT_TIMESTAMP not null
 );
 
-create table if not exists dialogue_like
+create table if not exists dialogue_comment_like
 (
     id uuid not null
         constraint dialogue_like_pk
@@ -67,6 +69,21 @@ create table if not exists dialogue_like
             references dialogue_comment,
     survey_respondent_id uuid
         constraint dialogue_like_survey_respondent
+            references survey_respondent,
+    ctm timestamp default CURRENT_TIMESTAMP not null,
+    mtm timestamp default CURRENT_TIMESTAMP not null
+);
+
+create table if not exists dialogue_question_like
+(
+    id uuid not null
+        constraint dialogue_question_like_pk
+            primary key,
+    dialogue_question_id uuid
+        constraint dialogue_question_like_dialogue_topic_question
+            references dialogue_topic_question,
+    survey_respondent_id uuid
+        constraint dialogue_question_like_survey_respondent
             references survey_respondent,
     ctm timestamp default CURRENT_TIMESTAMP not null,
     mtm timestamp default CURRENT_TIMESTAMP not null
