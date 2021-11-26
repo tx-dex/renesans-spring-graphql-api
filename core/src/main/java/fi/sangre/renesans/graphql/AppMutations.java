@@ -2,7 +2,7 @@ package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.application.model.questions.QuestionId;
-import fi.sangre.renesans.graphql.facade.AfterGameFacade;
+import fi.sangre.renesans.graphql.facade.aftergame.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;

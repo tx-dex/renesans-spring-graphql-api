@@ -125,7 +125,21 @@ type Query {
         questionnaireId: ID!
     ): AfterGameOverviewParticipants
 
+    afterGameDialogueTotalStatistics(
+        questionnaireId: ID!
+        languageCode: String
+    ): DialogueTotalStatistics!
 
+    afterGameDialogueTopics(
+        questionnaireId: ID!
+        languageCode: String
+    ): [DialogueTopic]!
+
+    afterGameDialogueTopic(
+        questionnaireId: ID!
+        topicId: ID!
+        languageCode: String
+    ): DialogueTopic!
 
     # get media public url by key, this should be used for logo
     mediaPublicUrl(key: String!, params: MediaParametersInput): Url!
