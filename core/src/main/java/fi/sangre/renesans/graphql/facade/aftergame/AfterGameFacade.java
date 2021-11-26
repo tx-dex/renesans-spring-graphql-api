@@ -297,7 +297,7 @@ public class AfterGameFacade {
     }
 
     @NonNull
-    private OrganizationSurvey getSurvey(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
+    public OrganizationSurvey getSurvey(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
         final OrganizationSurvey survey;
         if (principal instanceof RespondentPrincipal) {
             survey = organizationSurveyService.getSurvey(((RespondentPrincipal) principal).getSurveyId());

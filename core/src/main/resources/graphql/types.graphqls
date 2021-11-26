@@ -420,6 +420,63 @@ type AfterGameOpenQuestion {
     answers: [String!]!
 }
 
+type DialogueTopic {
+    title: String!
+    picture: String
+    questionsCount: Int!
+    sortOrder: Int!
+    active: Boolean!
+}
+
+type DialogueQuestion {
+    title: String!
+    answersCount: Int!
+    likesCount: Int!
+    sortOrder: Int!
+    active: Boolean!
+    hasLikeByRespondent: Boolean!
+}
+
+type DialogueTotalStatistics {
+    activeTopicsCount: Int!
+    answersCount: Int!
+    likesCount: Int!
+}
+
+type DialogueTopic {
+    title: String!
+    questionsCount: Int!
+    sortOrder: Int!
+    active: Boolean!
+    questions: [DialogueQuestion]!
+    tips: [DialogueTip]!
+    picture: String
+}
+
+type DialogueTip {
+    text: String!
+}
+
+type DialogueQuestion {
+    title: String!
+    answersCount: Int!
+    likesCount: Int!
+    hasLikeByThisRespondent: Boolean!
+    sortOrder: Int!
+    active: Boolean!
+    comments: [DialogueComment]!
+    picture: String
+}
+
+type DialogueComment {
+    likesCount: Int!
+    text: String!
+    createdAt: String!
+    respondentColor: String!
+    hasLikeByThisRespondent: Boolean!
+    replies: [DialogueComment]!
+}
+
 type MediaUpload {
     key: String!
     url: Url!

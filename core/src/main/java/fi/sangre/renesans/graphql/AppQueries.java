@@ -3,7 +3,11 @@ package fi.sangre.renesans.graphql;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import fi.sangre.renesans.graphql.facade.aftergame.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
+import fi.sangre.renesans.graphql.facade.aftergame.DialogueFacade;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.graphql.output.dialogue.DialogueQuestionOutput;
+import fi.sangre.renesans.graphql.output.dialogue.DialogueTopicOutput;
+import fi.sangre.renesans.graphql.output.dialogue.DialogueTotalStatisticsOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.output.parameter.SurveyParameterOutput;
 import fi.sangre.renesans.graphql.output.statistics.*;
@@ -26,6 +30,7 @@ import java.util.UUID;
 public class AppQueries implements GraphQLQueryResolver {
     private final QuestionnaireFacade questionnaireFacade;
     private final AfterGameFacade afterGameFacade;
+    private final DialogueFacade dialogueFacade;
     private final ResolverHelper resolverHelper;
 
     @NonNull
@@ -186,5 +191,49 @@ public class AppQueries implements GraphQLQueryResolver {
 
         resolverHelper.setLanguageCode(languageCode, environment);
         return afterGameFacade.afterGameParameters(questionnaireId, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public DialogueTotalStatisticsOutput afterGameDialogueTotalStatistics(
+            @NonNull final UUID questionnaireId,
+            @Nullable final String languageCode,
+            @NonNull final DataFetchingEnvironment environment
+    ) {
+        log.debug("Getting dialogue total stats for questionnaire(id={})", questionnaireId);
+
+        resolverHelper.setLanguageCode(languageCode, environment);
+        return dialogueFacade.getDialogueTotalStatistics(questionnaireId, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public Collection<DialogueTopicOutput> afterGameDialogueTopics(
+            @NonNull final UUID questionnaireId,
+            @Nullable final String languageCode,
+            @NonNull final DataFetchingEnvironment environment
+    ) {
+        log.debug("Getting dialogue topics for questionnaire(id={})", questionnaireId);
+
+        resolverHelper.setLanguageCode(languageCode, environment);
+        return dialogueFacade.getDialogueTopics(questionnaireId, resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public DialogueTopicOutput afterGameDialogueTopic(
+            @NonNull final UUID questionnaireId,
+            @NonNull final UUID topicId,
+            @Nullable final String languageCode,
+            @NonNull final DataFetchingEnvironment environment
+    ) {
+        log.debug("Getting dialogue topic by id: " + topicId);
+
+        resolverHelper.setLanguageCode(languageCode, environment);
+        return dialogueFacade.getDialogueTopic(
+                questionnaireId,
+                topicId,
+                resolverHelper.getRequiredPrincipal(environment)
+        );
     }
 }

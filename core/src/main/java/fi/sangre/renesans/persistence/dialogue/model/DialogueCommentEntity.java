@@ -44,7 +44,7 @@ public class DialogueCommentEntity {
     private DialogueTopicQuestionEntity question;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "survey_respondent_id", referencedColumnName = "id")
+    @JoinColumn(name = "respondent_id", referencedColumnName = "id")
     private SurveyRespondent respondent;
 
     @Column(name = "text")
