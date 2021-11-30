@@ -33,6 +33,9 @@ public class DialogueTopicQuestionEntity {
     @JoinColumn(name = "dialogue_topic_id", referencedColumnName = "id")
     private DialogueTopicEntity topic;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private Map<UUID, DialogueCommentEntity> comments;
 
