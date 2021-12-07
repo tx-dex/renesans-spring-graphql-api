@@ -55,6 +55,7 @@ public class DialogueFacade {
     private DialogueTopicOutput getFakeTopic() {
         DialogueCommentOutput comment1Reply = DialogueCommentOutput
                 .builder()
+                .id(UUID.randomUUID())
                 .text("Ei, see on vana")
                 .likesCount(0)
                 .hasLikeByThisRespondent(false)
@@ -64,6 +65,7 @@ public class DialogueFacade {
 
         DialogueCommentOutput comment1 = DialogueCommentOutput
                 .builder()
+                .id(UUID.randomUUID())
                 .text("Kas me seda küsimust arutame?")
                 .likesCount(2)
                 .replies(Collections.singletonList(comment1Reply))
@@ -75,6 +77,7 @@ public class DialogueFacade {
 
         DialogueCommentOutput comment2 = DialogueCommentOutput
                 .builder()
+                .id(UUID.randomUUID())
                 .text("O hi!")
                 .likesCount(1)
                 .replies(Collections.singletonList(comment1Reply))
@@ -86,6 +89,7 @@ public class DialogueFacade {
 
         List<DialogueCommentOutput> commentsList1 = Arrays.asList(comment1, comment2);
         DialogueQuestionOutput question1 = DialogueQuestionOutput.builder()
+                .id(UUID.randomUUID())
                 .title("First question title")
                 .active(true)
                 .sortOrder(1)
@@ -96,6 +100,7 @@ public class DialogueFacade {
                 .build();
 
         DialogueQuestionOutput question2 = DialogueQuestionOutput.builder()
+                .id(UUID.randomUUID())
                 .title("Another question title")
                 .active(true)
                 .sortOrder(2)
@@ -106,6 +111,7 @@ public class DialogueFacade {
                 .build();
 
         DialogueQuestionOutput question3 = DialogueQuestionOutput.builder()
+                .id(UUID.randomUUID())
                 .title("Closed question title")
                 .active(false)
                 .sortOrder(2)
@@ -116,10 +122,11 @@ public class DialogueFacade {
                 .comments(Collections.emptyList())
                 .build();
 
-        DialogueTipOutput tip1 = DialogueTipOutput.builder().text("Some tip will be here").build();
-        DialogueTipOutput tip2 = DialogueTipOutput.builder().text("Lorem ipsum sit amet").build();
+        DialogueTipOutput tip1 = DialogueTipOutput.builder().id(UUID.randomUUID()).text("Some tip will be here").build();
+        DialogueTipOutput tip2 = DialogueTipOutput.builder().id(UUID.randomUUID()).text("Lorem ipsum sit amet").build();
 
         return DialogueTopicOutput.builder()
+                .id(UUID.randomUUID())
                 .title("Topic #1")
                 .active(true)
                 .questionsCount(3)
@@ -131,6 +138,7 @@ public class DialogueFacade {
 
     private DialogueTotalStatisticsOutput getFakeTotalStatistics() {
         return DialogueTotalStatisticsOutput.builder()
+                .id(UUID.randomUUID())
                 .activeTopicsCount(3)
                 .likesCount(5)
                 .answersCount(3)
