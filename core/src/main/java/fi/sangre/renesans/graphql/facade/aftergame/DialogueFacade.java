@@ -89,6 +89,9 @@ public class DialogueFacade {
                 .title("First question title")
                 .active(true)
                 .sortOrder(1)
+                .answersCount(3)
+                .likesCount(3)
+                .hasLikeByThisRespondent(true)
                 .comments(commentsList1)
                 .build();
 
@@ -96,6 +99,9 @@ public class DialogueFacade {
                 .title("Another question title")
                 .active(true)
                 .sortOrder(2)
+                .answersCount(2)
+                .likesCount(2)
+                .hasLikeByThisRespondent(false)
                 .comments(commentsList1)
                 .build();
 
@@ -103,6 +109,9 @@ public class DialogueFacade {
                 .title("Closed question title")
                 .active(false)
                 .sortOrder(2)
+                .answersCount(1)
+                .likesCount(1)
+                .hasLikeByThisRespondent(false)
                 // don't send any comments since the question is archived
                 .comments(Collections.emptyList())
                 .build();
