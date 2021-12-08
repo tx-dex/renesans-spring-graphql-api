@@ -39,7 +39,7 @@ public class DialogueCommentEntity {
     private Map<UUID, DialogueCommentEntity> replies;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Map<Long, LikeEntity> likes;
+    private Map<Long, DialogueCommentLikeEntity> likes;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private DialogueTopicQuestionEntity question;

@@ -251,20 +251,25 @@ type Mutation {
         dialogueQuestionID: ID!
         input: DialogueCommentInput!
         languageCode: String
-    ): DialogueTopic!
+    ): DialogueComment!
 
-    likeDialogueComment(
+    likeOrUnlikeDialogueComment(
         questionnaireId: ID!
         commentId: ID!
-        like: Boolean!
         languageCode: String
-    ): DialogueTopic!
+    ): DialogueComment!
+
+    likeOrUnlikeDialogueQuestion(
+        questionnaireId: ID!
+        questionId: ID!
+        languageCode: String
+    ): DialogueQuestion!
 
     deleteDialogueComment(
         questionnaireId: ID!
         commentId: ID!
         languageCode: String
-    ): DialogueTopic!
+    ): Boolean!
 
 
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer  @deprecated(reason: "Will be removed")

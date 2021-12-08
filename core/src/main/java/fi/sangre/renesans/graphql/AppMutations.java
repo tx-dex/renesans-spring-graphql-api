@@ -1,7 +1,11 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import fi.sangre.renesans.aaa.RespondentPrincipal;
+import fi.sangre.renesans.aaa.UserPrincipal;
+import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.facade.aftergame.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.facade.aftergame.DialogueFacade;
@@ -13,6 +17,8 @@ import fi.sangre.renesans.graphql.input.dialogue.DialogueCommentInput;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.graphql.output.dialogue.DialogueCommentOutput;
+import fi.sangre.renesans.graphql.output.dialogue.DialogueQuestionOutput;
 import fi.sangre.renesans.graphql.output.dialogue.DialogueTopicOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
@@ -23,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -145,36 +152,107 @@ public class AppMutations implements GraphQLMutationResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
-    public DialogueTopicOutput postDialogueComment(@NonNull final UUID questionnaireId,
-                                                   @Nullable final UUID parentCommentId,
-                                                   @NonNull final UUID dialogueQuestionId,
-                                                   @NonNull final DialogueCommentInput input,
-                                                   @Nullable final String languageCode,
-                                                   @NonNull final DataFetchingEnvironment environment
+    public DialogueCommentOutput postDialogueComment(@NonNull final UUID questionnaireId,
+                                                     @Nullable final UUID parentCommentId,
+                                                     @NonNull final UUID dialogueQuestionId,
+                                                     @NonNull final DialogueCommentInput input,
+                                                     @Nullable final String languageCode,
+                                                     @NonNull final DataFetchingEnvironment environment
     ) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+        UserDetails principal = resolverHelper.getRequiredPrincipal(environment);
 
+        if (!(principal instanceof RespondentPrincipal)) {
+            throw new SurveyException("Only survey respondents are allowed to add comments.");
+        }
 
-        return new DialogueTopicOutput();
+        RespondentPrincipal respondent = (RespondentPrincipal) principal;
+
+        afterGameFacade.validateQuestionnairePermissions(
+                questionnaireId,
+                principal
+        );
+
+        return dialogueFacade.postComment(
+                parentCommentId,
+                dialogueQuestionId,
+                input,
+                respondent.getId(),
+                respondent.getSurveyId()
+        );
     }
 
     @NonNull
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
-    public DialogueTopicOutput likeDialogueComment(@NonNull final UUID questionnaireId,
+    public DialogueCommentOutput likeOrUnlikeDialogueComment(@NonNull final UUID questionnaireId,
                                                    @NonNull final UUID commentId,
-                                                   @NonNull final Boolean like,
                                                    @Nullable final String languageCode,
                                                    @NonNull final DataFetchingEnvironment environment
    ) {
-        return new DialogueTopicOutput();
+        resolverHelper.setLanguageCode(languageCode, environment);
+        UserDetails principal = resolverHelper.getRequiredPrincipal(environment);
+
+        afterGameFacade.validateQuestionnairePermissions(
+                questionnaireId,
+                principal
+        );
+
+        if (!(principal instanceof RespondentPrincipal)) {
+            throw new SurveyException("Only survey respondents are allowed to like/unlike comments.");
+        }
+
+        RespondentPrincipal respondent = (RespondentPrincipal) principal;
+
+        return dialogueFacade.likeOrUnlikeComment(
+                commentId,
+                respondent.getSurveyId(),
+                respondent.getId()
+        );
     }
 
     @NonNull
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
-    public DialogueTopicOutput deleteDialogueComment(@NonNull final UUID questionnaireId,
-                                                        @NonNull final UUID commentId,
-                                                        @Nullable final String languageCode,
-                                                        @NonNull final DataFetchingEnvironment environment
+    public DialogueQuestionOutput likeOrUnlikeDialogueQuestion(@NonNull final UUID questionnaireId,
+                                                       @NonNull final UUID questionId,
+                                                       @Nullable final String languageCode,
+                                                       @NonNull final DataFetchingEnvironment environment
     ) {
-        return new DialogueTopicOutput();
+        resolverHelper.setLanguageCode(languageCode, environment);
+        UserDetails principal = resolverHelper.getRequiredPrincipal(environment);
+
+        afterGameFacade.validateQuestionnairePermissions(
+                questionnaireId,
+                principal
+        );
+
+        if (!(principal instanceof RespondentPrincipal)) {
+            throw new SurveyException("Only survey respondents are allowed to like comments.");
+        }
+
+        RespondentPrincipal respondent = (RespondentPrincipal) principal;
+
+        return dialogueFacade.likeOrUnlikeQuestion(
+                questionId,
+                respondent.getSurveyId(),
+                respondent.getId()
+        );
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public boolean deleteDialogueComment(@NonNull final UUID questionnaireId,
+                                 @NonNull final UUID commentId,
+                                 @Nullable final String languageCode,
+                                 @NonNull final DataFetchingEnvironment environment
+    ) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+        UserDetails principal = resolverHelper.getRequiredPrincipal(environment);
+
+        afterGameFacade.validateQuestionnairePermissions(
+                questionnaireId,
+                principal
+        );
+
+        return dialogueFacade.deleteComment(commentId, principal);
     }
 }

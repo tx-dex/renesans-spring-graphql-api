@@ -1,17 +1,28 @@
 package fi.sangre.renesans.graphql.facade.aftergame;
 
+import fi.sangre.renesans.aaa.RespondentPrincipal;
+import fi.sangre.renesans.aaa.UserPrincipal;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.assemble.dialogue.DialogueCommentOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.dialogue.DialogueTopicOutputAssembler;
+import fi.sangre.renesans.graphql.assemble.dialogue.DialogueTopicQuestionOutputAssembler;
+import fi.sangre.renesans.graphql.input.dialogue.DialogueCommentInput;
 import fi.sangre.renesans.graphql.output.dialogue.*;
-import fi.sangre.renesans.persistence.dialogue.model.DialogueTopicEntity;
+import fi.sangre.renesans.persistence.dialogue.model.*;
+import fi.sangre.renesans.persistence.model.Survey;
+import fi.sangre.renesans.persistence.model.SurveyRespondent;
+import fi.sangre.renesans.persistence.repository.SurveyRepository;
+import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import fi.sangre.renesans.repository.dialogue.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +39,17 @@ public class DialogueFacade {
     private final DialogueTopicOutputAssembler dialogueTopicOutputAssembler;
 
     @Autowired
+    private final DialogueTopicQuestionOutputAssembler dialogueTopicQuestionOutputAssembler;
+
+    @Autowired
+    private final DialogueCommentOutputAssembler dialogueCommentOutputAssembler;
+
+    @Autowired
+    private final SurveyRepository surveyRepository;
+
+    private final SurveyRespondentRepository surveyRespondentRepository;
+
+    @Autowired
     private final DialogueTopicRepository dialogueTopicRepository;
 
     @Autowired
@@ -35,6 +57,9 @@ public class DialogueFacade {
 
     @Autowired
     private final DialogueQuestionLikeRepository dialogueQuestionLikeRepository;
+
+    @Autowired
+    private final DialogueTopicQuestionRepository dialogueTopicQuestionRepository;
 
     @Autowired
     private final DialogueCommentRepository dialogueCommentRepository;
@@ -186,5 +211,136 @@ public class DialogueFacade {
                 .questions(Arrays.asList(question1, question2, question3))
                 .sortOrder(1)
                 .build();
+    }
+
+    public DialogueCommentOutput postComment(
+            @Nullable final UUID parentCommentId,
+            @NonNull final UUID dialogueQuestionId,
+            @NonNull final DialogueCommentInput input,
+            @NonNull final RespondentId respondentId,
+            @NonNull final SurveyId surveyId
+            ) {
+        DialogueCommentEntity parentComment = null;
+        DialogueTopicQuestionEntity question = dialogueTopicQuestionRepository
+                .findById(dialogueQuestionId)
+                .orElseThrow(() -> new SurveyException("Could not find a question!"));
+
+        if (parentCommentId != null) {
+            parentComment = dialogueCommentRepository.findById(parentCommentId)
+                    .orElseThrow(() -> new SurveyException("Could not find a parent comment!"));
+        }
+
+        Survey survey = surveyRepository.findById(surveyId.getValue())
+                .orElseThrow(() -> new SurveyException("Could not find a survey!"));
+
+        SurveyRespondent surveyRespondent = surveyRespondentRepository.getOne(respondentId.getValue());
+
+        DialogueCommentEntity commentEntity = DialogueCommentEntity.builder()
+                .id(UUID.randomUUID())
+                .respondent(surveyRespondent)
+                .parent(parentComment)
+                .question(question)
+                .survey(survey)
+                .text(input.getText())
+                .build();
+
+        dialogueCommentRepository.saveAndFlush(commentEntity);
+
+        return dialogueCommentOutputAssembler.from(commentEntity, respondentId);
+    }
+
+    public DialogueCommentOutput likeOrUnlikeComment(@NonNull final UUID commentId,
+                                                     @NonNull final SurveyId surveyId,
+                                                     @NonNull final RespondentId respondentId) {
+        DialogueCommentEntity commentEntity = dialogueCommentRepository.findById(commentId)
+                .orElseThrow(() -> new SurveyException("Could not find a comment, no way to like/unlike it"));
+
+        if (respondentId.getValue().equals(commentEntity.getRespondent().getId())) {
+            throw new SurveyException("Liking/unliking your own comment is not allowed.");
+        }
+
+        Survey survey = surveyRepository.findById(surveyId.getValue())
+                .orElseThrow(() -> new SurveyException("Could not find a survey!"));
+        SurveyRespondent surveyRespondent = surveyRespondentRepository.getOne(respondentId.getValue());
+
+        Collection<DialogueCommentLikeEntity> likes = commentEntity.getLikes().values();
+        Optional<DialogueCommentLikeEntity> ownLike = likes.stream()
+                .filter(like -> like.getRespondent().getId().equals(respondentId.getValue()))
+                .findFirst();
+
+        if (ownLike.isPresent()) {
+            // if this user has already liked the comment, let's unlike it
+            dialogueCommentLikeRepository.deleteById(ownLike.get().getId());
+        } else {
+            // like the comment if not yet
+            dialogueCommentLikeRepository.saveAndFlush(
+                    DialogueCommentLikeEntity.builder()
+                            .comment(commentEntity)
+                            .respondent(surveyRespondent)
+                            .survey(survey)
+                            .build()
+            );
+        }
+
+        return dialogueCommentOutputAssembler.from(commentEntity, respondentId);
+    }
+
+    public DialogueQuestionOutput likeOrUnlikeQuestion(@NonNull final UUID questionId,
+                                                     @NonNull final SurveyId surveyId,
+                                                     @NonNull final RespondentId respondentId) {
+        DialogueTopicQuestionEntity questionEntity = dialogueTopicQuestionRepository.findById(questionId)
+                .orElseThrow(() -> new SurveyException("Could not find a question, no way to like/unlike it"));
+
+        Survey survey = surveyRepository.findById(surveyId.getValue())
+                .orElseThrow(() -> new SurveyException("Could not find a survey!"));
+        SurveyRespondent surveyRespondent = surveyRespondentRepository.getOne(respondentId.getValue());
+
+        Collection<DialogueQuestionLikeEntity> likes = questionEntity.getLikes().values();
+        Optional<DialogueQuestionLikeEntity> ownLike = likes.stream()
+                .filter(like -> like.getRespondent().getId().equals(respondentId.getValue()))
+                .findFirst();
+
+        if (ownLike.isPresent()) {
+            // if this user has already liked the question, let's unlike it
+            dialogueQuestionLikeRepository.deleteById(ownLike.get().getId());
+        } else {
+            // like the question if not yet
+            dialogueQuestionLikeRepository.saveAndFlush(
+                    DialogueQuestionLikeEntity.builder()
+                            .question(questionEntity)
+                            .respondent(surveyRespondent)
+                            .survey(survey)
+                            .build()
+            );
+        }
+
+        return dialogueTopicQuestionOutputAssembler.from(questionEntity, respondentId);
+    }
+
+    public boolean deleteComment(@NonNull final UUID commentId,
+                                               @NonNull final UserDetails principal) {
+        DialogueCommentEntity commentEntity = dialogueCommentRepository.findById(commentId)
+                .orElseThrow(() -> new SurveyException("Could not find a comment, is it already removed?"));
+
+        // allow respondent to delete his own comment
+        if (principal instanceof RespondentPrincipal) {
+            RespondentPrincipal respondent = (RespondentPrincipal) principal;
+
+            // only comment's author can remove it
+            // removal should be cascade, i.e. all the replies will be removed automatically
+            if (commentEntity.getRespondent().getId().equals(respondent.getId().getValue())) {
+                dialogueCommentRepository.delete(commentEntity);
+            } else {
+                throw new SurveyException("A respondent cannot delete a comment that does not belong to him.");
+            }
+
+        // allow admin to delete any comment in a survey he's responsible for
+        } else if (principal instanceof UserPrincipal) {
+            dialogueCommentRepository.delete(commentEntity);
+        } else {
+            throw new SurveyException("Incorrect user type for deletion of a comment.");
+        }
+
+        return true;
     }
 }
