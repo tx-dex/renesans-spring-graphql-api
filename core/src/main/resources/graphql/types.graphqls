@@ -463,6 +463,8 @@ type DialogueComment {
     respondentColor: String!
     hasLikeByThisRespondent: Boolean!
     replies: [DialogueComment]!
+    isOwnedByThisRespondent: Boolean!
+    authorRespondentId: ID!
 }
 
 type MediaUpload {

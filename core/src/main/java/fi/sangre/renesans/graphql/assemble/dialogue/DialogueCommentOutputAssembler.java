@@ -28,20 +28,23 @@ public class DialogueCommentOutputAssembler {
     private SurveyRespondentRepository surveyRespondentRepository;
 
     @NonNull
-    public DialogueCommentOutput from(DialogueCommentEntity entity, RespondentId respondentId) {
+    public DialogueCommentOutput from(DialogueCommentEntity entity, RespondentId viewingRespondentId) {
         boolean hasLikeByThisRespondent = dialogueCommentLikeRepository
                 .countDialogueCommentLikeEntitiesByCommentEqualsAndRespondentIdEquals(
-                        entity, respondentId.getValue()
+                        entity, viewingRespondentId.getValue()
                 ) > 0;
 
         int likesCount = dialogueCommentLikeRepository.countDialogueCommentLikeEntitiesByCommentEquals(entity);
+        UUID commentAuthorId = entity.getRespondent().getId();
 
         return DialogueCommentOutput.builder()
                 .id(entity.getId())
                 .respondentColor(entity.getRespondent().getColor())
-                .replies(from(entity.getReplies(), respondentId))
+                .replies(from(entity.getReplies(), viewingRespondentId))
                 .likesCount(likesCount)
                 .hasLikeByThisRespondent(hasLikeByThisRespondent)
+                .isOwnedByThisRespondent(commentAuthorId.equals(viewingRespondentId.getValue()))
+                .authorRespondentId(commentAuthorId)
                 .text(entity.getText())
                 .createdAt(entity.getCreatedOn().toString())
                 .build();

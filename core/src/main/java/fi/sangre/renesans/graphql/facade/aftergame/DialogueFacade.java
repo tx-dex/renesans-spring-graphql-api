@@ -109,6 +109,8 @@ public class DialogueFacade {
                 .hasLikeByThisRespondent(false)
                 .createdAt("2021-11-20T11:03:51.612Z")
                 .respondentColor("#00ff00")
+                .authorRespondentId(UUID.randomUUID())
+                .isOwnedByThisRespondent(false)
                 .build();
 
         DialogueCommentOutput comment1 = DialogueCommentOutput
@@ -119,6 +121,8 @@ public class DialogueFacade {
                 .hasLikeByThisRespondent(true)
                 .createdAt("2021-11-20T10:00:00.612Z")
                 .respondentColor("#ee0000")
+                .authorRespondentId(UUID.randomUUID())
+                .isOwnedByThisRespondent(true)
                 .build();
 
 
@@ -130,6 +134,8 @@ public class DialogueFacade {
                 .hasLikeByThisRespondent(true)
                 .createdAt("2021-11-20T10:30:00.612Z")
                 .respondentColor("#ee0000")
+                .authorRespondentId(UUID.randomUUID())
+                .isOwnedByThisRespondent(false)
                 .build();
 
 

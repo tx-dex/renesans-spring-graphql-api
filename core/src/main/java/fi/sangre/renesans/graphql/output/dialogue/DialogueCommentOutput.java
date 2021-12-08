@@ -18,4 +18,6 @@ public class DialogueCommentOutput {
     private boolean hasLikeByThisRespondent;
     private Collection<DialogueCommentOutput> replies;
     private String respondentColor;
+    private UUID authorRespondentId;
+    private boolean isOwnedByThisRespondent;
 }
