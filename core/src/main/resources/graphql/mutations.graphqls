@@ -244,6 +244,29 @@ type Mutation {
         languageCode: String
     ): AfterGameComment!
 
+
+    postDialogueComment(
+        questionnaireId: ID!
+        parentCommentId: ID
+        dialogueQuestionID: ID!
+        input: DialogueCommentInput!
+        languageCode: String
+    ): DialogueTopic!
+
+    likeDialogueComment(
+        questionnaireId: ID!
+        commentId: ID!
+        like: Boolean!
+        languageCode: String
+    ): DialogueTopic!
+
+    deleteDialogueComment(
+        questionnaireId: ID!
+        commentId: ID!
+        languageCode: String
+    ): DialogueTopic!
+
+
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer  @deprecated(reason: "Will be removed")
 
     storeSegment(languageCode: String!, segment: SegmentInput!): Segment @deprecated(reason: "Will be removed")

@@ -4,13 +4,16 @@ import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.graphql.facade.aftergame.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
+import fi.sangre.renesans.graphql.facade.aftergame.DialogueFacade;
 import fi.sangre.renesans.graphql.input.answer.CatalystOpenQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionAnswerInput;
 import fi.sangre.renesans.graphql.input.answer.LikertQuestionRateInput;
 import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
+import fi.sangre.renesans.graphql.input.dialogue.DialogueCommentInput;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.graphql.output.dialogue.DialogueTopicOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameCommentOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
@@ -31,6 +34,7 @@ import java.util.UUID;
 public class AppMutations implements GraphQLMutationResolver {
     private final QuestionnaireFacade questionnaireFacade;
     private final AfterGameFacade afterGameFacade;
+    private final DialogueFacade dialogueFacade;
     private final ResolverHelper resolverHelper;
 
     // NOTICE!!!
@@ -137,5 +141,40 @@ public class AppMutations implements GraphQLMutationResolver {
                 commentId,
                 like,
                 resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public DialogueTopicOutput postDialogueComment(@NonNull final UUID questionnaireId,
+                                                   @Nullable final UUID parentCommentId,
+                                                   @NonNull final UUID dialogueQuestionId,
+                                                   @NonNull final DialogueCommentInput input,
+                                                   @Nullable final String languageCode,
+                                                   @NonNull final DataFetchingEnvironment environment
+    ) {
+
+
+        return new DialogueTopicOutput();
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public DialogueTopicOutput likeDialogueComment(@NonNull final UUID questionnaireId,
+                                                   @NonNull final UUID commentId,
+                                                   @NonNull final Boolean like,
+                                                   @Nullable final String languageCode,
+                                                   @NonNull final DataFetchingEnvironment environment
+   ) {
+        return new DialogueTopicOutput();
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public DialogueTopicOutput deleteDialogueComment(@NonNull final UUID questionnaireId,
+                                                        @NonNull final UUID commentId,
+                                                        @Nullable final String languageCode,
+                                                        @NonNull final DataFetchingEnvironment environment
+    ) {
+        return new DialogueTopicOutput();
     }
 }
