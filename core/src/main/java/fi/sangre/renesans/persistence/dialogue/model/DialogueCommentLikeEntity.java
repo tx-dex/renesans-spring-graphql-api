@@ -1,6 +1,7 @@
 package fi.sangre.renesans.persistence.dialogue.model;
 
 import fi.sangre.renesans.persistence.auditing.SecurityAuditorAware;
+import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -36,6 +37,10 @@ public class DialogueCommentLikeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dialogue_comment_id", referencedColumnName = "id")
     private DialogueCommentEntity comment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "survey_id", referencedColumnName = "id", nullable = false, updatable = false)
+    private Survey survey;
 
     @CreatedDate
     @Column(name = "ctm", nullable = false, updatable = false)

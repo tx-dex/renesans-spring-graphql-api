@@ -312,6 +312,10 @@ public class AfterGameFacade {
         return survey;
     }
 
+    public void validateQuestionnairePermissions(@NonNull final UUID questionnaireId, @NonNull final UserDetails principal) {
+        getSurvey(questionnaireId, principal);
+    }
+
     @Nullable
     private SurveyResult getRespondentStatistics(@NonNull final OrganizationSurvey survey, @NonNull final UserDetails principal) {
         final SurveyResult respondentStatistics;

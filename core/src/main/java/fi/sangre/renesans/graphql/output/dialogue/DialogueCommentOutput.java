@@ -1,7 +1,6 @@
 package fi.sangre.renesans.graphql.output.dialogue;
 
 import lombok.*;
-import org.joda.time.DateTime;
 
 import java.util.Collection;
 import java.util.UUID;

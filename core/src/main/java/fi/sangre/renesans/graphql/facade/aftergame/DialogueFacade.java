@@ -1,10 +1,16 @@
 package fi.sangre.renesans.graphql.facade.aftergame;
 
 import fi.sangre.renesans.application.model.OrganizationSurvey;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.assemble.dialogue.DialogueTopicOutputAssembler;
 import fi.sangre.renesans.graphql.output.dialogue.*;
+import fi.sangre.renesans.persistence.dialogue.model.DialogueTopicEntity;
+import fi.sangre.renesans.repository.dialogue.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -18,14 +24,40 @@ import java.util.*;
 public class DialogueFacade {
     private final AfterGameFacade afterGameFacade;
 
+    @Autowired
+    private final DialogueTopicOutputAssembler dialogueTopicOutputAssembler;
+
+    @Autowired
+    private final DialogueTopicRepository dialogueTopicRepository;
+
+    @Autowired
+    private final DialogueCommentLikeRepository dialogueCommentLikeRepository;
+
+    @Autowired
+    private final DialogueQuestionLikeRepository dialogueQuestionLikeRepository;
+
+    @Autowired
+    private final DialogueCommentRepository dialogueCommentRepository;
+
     @NonNull
     public DialogueTotalStatisticsOutput getDialogueTotalStatistics(
             @NonNull final UUID questionnaireId,
             @NonNull final UserDetails principal
     ) {
         final OrganizationSurvey survey = afterGameFacade.getSurvey(questionnaireId, principal);
+        UUID surveyId = survey.getId();
 
-        return getFakeTotalStatistics();
+        int likesTotal = dialogueCommentLikeRepository.countAllBySurveyId(surveyId)
+                + dialogueQuestionLikeRepository.countAllBySurveyId(surveyId);
+        int answersCount = dialogueCommentRepository.countAllBySurveyId(surveyId);
+        int activeTopicsCount = dialogueTopicRepository.countAllBySurveyIdAndActiveTrue(surveyId);
+
+        return DialogueTotalStatisticsOutput.builder()
+                .id(UUID.randomUUID())
+                .answersCount(answersCount)
+                .likesCount(likesTotal)
+                .activeTopicsCount(activeTopicsCount)
+                .build();
     }
 
     public Collection<DialogueTopicOutput> getDialogueTopics(
@@ -34,12 +66,13 @@ public class DialogueFacade {
     ) {
         final OrganizationSurvey survey = afterGameFacade.getSurvey(questionnaireId, principal);
 
-        List<DialogueTopicOutput> topics = new ArrayList<>();
-        topics.add(getFakeTopic());
-        topics.add(getFakeTopic());
-        topics.add(getFakeTopic());
+        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository.findAllBySurveyId(
+                survey.getId(), Sort.by(Sort.Direction.ASC, "sortOrder")
+        );
 
-        return topics;
+        // TODO: uncomment the line and remove mock data
+        // return dialogueTopicOutputAssembler.from(dialogueTopicEntities, new RespondentId(questionnaireId));
+        return getFakeTopicsList();
     }
 
     public DialogueTopicOutput getDialogueTopic(
@@ -47,15 +80,30 @@ public class DialogueFacade {
             @NonNull final UUID topicId,
             @NonNull final UserDetails principal
     ) {
-        final OrganizationSurvey survey = afterGameFacade.getSurvey(questionnaireId, principal);
+        afterGameFacade.validateQuestionnairePermissions(questionnaireId, principal);
+        DialogueTopicEntity dialogueTopicEntity = dialogueTopicRepository.findById(topicId).orElse(null);
 
+        if (dialogueTopicEntity == null) {
+            log.warn("Could not find a dialogue topic with id(id={})", topicId);
+            throw new SurveyException("Could not find a dialogue topic by id");
+        }
+
+        // TODO: uncomment the line and remove mock data
+        // return dialogueTopicOutputAssembler.from(dialogueTopicEntity, new RespondentId(questionnaireId));
         return getFakeTopic();
+    }
+
+    private List<DialogueTopicOutput> getFakeTopicsList() {
+        List<DialogueTopicOutput> topics = new ArrayList<>();
+        topics.add(getFakeTopic());
+        topics.add(getFakeTopic());
+        topics.add(getFakeTopic());
+        return topics;
     }
 
     private DialogueTopicOutput getFakeTopic() {
         DialogueCommentOutput comment1Reply = DialogueCommentOutput
                 .builder()
-                .id(UUID.randomUUID())
                 .text("Ei, see on vana")
                 .likesCount(0)
                 .hasLikeByThisRespondent(false)
@@ -65,7 +113,6 @@ public class DialogueFacade {
 
         DialogueCommentOutput comment1 = DialogueCommentOutput
                 .builder()
-                .id(UUID.randomUUID())
                 .text("Kas me seda küsimust arutame?")
                 .likesCount(2)
                 .replies(Collections.singletonList(comment1Reply))
@@ -77,7 +124,6 @@ public class DialogueFacade {
 
         DialogueCommentOutput comment2 = DialogueCommentOutput
                 .builder()
-                .id(UUID.randomUUID())
                 .text("O hi!")
                 .likesCount(1)
                 .replies(Collections.singletonList(comment1Reply))
@@ -89,59 +135,37 @@ public class DialogueFacade {
 
         List<DialogueCommentOutput> commentsList1 = Arrays.asList(comment1, comment2);
         DialogueQuestionOutput question1 = DialogueQuestionOutput.builder()
-                .id(UUID.randomUUID())
                 .title("First question title")
                 .active(true)
                 .sortOrder(1)
-                .answersCount(3)
-                .likesCount(3)
-                .hasLikeByThisRespondent(true)
                 .comments(commentsList1)
                 .build();
 
         DialogueQuestionOutput question2 = DialogueQuestionOutput.builder()
-                .id(UUID.randomUUID())
                 .title("Another question title")
                 .active(true)
                 .sortOrder(2)
-                .answersCount(2)
-                .likesCount(2)
-                .hasLikeByThisRespondent(false)
                 .comments(commentsList1)
                 .build();
 
         DialogueQuestionOutput question3 = DialogueQuestionOutput.builder()
-                .id(UUID.randomUUID())
                 .title("Closed question title")
                 .active(false)
                 .sortOrder(2)
-                .answersCount(1)
-                .likesCount(1)
-                .hasLikeByThisRespondent(false)
                 // don't send any comments since the question is archived
                 .comments(Collections.emptyList())
                 .build();
 
-        DialogueTipOutput tip1 = DialogueTipOutput.builder().id(UUID.randomUUID()).text("Some tip will be here").build();
-        DialogueTipOutput tip2 = DialogueTipOutput.builder().id(UUID.randomUUID()).text("Lorem ipsum sit amet").build();
+        DialogueTipOutput tip1 = DialogueTipOutput.builder().text("Some tip will be here").build();
+        DialogueTipOutput tip2 = DialogueTipOutput.builder().text("Lorem ipsum sit amet").build();
 
         return DialogueTopicOutput.builder()
-                .id(UUID.randomUUID())
                 .title("Topic #1")
                 .active(true)
                 .questionsCount(3)
                 .tips(Arrays.asList(tip1, tip2))
                 .questions(Arrays.asList(question1, question2, question3))
                 .sortOrder(1)
-                .build();
-    }
-
-    private DialogueTotalStatisticsOutput getFakeTotalStatistics() {
-        return DialogueTotalStatisticsOutput.builder()
-                .id(UUID.randomUUID())
-                .activeTopicsCount(3)
-                .likesCount(5)
-                .answersCount(3)
                 .build();
     }
 }

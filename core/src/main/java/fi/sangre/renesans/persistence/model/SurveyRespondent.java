@@ -61,6 +61,9 @@ public class SurveyRespondent {
     @Column(name = "language_tag")
     private String selectedLanguageTag;
 
+    @Column(name = "color")
+    private String color;
+
     @Column(name = "invitation_language_tag", nullable = false)
     @Builder.Default
     private String invitationLanguageTag = "en";

@@ -1,0 +1,61 @@
+package fi.sangre.renesans.graphql.assemble.dialogue;
+
+import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.graphql.output.dialogue.DialogueCommentOutput;
+import fi.sangre.renesans.persistence.dialogue.model.DialogueCommentEntity;
+import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
+import fi.sangre.renesans.repository.dialogue.DialogueCommentLikeRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.UUID;
+
+@RequiredArgsConstructor
+@Slf4j
+
+@Component
+public class DialogueCommentOutputAssembler {
+    @Autowired
+    private DialogueCommentLikeRepository dialogueCommentLikeRepository;
+
+    @Autowired
+    private SurveyRespondentRepository surveyRespondentRepository;
+
+    @NonNull
+    public DialogueCommentOutput from(DialogueCommentEntity entity, RespondentId respondentId) {
+        boolean hasLikeByThisRespondent = dialogueCommentLikeRepository
+                .countDialogueCommentLikeEntitiesByCommentEqualsAndRespondentIdEquals(
+                        entity, respondentId.getValue()
+                ) > 0;
+
+        int likesCount = dialogueCommentLikeRepository.countDialogueCommentLikeEntitiesByCommentEquals(entity);
+
+        return DialogueCommentOutput.builder()
+                .id(entity.getId())
+                .respondentColor(entity.getRespondent().getColor())
+                .replies(from(entity.getReplies(), respondentId))
+                .likesCount(likesCount)
+                .hasLikeByThisRespondent(hasLikeByThisRespondent)
+                .text(entity.getText())
+                .createdAt(entity.getCreatedOn().toString())
+                .build();
+    }
+
+    @NonNull
+    public Collection<DialogueCommentOutput> from(
+            Map<UUID, DialogueCommentEntity> entityMap, RespondentId respondentId) {
+        Collection<DialogueCommentOutput> outputs = new ArrayList<>();
+
+        entityMap.values().forEach(entity -> {
+            outputs.add(from(entity, respondentId));
+        });
+
+        return outputs;
+    }
+}
