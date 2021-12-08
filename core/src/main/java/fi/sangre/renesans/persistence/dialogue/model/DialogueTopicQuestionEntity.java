@@ -39,6 +39,9 @@ public class DialogueTopicQuestionEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private Map<UUID, DialogueCommentEntity> comments;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Map<Long, DialogueQuestionLikeEntity> likes;
+
     @Column(name = "active", nullable = false)
     private Boolean active;
 

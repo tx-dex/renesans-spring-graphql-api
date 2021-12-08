@@ -271,3 +271,7 @@ input Filters {
     segmentIds: [ID]
 }
 
+input DialogueCommentInput {
+    text: String!
+    mediaAttachment: String
+}
