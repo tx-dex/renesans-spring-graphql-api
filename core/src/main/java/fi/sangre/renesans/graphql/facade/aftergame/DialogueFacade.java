@@ -80,13 +80,15 @@ public class DialogueFacade {
             @NonNull final UUID topicId,
             @NonNull final UserDetails principal
     ) {
+        // TODO: uncomment
+        /*
         afterGameFacade.validateQuestionnairePermissions(questionnaireId, principal);
         DialogueTopicEntity dialogueTopicEntity = dialogueTopicRepository.findById(topicId).orElse(null);
 
         if (dialogueTopicEntity == null) {
             log.warn("Could not find a dialogue topic with id(id={})", topicId);
             throw new SurveyException("Could not find a dialogue topic by id");
-        }
+        } */
 
         // TODO: uncomment the line and remove mock data
         // return dialogueTopicOutputAssembler.from(dialogueTopicEntity, new RespondentId(questionnaireId));
