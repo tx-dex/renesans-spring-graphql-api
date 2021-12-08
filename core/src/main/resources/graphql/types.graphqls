@@ -420,30 +420,15 @@ type AfterGameOpenQuestion {
     answers: [String!]!
 }
 
-type DialogueTopic {
-    title: String!
-    picture: String
-    questionsCount: Int!
-    sortOrder: Int!
-    active: Boolean!
-}
-
-type DialogueQuestion {
-    title: String!
-    answersCount: Int!
-    likesCount: Int!
-    sortOrder: Int!
-    active: Boolean!
-    hasLikeByRespondent: Boolean!
-}
-
 type DialogueTotalStatistics {
+    id: ID!
     activeTopicsCount: Int!
     answersCount: Int!
     likesCount: Int!
 }
 
 type DialogueTopic {
+    id: ID!
     title: String!
     questionsCount: Int!
     sortOrder: Int!
@@ -454,10 +439,12 @@ type DialogueTopic {
 }
 
 type DialogueTip {
+    id: ID!
     text: String!
 }
 
 type DialogueQuestion {
+    id: ID!
     title: String!
     answersCount: Int!
     likesCount: Int!
@@ -469,6 +456,7 @@ type DialogueQuestion {
 }
 
 type DialogueComment {
+    id: ID!
     likesCount: Int!
     text: String!
     createdAt: String!
