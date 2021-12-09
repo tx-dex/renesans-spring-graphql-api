@@ -107,6 +107,11 @@ public class Survey {
     @Builder.Default
     private Boolean archived = false;
 
+    @NotAudited
+    @Column(name = "dialogue_active")
+    @Builder.Default
+    private Boolean isDialogueActive = false;
+
     @LastModifiedBy
     @Column(name="muser", nullable=false)
     private Long modifiedBy;

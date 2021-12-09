@@ -10,6 +10,7 @@ import fi.sangre.renesans.graphql.assemble.dialogue.DialogueCommentOutputAssembl
 import fi.sangre.renesans.graphql.assemble.dialogue.DialogueTopicOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.dialogue.DialogueTopicQuestionOutputAssembler;
 import fi.sangre.renesans.graphql.input.dialogue.DialogueCommentInput;
+import fi.sangre.renesans.graphql.input.dialogue.DialogueTopicInput;
 import fi.sangre.renesans.graphql.output.dialogue.*;
 import fi.sangre.renesans.persistence.dialogue.model.*;
 import fi.sangre.renesans.persistence.model.Survey;
@@ -344,5 +345,55 @@ public class DialogueFacade {
         }
 
         return true;
+    }
+
+    public boolean changeSurveyDialogueActivation(@NonNull UUID surveyId, @NonNull Boolean isActive) {
+        Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new SurveyException("The survey does not exist."));
+
+        survey.setIsDialogueActive(isActive);
+        surveyRepository.saveAndFlush(survey);
+
+        return true;
+    }
+
+    public boolean reorderTopic(@NonNull UUID surveyId, @NonNull UUID topicId, @NonNull Integer sortOrder) {
+        DialogueTopicEntity dialogueTopicEntity = dialogueTopicRepository.findById(topicId)
+                .orElseThrow(() -> new SurveyException("The topic does not exist."));
+
+        if (!surveyId.equals(dialogueTopicEntity.getSurvey().getId())) {
+            throw new SurveyException("A topic you're trying to re-order does not belong to this survey.");
+        }
+
+        dialogueTopicEntity.setSortOrder(sortOrder);
+        dialogueTopicRepository.saveAndFlush(dialogueTopicEntity);
+
+        return true;
+    }
+
+    public DialogueTopicOutput storeTopic(@NonNull DialogueTopicInput input) {
+        // check if the topic already exists (i.e. edit mode)
+        if (input.getId() != null) {
+            DialogueTopicEntity existingTopicEntity = dialogueTopicRepository.findById(input.getId())
+                    .orElseThrow(() -> new SurveyException("Cannot edit a topic that does not exist."));
+
+            return editTopic(existingTopicEntity, input);
+        }
+
+        return createTopic(input);
+    }
+
+    private DialogueTopicOutput createTopic(@NonNull DialogueTopicInput input) {
+        /* DialogueTopicEntity topicEntity = DialogueTopicEntity.builder()
+                .active().build();
+
+        dialogueTopicRepository.saveAndFlush(topicEntity);
+        return dialogueTopicOutputAssembler.from(topicEntity); */
+        return new DialogueTopicOutput();
+    }
+
+    private DialogueTopicOutput editTopic(@NonNull DialogueTopicEntity existingTopicEntity,
+                                          @NonNull DialogueTopicInput input) {
+        return new DialogueTopicOutput();
     }
 }

@@ -275,3 +275,25 @@ input DialogueCommentInput {
     text: String!
     mediaAttachment: String
 }
+
+input DialogueTopicInput {
+    id: ID
+    title: String!
+    active: Boolean!
+    image: String
+    tips: [DialogueTipInput]!
+    questions: [DialogueQuestionInput]!
+}
+
+input DialogueTipInput {
+    id: ID
+    text: String!
+}
+
+input DialogueQuestionInput {
+    id: ID
+    title: String!
+    active: Boolean!
+    sortOrder: Int!
+    image: String
+}
