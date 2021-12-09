@@ -20,7 +20,7 @@ public class DialogueQuestionOutput {
     private boolean active;
 
     // TODO: implement in the model layer later
-    private String picture = "";
+    private String image = "";
 
     private Collection<DialogueCommentOutput> comments;
 }

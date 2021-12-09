@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,10 +37,10 @@ public class DialogueCommentEntity {
     private DialogueCommentEntity parent;
 
     @OneToMany(mappedBy="parent")
-    private Map<UUID, DialogueCommentEntity> replies;
+    private List<DialogueCommentEntity> replies;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Map<Long, DialogueCommentLikeEntity> likes;
+    private List<DialogueCommentLikeEntity> likes;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private DialogueTopicQuestionEntity question;

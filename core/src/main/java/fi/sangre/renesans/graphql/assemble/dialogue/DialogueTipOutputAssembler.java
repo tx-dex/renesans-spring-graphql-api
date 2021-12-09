@@ -7,10 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -26,10 +23,10 @@ public class DialogueTipOutputAssembler {
     }
 
     @NonNull
-    public Collection<DialogueTipOutput> from(Map<UUID, DialogueTipEntity> entityMap) {
+    public Collection<DialogueTipOutput> from(List<DialogueTipEntity> entityList) {
         Collection<DialogueTipOutput> outputs = new ArrayList<>();
 
-        entityMap.values().forEach(entity -> {
+        entityList.forEach(entity -> {
             outputs.add(from(entity));
         });
 

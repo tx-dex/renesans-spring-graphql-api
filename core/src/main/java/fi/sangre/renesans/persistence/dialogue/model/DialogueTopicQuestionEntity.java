@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -37,10 +37,10 @@ public class DialogueTopicQuestionEntity {
     private String title;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Map<UUID, DialogueCommentEntity> comments;
+    private List<DialogueCommentEntity> comments;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Map<Long, DialogueQuestionLikeEntity> likes;
+    private List<DialogueQuestionLikeEntity> likes;
 
     @Column(name = "active", nullable = false)
     private Boolean active;

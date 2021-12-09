@@ -12,9 +12,11 @@ import java.util.UUID;
 @ToString
 public class DialogueTopicInput {
     private UUID id;
+    private UUID surveyId;
     private String title;
     private boolean active;
     private String image;
+    private int sortOrder;
     private List<DialogueTipInput> tips;
     private List<DialogueQuestionInput> questions;
 }

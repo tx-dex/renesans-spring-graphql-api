@@ -435,7 +435,7 @@ type DialogueTopic {
     active: Boolean!
     questions: [DialogueQuestion]!
     tips: [DialogueTip]!
-    picture: String
+    image: String
 }
 
 type DialogueTip {
@@ -452,7 +452,7 @@ type DialogueQuestion {
     sortOrder: Int!
     active: Boolean!
     comments: [DialogueComment]!
-    picture: String
+    image: String
 }
 
 type DialogueComment {

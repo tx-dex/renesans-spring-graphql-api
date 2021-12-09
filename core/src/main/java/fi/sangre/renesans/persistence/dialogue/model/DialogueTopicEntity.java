@@ -10,6 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -44,10 +45,10 @@ public class DialogueTopicEntity {
     private Integer sortOrder;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Map<UUID, DialogueTopicQuestionEntity> questions;
+    private List<DialogueTopicQuestionEntity> questions;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Map<UUID, DialogueTipEntity> tips;
+    private List<DialogueTipEntity> tips;
 
     @CreatedDate
     @Column(name = "ctm", nullable = false, updatable = false)

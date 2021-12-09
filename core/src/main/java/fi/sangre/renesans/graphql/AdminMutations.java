@@ -374,6 +374,7 @@ public class AdminMutations implements GraphQLMutationResolver {
     public boolean changeSurveyDialogueActivation(@NonNull UUID surveyId, @NonNull Boolean isActive) {
         return dialogueFacade.changeSurveyDialogueActivation(surveyId, isActive);
     }
+
     @NonNull
     @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
     public boolean reorderTopic(@NonNull UUID surveyId, @NonNull UUID topicId, @NonNull Integer sortOrder) {

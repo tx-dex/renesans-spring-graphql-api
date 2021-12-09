@@ -96,9 +96,7 @@ public class DialogueFacade {
                 survey.getId(), Sort.by(Sort.Direction.ASC, "sortOrder")
         );
 
-        // TODO: uncomment the line and remove mock data
-        // return dialogueTopicOutputAssembler.from(dialogueTopicEntities, new RespondentId(questionnaireId));
-        return getFakeTopicsList();
+        return dialogueTopicOutputAssembler.from(dialogueTopicEntities, new RespondentId(questionnaireId));
     }
 
     public DialogueTopicOutput getDialogueTopic(
@@ -106,19 +104,34 @@ public class DialogueFacade {
             @NonNull final UUID topicId,
             @NonNull final UserDetails principal
     ) {
-        // TODO: uncomment
-        /*
+
         afterGameFacade.validateQuestionnairePermissions(questionnaireId, principal);
         DialogueTopicEntity dialogueTopicEntity = dialogueTopicRepository.findById(topicId).orElse(null);
 
         if (dialogueTopicEntity == null) {
             log.warn("Could not find a dialogue topic with id(id={})", topicId);
             throw new SurveyException("Could not find a dialogue topic by id");
-        } */
+        }
 
-        // TODO: uncomment the line and remove mock data
-        // return dialogueTopicOutputAssembler.from(dialogueTopicEntity, new RespondentId(questionnaireId));
-        return getFakeTopic();
+        return dialogueTopicOutputAssembler.from(dialogueTopicEntity, new RespondentId(questionnaireId));
+    }
+
+    public Collection<DialogueTopicOutput> getDialogueTopicsAdmin(
+            @NonNull final UUID surveyId
+    ) {
+        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository.findAllBySurveyId(
+                surveyId, Sort.by(Sort.Direction.ASC, "sortOrder")
+        );
+
+        return dialogueTopicOutputAssembler.from(dialogueTopicEntities);
+    }
+
+    public DialogueTopicOutput getDialogueTopicAdmin(
+            @NonNull final UUID surveyTopicId
+    ) {
+        DialogueTopicEntity topicEntity = dialogueTopicRepository.getOne(surveyTopicId);
+
+        return dialogueTopicOutputAssembler.from(topicEntity);
     }
 
     private List<DialogueTopicOutput> getFakeTopicsList() {
@@ -266,7 +279,7 @@ public class DialogueFacade {
                 .orElseThrow(() -> new SurveyException("Could not find a survey!"));
         SurveyRespondent surveyRespondent = surveyRespondentRepository.getOne(respondentId.getValue());
 
-        Collection<DialogueCommentLikeEntity> likes = commentEntity.getLikes().values();
+        Collection<DialogueCommentLikeEntity> likes = commentEntity.getLikes();
         Optional<DialogueCommentLikeEntity> ownLike = likes.stream()
                 .filter(like -> like.getRespondent().getId().equals(respondentId.getValue()))
                 .findFirst();
@@ -298,7 +311,7 @@ public class DialogueFacade {
                 .orElseThrow(() -> new SurveyException("Could not find a survey!"));
         SurveyRespondent surveyRespondent = surveyRespondentRepository.getOne(respondentId.getValue());
 
-        Collection<DialogueQuestionLikeEntity> likes = questionEntity.getLikes().values();
+        Collection<DialogueQuestionLikeEntity> likes = questionEntity.getLikes();
         Optional<DialogueQuestionLikeEntity> ownLike = likes.stream()
                 .filter(like -> like.getRespondent().getId().equals(respondentId.getValue()))
                 .findFirst();
@@ -380,20 +393,86 @@ public class DialogueFacade {
             return editTopic(existingTopicEntity, input);
         }
 
-        return createTopic(input);
+        Survey survey = surveyRepository.findById(input.getSurveyId())
+                .orElseThrow(() -> new SurveyException("The survey linked to this topic does not exist."));
+
+        return createTopic(input, survey);
     }
 
-    private DialogueTopicOutput createTopic(@NonNull DialogueTopicInput input) {
-        /* DialogueTopicEntity topicEntity = DialogueTopicEntity.builder()
-                .active().build();
+    private DialogueTopicOutput createTopic(@NonNull DialogueTopicInput input,
+                                            @NonNull Survey survey) {
+        List<DialogueTipEntity> tipEntities = new ArrayList<>();
+        List<DialogueTopicQuestionEntity> questionEntities = new ArrayList<>();
+
+        DialogueTopicEntity topicEntity = DialogueTopicEntity.builder()
+                .active(input.isActive())
+                .title(input.getTitle())
+                .survey(survey)
+                .sortOrder(input.getSortOrder())
+                .build();
+
+        input.getQuestions().forEach((questionInput) -> {
+            DialogueTopicQuestionEntity questionEntity = DialogueTopicQuestionEntity.builder()
+                    .title(input.getTitle())
+                    .topic(topicEntity)
+                    .sortOrder(input.getSortOrder())
+                    .active(input.isActive())
+                    .build();
+
+            questionEntities.add(questionEntity);
+        });
+
+        input.getTips().forEach((tipInput) -> {
+            DialogueTipEntity tipEntity = DialogueTipEntity.builder()
+                    .topic(topicEntity)
+                    .text(tipInput.getText())
+                    .build();
+
+            tipEntities.add(tipEntity);
+        });
+
+        topicEntity.setQuestions(questionEntities);
+        topicEntity.setTips(tipEntities);
 
         dialogueTopicRepository.saveAndFlush(topicEntity);
-        return dialogueTopicOutputAssembler.from(topicEntity); */
-        return new DialogueTopicOutput();
+        return dialogueTopicOutputAssembler.from(topicEntity);
     }
 
     private DialogueTopicOutput editTopic(@NonNull DialogueTopicEntity existingTopicEntity,
                                           @NonNull DialogueTopicInput input) {
-        return new DialogueTopicOutput();
+        List<DialogueTipEntity> tipEntities = new ArrayList<>();
+        List<DialogueTopicQuestionEntity> questionEntities = new ArrayList<>();
+
+        existingTopicEntity.setTitle(input.getTitle());
+        existingTopicEntity.setActive(input.isActive());
+        existingTopicEntity.setSortOrder(input.getSortOrder());
+
+        input.getQuestions().forEach((questionInput) -> {
+            DialogueTopicQuestionEntity questionEntity = DialogueTopicQuestionEntity.builder()
+                    .id(questionInput.getId())
+                    .title(input.getTitle())
+                    .topic(existingTopicEntity)
+                    .sortOrder(input.getSortOrder())
+                    .active(input.isActive())
+                    .build();
+
+            questionEntities.add(questionEntity);
+        });
+
+        input.getTips().forEach((tipInput) -> {
+            DialogueTipEntity tipEntity = DialogueTipEntity.builder()
+                    .id(tipInput.getId())
+                    .topic(existingTopicEntity)
+                    .text(tipInput.getText())
+                    .build();
+
+            tipEntities.add(tipEntity);
+        });
+
+        existingTopicEntity.setTips(tipEntities);
+        existingTopicEntity.setQuestions(questionEntities);
+
+        dialogueTopicRepository.saveAndFlush(existingTopicEntity);
+        return dialogueTopicOutputAssembler.from(existingTopicEntity);
     }
 }
