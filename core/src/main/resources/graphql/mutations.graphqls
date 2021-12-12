@@ -287,6 +287,10 @@ type Mutation {
         sortOrder: Int!
     ): Boolean!
 
+    deleteTopic(
+        surveyId: ID!
+        topicId: ID!
+    ): Boolean!
 
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer  @deprecated(reason: "Will be removed")
 

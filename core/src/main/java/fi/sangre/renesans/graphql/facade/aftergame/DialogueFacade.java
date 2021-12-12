@@ -20,8 +20,6 @@ import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import fi.sangre.renesans.repository.dialogue.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -145,7 +143,6 @@ public class DialogueFacade {
         SurveyRespondent surveyRespondent = surveyRespondentRepository.getOne(respondentId.getValue());
 
         DialogueCommentEntity commentEntity = DialogueCommentEntity.builder()
-                .id(UUID.randomUUID())
                 .respondent(surveyRespondent)
                 .parent(parentComment)
                 .question(question)
@@ -155,7 +152,10 @@ public class DialogueFacade {
 
         dialogueCommentRepository.saveAndFlush(commentEntity);
 
-        return dialogueCommentOutputAssembler.from(commentEntity, respondentId);
+        DialogueCommentEntity updatedComment = dialogueCommentRepository.findById(commentEntity.getId())
+                .orElseThrow(() -> new SurveyException("Could not get an updated comment entity from the database."));
+
+        return dialogueCommentOutputAssembler.from(updatedComment, respondentId);
     }
 
     public DialogueCommentOutput likeOrUnlikeComment(@NonNull final UUID commentId,
@@ -259,6 +259,16 @@ public class DialogueFacade {
 
         survey.setIsDialogueActive(isActive);
         surveyRepository.saveAndFlush(survey);
+
+        return true;
+    }
+
+    public boolean deleteTopic(@NonNull UUID topicId) {
+        DialogueTopicEntity dialogueTopicEntity = dialogueTopicRepository.findById(topicId)
+                .orElseThrow(() -> new SurveyException("The topic does not exist."));
+
+        dialogueTopicRepository.delete(dialogueTopicEntity);
+        dialogueTopicRepository.flush();
 
         return true;
     }

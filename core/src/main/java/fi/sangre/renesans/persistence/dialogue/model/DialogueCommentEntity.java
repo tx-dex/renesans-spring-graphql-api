@@ -12,10 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,17 +34,17 @@ public class DialogueCommentEntity {
     @ManyToOne
     private DialogueCommentEntity parent;
 
-    @OneToMany(mappedBy="parent")
-    private List<DialogueCommentEntity> replies;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy="parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<DialogueCommentEntity> replies;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<DialogueCommentLikeEntity> likes = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<DialogueCommentLikeEntity> likes;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dialogue_topic_question_id", updatable = false, insertable = false, nullable = true)
+    @JoinColumn(name = "dialogue_topic_question_id", referencedColumnName = "id")
     private DialogueTopicQuestionEntity question;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "respondent_id", referencedColumnName = "id")
     private SurveyRespondent respondent;
 

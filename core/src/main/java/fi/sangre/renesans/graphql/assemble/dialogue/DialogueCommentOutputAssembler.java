@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -46,7 +47,7 @@ public class DialogueCommentOutputAssembler {
 
     @NonNull
     public Collection<DialogueCommentOutput> from(
-            List<DialogueCommentEntity> entityList, RespondentId respondentId) {
+            Collection<DialogueCommentEntity> entityList, RespondentId respondentId) {
         Collection<DialogueCommentOutput> outputs = new ArrayList<>();
 
         entityList.forEach(entity -> {

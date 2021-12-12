@@ -11,6 +11,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -37,11 +38,11 @@ public class DialogueTopicQuestionEntity {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<DialogueCommentEntity> comments = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<DialogueCommentEntity> comments;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<DialogueQuestionLikeEntity> likes = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<DialogueQuestionLikeEntity> likes;
 
     @Column(name = "active", nullable = false)
     private Boolean active;

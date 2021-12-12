@@ -379,4 +379,10 @@ public class AdminMutations implements GraphQLMutationResolver {
     public boolean reorderTopic(@NonNull UUID surveyId, @NonNull UUID topicId, @NonNull Integer sortOrder) {
         return dialogueFacade.reorderTopic(surveyId, topicId, sortOrder);
     }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
+    public boolean deleteTopic(@NonNull UUID surveyId, @NonNull UUID topicId) {
+        return dialogueFacade.deleteTopic(topicId);
+    }
 }

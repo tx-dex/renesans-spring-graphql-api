@@ -26,7 +26,7 @@ public class DialogueTopicQuestionOutputAssembler {
 
     @NonNull
     public DialogueQuestionOutput from(DialogueTopicQuestionEntity entity, RespondentId respondentId) {
-        List<DialogueCommentEntity> commentEntities = entity.getComments();
+        Collection<DialogueCommentEntity> commentEntities = entity.getComments();
 
         boolean hasLikeByThisRespondent = dialogueQuestionLikeRepository
                 .countDialogueQuestionLikeEntitiesByQuestionEqualsAndRespondentIdEquals(
@@ -36,6 +36,7 @@ public class DialogueTopicQuestionOutputAssembler {
         int likesCount = dialogueQuestionLikeRepository.countDialogueQuestionLikeEntitiesByQuestionEquals(entity);
 
         return DialogueQuestionOutput.builder()
+                .id(entity.getId())
                 .title(entity.getTitle())
                 .active(entity.getActive())
                 .sortOrder(entity.getSortOrder())
