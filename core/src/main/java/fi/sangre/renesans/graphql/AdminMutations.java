@@ -361,9 +361,8 @@ public class AdminMutations implements GraphQLMutationResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
-    public DialogueTopicOutput storeDialogueTopic(@NonNull final UUID surveyId,
-                                                  @NonNull final String languageCode,
-                                                  @NonNull final DialogueTopicInput input,
+    public DialogueTopicOutput storeDialogueTopic(@NonNull final DialogueTopicInput input,
+                                                  @Nullable final String languageCode,
                                                   @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
         return dialogueFacade.storeTopic(input);

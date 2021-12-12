@@ -48,6 +48,7 @@ public class DialogueTopicOutputAssembler {
                 .title(entity.getTitle())
                 .questions(dialogueTopicQuestionOutputAssembler.from(questionEntityList))
                 .active(entity.getActive())
+                .questionsCount(questionEntityList.size())
                 .sortOrder(entity.getSortOrder())
                 .tips(dialogueTipOutputAssembler.from(entity.getTips()))
                 .build();

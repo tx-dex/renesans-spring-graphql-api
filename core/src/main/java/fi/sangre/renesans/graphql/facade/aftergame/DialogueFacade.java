@@ -20,6 +20,10 @@ import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import fi.sangre.renesans.repository.dialogue.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
@@ -27,6 +31,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -36,34 +43,18 @@ import java.util.*;
 public class DialogueFacade {
     private final AfterGameFacade afterGameFacade;
 
-    @Autowired
     private final DialogueTopicOutputAssembler dialogueTopicOutputAssembler;
-
-    @Autowired
     private final DialogueTopicQuestionOutputAssembler dialogueTopicQuestionOutputAssembler;
-
-    @Autowired
     private final DialogueCommentOutputAssembler dialogueCommentOutputAssembler;
-
-    @Autowired
     private final SurveyRepository surveyRepository;
-
     private final SurveyRespondentRepository surveyRespondentRepository;
-
-    @Autowired
     private final DialogueTopicRepository dialogueTopicRepository;
-
-    @Autowired
     private final DialogueCommentLikeRepository dialogueCommentLikeRepository;
-
-    @Autowired
     private final DialogueQuestionLikeRepository dialogueQuestionLikeRepository;
-
-    @Autowired
     private final DialogueTopicQuestionRepository dialogueTopicQuestionRepository;
-
-    @Autowired
+    private final DialogueTipRepository dialogueTipRepository;
     private final DialogueCommentRepository dialogueCommentRepository;
+    private final EntityManagerFactory entityManagerFactory;
 
     @NonNull
     public DialogueTotalStatisticsOutput getDialogueTotalStatistics(
@@ -132,101 +123,6 @@ public class DialogueFacade {
         DialogueTopicEntity topicEntity = dialogueTopicRepository.getOne(surveyTopicId);
 
         return dialogueTopicOutputAssembler.from(topicEntity);
-    }
-
-    private List<DialogueTopicOutput> getFakeTopicsList() {
-        List<DialogueTopicOutput> topics = new ArrayList<>();
-        topics.add(getFakeTopic());
-        topics.add(getFakeTopic());
-        topics.add(getFakeTopic());
-        return topics;
-    }
-
-    private DialogueTopicOutput getFakeTopic() {
-        DialogueCommentOutput comment1Reply = DialogueCommentOutput
-                .builder()
-                .id(UUID.randomUUID())
-                .text("Ei, see on vana")
-                .likesCount(0)
-                .hasLikeByThisRespondent(false)
-                .createdAt("2021-11-20T11:03:51.612Z")
-                .respondentColor("#00ff00")
-                .authorRespondentId(UUID.randomUUID())
-                .isOwnedByThisRespondent(false)
-                .build();
-
-        DialogueCommentOutput comment1 = DialogueCommentOutput
-                .builder()
-                .id(UUID.randomUUID())
-                .text("Kas me seda küsimust arutame?")
-                .likesCount(2)
-                .replies(Collections.singletonList(comment1Reply))
-                .hasLikeByThisRespondent(true)
-                .createdAt("2021-11-20T10:00:00.612Z")
-                .respondentColor("#ee0000")
-                .authorRespondentId(UUID.randomUUID())
-                .isOwnedByThisRespondent(true)
-                .build();
-
-
-        DialogueCommentOutput comment2 = DialogueCommentOutput
-                .builder()
-                .id(UUID.randomUUID())
-                .text("O hi!")
-                .likesCount(1)
-                .replies(Collections.singletonList(comment1Reply))
-                .hasLikeByThisRespondent(true)
-                .createdAt("2021-11-20T10:30:00.612Z")
-                .respondentColor("#ee0000")
-                .authorRespondentId(UUID.randomUUID())
-                .isOwnedByThisRespondent(false)
-                .build();
-
-
-        List<DialogueCommentOutput> commentsList1 = Arrays.asList(comment1, comment2);
-        DialogueQuestionOutput question1 = DialogueQuestionOutput.builder()
-                .id(UUID.randomUUID())
-                .title("First question title")
-                .active(true)
-                .sortOrder(1)
-                .answersCount(3)
-                .likesCount(4)
-                .comments(commentsList1)
-                .build();
-
-        DialogueQuestionOutput question2 = DialogueQuestionOutput.builder()
-                .id(UUID.randomUUID())
-                .title("Another question title")
-                .active(true)
-                .sortOrder(2)
-                .likesCount(2)
-                .answersCount(2)
-                .comments(commentsList1)
-                .build();
-
-        DialogueQuestionOutput question3 = DialogueQuestionOutput.builder()
-                .id(UUID.randomUUID())
-                .title("Closed question title")
-                .active(false)
-                .sortOrder(2)
-                .likesCount(3)
-                .answersCount(1)
-                // don't send any comments since the question is archived
-                .comments(Collections.emptyList())
-                .build();
-
-        DialogueTipOutput tip1 = DialogueTipOutput.builder().id(UUID.randomUUID()).text("Some tip will be here").build();
-        DialogueTipOutput tip2 = DialogueTipOutput.builder().id(UUID.randomUUID()).text("Lorem ipsum sit amet").build();
-
-        return DialogueTopicOutput.builder()
-                .id(UUID.randomUUID())
-                .title("Topic #1")
-                .active(true)
-                .questionsCount(3)
-                .tips(Arrays.asList(tip1, tip2))
-                .questions(Arrays.asList(question1, question2, question3))
-                .sortOrder(1)
-                .build();
     }
 
     public DialogueCommentOutput postComment(
@@ -413,10 +309,10 @@ public class DialogueFacade {
 
         input.getQuestions().forEach((questionInput) -> {
             DialogueTopicQuestionEntity questionEntity = DialogueTopicQuestionEntity.builder()
-                    .title(input.getTitle())
+                    .title(questionInput.getTitle())
                     .topic(topicEntity)
-                    .sortOrder(input.getSortOrder())
-                    .active(input.isActive())
+                    .sortOrder(questionInput.getSortOrder())
+                    .active(questionInput.isActive())
                     .build();
 
             questionEntities.add(questionEntity);
@@ -438,10 +334,18 @@ public class DialogueFacade {
         return dialogueTopicOutputAssembler.from(topicEntity);
     }
 
+    // TODO: break the method into smaller ones?
     private DialogueTopicOutput editTopic(@NonNull DialogueTopicEntity existingTopicEntity,
                                           @NonNull DialogueTopicInput input) {
         List<DialogueTipEntity> tipEntities = new ArrayList<>();
         List<DialogueTopicQuestionEntity> questionEntities = new ArrayList<>();
+
+        List<DialogueTopicQuestionEntity> previousQuestions = dialogueTopicQuestionRepository
+                .findAllByTopic(existingTopicEntity);
+        List<DialogueTipEntity> previousTips = dialogueTipRepository.findAllByTopic(existingTopicEntity);
+
+        List<DialogueTopicQuestionEntity> questionsToRemove = new ArrayList<>();
+        List<DialogueTipEntity> tipsToRemove = new ArrayList<>();
 
         existingTopicEntity.setTitle(input.getTitle());
         existingTopicEntity.setActive(input.isActive());
@@ -450,10 +354,10 @@ public class DialogueFacade {
         input.getQuestions().forEach((questionInput) -> {
             DialogueTopicQuestionEntity questionEntity = DialogueTopicQuestionEntity.builder()
                     .id(questionInput.getId())
-                    .title(input.getTitle())
+                    .title(questionInput.getTitle())
                     .topic(existingTopicEntity)
-                    .sortOrder(input.getSortOrder())
-                    .active(input.isActive())
+                    .sortOrder(questionInput.getSortOrder())
+                    .active(questionInput.isActive())
                     .build();
 
             questionEntities.add(questionEntity);
@@ -472,7 +376,48 @@ public class DialogueFacade {
         existingTopicEntity.setTips(tipEntities);
         existingTopicEntity.setQuestions(questionEntities);
 
-        dialogueTopicRepository.saveAndFlush(existingTopicEntity);
+        previousQuestions.forEach((previousQuestion -> {
+            boolean isQuestionRemoved = questionEntities.stream().anyMatch(
+                    updatedQuestion -> updatedQuestion.getId() != null
+                            && updatedQuestion.getId().equals(previousQuestion.getId())
+            );
+
+            if (isQuestionRemoved) questionsToRemove.add(previousQuestion);
+        }));
+
+        previousTips.forEach((previousTip -> {
+            boolean isTipRemoved = questionEntities.stream().anyMatch(
+                    updatedTip -> updatedTip.getId() != null && updatedTip.getId().equals(previousTip.getId())
+            );
+
+            if (isTipRemoved) tipsToRemove.add(previousTip);
+        }));
+
+        EntityManager em = entityManagerFactory.createEntityManager();
+        EntityTransaction tx = null;
+
+        try {
+            tx = em.getTransaction();
+            tx.begin();
+
+            dialogueTopicRepository.save(existingTopicEntity);
+            if (questionsToRemove.size() > 0) dialogueTopicQuestionRepository.deleteAll(questionsToRemove);
+            if (tipsToRemove.size() > 0) dialogueTipRepository.deleteAll(tipsToRemove);
+
+            tx.commit();
+        } catch (Exception e) {
+            try {
+                log.error("Could not commit a dialogue topic transaction: " + e.getMessage());
+                log.error(e.fillInStackTrace().getMessage());
+                if (tx != null) tx.rollback();
+            } catch (Exception te) {
+                log.error("Failed to rollback a dialogue topic transaction: "  + te.getMessage());
+                log.error(te.fillInStackTrace().getMessage());
+            }
+        } finally {
+            em.close();
+        }
+
         return dialogueTopicOutputAssembler.from(existingTopicEntity);
     }
 }

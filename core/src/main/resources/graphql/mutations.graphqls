@@ -277,9 +277,8 @@ type Mutation {
     ): Boolean!
 
     storeDialogueTopic(
-        surveyId: ID!
-        languageCode: String
         input: DialogueTopicInput!
+        languageCode: String
     ): DialogueTopic!
 
     reorderTopic(
