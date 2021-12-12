@@ -20,10 +20,7 @@ import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import fi.sangre.renesans.repository.dialogue.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
+import org.hibernate.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
@@ -297,8 +294,8 @@ public class DialogueFacade {
 
     private DialogueTopicOutput createTopic(@NonNull DialogueTopicInput input,
                                             @NonNull Survey survey) {
-        List<DialogueTipEntity> tipEntities = new ArrayList<>();
-        List<DialogueTopicQuestionEntity> questionEntities = new ArrayList<>();
+        Set<DialogueTipEntity> tipEntities = new HashSet<>();
+        Set<DialogueTopicQuestionEntity> questionEntities = new HashSet<>();
 
         DialogueTopicEntity topicEntity = DialogueTopicEntity.builder()
                 .active(input.isActive())
@@ -331,14 +328,19 @@ public class DialogueFacade {
         topicEntity.setTips(tipEntities);
 
         dialogueTopicRepository.saveAndFlush(topicEntity);
-        return dialogueTopicOutputAssembler.from(topicEntity);
+
+        DialogueTopicEntity createdTopic = dialogueTopicRepository.findById(topicEntity.getId()).orElseThrow(
+                () -> new SurveyException("Could not get a newly created topic entity from the database.")
+        );
+
+        return dialogueTopicOutputAssembler.from(createdTopic);
     }
 
     // TODO: break the method into smaller ones?
     private DialogueTopicOutput editTopic(@NonNull DialogueTopicEntity existingTopicEntity,
                                           @NonNull DialogueTopicInput input) {
-        List<DialogueTipEntity> tipEntities = new ArrayList<>();
-        List<DialogueTopicQuestionEntity> questionEntities = new ArrayList<>();
+        Set<DialogueTipEntity> tipEntities = new HashSet<>();
+        Set<DialogueTopicQuestionEntity> questionEntities = new HashSet<>();
 
         List<DialogueTopicQuestionEntity> previousQuestions = dialogueTopicQuestionRepository
                 .findAllByTopic(existingTopicEntity);
@@ -377,20 +379,20 @@ public class DialogueFacade {
         existingTopicEntity.setQuestions(questionEntities);
 
         previousQuestions.forEach((previousQuestion -> {
-            boolean isQuestionRemoved = questionEntities.stream().anyMatch(
+            boolean isQuestionStillExists = questionEntities.stream().anyMatch(
                     updatedQuestion -> updatedQuestion.getId() != null
                             && updatedQuestion.getId().equals(previousQuestion.getId())
             );
 
-            if (isQuestionRemoved) questionsToRemove.add(previousQuestion);
+            if (!isQuestionStillExists) questionsToRemove.add(previousQuestion);
         }));
 
         previousTips.forEach((previousTip -> {
-            boolean isTipRemoved = questionEntities.stream().anyMatch(
+            boolean isTipStillExists = tipEntities.stream().anyMatch(
                     updatedTip -> updatedTip.getId() != null && updatedTip.getId().equals(previousTip.getId())
             );
 
-            if (isTipRemoved) tipsToRemove.add(previousTip);
+            if (!isTipStillExists) tipsToRemove.add(previousTip);
         }));
 
         EntityManager em = entityManagerFactory.createEntityManager();
@@ -418,6 +420,10 @@ public class DialogueFacade {
             em.close();
         }
 
-        return dialogueTopicOutputAssembler.from(existingTopicEntity);
+        DialogueTopicEntity updatedTopic = dialogueTopicRepository.findById(existingTopicEntity.getId()).orElseThrow(
+                () -> new SurveyException("Could not get an updated topic entity from the database.")
+        );
+
+        return dialogueTopicOutputAssembler.from(updatedTopic);
     }
 }

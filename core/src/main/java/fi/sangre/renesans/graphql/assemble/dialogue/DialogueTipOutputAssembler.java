@@ -23,10 +23,10 @@ public class DialogueTipOutputAssembler {
     }
 
     @NonNull
-    public Collection<DialogueTipOutput> from(List<DialogueTipEntity> entityList) {
+    public Collection<DialogueTipOutput> from(Set<DialogueTipEntity> entitySet) {
         Collection<DialogueTipOutput> outputs = new ArrayList<>();
 
-        entityList.forEach(entity -> {
+        entitySet.forEach(entity -> {
             outputs.add(from(entity));
         });
 

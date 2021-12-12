@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(of = "id", callSuper = false)
+@EqualsAndHashCode(of = "id")
 
 @Entity
 @Table(name = "dialogue_comment")
@@ -40,9 +41,10 @@ public class DialogueCommentEntity {
     private List<DialogueCommentEntity> replies;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DialogueCommentLikeEntity> likes;
+    private final List<DialogueCommentLikeEntity> likes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dialogue_topic_question_id", updatable = false, insertable = false, nullable = true)
     private DialogueTopicQuestionEntity question;
 
     @ManyToOne(fetch = FetchType.LAZY)

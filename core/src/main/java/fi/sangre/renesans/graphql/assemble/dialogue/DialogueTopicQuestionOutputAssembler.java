@@ -48,7 +48,7 @@ public class DialogueTopicQuestionOutputAssembler {
 
     @NonNull
     public Collection<DialogueQuestionOutput> from(
-            List<DialogueTopicQuestionEntity> entityList,
+            Set<DialogueTopicQuestionEntity> entityList,
             RespondentId respondentId
     ) {
         Collection<DialogueQuestionOutput> outputs = new ArrayList<>();
@@ -61,10 +61,11 @@ public class DialogueTopicQuestionOutputAssembler {
     }
 
     @NonNull
-    public Collection<DialogueQuestionOutput> from(List<DialogueTopicQuestionEntity> entityList) {
+    public Collection<DialogueQuestionOutput> from(Set<DialogueTopicQuestionEntity> entityList) {
         Collection<DialogueQuestionOutput> outputs = new ArrayList<>();
 
         entityList.forEach(entity -> outputs.add(DialogueQuestionOutput.builder()
+                .id(entity.getId())
                 .title(entity.getTitle())
                 .sortOrder(entity.getSortOrder())
                 .active(entity.getActive())

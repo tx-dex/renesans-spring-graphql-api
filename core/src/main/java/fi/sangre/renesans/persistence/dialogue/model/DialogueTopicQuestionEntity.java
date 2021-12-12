@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(of = "id", callSuper = false)
+@EqualsAndHashCode(of = {"id", "title", "sortOrder"})
 
 @Entity
 @Table(name = "dialogue_topic_question")
@@ -37,10 +38,10 @@ public class DialogueTopicQuestionEntity {
     private String title;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DialogueCommentEntity> comments;
+    private final List<DialogueCommentEntity> comments = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DialogueQuestionLikeEntity> likes;
+    private final List<DialogueQuestionLikeEntity> likes = new ArrayList<>();
 
     @Column(name = "active", nullable = false)
     private Boolean active;

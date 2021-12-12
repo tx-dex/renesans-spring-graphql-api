@@ -1,6 +1,5 @@
 package fi.sangre.renesans.graphql.assemble.dialogue;
 
-import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.graphql.output.dialogue.DialogueTopicOutput;
 import fi.sangre.renesans.persistence.dialogue.model.DialogueTopicEntity;
@@ -26,14 +25,14 @@ public class DialogueTopicOutputAssembler {
 
     @NonNull
     public DialogueTopicOutput from(DialogueTopicEntity entity, RespondentId respondentId) {
-        List<DialogueTopicQuestionEntity> questionEntityList = entity.getQuestions();
+        Set<DialogueTopicQuestionEntity> questionEntitySet = entity.getQuestions();
 
         return DialogueTopicOutput.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
-                .questions(dialogueTopicQuestionOutputAssembler.from(questionEntityList, respondentId))
+                .questions(dialogueTopicQuestionOutputAssembler.from(questionEntitySet, respondentId))
                 .active(entity.getActive())
-                .questionsCount(questionEntityList.size())
+                .questionsCount(questionEntitySet.size())
                 .sortOrder(entity.getSortOrder())
                 .tips(dialogueTipOutputAssembler.from(entity.getTips()))
                 .build();
@@ -41,14 +40,14 @@ public class DialogueTopicOutputAssembler {
 
     @NonNull
     public DialogueTopicOutput from(DialogueTopicEntity entity) {
-        List<DialogueTopicQuestionEntity> questionEntityList = entity.getQuestions();
+        Set<DialogueTopicQuestionEntity> questionEntitySet = entity.getQuestions();
 
         return DialogueTopicOutput.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
-                .questions(dialogueTopicQuestionOutputAssembler.from(questionEntityList))
+                .questions(dialogueTopicQuestionOutputAssembler.from(questionEntitySet))
                 .active(entity.getActive())
-                .questionsCount(questionEntityList.size())
+                .questionsCount(questionEntitySet.size())
                 .sortOrder(entity.getSortOrder())
                 .tips(dialogueTipOutputAssembler.from(entity.getTips()))
                 .build();
