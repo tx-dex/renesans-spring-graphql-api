@@ -25,14 +25,29 @@ public class DialogueTopicOutputAssembler {
 
     @NonNull
     public DialogueTopicOutput from(DialogueTopicEntity entity, RespondentId respondentId) {
-        Map<UUID, DialogueTopicQuestionEntity> questionEntityList = entity.getQuestions();
+        Set<DialogueTopicQuestionEntity> questionEntitySet = entity.getQuestions();
 
         return DialogueTopicOutput.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
-                .questions(dialogueTopicQuestionOutputAssembler.from(questionEntityList, respondentId))
+                .questions(dialogueTopicQuestionOutputAssembler.from(questionEntitySet, respondentId))
                 .active(entity.getActive())
-                .questionsCount(questionEntityList.size())
+                .questionsCount(questionEntitySet.size())
+                .sortOrder(entity.getSortOrder())
+                .tips(dialogueTipOutputAssembler.from(entity.getTips()))
+                .build();
+    }
+
+    @NonNull
+    public DialogueTopicOutput from(DialogueTopicEntity entity) {
+        Set<DialogueTopicQuestionEntity> questionEntitySet = entity.getQuestions();
+
+        return DialogueTopicOutput.builder()
+                .id(entity.getId())
+                .title(entity.getTitle())
+                .questions(dialogueTopicQuestionOutputAssembler.from(questionEntitySet))
+                .active(entity.getActive())
+                .questionsCount(questionEntitySet.size())
                 .sortOrder(entity.getSortOrder())
                 .tips(dialogueTipOutputAssembler.from(entity.getTips()))
                 .build();
@@ -44,6 +59,17 @@ public class DialogueTopicOutputAssembler {
 
         entities.forEach(entity -> {
             outputs.add(from(entity, respondentId));
+        });
+
+        return outputs;
+    }
+
+    @NonNull
+    public Collection<DialogueTopicOutput> from(Collection<DialogueTopicEntity> entities) {
+        Collection<DialogueTopicOutput> outputs = new ArrayList<>();
+
+        entities.forEach(entity -> {
+            outputs.add(from(entity));
         });
 
         return outputs;

@@ -16,7 +16,9 @@ import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
 import fi.sangre.renesans.graphql.facade.aftergame.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.OrganizationSurveyFacade;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
+import fi.sangre.renesans.graphql.facade.aftergame.DialogueFacade;
 import fi.sangre.renesans.graphql.input.*;
+import fi.sangre.renesans.graphql.input.dialogue.DialogueTopicInput;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionQuestionInput;
 import fi.sangre.renesans.graphql.input.media.MediaDetailsInput;
 import fi.sangre.renesans.graphql.input.media.MediaUploadInput;
@@ -27,6 +29,7 @@ import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.output.aaa.UserOutput;
+import fi.sangre.renesans.graphql.output.dialogue.DialogueTopicOutput;
 import fi.sangre.renesans.graphql.output.media.MediaUploadOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.service.MediaService;
@@ -57,6 +60,7 @@ import java.util.UUID;
 public class AdminMutations implements GraphQLMutationResolver {
     private final OrganizationService organizationService;
     private final OrganizationSurveyFacade organizationSurveyFacade;
+    private final DialogueFacade dialogueFacade;
     private final OrganizationOutputAssembler organizationOutputAssembler;
     private final OrganizationSurveyService organizationSurveyService;
     private final OrganizationSurveyAssembler organizationSurveyAssembler;
@@ -353,5 +357,32 @@ public class AdminMutations implements GraphQLMutationResolver {
     public MediaUploadOutput getMediaUploadUrl(@NonNull final UUID id,
                                                @NonNull final MediaUploadInput input) {
         return mediaService.requestUploadUrl(new SurveyId(id), input);
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
+    public DialogueTopicOutput storeDialogueTopic(@NonNull final DialogueTopicInput input,
+                                                  @Nullable final String languageCode,
+                                                  @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+        return dialogueFacade.storeTopic(input);
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
+    public boolean changeSurveyDialogueActivation(@NonNull UUID surveyId, @NonNull Boolean isActive) {
+        return dialogueFacade.changeSurveyDialogueActivation(surveyId, isActive);
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
+    public boolean reorderTopic(@NonNull UUID surveyId, @NonNull UUID topicId, @NonNull Integer sortOrder) {
+        return dialogueFacade.reorderTopic(surveyId, topicId, sortOrder);
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
+    public boolean deleteTopic(@NonNull UUID surveyId, @NonNull UUID topicId) {
+        return dialogueFacade.deleteTopic(topicId);
     }
 }

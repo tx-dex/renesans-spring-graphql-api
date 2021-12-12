@@ -249,6 +249,8 @@ public class OrganizationSurveyService {
         final List<SurveyRespondent> respondents = invitation.getEmails().stream()
                 .map(e -> existing.getOrDefault(e, SurveyRespondent.builder()
                         .surveyId(surveyId.getValue())
+                        // generate a random color for each new respondent to show it later in the comments
+                        .color(String.format("#%06x", (new Random()).nextInt(0x1000000)))
                         .email(StringUtils.trim(e))
                         .state(SurveyRespondentState.INVITING)
                         .consent(false)

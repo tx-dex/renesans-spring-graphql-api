@@ -1,5 +1,6 @@
 package fi.sangre.renesans.graphql.output.dialogue;
 
+import fi.sangre.renesans.application.model.SurveyId;
 import lombok.*;
 
 import java.util.Collection;
@@ -18,7 +19,7 @@ public class DialogueTopicOutput {
     private boolean active;
 
     // TODO: implement in the model layer
-    private String picture = "";
+    private String image = "";
 
     private Collection<DialogueQuestionOutput> questions;
     private Collection<DialogueTipOutput> tips;

@@ -10,11 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -23,9 +21,6 @@ import java.util.UUID;
 public class DialogueCommentOutputAssembler {
     @Autowired
     private DialogueCommentLikeRepository dialogueCommentLikeRepository;
-
-    @Autowired
-    private SurveyRespondentRepository surveyRespondentRepository;
 
     @NonNull
     public DialogueCommentOutput from(DialogueCommentEntity entity, RespondentId viewingRespondentId) {
@@ -52,10 +47,10 @@ public class DialogueCommentOutputAssembler {
 
     @NonNull
     public Collection<DialogueCommentOutput> from(
-            Map<UUID, DialogueCommentEntity> entityMap, RespondentId respondentId) {
+            Collection<DialogueCommentEntity> entityList, RespondentId respondentId) {
         Collection<DialogueCommentOutput> outputs = new ArrayList<>();
 
-        entityMap.values().forEach(entity -> {
+        entityList.forEach(entity -> {
             outputs.add(from(entity, respondentId));
         });
 

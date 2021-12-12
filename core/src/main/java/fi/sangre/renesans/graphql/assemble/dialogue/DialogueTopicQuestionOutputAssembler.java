@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -29,7 +26,7 @@ public class DialogueTopicQuestionOutputAssembler {
 
     @NonNull
     public DialogueQuestionOutput from(DialogueTopicQuestionEntity entity, RespondentId respondentId) {
-        Map<UUID, DialogueCommentEntity> commentEntityMap = entity.getComments();
+        Collection<DialogueCommentEntity> commentEntities = entity.getComments();
 
         boolean hasLikeByThisRespondent = dialogueQuestionLikeRepository
                 .countDialogueQuestionLikeEntitiesByQuestionEqualsAndRespondentIdEquals(
@@ -39,11 +36,12 @@ public class DialogueTopicQuestionOutputAssembler {
         int likesCount = dialogueQuestionLikeRepository.countDialogueQuestionLikeEntitiesByQuestionEquals(entity);
 
         return DialogueQuestionOutput.builder()
+                .id(entity.getId())
                 .title(entity.getTitle())
                 .active(entity.getActive())
                 .sortOrder(entity.getSortOrder())
-                .comments(dialogueCommentOutputAssembler.from(commentEntityMap, respondentId))
-                .answersCount(commentEntityMap.size())
+                .comments(dialogueCommentOutputAssembler.from(commentEntities, respondentId))
+                .answersCount(commentEntities.size())
                 .hasLikeByThisRespondent(hasLikeByThisRespondent)
                 .likesCount(likesCount)
                 .build();
@@ -51,14 +49,29 @@ public class DialogueTopicQuestionOutputAssembler {
 
     @NonNull
     public Collection<DialogueQuestionOutput> from(
-            Map<UUID, DialogueTopicQuestionEntity> entityMap,
+            Set<DialogueTopicQuestionEntity> entityList,
             RespondentId respondentId
     ) {
         Collection<DialogueQuestionOutput> outputs = new ArrayList<>();
 
-        entityMap.values().forEach(entity -> {
+        entityList.forEach(entity -> {
             outputs.add(from(entity, respondentId));
         });
+
+        return outputs;
+    }
+
+    @NonNull
+    public Collection<DialogueQuestionOutput> from(Set<DialogueTopicQuestionEntity> entityList) {
+        Collection<DialogueQuestionOutput> outputs = new ArrayList<>();
+
+        entityList.forEach(entity -> outputs.add(DialogueQuestionOutput.builder()
+                .id(entity.getId())
+                .title(entity.getTitle())
+                .sortOrder(entity.getSortOrder())
+                .active(entity.getActive())
+                .image("")
+                .build()));
 
         return outputs;
     }

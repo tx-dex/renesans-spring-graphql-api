@@ -10,11 +10,13 @@ import fi.sangre.renesans.exception.SurveyException;
 import fi.sangre.renesans.graphql.assemble.aaa.UserOutputAssembler;
 import fi.sangre.renesans.graphql.facade.OrganizationSurveyFacade;
 import fi.sangre.renesans.graphql.facade.SurveyRespondentsFacade;
+import fi.sangre.renesans.graphql.facade.aftergame.DialogueFacade;
 import fi.sangre.renesans.graphql.input.FilterInput;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.RespondentOutput;
 import fi.sangre.renesans.graphql.output.aaa.UserOutput;
 import fi.sangre.renesans.graphql.output.aaa.UserRoleOutput;
+import fi.sangre.renesans.graphql.output.dialogue.DialogueTopicOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.resolver.ResolverHelper;
 import fi.sangre.renesans.service.OrganizationSurveyService;
@@ -46,6 +48,7 @@ public class AdminQueries implements GraphQLQueryResolver {
     private final SurveyRespondentsFacade surveyRespondentsFacade;
     private final RespondentFilterAssembler respondentFilterAssembler;
     private final SurveyTemplateService surveyTemplateService;
+    private final DialogueFacade dialogueFacade;
     private final UserDao userDao;
     private final UserOutputAssembler userOutputAssembler;
     private final ResolverHelper resolverHelper;
@@ -138,5 +141,24 @@ public class AdminQueries implements GraphQLQueryResolver {
                         .title(e.getTitle())
                         .build())
                 .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'READ')")
+    public Collection<DialogueTopicOutput> getDialogueTopicsAdmin(@NonNull final UUID surveyId,
+                                                                  @Nullable final String languageCode,
+                                                                  @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+        return dialogueFacade.getDialogueTopicsAdmin(surveyId);
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#surveyId, 'survey', 'READ')")
+    public DialogueTopicOutput getDialogueTopicAdmin(@NonNull final UUID surveyId,
+                                                     @NonNull final UUID surveyTopicId,
+                                                     @Nullable final String languageCode,
+                                                     @NonNull final DataFetchingEnvironment environment) {
+        resolverHelper.setLanguageCode(languageCode, environment);
+        return dialogueFacade.getDialogueTopicAdmin(surveyTopicId);
     }
 }

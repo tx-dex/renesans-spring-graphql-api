@@ -229,4 +229,15 @@ type Query {
 
     validateEmail(value: String!, userId: ID): Validation
     validateUsername(value: String!, userId: ID): Validation
+
+    getDialogueTopicAdmin(
+        surveyId: ID!
+        surveyTopicId: ID!
+        languageCode: String
+    ): DialogueTopic!
+
+    getDialogueTopicsAdmin(
+        surveyId: ID!
+        languageCode: String
+    ): [DialogueTopic]
 }

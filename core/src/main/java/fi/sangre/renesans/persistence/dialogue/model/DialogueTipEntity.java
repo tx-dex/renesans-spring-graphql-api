@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(of = "id", callSuper = false)
+@EqualsAndHashCode(of = {"id", "text"})
 
 @Entity
 @Table(name = "dialogue_tip")
