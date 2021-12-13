@@ -85,6 +85,7 @@ public class QuestionnaireAssembler {
                 .answerable(!isAfterGameEnabled)
                 .finished(false)
                 .isAfterGameGuest(true)
+                .isDialogueActive(survey.isDialogueActive())
                 .canAnswerParameters(!isViewingAfterGame)
                 .canGoToQuestions(false) //This should be false
                 .canViewAfterGame(isAfterGameEnabled && isConsented && areAllParametersAnswered)
@@ -151,6 +152,7 @@ public class QuestionnaireAssembler {
     private QuestionnaireOutput.QuestionnaireOutputBuilder builder(@NonNull final OrganizationSurvey survey) {
         return QuestionnaireOutput.builder()
                 .id(survey.getId())
+                .isDialogueActive(survey.isDialogueActive())
                 .selectedLanguage(TranslationService.DEFAULT_LANGUAGE)
                 .logo(mediaDetailsAssembler.from(survey.getLogo()))
                 .media(surveyMediaAssembler.from(survey.getMedia()))

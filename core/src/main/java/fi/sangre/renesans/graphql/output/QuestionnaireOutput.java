@@ -33,6 +33,7 @@ public class QuestionnaireOutput {
     private boolean canAnswer;
     private boolean canViewAfterGame;
     private boolean canComment;
+    private boolean isDialogueActive;
 
 
 }

@@ -14,6 +14,7 @@ import fi.sangre.renesans.graphql.input.parameter.SurveyParameterInput;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.metadata.SurveyMetadata;
 import fi.sangre.renesans.persistence.model.metadata.media.ImageMetadata;
+import fi.sangre.renesans.persistence.repository.SurveyRepository;
 import fi.sangre.renesans.service.TranslationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ public class OrganizationSurveyAssembler {
     private final CatalystAssembler catalystAssembler;
     private final DiscussionQuestionAssembler discussionQuestionAssembler;
     private final MultilingualUtils multilingualUtils;
+    private final SurveyRepository surveyRepository;
 
     @NonNull
     public OrganizationSurvey fromQuestionsInput(@NonNull final UUID id,
@@ -49,9 +51,11 @@ public class OrganizationSurveyAssembler {
                                                  @NonNull final List<CatalystInput> input,
                                                  @NonNull final String languageTag) {
         multilingualUtils.checkLanguageTag(languageTag);
+        Survey surveyEntity = surveyRepository.findById(id).orElse(null);
 
         return OrganizationSurvey.builder()
                 .id(id)
+                .isDialogueActive(surveyEntity != null ? surveyEntity.getIsDialogueActive() : false)
                 .version(version)
                 .catalysts(catalystAssembler.fromInputs(input, languageTag).stream()
                         .peek(e -> {
@@ -70,9 +74,11 @@ public class OrganizationSurveyAssembler {
                                                           @NonNull final List<CatalystInput> input,
                                                           @NonNull final String languageTag) {
         multilingualUtils.checkLanguageTag(languageTag);
+        Survey surveyEntity = surveyRepository.findById(id).orElse(null);
 
         return OrganizationSurvey.builder()
                 .id(id)
+                .isDialogueActive(surveyEntity != null ? surveyEntity.getIsDialogueActive() : false)
                 .version(version)
                 .catalysts(catalystAssembler.fromInputs(input, languageTag).stream()
                         .peek(e -> {
@@ -90,9 +96,11 @@ public class OrganizationSurveyAssembler {
                                                   @NonNull final List<SurveyParameterInput> input,
                                                   @NonNull final String languageTag) {
         multilingualUtils.checkLanguageTag(languageTag);
+        Survey surveyEntity = surveyRepository.findById(id).orElse(null);
 
         return OrganizationSurvey.builder()
                 .id(id)
+                .isDialogueActive(surveyEntity != null ? surveyEntity.getIsDialogueActive() : false)
                 .version(version)
                 .parameters(parameterAssembler.fromInputs(input, languageTag))
                 .build();
@@ -104,9 +112,11 @@ public class OrganizationSurveyAssembler {
                                                @NonNull final List<SurveyMediaInput> input,
                                                @NonNull final String languageTag) {
         multilingualUtils.checkLanguageTag(languageTag);
+        Survey surveyEntity = surveyRepository.findById(id).orElse(null);
 
         return OrganizationSurvey.builder()
                 .id(id)
+                .isDialogueActive(surveyEntity != null ? surveyEntity.getIsDialogueActive() : false)
                 .version(version)
                 .media(mediaAssembler.fromInputs(input, languageTag))
                 .build();
@@ -118,10 +128,12 @@ public class OrganizationSurveyAssembler {
                                                   @NonNull final StaticTextInput input,
                                                   @NonNull final String languageTag) {
         multilingualUtils.checkLanguageTag(languageTag);
+        Survey surveyEntity = surveyRepository.findById(id).orElse(null);
 
         if (StringUtils.isNotBlank(input.getText())) {
             return OrganizationSurvey.builder()
                     .id(id)
+                    .isDialogueActive(surveyEntity != null ? surveyEntity.getIsDialogueActive() : false)
                     .version(version)
                     .staticTexts(ImmutableMap.of(input.getTextGroupId(), StaticTextGroup.builder()
                             .texts(ImmutableMap.of(input.getId(), staticTextAssembler.from(input, languageTag)))
@@ -130,6 +142,7 @@ public class OrganizationSurveyAssembler {
         } else {
             return OrganizationSurvey.builder()
                     .id(id)
+                    .isDialogueActive(surveyEntity != null ? surveyEntity.getIsDialogueActive() : false)
                     .version(version)
                     .staticTexts(ImmutableMap.of())
                     .build();
@@ -140,6 +153,8 @@ public class OrganizationSurveyAssembler {
     public OrganizationSurvey fromLogoInput(@NonNull final UUID id,
                                             @NonNull final Long version,
                                             @Nullable final MediaDetailsInput input) {
+        Survey surveyEntity = surveyRepository.findById(id).orElse(null);
+
         final MediaDetails logo = Optional.ofNullable(input)
                 .map(MediaDetailsInput::getKey)
                 .map(StringUtils::trimToNull)
@@ -151,6 +166,7 @@ public class OrganizationSurveyAssembler {
 
         return OrganizationSurvey.builder()
                 .id(id)
+                .isDialogueActive(surveyEntity != null ? surveyEntity.getIsDialogueActive() : false)
                 .version(version)
                 .logo(logo)
                 .build();
@@ -161,9 +177,11 @@ public class OrganizationSurveyAssembler {
                                                           @NonNull final Long version,
                                                           @NonNull final List<DiscussionQuestionInput> input,
                                                           @NonNull final String languageTag) {
+        Survey surveyEntity = surveyRepository.findById(id).orElse(null);
 
-       return OrganizationSurvey.builder()
+        return OrganizationSurvey.builder()
                 .id(id)
+                .isDialogueActive(surveyEntity != null ? surveyEntity.getIsDialogueActive() : false)
                 .version(version)
                 .discussionQuestions(discussionQuestionAssembler.fromInput(input, languageTag))
                 .build();
@@ -178,6 +196,7 @@ public class OrganizationSurveyAssembler {
 
         return OrganizationSurvey.builder()
                 .id(survey.getId())
+                .isDialogueActive(survey.getIsDialogueActive())
                 .version(survey.getVersion())
                 .state(survey.getState())
                 .logo(Optional.ofNullable(metadata.getLogo())
