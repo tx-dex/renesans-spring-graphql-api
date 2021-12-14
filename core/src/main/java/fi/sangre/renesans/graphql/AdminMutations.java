@@ -361,28 +361,17 @@ public class AdminMutations implements GraphQLMutationResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
-    public DialogueTopicOutput storeDialogueTopic(@NonNull final DialogueTopicInput input,
+    public Collection<DialogueTopicOutput> storeDialogueTopics(@NonNull final Collection<DialogueTopicInput> inputs,
+                                                  @NonNull final UUID surveyId,
                                                   @Nullable final String languageCode,
                                                   @NonNull final DataFetchingEnvironment environment) {
         resolverHelper.setLanguageCode(languageCode, environment);
-        return dialogueFacade.storeTopic(input);
+        return dialogueFacade.storeTopics(surveyId, inputs);
     }
 
     @NonNull
     @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
     public boolean changeSurveyDialogueActivation(@NonNull UUID surveyId, @NonNull Boolean isActive) {
         return dialogueFacade.changeSurveyDialogueActivation(surveyId, isActive);
-    }
-
-    @NonNull
-    @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
-    public boolean reorderTopic(@NonNull UUID surveyId, @NonNull UUID topicId, @NonNull Integer sortOrder) {
-        return dialogueFacade.reorderTopic(surveyId, topicId, sortOrder);
-    }
-
-    @NonNull
-    @PreAuthorize("hasPermission(#surveyId, 'survey', 'WRITE')")
-    public boolean deleteTopic(@NonNull UUID surveyId, @NonNull UUID topicId) {
-        return dialogueFacade.deleteTopic(topicId);
     }
 }

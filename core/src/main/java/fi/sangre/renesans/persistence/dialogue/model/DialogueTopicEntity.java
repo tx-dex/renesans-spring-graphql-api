@@ -10,10 +10,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,10 +43,10 @@ public class DialogueTopicEntity {
     private Integer sortOrder;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DialogueTopicQuestionEntity> questions;
+    private final Set<DialogueTopicQuestionEntity> questions = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DialogueTipEntity> tips;
+    private final Set<DialogueTipEntity> tips = new HashSet<>();
 
     @CreatedDate
     @Column(name = "ctm", nullable = false, updatable = false)

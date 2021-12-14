@@ -278,7 +278,6 @@ input DialogueCommentInput {
 
 input DialogueTopicInput {
     id: ID
-    surveyId: ID!
     title: String!
     active: Boolean!
     image: String

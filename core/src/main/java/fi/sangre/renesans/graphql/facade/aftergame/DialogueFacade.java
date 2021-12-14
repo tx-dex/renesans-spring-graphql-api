@@ -30,10 +30,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
 
+// TODO: rename to DialogueService since it actively uses JPA directly?
 @Component
 public class DialogueFacade {
     private final AfterGameFacade afterGameFacade;
@@ -287,7 +289,53 @@ public class DialogueFacade {
         return true;
     }
 
-    public DialogueTopicOutput storeTopic(@NonNull DialogueTopicInput input) {
+    public Collection<DialogueTopicOutput> storeTopics(
+            @NonNull UUID surveyId,
+            @NonNull Collection<DialogueTopicInput> inputs) {
+        Collection<DialogueTopicOutput> topicOutputs = new ArrayList<>();
+
+        EntityManager em = entityManagerFactory.createEntityManager();
+        EntityTransaction tx = null;
+
+        // remove all the topics that have disappeared
+        List<DialogueTopicEntity> existingTopicEntities = dialogueTopicRepository.findAllBySurveyId(surveyId);
+        List<DialogueTopicEntity> topicsToRemove = new ArrayList<>();
+        List<DialogueTopicInput> inputsWithId = inputs.stream().filter(input -> input.getId() != null)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        for (DialogueTopicEntity topicEntity : existingTopicEntities) {
+            boolean isItemRemoved = inputsWithId.stream().noneMatch(input -> input.getId().equals(topicEntity.getId()));
+            if (isItemRemoved) topicsToRemove.add(topicEntity);
+        }
+
+        try {
+            tx = em.getTransaction();
+            tx.begin();
+
+            dialogueTopicRepository.deleteAll(topicsToRemove);
+
+            for (DialogueTopicInput input : inputs) {
+                topicOutputs.add(storeTopic(input, surveyId));
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            try {
+                log.error("Could not commit a dialogue topics transaction: " + e.getMessage());
+                log.error(e.fillInStackTrace().getMessage());
+                if (tx != null) tx.rollback();
+            } catch (Exception te) {
+                log.error("Failed to rollback a dialogue topics transaction: "  + te.getMessage());
+                log.error(te.fillInStackTrace().getMessage());
+            }
+        } finally {
+            em.close();
+        }
+
+        return topicOutputs;
+    }
+
+    public DialogueTopicOutput storeTopic(@NonNull DialogueTopicInput input, @NonNull UUID surveyId) {
         // check if the topic already exists (i.e. edit mode)
         if (input.getId() != null) {
             DialogueTopicEntity existingTopicEntity = dialogueTopicRepository.findById(input.getId())
@@ -296,7 +344,7 @@ public class DialogueFacade {
             return editTopic(existingTopicEntity, input);
         }
 
-        Survey survey = surveyRepository.findById(input.getSurveyId())
+        Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new SurveyException("The survey linked to this topic does not exist."));
 
         return createTopic(input, survey);
@@ -334,8 +382,8 @@ public class DialogueFacade {
             tipEntities.add(tipEntity);
         });
 
-        topicEntity.setQuestions(questionEntities);
-        topicEntity.setTips(tipEntities);
+        topicEntity.getQuestions().addAll(questionEntities);
+        topicEntity.getTips().addAll(tipEntities);
 
         dialogueTopicRepository.saveAndFlush(topicEntity);
 
@@ -372,6 +420,19 @@ public class DialogueFacade {
                     .active(questionInput.isActive())
                     .build();
 
+            if (questionInput.getId() != null) {
+                DialogueTopicQuestionEntity previousQuestion = existingTopicEntity
+                        .getQuestions().stream().filter((q) -> q.getId().equals(questionInput.getId())).findFirst()
+                        .orElseThrow(() -> new SurveyException(
+                                "Could not copy the children of question " +
+                                        "because the question with such id does not exist")
+                        );
+
+                // avoid losing of comments and likes
+                questionEntity.getComments().addAll(previousQuestion.getComments());
+                questionEntity.getLikes().addAll(previousQuestion.getLikes());
+            }
+
             questionEntities.add(questionEntity);
         });
 
@@ -385,8 +446,10 @@ public class DialogueFacade {
             tipEntities.add(tipEntity);
         });
 
-        existingTopicEntity.setTips(tipEntities);
-        existingTopicEntity.setQuestions(questionEntities);
+        existingTopicEntity.getTips().clear();
+        existingTopicEntity.getQuestions().clear();
+        existingTopicEntity.getTips().addAll(tipEntities);
+        existingTopicEntity.getQuestions().addAll(questionEntities);
 
         previousQuestions.forEach((previousQuestion -> {
             boolean isQuestionStillExists = questionEntities.stream().anyMatch(
@@ -405,30 +468,9 @@ public class DialogueFacade {
             if (!isTipStillExists) tipsToRemove.add(previousTip);
         }));
 
-        EntityManager em = entityManagerFactory.createEntityManager();
-        EntityTransaction tx = null;
-
-        try {
-            tx = em.getTransaction();
-            tx.begin();
-
-            dialogueTopicRepository.save(existingTopicEntity);
-            if (questionsToRemove.size() > 0) dialogueTopicQuestionRepository.deleteAll(questionsToRemove);
-            if (tipsToRemove.size() > 0) dialogueTipRepository.deleteAll(tipsToRemove);
-
-            tx.commit();
-        } catch (Exception e) {
-            try {
-                log.error("Could not commit a dialogue topic transaction: " + e.getMessage());
-                log.error(e.fillInStackTrace().getMessage());
-                if (tx != null) tx.rollback();
-            } catch (Exception te) {
-                log.error("Failed to rollback a dialogue topic transaction: "  + te.getMessage());
-                log.error(te.fillInStackTrace().getMessage());
-            }
-        } finally {
-            em.close();
-        }
+        dialogueTopicRepository.save(existingTopicEntity);
+        if (questionsToRemove.size() > 0) dialogueTopicQuestionRepository.deleteAll(questionsToRemove);
+        if (tipsToRemove.size() > 0) dialogueTipRepository.deleteAll(tipsToRemove);
 
         DialogueTopicEntity updatedTopic = dialogueTopicRepository.findById(existingTopicEntity.getId()).orElseThrow(
                 () -> new SurveyException("Could not get an updated topic entity from the database.")

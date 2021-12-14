@@ -151,14 +151,4 @@ public class AdminQueries implements GraphQLQueryResolver {
         resolverHelper.setLanguageCode(languageCode, environment);
         return dialogueFacade.getDialogueTopicsAdmin(surveyId);
     }
-
-    @NonNull
-    @PreAuthorize("hasPermission(#surveyId, 'survey', 'READ')")
-    public DialogueTopicOutput getDialogueTopicAdmin(@NonNull final UUID surveyId,
-                                                     @NonNull final UUID surveyTopicId,
-                                                     @Nullable final String languageCode,
-                                                     @NonNull final DataFetchingEnvironment environment) {
-        resolverHelper.setLanguageCode(languageCode, environment);
-        return dialogueFacade.getDialogueTopicAdmin(surveyTopicId);
-    }
 }

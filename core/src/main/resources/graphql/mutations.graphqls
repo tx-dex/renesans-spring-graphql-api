@@ -276,21 +276,11 @@ type Mutation {
         isActive: Boolean!
     ): Boolean!
 
-    storeDialogueTopic(
-        input: DialogueTopicInput!
+    storeDialogueTopics(
+        input: [DialogueTopicInput]!
+        surveyId: ID!
         languageCode: String
-    ): DialogueTopic!
-
-    reorderTopic(
-        surveyId: ID!
-        topicId: ID!
-        sortOrder: Int!
-    ): Boolean!
-
-    deleteTopic(
-        surveyId: ID!
-        topicId: ID!
-    ): Boolean!
+    ): [DialogueTopic]!
 
     storeCustomerDriverWeights(customerId: ID!, driverWeights: [DriverWeightInput!]!):Customer  @deprecated(reason: "Will be removed")
 

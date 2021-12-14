@@ -9,10 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,10 +36,10 @@ public class DialogueTopicQuestionEntity {
     private String title;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DialogueCommentEntity> comments;
+    private final Set<DialogueCommentEntity> comments = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DialogueQuestionLikeEntity> likes;
+    private final Set<DialogueQuestionLikeEntity> likes = new HashSet<>();
 
     @Column(name = "active", nullable = false)
     private Boolean active;

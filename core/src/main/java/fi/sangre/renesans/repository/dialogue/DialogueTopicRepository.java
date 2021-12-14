@@ -18,5 +18,7 @@ public interface DialogueTopicRepository extends JpaRepository<DialogueTopicEnti
     })
     List<DialogueTopicEntity> findAllBySurveyId(UUID surveyId, Sort sort);
 
+    List<DialogueTopicEntity> findAllBySurveyId(UUID surveyId);
+
     int countAllBySurveyIdAndActiveTrue(UUID surveyId);
 }
