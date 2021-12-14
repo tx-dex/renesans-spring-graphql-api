@@ -34,5 +34,5 @@ public class OrganizationSurvey {
     private boolean deleted = false;
     //TODO: create OrganizationSurveyOutput and move this there
     private RespondentCounters respondentCounters;
-    private boolean isDialogueActive;
+    private Boolean isDialogueActive;
 }
