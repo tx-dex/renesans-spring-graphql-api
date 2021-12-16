@@ -13,12 +13,6 @@ import java.util.UUID;
 
 @Repository
 public interface DialogueTopicRepository extends JpaRepository<DialogueTopicEntity, UUID>, QuerydslPredicateExecutor<DialogueTopicEntity> {
-    @QueryHints(value = {
-            @QueryHint(name = "org.hibernate.cacheable", value = "true"),
-    })
-    List<DialogueTopicEntity> findAllBySurveyId(UUID surveyId, Sort sort);
-
     List<DialogueTopicEntity> findAllBySurveyId(UUID surveyId);
-
     int countAllBySurveyIdAndActiveTrue(UUID surveyId);
 }

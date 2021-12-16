@@ -16,7 +16,6 @@ public class DialogueQuestionOutput {
     private Integer answersCount;
     private Integer likesCount;
     private boolean hasLikeByThisRespondent;
-    private Integer sortOrder;
     private boolean active;
 
     // TODO: implement in the model layer later

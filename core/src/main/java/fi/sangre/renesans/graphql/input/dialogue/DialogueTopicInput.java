@@ -15,7 +15,6 @@ public class DialogueTopicInput {
     private String title;
     private boolean active;
     private String image;
-    private int sortOrder;
     private List<DialogueTipInput> tips;
     private List<DialogueQuestionInput> questions;
 }

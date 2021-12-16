@@ -15,7 +15,6 @@ public class DialogueTopicOutput {
     private UUID id;
     private String title;
     private Integer questionsCount;
-    private Integer sortOrder;
     private boolean active;
 
     // TODO: implement in the model layer

@@ -32,15 +32,15 @@ public class DialogueTopicEntity {
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "image")
+    private String image;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "survey_id", referencedColumnName = "id", nullable = false, updatable = false)
     private Survey survey;
 
     @Column(name = "active", nullable = false)
     private Boolean active;
-
-    @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<DialogueTopicQuestionEntity> questions = new HashSet<>();

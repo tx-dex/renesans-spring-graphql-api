@@ -20,7 +20,6 @@ import fi.sangre.renesans.persistence.repository.SurveyRespondentRepository;
 import fi.sangre.renesans.repository.dialogue.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -80,9 +79,7 @@ public class DialogueFacade {
     ) {
         final OrganizationSurvey survey = afterGameFacade.getSurvey(questionnaireId, principal);
 
-        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository.findAllBySurveyId(
-                survey.getId(), Sort.by(Sort.Direction.ASC, "sortOrder")
-        );
+        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository.findAllBySurveyId(survey.getId());
 
         return dialogueTopicOutputAssembler.from(dialogueTopicEntities, new RespondentId(questionnaireId));
     }
@@ -107,19 +104,8 @@ public class DialogueFacade {
     public Collection<DialogueTopicOutput> getDialogueTopicsAdmin(
             @NonNull final UUID surveyId
     ) {
-        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository.findAllBySurveyId(
-                surveyId, Sort.by(Sort.Direction.ASC, "sortOrder")
-        );
-
+        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository.findAllBySurveyId(surveyId);
         return dialogueTopicOutputAssembler.from(dialogueTopicEntities);
-    }
-
-    public DialogueTopicOutput getDialogueTopicAdmin(
-            @NonNull final UUID surveyTopicId
-    ) {
-        DialogueTopicEntity topicEntity = dialogueTopicRepository.getOne(surveyTopicId);
-
-        return dialogueTopicOutputAssembler.from(topicEntity);
     }
 
     public DialogueCommentOutput postComment(
@@ -275,19 +261,7 @@ public class DialogueFacade {
         return true;
     }
 
-    public boolean reorderTopic(@NonNull UUID surveyId, @NonNull UUID topicId, @NonNull Integer sortOrder) {
-        DialogueTopicEntity dialogueTopicEntity = dialogueTopicRepository.findById(topicId)
-                .orElseThrow(() -> new SurveyException("The topic does not exist."));
 
-        if (!surveyId.equals(dialogueTopicEntity.getSurvey().getId())) {
-            throw new SurveyException("A topic you're trying to re-order does not belong to this survey.");
-        }
-
-        dialogueTopicEntity.setSortOrder(sortOrder);
-        dialogueTopicRepository.saveAndFlush(dialogueTopicEntity);
-
-        return true;
-    }
 
     public Collection<DialogueTopicOutput> storeTopics(
             @NonNull UUID surveyId,
@@ -358,15 +332,15 @@ public class DialogueFacade {
         DialogueTopicEntity topicEntity = DialogueTopicEntity.builder()
                 .active(input.isActive())
                 .title(input.getTitle())
+                .image(input.getImage())
                 .survey(survey)
-                .sortOrder(input.getSortOrder())
                 .build();
 
         input.getQuestions().forEach((questionInput) -> {
             DialogueTopicQuestionEntity questionEntity = DialogueTopicQuestionEntity.builder()
                     .title(questionInput.getTitle())
                     .topic(topicEntity)
-                    .sortOrder(questionInput.getSortOrder())
+                    .image(questionInput.getImage())
                     .active(questionInput.isActive())
                     .build();
 
@@ -409,14 +383,14 @@ public class DialogueFacade {
 
         existingTopicEntity.setTitle(input.getTitle());
         existingTopicEntity.setActive(input.isActive());
-        existingTopicEntity.setSortOrder(input.getSortOrder());
+        existingTopicEntity.setImage(input.getImage());
 
         input.getQuestions().forEach((questionInput) -> {
             DialogueTopicQuestionEntity questionEntity = DialogueTopicQuestionEntity.builder()
                     .id(questionInput.getId())
+                    .image(questionInput.getImage())
                     .title(questionInput.getTitle())
                     .topic(existingTopicEntity)
-                    .sortOrder(questionInput.getSortOrder())
                     .active(questionInput.isActive())
                     .build();
 

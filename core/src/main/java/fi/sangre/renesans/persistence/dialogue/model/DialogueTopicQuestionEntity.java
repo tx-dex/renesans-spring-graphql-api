@@ -16,7 +16,7 @@ import java.util.*;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode(of = {"id", "title", "sortOrder"})
+@EqualsAndHashCode(of = {"id", "title"})
 
 @Entity
 @Table(name = "dialogue_topic_question")
@@ -35,6 +35,9 @@ public class DialogueTopicQuestionEntity {
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "image")
+    private String image;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private final Set<DialogueCommentEntity> comments = new HashSet<>();
 
@@ -43,9 +46,6 @@ public class DialogueTopicQuestionEntity {
 
     @Column(name = "active", nullable = false)
     private Boolean active;
-
-    @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder;
 
     @CreatedDate
     @Column(name = "ctm", nullable = false, updatable = false)

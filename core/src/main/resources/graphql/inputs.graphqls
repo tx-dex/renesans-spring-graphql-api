@@ -283,7 +283,6 @@ input DialogueTopicInput {
     image: String
     tips: [DialogueTipInput]!
     questions: [DialogueQuestionInput]!
-    sortOrder: Int!
 }
 
 input DialogueTipInput {
@@ -295,6 +294,5 @@ input DialogueQuestionInput {
     id: ID
     title: String!
     active: Boolean!
-    sortOrder: Int!
     image: String
 }

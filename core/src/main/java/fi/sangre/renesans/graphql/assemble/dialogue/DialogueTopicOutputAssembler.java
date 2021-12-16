@@ -30,10 +30,10 @@ public class DialogueTopicOutputAssembler {
         return DialogueTopicOutput.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
+                .image(entity.getImage())
                 .questions(dialogueTopicQuestionOutputAssembler.from(questionEntitySet, respondentId))
                 .active(entity.getActive())
                 .questionsCount(questionEntitySet.size())
-                .sortOrder(entity.getSortOrder())
                 .tips(dialogueTipOutputAssembler.from(entity.getTips()))
                 .build();
     }
@@ -45,10 +45,10 @@ public class DialogueTopicOutputAssembler {
         return DialogueTopicOutput.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
+                .image(entity.getImage())
                 .questions(dialogueTopicQuestionOutputAssembler.from(questionEntitySet))
                 .active(entity.getActive())
                 .questionsCount(questionEntitySet.size())
-                .sortOrder(entity.getSortOrder())
                 .tips(dialogueTipOutputAssembler.from(entity.getTips()))
                 .build();
     }

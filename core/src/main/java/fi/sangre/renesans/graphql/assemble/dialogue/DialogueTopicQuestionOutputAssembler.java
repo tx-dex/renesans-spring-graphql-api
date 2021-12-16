@@ -38,8 +38,8 @@ public class DialogueTopicQuestionOutputAssembler {
         return DialogueQuestionOutput.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
+                .image(entity.getImage())
                 .active(entity.getActive())
-                .sortOrder(entity.getSortOrder())
                 .comments(dialogueCommentOutputAssembler.from(commentEntities, respondentId))
                 .answersCount(commentEntities.size())
                 .hasLikeByThisRespondent(hasLikeByThisRespondent)
@@ -68,9 +68,8 @@ public class DialogueTopicQuestionOutputAssembler {
         entityList.forEach(entity -> outputs.add(DialogueQuestionOutput.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
-                .sortOrder(entity.getSortOrder())
+                .image(entity.getImage())
                 .active(entity.getActive())
-                .image("")
                 .build()));
 
         return outputs;

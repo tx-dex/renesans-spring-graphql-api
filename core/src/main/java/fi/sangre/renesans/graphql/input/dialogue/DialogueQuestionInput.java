@@ -13,6 +13,5 @@ public class DialogueQuestionInput {
     private UUID id;
     private String title;
     private boolean active;
-    private int sortOrder;
     private String image;
 }

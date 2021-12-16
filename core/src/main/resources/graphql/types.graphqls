@@ -433,7 +433,6 @@ type DialogueTopic {
     id: ID!
     title: String!
     questionsCount: Int!
-    sortOrder: Int!
     active: Boolean!
     questions: [DialogueQuestion]!
     tips: [DialogueTip]!
@@ -451,7 +450,6 @@ type DialogueQuestion {
     answersCount: Int!
     likesCount: Int!
     hasLikeByThisRespondent: Boolean!
-    sortOrder: Int!
     active: Boolean!
     comments: [DialogueComment]!
     image: String
