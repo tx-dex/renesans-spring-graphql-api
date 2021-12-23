@@ -35,7 +35,7 @@ public class DialogueCommentOutputAssembler {
         return DialogueCommentOutput.builder()
                 .id(entity.getId())
                 .respondentColor(entity.getRespondent().getColor())
-                .replies(from(entity.getReplies(), viewingRespondentId))
+                .replies(fromReplies(entity.getReplies(), viewingRespondentId))
                 .likesCount(likesCount)
                 .hasLikeByThisRespondent(hasLikeByThisRespondent)
                 .isOwnedByThisRespondent(commentAuthorId.equals(viewingRespondentId.getValue()))
@@ -47,6 +47,21 @@ public class DialogueCommentOutputAssembler {
 
     @NonNull
     public Collection<DialogueCommentOutput> from(
+            Collection<DialogueCommentEntity> entityList, RespondentId respondentId) {
+        Collection<DialogueCommentOutput> outputs = new ArrayList<>();
+
+        entityList.forEach(entity -> {
+            // hide replies from the first level of the tree
+            if (entity.getParent() == null) {
+                outputs.add(from(entity, respondentId));
+            }
+        });
+
+        return outputs;
+    }
+
+    @NonNull
+    public Collection<DialogueCommentOutput> fromReplies(
             Collection<DialogueCommentEntity> entityList, RespondentId respondentId) {
         Collection<DialogueCommentOutput> outputs = new ArrayList<>();
 
