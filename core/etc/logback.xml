@@ -5,11 +5,16 @@
         </encoder>
     </appender>
 
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/graphql_console.log</file>
+    </appender>
+
     <logger name="org.springframework.web" level="INFO" />
     <logger name="org.hibernate" level="WARN" />
     <logger name="fi.sangre.renesans" level="DEBUG" />
     <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG" />
     <root level="WARN">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
     </root>
 </configuration>
