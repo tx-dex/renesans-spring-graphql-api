@@ -226,6 +226,11 @@ public class DialogueFacade {
             // only comment's author can remove it
             // removal should be cascade, i.e. all the replies will be removed automatically
             if (commentEntity.getRespondent().getId().equals(respondent.getId().getValue())) {
+                if (commentEntity.getParent() != null) {
+                    commentEntity.getParent().getReplies().remove(commentEntity);
+                    dialogueCommentRepository.saveAndFlush(commentEntity.getParent());
+                }
+
                 dialogueCommentRepository.delete(commentEntity);
             } else {
                 throw new SurveyException("A respondent cannot delete a comment that does not belong to him.");
@@ -233,6 +238,11 @@ public class DialogueFacade {
 
         // allow admin to delete any comment in a survey he's responsible for
         } else if (principal instanceof UserPrincipal) {
+            if (commentEntity.getParent() != null) {
+                commentEntity.getParent().getReplies().remove(commentEntity);
+                dialogueCommentRepository.saveAndFlush(commentEntity.getParent());
+            }
+            
             dialogueCommentRepository.delete(commentEntity);
         } else {
             throw new SurveyException("Incorrect user type for deletion of a comment.");

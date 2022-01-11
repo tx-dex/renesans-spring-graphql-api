@@ -34,7 +34,7 @@ public class DialogueCommentEntity {
     @ManyToOne
     private DialogueCommentEntity parent;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy="parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<DialogueCommentEntity> replies;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
