@@ -12,7 +12,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZoneId;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -42,8 +41,7 @@ public class DialogueCommentOutputAssembler {
                 .isOwnedByThisRespondent(commentAuthorId.equals(viewingRespondentId.getValue()))
                 .authorRespondentId(commentAuthorId)
                 .text(entity.getText())
-                .createdAt(entity.getCreatedOn().atZone(ZoneId.of("UTC"))
-                        .withZoneSameInstant(ZoneId.of("Europe/Helsinki")).toLocalDateTime().toString())
+                .createdAt(entity.getCreatedOn().toString())
                 .build();
     }
 
