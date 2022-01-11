@@ -13,6 +13,7 @@ import fi.sangre.renesans.graphql.input.dialogue.DialogueCommentInput;
 import fi.sangre.renesans.graphql.input.dialogue.DialogueTopicInput;
 import fi.sangre.renesans.graphql.output.dialogue.*;
 import fi.sangre.renesans.persistence.dialogue.model.*;
+import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import fi.sangre.renesans.persistence.repository.SurveyRepository;
@@ -226,29 +227,28 @@ public class DialogueFacade {
             // only comment's author can remove it
             // removal should be cascade, i.e. all the replies will be removed automatically
             if (commentEntity.getRespondent().getId().equals(respondent.getId().getValue())) {
-                if (commentEntity.getParent() != null) {
-                    commentEntity.getParent().getReplies().remove(commentEntity);
-                    dialogueCommentRepository.saveAndFlush(commentEntity.getParent());
-                }
-
-                dialogueCommentRepository.delete(commentEntity);
+                deleteComment(commentEntity);
             } else {
                 throw new SurveyException("A respondent cannot delete a comment that does not belong to him.");
             }
 
         // allow admin to delete any comment in a survey he's responsible for
         } else if (principal instanceof UserPrincipal) {
-            if (commentEntity.getParent() != null) {
-                commentEntity.getParent().getReplies().remove(commentEntity);
-                dialogueCommentRepository.saveAndFlush(commentEntity.getParent());
-            }
-            
-            dialogueCommentRepository.delete(commentEntity);
+            deleteComment(commentEntity);
         } else {
             throw new SurveyException("Incorrect user type for deletion of a comment.");
         }
 
         return true;
+    }
+
+    private void deleteComment(DialogueCommentEntity commentEntity) {
+        if (commentEntity.getParent() != null) {
+            commentEntity.getParent().getReplies().remove(commentEntity);
+            dialogueCommentRepository.saveAndFlush(commentEntity.getParent());
+        }
+
+        dialogueCommentRepository.delete(commentEntity);
     }
 
     public boolean changeSurveyDialogueActivation(@NonNull UUID surveyId, @NonNull Boolean isActive) {
