@@ -13,7 +13,6 @@ import fi.sangre.renesans.graphql.input.dialogue.DialogueCommentInput;
 import fi.sangre.renesans.graphql.input.dialogue.DialogueTopicInput;
 import fi.sangre.renesans.graphql.output.dialogue.*;
 import fi.sangre.renesans.persistence.dialogue.model.*;
-import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import fi.sangre.renesans.persistence.repository.SurveyRepository;

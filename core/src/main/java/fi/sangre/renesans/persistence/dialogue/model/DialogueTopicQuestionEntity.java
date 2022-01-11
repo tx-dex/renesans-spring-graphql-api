@@ -39,6 +39,7 @@ public class DialogueTopicQuestionEntity {
     private String image;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdOn DESC")
     private final Set<DialogueCommentEntity> comments = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
