@@ -11,5 +11,5 @@ import java.util.UUID;
 
 @Repository
 public interface DialogueTopicQuestionRepository extends JpaRepository<DialogueTopicQuestionEntity, UUID>, QuerydslPredicateExecutor<DialogueTopicQuestionEntity> {
-    List<DialogueTopicQuestionEntity> findAllByTopic(DialogueTopicEntity dialogueTopicEntity);
+    List<DialogueTopicQuestionEntity> findAllByTopicOrderBySortIndexAsc(DialogueTopicEntity dialogueTopicEntity);
 }

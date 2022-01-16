@@ -48,6 +48,9 @@ public class DialogueTopicQuestionEntity {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
+    @Column(name = "sort_index")
+    private Integer sortIndex;
+
     @CreatedDate
     @Column(name = "ctm", nullable = false, updatable = false)
     private LocalDateTime createdOn;

@@ -79,8 +79,8 @@ public class DialogueFacade {
     ) {
         final OrganizationSurvey survey = afterGameFacade.getSurvey(questionnaireId, principal);
 
-        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository.findAllBySurveyId(survey.getId());
-
+        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository
+                .findAllBySurveyIdOrderBySortIndexAsc(survey.getId());
         return dialogueTopicOutputAssembler.from(dialogueTopicEntities, new RespondentId(questionnaireId));
     }
 
@@ -104,7 +104,8 @@ public class DialogueFacade {
     public Collection<DialogueTopicOutput> getDialogueTopicsAdmin(
             @NonNull final UUID surveyId
     ) {
-        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository.findAllBySurveyId(surveyId);
+        List<DialogueTopicEntity> dialogueTopicEntities = dialogueTopicRepository
+                .findAllBySurveyIdOrderBySortIndexAsc(surveyId);
         return dialogueTopicOutputAssembler.from(dialogueTopicEntities);
     }
 
@@ -270,8 +271,6 @@ public class DialogueFacade {
         return true;
     }
 
-
-
     public Collection<DialogueTopicOutput> storeTopics(
             @NonNull UUID surveyId,
             @NonNull Collection<DialogueTopicInput> inputs) {
@@ -281,7 +280,8 @@ public class DialogueFacade {
         EntityTransaction tx = null;
 
         // remove all the topics that have disappeared
-        List<DialogueTopicEntity> existingTopicEntities = dialogueTopicRepository.findAllBySurveyId(surveyId);
+        List<DialogueTopicEntity> existingTopicEntities = dialogueTopicRepository
+                .findAllBySurveyIdOrderBySortIndexAsc(surveyId);
         List<DialogueTopicEntity> topicsToRemove = new ArrayList<>();
         List<DialogueTopicInput> inputsWithId = inputs.stream().filter(input -> input.getId() != null)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -297,8 +297,11 @@ public class DialogueFacade {
 
             dialogueTopicRepository.deleteAll(topicsToRemove);
 
+            int sortIndex = 0;
+
             for (DialogueTopicInput input : inputs) {
-                topicOutputs.add(storeTopic(input, surveyId));
+                topicOutputs.add(storeTopic(input, surveyId, sortIndex));
+                sortIndex++;
             }
 
             tx.commit();
@@ -318,23 +321,28 @@ public class DialogueFacade {
         return topicOutputs;
     }
 
-    public DialogueTopicOutput storeTopic(@NonNull DialogueTopicInput input, @NonNull UUID surveyId) {
+    public DialogueTopicOutput storeTopic(@NonNull DialogueTopicInput input,
+                                          @NonNull UUID surveyId,
+                                          @NonNull Integer sortIndex
+    ) {
         // check if the topic already exists (i.e. edit mode)
         if (input.getId() != null) {
             DialogueTopicEntity existingTopicEntity = dialogueTopicRepository.findById(input.getId())
                     .orElseThrow(() -> new SurveyException("Cannot edit a topic that does not exist."));
 
-            return editTopic(existingTopicEntity, input);
+            return editTopic(existingTopicEntity, input, sortIndex);
         }
 
         Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new SurveyException("The survey linked to this topic does not exist."));
 
-        return createTopic(input, survey);
+        return createTopic(input, survey, sortIndex);
     }
 
     private DialogueTopicOutput createTopic(@NonNull DialogueTopicInput input,
-                                            @NonNull Survey survey) {
+                                            @NonNull Survey survey,
+                                            @NonNull Integer sortIndex
+    ) {
         Set<DialogueTipEntity> tipEntities = new HashSet<>();
         Set<DialogueTopicQuestionEntity> questionEntities = new HashSet<>();
 
@@ -342,14 +350,19 @@ public class DialogueFacade {
                 .active(input.isActive())
                 .title(input.getTitle())
                 .image(input.getImage())
+                .sortIndex(sortIndex)
                 .survey(survey)
                 .build();
+
+        // an array type here is a hack to pass the index into a lambda expression
+        int[] questionSortIndex = { 0 };
 
         input.getQuestions().forEach((questionInput) -> {
             DialogueTopicQuestionEntity questionEntity = DialogueTopicQuestionEntity.builder()
                     .title(questionInput.getTitle())
                     .topic(topicEntity)
                     .image(questionInput.getImage())
+                    .sortIndex(questionSortIndex[0]++)
                     .active(questionInput.isActive())
                     .build();
 
@@ -377,14 +390,15 @@ public class DialogueFacade {
         return dialogueTopicOutputAssembler.from(createdTopic);
     }
 
-    // TODO: break the method into smaller ones?
     private DialogueTopicOutput editTopic(@NonNull DialogueTopicEntity existingTopicEntity,
-                                          @NonNull DialogueTopicInput input) {
+                                          @NonNull DialogueTopicInput input,
+                                          @NonNull Integer sortIndex
+    ) {
         Set<DialogueTipEntity> tipEntities = new HashSet<>();
         Set<DialogueTopicQuestionEntity> questionEntities = new HashSet<>();
 
         List<DialogueTopicQuestionEntity> previousQuestions = dialogueTopicQuestionRepository
-                .findAllByTopic(existingTopicEntity);
+                .findAllByTopicOrderBySortIndexAsc(existingTopicEntity);
         List<DialogueTipEntity> previousTips = dialogueTipRepository.findAllByTopic(existingTopicEntity);
 
         List<DialogueTopicQuestionEntity> questionsToRemove = new ArrayList<>();
@@ -393,6 +407,10 @@ public class DialogueFacade {
         existingTopicEntity.setTitle(input.getTitle());
         existingTopicEntity.setActive(input.isActive());
         existingTopicEntity.setImage(input.getImage());
+        existingTopicEntity.setSortIndex(sortIndex);
+
+        // an array type here is a hack to pass the index into a lambda expression
+        int[] questionSortIndex = { 0 };
 
         input.getQuestions().forEach((questionInput) -> {
             DialogueTopicQuestionEntity questionEntity = DialogueTopicQuestionEntity.builder()
@@ -400,6 +418,7 @@ public class DialogueFacade {
                     .image(questionInput.getImage())
                     .title(questionInput.getTitle())
                     .topic(existingTopicEntity)
+                    .sortIndex(questionSortIndex[0]++)
                     .active(questionInput.isActive())
                     .build();
 

@@ -42,7 +42,11 @@ public class DialogueTopicEntity {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
+    @Column(name = "sort_index")
+    private Integer sortIndex;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortIndex ASC")
     private final Set<DialogueTopicQuestionEntity> questions = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)

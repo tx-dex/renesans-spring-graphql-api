@@ -13,6 +13,6 @@ import java.util.UUID;
 
 @Repository
 public interface DialogueTopicRepository extends JpaRepository<DialogueTopicEntity, UUID>, QuerydslPredicateExecutor<DialogueTopicEntity> {
-    List<DialogueTopicEntity> findAllBySurveyId(UUID surveyId);
+    List<DialogueTopicEntity> findAllBySurveyIdOrderBySortIndexAsc(UUID surveyId);
     int countAllBySurveyIdAndActiveTrue(UUID surveyId);
 }
