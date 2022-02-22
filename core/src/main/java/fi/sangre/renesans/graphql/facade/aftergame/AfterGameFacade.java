@@ -164,7 +164,10 @@ public class AfterGameFacade {
 
         allRespondentStatistics = surveyStatisticsService.calculateStatistics(survey);
 
-        return afterGameCatalystStatisticsAssembler.from(survey, respondentStatistics, allRespondentStatistics);
+        RespondentStateCounters respondentStateCounters = surveyDao.countRespondentsBySurvey(new SurveyId(survey.getId()));
+        Long respondentsAnswered = respondentStateCounters != null ? respondentStateCounters.getAnswered() : 0L;
+
+        return afterGameCatalystStatisticsAssembler.from(survey, respondentStatistics, allRespondentStatistics, respondentsAnswered);
     }
 
     @NonNull
@@ -186,7 +189,12 @@ public class AfterGameFacade {
             statistics = getParameterStatistics(survey, parameterId, principal);
         }
 
-        final AfterGameCatalystStatisticsOutput output = afterGameCatalystStatisticsAssembler.from(catalyst, null, statistics);
+        RespondentStateCounters respondentStateCounters = surveyDao.countRespondentsBySurvey(new SurveyId(survey.getId()));
+        Long respondentsAnswered = respondentStateCounters != null ? respondentStateCounters.getAnswered() : 0L;
+
+        final AfterGameCatalystStatisticsOutput output = afterGameCatalystStatisticsAssembler.from(
+                catalyst, null, statistics, respondentsAnswered
+        );
 
         if (output.getOpenQuestions() != null && statistics != null) {
             Try.ofSupplier(() -> {
@@ -262,11 +270,16 @@ public class AfterGameFacade {
         final List<io.vavr.concurrent.Future<AfterGameParameterStatisticsOutput>> futures = Lists.newArrayList();
         final List<ParameterChild> parameters = getParameters(survey, principal);
 
+        RespondentStateCounters respondentStateCounters = surveyDao.countRespondentsBySurvey(new SurveyId(survey.getId()));
+        Long respondentsAnswered = respondentStateCounters != null ? respondentStateCounters.getAnswered() : 0L;
+
         parameters.forEach(parameter -> {
             log.debug("Get async stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameter.getId());
             futures.add(io.vavr.concurrent.Future.of(daoExecutor, () -> {
                 final SurveyResult statistics = getParameterStatistics(survey, parameter.getId(), principal);
-                final AfterGameCatalystStatisticsOutput output = afterGameCatalystStatisticsAssembler.from(catalyst, null, statistics);
+                final AfterGameCatalystStatisticsOutput output = afterGameCatalystStatisticsAssembler.from(
+                        catalyst, null, statistics, respondentsAnswered
+                );
                 return AfterGameParameterStatisticsOutput.builder()
                         .titles(parameter.getLabel().getPhrases())
                         .value(parameter.getId().asString())

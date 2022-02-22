@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static fi.sangre.renesans.application.utils.StatisticsUtils.rateToPercent;
+import static fi.sangre.renesans.application.utils.CatalystUtils.RESPONDENTS_ANSWERED_MINIMUM;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -45,7 +46,8 @@ public class AfterGameCatalystStatisticsAssembler {
     @NonNull
     public List<AfterGameCatalystStatisticsOutput> from(@NonNull final OrganizationSurvey survey,
                                                         @Nullable final SurveyResult respondentResult,
-                                                        @Nullable final SurveyResult respondentGroupResult) {
+                                                        @Nullable final SurveyResult respondentGroupResult,
+                                                        @NonNull final Long respondentsAnswered) {
 
         final Map<CatalystId, CatalystStatistics> respondentCatalysts = Optional.ofNullable(respondentResult)
                 .map(SurveyResult::getStatistics)
@@ -58,14 +60,15 @@ public class AfterGameCatalystStatisticsAssembler {
 
         return survey.getCatalysts().stream()
                 .filter(catalystUtils::hasQuestions)
-                .map(catalyst -> from(catalyst, respondentCatalysts, respondentGroupCatalysts))
+                .map(catalyst -> from(catalyst, respondentCatalysts, respondentGroupCatalysts, respondentsAnswered))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull
     public AfterGameCatalystStatisticsOutput from(@NonNull final Catalyst catalyst,
                                                   @Nullable final SurveyResult respondentResult,
-                                                  @Nullable final SurveyResult respondentGroupResult) {
+                                                  @Nullable final SurveyResult respondentGroupResult,
+                                                  @NonNull final Long respondentsAnswered) {
         final Map<CatalystId, CatalystStatistics> respondentCatalysts = Optional.ofNullable(respondentResult)
                 .map(SurveyResult::getStatistics)
                 .map(SurveyStatistics::getCatalysts)
@@ -75,13 +78,14 @@ public class AfterGameCatalystStatisticsAssembler {
                 .map(SurveyStatistics::getCatalysts)
                 .orElse(ImmutableMap.of());
 
-        return from(catalyst, respondentCatalysts, respondentGroupCatalysts);
+        return from(catalyst, respondentCatalysts, respondentGroupCatalysts, respondentsAnswered);
     }
 
     @NonNull
     private AfterGameCatalystStatisticsOutput from(@NonNull final Catalyst catalyst,
                                                    @NonNull final Map<CatalystId, CatalystStatistics> respondentCatalysts,
-                                                   @NonNull final Map<CatalystId, CatalystStatistics> respondentGroupCatalysts) {
+                                                   @NonNull final Map<CatalystId, CatalystStatistics> respondentGroupCatalysts,
+                                                   @NonNull final Long respondentsAnswered) {
         final CatalystStatistics respondentCatalyst = respondentCatalysts.getOrDefault(catalyst.getId(), CatalystStatistics.EMPTY);
         final CatalystStatistics respondentGroupCatalyst = respondentGroupCatalysts.getOrDefault(catalyst.getId(), CatalystStatistics.EMPTY);
 
@@ -89,16 +93,21 @@ public class AfterGameCatalystStatisticsAssembler {
                 .id(catalyst.getId().getValue())
                 .titles(catalyst.getTitles().getPhrases())
                 .respondentResult(rateToPercent(respondentCatalyst.getWeighedResult()))
-                .respondentGroupResult(rateToPercent(respondentGroupCatalyst.getWeighedResult()))
+                .respondentGroupResult(respondentsAnswered >= RESPONDENTS_ANSWERED_MINIMUM
+                        ? rateToPercent(respondentGroupCatalyst.getWeighedResult())
+                        : null
+                )
                 .drivers(catalyst.getDrivers().stream()
                         .map(driver -> from(driver,
                                 respondentCatalyst.getDrivers(),
-                                respondentGroupCatalyst.getDrivers()))
+                                respondentGroupCatalyst.getDrivers(),
+                                respondentsAnswered))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
                 .questions(catalyst.getQuestions().stream()
                         .map((question -> from(question,
                                 respondentCatalyst.getQuestions(),
-                                respondentGroupCatalyst.getQuestions())))
+                                respondentGroupCatalyst.getQuestions(),
+                                respondentsAnswered)))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
                 .openQuestions(catalyst.getOpenQuestions().stream()
                         .map((question -> from(question, ImmutableMap.of()))) // TODO: provide this
@@ -120,7 +129,8 @@ public class AfterGameCatalystStatisticsAssembler {
     @NonNull
     private AfterGameDriverStatisticsOutput from(@NonNull final Driver driver,
                                                  @NonNull final Map<DriverId, DriverStatistics> respondentDrivers,
-                                                 @NonNull final Map<DriverId, DriverStatistics> respondentGroupDrivers) {
+                                                 @NonNull final Map<DriverId, DriverStatistics> respondentGroupDrivers,
+                                                 @NonNull final Long respondentsAnswered) {
         final DriverId driverId = new DriverId(driver.getId());
         final DriverStatistics respondentDriver = respondentDrivers.getOrDefault(driverId, DriverStatistics.EMPTY);
         final DriverStatistics respondentGroupDriver = respondentGroupDrivers.getOrDefault(driverId, DriverStatistics.EMPTY);
@@ -128,14 +138,18 @@ public class AfterGameCatalystStatisticsAssembler {
         return AfterGameDriverStatisticsOutput.builder()
                 .titles(driver.getTitles().getPhrases())
                 .respondentResult(rateToPercent(respondentDriver.getWeighedResult()))
-                .respondentGroupResult(rateToPercent(respondentGroupDriver.getWeighedResult()))
+                .respondentGroupResult(respondentsAnswered >= RESPONDENTS_ANSWERED_MINIMUM
+                        ? rateToPercent(respondentGroupDriver.getWeighedResult())
+                        : null
+                )
                 .build();
     }
 
     @NonNull
     private AfterGameQuestionStatisticsOutput from(@NonNull final LikertQuestion question,
                                                    @NonNull final Map<QuestionId, QuestionStatistics> respondentQuestions,
-                                                   @NonNull final Map<QuestionId, QuestionStatistics> respondentGroupQuestions) {
+                                                   @NonNull final Map<QuestionId, QuestionStatistics> respondentGroupQuestions,
+                                                   @NonNull final Long respondentsAnswered) {
         final QuestionStatistics respondentQuestion = respondentQuestions.getOrDefault(question.getId(), QuestionStatistics.EMPTY);
         final QuestionStatistics respondentGroupQuestion = respondentGroupQuestions.getOrDefault(question.getId(), QuestionStatistics.EMPTY);
 
