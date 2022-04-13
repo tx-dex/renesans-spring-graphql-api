@@ -15,7 +15,7 @@ import java.util.Collection;
 
 @Component
 public class CatalystUtils {
-    public static final Long RESPONDENTS_ANSWERED_MINIMUM = 6L;
+    public static final Long RESPONDENTS_ANSWERED_MINIMUM = 2L;
 
     public boolean hasQuestions(@NonNull final Catalyst catalyst) {
         return isNotEmpty(catalyst.getQuestions())
