@@ -227,9 +227,17 @@ public class AfterGameFacade {
             @NonNull final UserDetails principal
     ) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
-        final Set<RespondentId> respondentIds = getRespondentIdsFromStatistics(
-                getSurveyResultForAfterGame(survey, principal, parameterValue)
-        );
+        final boolean isAfterGameEnabled = SurveyState.AFTER_GAME.equals(survey.getState());
+        final Set<RespondentId> respondentIds;
+
+        if (isAfterGameEnabled) {
+            respondentIds = getRespondentIdsFromStatistics(
+                    getSurveyResultForAfterGame(survey, principal, parameterValue)
+            );
+        } else {
+            final RespondentPrincipal respondent = (RespondentPrincipal) principal;
+            respondentIds = new HashSet<>(Collections.singletonList(respondent.getId()));
+        }
 
         final SurveyId surveyId = new SurveyId(survey.getId());
         final Map<QuestionId, QuestionStatistics> questionStatisticsMap = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
