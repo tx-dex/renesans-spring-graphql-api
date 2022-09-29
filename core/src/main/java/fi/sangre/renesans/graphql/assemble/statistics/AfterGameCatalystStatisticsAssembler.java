@@ -137,9 +137,9 @@ public class AfterGameCatalystStatisticsAssembler {
 
         return AfterGameDriverStatisticsOutput.builder()
                 .titles(driver.getTitles().getPhrases())
-                .respondentResult(rateToPercent(respondentDriver.getWeighedResult()))
+                .respondentResult(rateToPercent(respondentDriver.getResult()))
                 .respondentGroupResult(respondentsAnswered >= RESPONDENTS_ANSWERED_MINIMUM
-                        ? rateToPercent(respondentGroupDriver.getWeighedResult())
+                        ? rateToPercent(respondentGroupDriver.getResult())
                         : null
                 )
                 .build();
