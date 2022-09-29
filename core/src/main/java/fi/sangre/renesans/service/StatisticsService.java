@@ -298,11 +298,6 @@ public class StatisticsService {
         List<DetailedDriverStatistics> detailedDriverStatisticsList = new ArrayList<>();
 
         for (DriverStatistics driverStatistics : driverStatisticsList) {
-            // ignore drivers that do not have any statistics yet
-            if (driverStatistics.getResult() == null) {
-                continue;
-            }
-
             Map<QuestionId, QuestionStatistics> relatedQuestionsStatistics = new HashMap<>();
             Catalyst catalyst = survey.getCatalysts().stream()
                     .filter(ct -> ct.getId().equals(driverStatistics.getCatalystId()))
