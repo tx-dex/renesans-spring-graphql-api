@@ -232,6 +232,7 @@ type SurveyCatalystStatistics {
     drivers: [SurveyDriverStatistics!]!
     questions: [SurveyQuestionStatistics!]!
     openQuestion: SurveyOpenQuestionStatistics
+    openQuestions: [SurveyOpenQuestionStatistics!]!
 }
 
 type SurveyDriverStatistics {
@@ -698,11 +699,6 @@ type Resultdetails{
     recipients: [Recipient]
 }
 
-type MultiLingualPhrase{
-    id: ID!
-    name: String
-    text:String
-}
 type Locale{
     validation_email: String
     validation_age: String
