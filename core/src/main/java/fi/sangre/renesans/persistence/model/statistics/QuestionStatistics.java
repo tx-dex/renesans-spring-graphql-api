@@ -25,5 +25,6 @@ public class QuestionStatistics {
     private Integer max;
     private Long count;
     private Double rate;
+    private Long skipped;
 
 }

@@ -415,7 +415,8 @@ type AfterGameQuestionStatistics {
     title: String!
     result: Float
     # this is calculated rate of "How important is the question to me?"
-    rate: Float
+    rate: Float,
+    skipped: Long
 }
 
 type AfterGameOpenQuestion {

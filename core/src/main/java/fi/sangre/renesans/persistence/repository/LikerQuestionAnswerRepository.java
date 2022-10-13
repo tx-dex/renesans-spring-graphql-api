@@ -23,13 +23,13 @@ public interface LikerQuestionAnswerRepository extends JpaRepository<LikertQuest
 
     long countAllByIdSurveyIdAndIdRespondentId(@NonNull UUID surveyId, @NonNull UUID respondentId);
 
-    @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.QuestionStatistics(id.questionId, AVG(response), MIN(response), MAX(response), COUNT(id.questionId), AVG(rate)) " +
+    @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.QuestionStatistics(id.questionId, AVG(response), MIN(response), MAX(response), COUNT(id.questionId), AVG(rate), SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END)) " +
             "FROM LikertQuestionAnswerEntity " +
             "WHERE id.surveyId = :surveyId AND id.respondentId in :respondentIds " +
             "GROUP BY id.questionId")
     List<QuestionStatistics> getQuestionStatisticsByQuestionAndRespondentsIn(@Param("surveyId") UUID surveyId, @Param("respondentIds") Set<UUID> respondentIds);
 
-    @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.QuestionStatistics(id.questionId, AVG(response), MIN(response), MAX(response), COUNT(id.questionId), AVG(rate)) " +
+    @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.QuestionStatistics(id.questionId, AVG(response), MIN(response), MAX(response), COUNT(id.questionId), AVG(rate), SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END)) " +
             "FROM LikertQuestionAnswerEntity " +
             "WHERE id.surveyId = :surveyId " +
             "GROUP BY id.questionId")

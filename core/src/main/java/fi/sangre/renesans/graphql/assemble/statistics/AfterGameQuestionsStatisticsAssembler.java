@@ -39,6 +39,7 @@ public class AfterGameQuestionsStatisticsAssembler {
                     .titles(question.getTitles().getPhrases())
                     .result(rateToPercent(indexToRate(questionStatistics.getAvg())))
                     .rate(questionStatistics.getRate())
+                    .skipped(questionStatistics.getSkipped())
                     .build());
         });
 
