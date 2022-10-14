@@ -416,6 +416,7 @@ type AfterGameQuestionStatistics {
     result: Float
     # this is calculated rate of "How important is the question to me?"
     rate: Float,
+    participants: Long,
     skipped: Long
 }
 
