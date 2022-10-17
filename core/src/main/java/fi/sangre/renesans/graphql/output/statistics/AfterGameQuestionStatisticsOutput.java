@@ -16,5 +16,6 @@ public class AfterGameQuestionStatisticsOutput {
     private Map<String, String> catalystTitles;
     private Double result;
     private Double rate;
+    private Long participants;
     private Long skipped;
 }
