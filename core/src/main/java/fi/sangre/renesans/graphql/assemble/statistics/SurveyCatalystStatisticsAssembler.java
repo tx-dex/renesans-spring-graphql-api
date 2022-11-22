@@ -75,7 +75,7 @@ public class SurveyCatalystStatisticsAssembler {
                         .map(driver -> from(driver, catalystStatistics.getDrivers(), languageTag))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
                 .questions(catalyst.getQuestions().stream()
-                        .map(question -> from(question, catalystStatistics.getQuestions(), languageTag))
+                        .map(question -> from(question, catalystStatistics.getQuestions(), catalyst, languageTag))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
                 .openQuestions(catalyst.getOpenQuestions().stream()
                         .map(question -> from(question, ImmutableMap.of(), languageTag)) //TODO: get answers
@@ -99,6 +99,7 @@ public class SurveyCatalystStatisticsAssembler {
     @NonNull
     private SurveyQuestionStatisticsOutput from(@NonNull final LikertQuestion question,
                                                 @NonNull final Map<QuestionId, QuestionStatistics> statistics,
+                                                @NonNull final Catalyst catalyst,
                                                 @NonNull final String languageTag) {
         final QuestionStatistics questionStatistics = statistics.getOrDefault(question.getId(), QuestionStatistics.EMPTY);
 
@@ -109,6 +110,7 @@ public class SurveyCatalystStatisticsAssembler {
                 .rate(questionStatistics.getRate())
                 .participants(questionStatistics.getCount())
                 .skipped(questionStatistics.getSkipped())
+                .catalystTitle(MultilingualUtils.getText(catalyst.getTitles().getPhrases(), languageTag))
                 .build();
     }
 
