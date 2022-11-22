@@ -251,6 +251,9 @@ type SurveyQuestionStatistics {
     title: String
     result: Float
     rate: Float
+    skipped: Int
+    participants: Int
+    catalystTitle: String
 }
 
 type SurveyOpenQuestionStatistics {

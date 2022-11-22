@@ -107,6 +107,8 @@ public class SurveyCatalystStatisticsAssembler {
                 .title(MultilingualUtils.getText(question.getTitles().getPhrases(), languageTag))
                 .result(rateToPercent(questionStatistics.getAvg()))
                 .rate(questionStatistics.getRate())
+                .participants(questionStatistics.getCount())
+                .skipped(questionStatistics.getSkipped())
                 .build();
     }
 

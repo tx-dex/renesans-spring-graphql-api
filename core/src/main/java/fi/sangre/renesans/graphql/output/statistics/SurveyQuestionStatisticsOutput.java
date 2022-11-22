@@ -16,4 +16,7 @@ public class SurveyQuestionStatisticsOutput {
     private String title;
     private Double result;
     private Double rate;
+    private Long skipped;
+    private Long participants;
+    private String catalystTitle;
 }
