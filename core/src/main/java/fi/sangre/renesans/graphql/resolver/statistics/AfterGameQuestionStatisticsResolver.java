@@ -22,4 +22,13 @@ public class AfterGameQuestionStatisticsResolver implements GraphQLResolver<Afte
     public String getTitle(@NonNull final AfterGameQuestionStatisticsOutput output, @NonNull final DataFetchingEnvironment environment) {
         return multilingualTextResolver.getRequiredText(output.getTitles(), resolverHelper.getLanguageCode(environment));
     }
+
+    @NonNull
+    public String getCatalystTitle(@NonNull final AfterGameQuestionStatisticsOutput output, @NonNull final DataFetchingEnvironment environment) {
+        if(output.getCatalystTitles() != null) {
+            return multilingualTextResolver.getRequiredText(output.getCatalystTitles(), resolverHelper.getLanguageCode(environment));
+        } else {
+            return "";
+        }
+    }
 }

@@ -416,6 +416,7 @@ type AfterGameParameterStatistics {
 
 type AfterGameQuestionStatistics {
     title: String!
+    catalystTitle: String
     result: Float
     # this is calculated rate of "How important is the question to me?"
     rate: Float,

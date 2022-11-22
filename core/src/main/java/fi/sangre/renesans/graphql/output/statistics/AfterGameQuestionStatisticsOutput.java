@@ -13,6 +13,7 @@ import java.util.Map;
 @Builder
 public class AfterGameQuestionStatisticsOutput {
     private Map<String, String> titles;
+    private Map<String, String> catalystTitles;
     private Double result;
     private Double rate;
     private Long participants;

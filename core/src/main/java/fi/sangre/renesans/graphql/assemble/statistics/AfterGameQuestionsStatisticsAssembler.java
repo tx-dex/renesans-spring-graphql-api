@@ -35,8 +35,15 @@ public class AfterGameQuestionsStatisticsAssembler {
                 throw new SurveyException("Couldn't find a question by ID");
             }
 
+            Map<String, String> catalystTitles = survey.getCatalysts().stream()
+                    .filter(c -> c.getId().equals(question.getCatalystId()))
+                    .findFirst()
+                    .map(value -> value.getTitles().getPhrases())
+                    .orElse(null);
+
             outputs.add(AfterGameQuestionStatisticsOutput.builder()
                     .titles(question.getTitles().getPhrases())
+                    .catalystTitles(catalystTitles)
                     .result(rateToPercent(indexToRate(questionStatistics.getAvg())))
                     .rate(questionStatistics.getRate())
                     .skipped(questionStatistics.getSkipped())
