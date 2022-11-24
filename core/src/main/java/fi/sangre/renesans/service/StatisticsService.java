@@ -351,6 +351,7 @@ public class StatisticsService {
                                     .max(indexToRate(e.getValue().getMax()))
                                     .min(indexToRate(e.getValue().getMin()))
                                     .count(e.getValue().getCount())
+                                    .skipped(e.getValue().getSkipped())
                             .build(),
                             (e1, e2) -> e1
                     ), Collections::unmodifiableMap));
