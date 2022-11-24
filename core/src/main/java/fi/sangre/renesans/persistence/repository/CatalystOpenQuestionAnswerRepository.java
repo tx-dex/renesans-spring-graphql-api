@@ -17,6 +17,8 @@ public interface CatalystOpenQuestionAnswerRepository extends JpaRepository<Cata
     @NonNull
     @EntityGraph("catalyst-answer-graph")
     List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndIdRespondentId(@NonNull UUID surveyId, @NonNull UUID respondentId);
+    @NonNull
+    List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyId(@NonNull UUID surveyId);
 
     long countAllByIdSurveyIdAndIdRespondentId(@NonNull UUID surveyId, @NonNull UUID respondentId);
 
