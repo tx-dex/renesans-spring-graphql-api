@@ -101,6 +101,20 @@ public class AppQueries implements GraphQLQueryResolver {
 
     @NonNull
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public Collection<AfterGameOpenQuestionStatisticsOutput> afterGameDetailedOpenQuestionsStatistics(@NonNull final UUID questionnaireId,
+                                                                                              @Nullable final UUID parameterValue,
+                                                                                              @Nullable final String languageCode,
+                                                                                              @NonNull final DataFetchingEnvironment environment) {
+        log.debug("Getting after game open questions statistics for questionnaire(id={})", questionnaireId);
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return afterGameFacade.afterGameOpenQuestionStatistics(questionnaireId,
+                parameterValue,
+                resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
     public Collection<AfterGameParameterStatisticsOutput> afterGameRespondentParametersStatistics(@NonNull final UUID questionnaireId,
                                                                                                   @NonNull final UUID catalystId,
                                                                                                   @Nullable final String languageCode,

@@ -31,6 +31,7 @@ import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembl
 import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameDetailedDriversStatisticsAssembler;
+import fi.sangre.renesans.graphql.assemble.statistics.AfterGameOpenQuestionsStatisticsAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.AfterGameQuestionsStatisticsAssembler;
 import fi.sangre.renesans.graphql.input.MailInvitationInput;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
@@ -95,6 +96,7 @@ public class AfterGameFacade {
     private final ParameterStatisticsService parameterStatisticsService;
     private final AfterGameCatalystStatisticsAssembler afterGameCatalystStatisticsAssembler;
     private final AfterGameQuestionsStatisticsAssembler afterGameQuestionsStatisticsAssembler;
+    private final AfterGameOpenQuestionsStatisticsAssembler afterGameOpenQuestionsStatisticsAssembler;
     private final AfterGameDetailedDriversStatisticsAssembler afterGameDetailedDriversStatisticsAssembler;
     private final AfterGameDiscussionAssembler afterGameDiscussionAssembler;
     private final SurveyParameterOutputAssembler surveyParameterOutputAssembler;
@@ -272,6 +274,30 @@ public class AfterGameFacade {
 
         return afterGameQuestionsStatisticsAssembler.from(
                 statisticsDao.getQuestionStatistics(surveyId, respondentIds),
+                survey
+        );
+    }
+    @NonNull
+    public Collection<AfterGameOpenQuestionStatisticsOutput> afterGameOpenQuestionStatistics(
+            @NonNull final UUID questionnaireId,
+            @Nullable final UUID parameterValue,
+            @NonNull final UserDetails principal
+    ) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final boolean isAfterGameEnabled = SurveyState.AFTER_GAME.equals(survey.getState());
+        Set<RespondentId> otherRespondentIds = new HashSet<>();
+        final RespondentId loggedRespondent = ((RespondentPrincipal) principal).getId();
+
+        if (isAfterGameEnabled) {
+            otherRespondentIds = getRespondentIdsFromStatistics(
+                    getSurveyResultForAfterGame(survey, principal, parameterValue)
+            ).stream().filter(respondentId -> !respondentId.equals(loggedRespondent)).collect(Collectors.toSet());
+        }
+
+        final SurveyId surveyId = new SurveyId(survey.getId());
+
+        return afterGameOpenQuestionsStatisticsAssembler.from(
+                statisticsDao.getOpenQuestionStatistics(surveyId, otherRespondentIds, loggedRespondent),
                 survey
         );
     }

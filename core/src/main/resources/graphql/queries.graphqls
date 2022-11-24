@@ -109,6 +109,14 @@ type Query {
         languageCode: String
     ) : [AfterGameQuestionStatistics]!
 
+    # Returns a collection of question statistics for specific questionnaire and parameter
+    afterGameDetailedOpenQuestionsStatistics(
+        questionnaireId: ID!
+        # Selected parameter value
+        parameterValue: ID
+        languageCode: String
+    ) : [AfterGameOpenQuestionStatistics]!
+
     # Gets the list of selected by reposndent parameters and its overall rate
     afterGameRespondentParametersStatistics(
         questionnaireId: ID!

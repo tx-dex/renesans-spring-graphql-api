@@ -424,6 +424,17 @@ type AfterGameQuestionStatistics {
     skipped: Long
 }
 
+type AfterGameOpenQuestionStatistics {
+    title: String!
+    catalystTitle: String
+    answers: [AfterGameOpenQuestionAnswer]
+}
+
+type AfterGameOpenQuestionAnswer {
+    answer: String!
+    isPublic: Boolean
+}
+
 type AfterGameOpenQuestion {
     title: String
     answers: [String!]!
