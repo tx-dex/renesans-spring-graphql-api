@@ -5,9 +5,11 @@ import fi.sangre.renesans.persistence.model.answer.CatalystAnswerId;
 import fi.sangre.renesans.persistence.model.answer.CatalystOpenQuestionAnswerEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,6 +33,14 @@ public interface CatalystOpenQuestionAnswerRepository extends JpaRepository<Cata
     List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndCatalystIdAndIsPublicIsTrueAndIdRespondentIdInOrderByAnswerTimeDesc(@NonNull UUID surveyId
             , @NonNull UUID catalystId
             , @NonNull Set<UUID> respondentIds);
+
+    @NonNull
+    List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndIsPublicAndIdRespondentIdInOrderByAnswerTimeDesc(@NonNull UUID surveyId
+            , @NonNull boolean isPublic
+            , @NonNull Set<UUID> respondentIds);
+
+    @NonNull
+    List<CatalystOpenQuestionAnswerEntity> findAllByIdSurveyIdAndIdRespondentIdInOrderByAnswerTimeDesc(@NonNull UUID id_surveyId, @NonNull Set<UUID> id_respondentId);
 
     void deleteAllByRespondent(@NonNull SurveyRespondent respondent);
 }

@@ -14,10 +14,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toMap;
@@ -58,7 +55,13 @@ public class StatisticsDao {
 
     @NonNull
     @Transactional(readOnly = true)
-    public List<CatalystOpenQuestionAnswerEntity> getOpenQuestionStatistics(@NonNull final SurveyId surveyId) {
-        return catalystOpenQuestionAnswerRepository.findAllByIdSurveyId(surveyId.getValue());
+    public List<CatalystOpenQuestionAnswerEntity> getOpenQuestionStatistics(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> otherRespondentIds, @NonNull final RespondentId loggedResponder) {
+        List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), Collections.singleton(loggedResponder.getValue()));
+
+        if(otherRespondentIds.size() > 0) {
+            answers.addAll(catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIsPublicAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), true, RespondentId.toUUIDs(otherRespondentIds)));
+        }
+
+        return answers;
     }
 }
