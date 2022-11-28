@@ -158,6 +158,7 @@ public class AfterGameCatalystStatisticsAssembler {
                 .result(rateToPercent(respondentGroupQuestion.getAvg()))
                 .rate(respondentGroupQuestion.getRate())
                 .participants(respondentQuestion.getCount())
+                .skipped(respondentQuestion.getSkipped())
                 .build();
     }
 }
