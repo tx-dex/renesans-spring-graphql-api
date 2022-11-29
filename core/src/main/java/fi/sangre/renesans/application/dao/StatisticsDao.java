@@ -55,9 +55,12 @@ public class StatisticsDao {
 
     @NonNull
     @Transactional(readOnly = true)
-    public List<CatalystOpenQuestionAnswerEntity> getOpenQuestionStatistics(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> otherRespondentIds, @NonNull final RespondentId loggedResponder) {
-        List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), Collections.singleton(loggedResponder.getValue()));
+    public List<CatalystOpenQuestionAnswerEntity> getOpenQuestionStatistics(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> otherRespondentIds, final RespondentId loggedResponder) {
+        List<CatalystOpenQuestionAnswerEntity> answers = new ArrayList<>();
 
+        if(loggedResponder != null) {
+            answers.addAll(catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), Collections.singleton(loggedResponder.getValue())));
+        }
         if(otherRespondentIds.size() > 0) {
             answers.addAll(catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIsPublicAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), true, RespondentId.toUUIDs(otherRespondentIds)));
         }
