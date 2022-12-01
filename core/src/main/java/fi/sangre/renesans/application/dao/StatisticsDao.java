@@ -55,14 +55,13 @@ public class StatisticsDao {
 
     @NonNull
     @Transactional(readOnly = true)
-    public List<CatalystOpenQuestionAnswerEntity> getOpenQuestionStatistics(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> otherRespondentIds, final RespondentId loggedResponder) {
-        List<CatalystOpenQuestionAnswerEntity> answers = new ArrayList<>();
+    public List<CatalystOpenQuestionAnswerEntity> getOpenQuestionStatistics(@NonNull final SurveyId surveyId, @NonNull final Set<RespondentId> respondentIds, final RespondentId loggedResponderId) {
+        List<CatalystOpenQuestionAnswerEntity> answers = new ArrayList<>(catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIsPublicAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), true, RespondentId.toUUIDs(respondentIds)));
 
-        if(loggedResponder != null) {
-            answers.addAll(catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), Collections.singleton(loggedResponder.getValue())));
-        }
-        if(otherRespondentIds.size() > 0) {
-            answers.addAll(catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIsPublicAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), true, RespondentId.toUUIDs(otherRespondentIds)));
+        //Add private answers of the logged user if they are part of the respondents
+        boolean loggedIsRespondent = respondentIds.stream().anyMatch(respondentId -> respondentId.equals(loggedResponderId));
+        if(loggedIsRespondent) {
+            answers.addAll(catalystOpenQuestionAnswerRepository.findAllByIdSurveyIdAndIsPublicAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(), false, Collections.singleton(loggedResponderId.getValue())));
         }
 
         return answers;
