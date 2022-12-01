@@ -17,6 +17,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static fi.sangre.renesans.application.utils.StatisticsUtils.indexToRate;
 import static fi.sangre.renesans.application.utils.StatisticsUtils.rateToPercent;
@@ -26,44 +27,33 @@ import static fi.sangre.renesans.application.utils.StatisticsUtils.rateToPercent
 
 @Component
 public class AfterGameOpenQuestionsStatisticsAssembler {
-    private final SurveyUtils surveyUtils;
 
     @NonNull
     public Collection<AfterGameOpenQuestionStatisticsOutput> from(@NonNull final List<CatalystOpenQuestionAnswerEntity> answers, @NonNull OrganizationSurvey survey) {
         Collection<AfterGameOpenQuestionStatisticsOutput> outputs = new ArrayList<>();
 
-        answers.forEach(answer -> {
-            AfterGameOpenQuestionAnswerOutput answerOutput = AfterGameOpenQuestionAnswerOutput.builder()
-                    .answer(answer.getResponse())
-                    .isPublic(answer.isPublic())
-                    .build();
+        survey.getCatalysts().stream().flatMap(s -> s.getOpenQuestions().stream()).forEach(openQuestion -> {
+            List<CatalystOpenQuestionAnswerEntity> questionAnswers = answers.stream().filter(answer -> answer.getId().getQuestionId().equals(openQuestion.getId().getValue())).collect(Collectors.toList());
 
-            Optional<AfterGameOpenQuestionStatisticsOutput> openQuestionStatisticsOutput = outputs.stream().filter(output -> output.getQuestionId().equals(answer.getId().getQuestionId())).findFirst();
-
-            if(openQuestionStatisticsOutput.isPresent()) {
-                openQuestionStatisticsOutput.get().addAnswer(answerOutput);
-            } else {
-                OpenQuestion question = surveyUtils.findOpenQuestion(new QuestionId(answer.getId().getQuestionId()), survey);
-
-                if (question == null) {
-                    throw new SurveyException("Couldn't find a question by ID");
-                }
-
-                Collection<AfterGameOpenQuestionAnswerOutput> answerOutputs = new ArrayList<>();
-                answerOutputs.add(answerOutput);
-
+            if(!questionAnswers.isEmpty()) {
                 Map<String, String> catalystTitles = survey.getCatalysts().stream()
-                        .filter(c -> c.getId().equals(question.getCatalystId()))
+                        .filter(c -> c.getId().equals(openQuestion.getCatalystId()))
                         .findFirst()
                         .map(value -> value.getTitles().getPhrases())
                         .orElse(null);
 
+                List<AfterGameOpenQuestionAnswerOutput> answerOutputs = questionAnswers.stream().map(answer ->
+                    AfterGameOpenQuestionAnswerOutput.builder()
+                            .answer(answer.getResponse())
+                            .isPublic(answer.isPublic())
+                            .build()).collect(Collectors.toList());
+
                 outputs.add(AfterGameOpenQuestionStatisticsOutput.builder()
-                                .questionId(answer.getId().getQuestionId())
-                                .titles(question.getTitles().getPhrases())
-                                .catalystTitles(catalystTitles)
-                                .answers(answerOutputs)
-                                .build());
+                        .questionId(openQuestion.getId().getValue())
+                        .titles(openQuestion.getTitles().getPhrases())
+                        .catalystTitles(catalystTitles)
+                        .answers(answerOutputs)
+                        .build());
             }
         });
 
