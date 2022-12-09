@@ -12,6 +12,7 @@ import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.assemble.OpenQuestionAnswerAssembler;
 import fi.sangre.renesans.graphql.assemble.OrganizationOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.OrganizationSurveyOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.statistics.SurveyCatalystStatisticsAssembler;
@@ -52,6 +53,7 @@ public class OrganizationSurveyFacade {
     private final SurveyStatisticsService surveyStatisticsService;
     private final RespondentStatisticsService respondentStatisticsService;
     private final SurveyCatalystStatisticsAssembler surveyCatalystStatisticsAssembler;
+    private final OpenQuestionAnswerAssembler openQuestionAnswerAssembler;
     private final SurveyUtils surveyUtils;
     private final MultilingualUtils multilingualUtils;
 
@@ -135,12 +137,10 @@ public class OrganizationSurveyFacade {
 
         if (output.getOpenQuestions() != null) {
             Try.ofSupplier(() -> answerDao.getAllOpenAnswers(surveyId, catalystId, statistics.getRespondentIds()))
-                    .onSuccess(answers -> {
-                        output.getOpenQuestions().forEach(question -> {
-                            final QuestionId id = new QuestionId(question.getId());
-                            question.setAnswers(answers.getOrDefault(id, ImmutableList.of()));
-                        });
-                    })
+                    .onSuccess(answers -> output.getOpenQuestions().forEach(question -> {
+                        final QuestionId id = new QuestionId(question.getId());
+                        question.setAnswers(openQuestionAnswerAssembler.from(answers.getOrDefault(id, ImmutableList.of())));
+                    }))
                     .onFailure(ex -> log.warn("Cannot get answers", ex))
                     .getOrElseThrow(ex -> new SurveyException("Cannot get answers"));
         }

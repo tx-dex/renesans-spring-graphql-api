@@ -1,6 +1,5 @@
 package fi.sangre.renesans.graphql.output.statistics;
 
-import fi.sangre.renesans.application.model.questions.QuestionId;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,10 +16,6 @@ import java.util.UUID;
 public class AfterGameOpenQuestionStatisticsOutput {
     private UUID questionId;
     private Map<String, String> titles;
-    private Collection<AfterGameOpenQuestionAnswerOutput> answers;
+    private Collection<OpenQuestionAnswerOutput> answers;
     private Map<String, String> catalystTitles;
-
-    public void addAnswer(AfterGameOpenQuestionAnswerOutput answerOutput) {
-        this.answers.add(answerOutput);
-    }
 }

@@ -1,16 +1,9 @@
 package fi.sangre.renesans.graphql.assemble.statistics;
 
 import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.questions.LikertQuestion;
-import fi.sangre.renesans.application.model.questions.OpenQuestion;
-import fi.sangre.renesans.application.model.questions.QuestionId;
-import fi.sangre.renesans.application.utils.SurveyUtils;
-import fi.sangre.renesans.exception.SurveyException;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameOpenQuestionAnswerOutput;
+import fi.sangre.renesans.graphql.assemble.OpenQuestionAnswerAssembler;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameOpenQuestionStatisticsOutput;
-import fi.sangre.renesans.graphql.output.statistics.AfterGameQuestionStatisticsOutput;
 import fi.sangre.renesans.persistence.model.answer.CatalystOpenQuestionAnswerEntity;
-import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -19,14 +12,13 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static fi.sangre.renesans.application.utils.StatisticsUtils.indexToRate;
-import static fi.sangre.renesans.application.utils.StatisticsUtils.rateToPercent;
-
 @RequiredArgsConstructor
 @Slf4j
 
 @Component
 public class AfterGameOpenQuestionsStatisticsAssembler {
+
+    final private OpenQuestionAnswerAssembler openQuestionAnswerAssembler;
 
     @NonNull
     public Collection<AfterGameOpenQuestionStatisticsOutput> from(@NonNull final List<CatalystOpenQuestionAnswerEntity> answers, @NonNull OrganizationSurvey survey) {
@@ -42,17 +34,11 @@ public class AfterGameOpenQuestionsStatisticsAssembler {
                         .map(value -> value.getTitles().getPhrases())
                         .orElse(null);
 
-                List<AfterGameOpenQuestionAnswerOutput> answerOutputs = questionAnswers.stream().map(answer ->
-                    AfterGameOpenQuestionAnswerOutput.builder()
-                            .answer(answer.getResponse())
-                            .isPublic(answer.isPublic())
-                            .build()).collect(Collectors.toList());
-
                 outputs.add(AfterGameOpenQuestionStatisticsOutput.builder()
                         .questionId(openQuestion.getId().getValue())
                         .titles(openQuestion.getTitles().getPhrases())
                         .catalystTitles(catalystTitles)
-                        .answers(answerOutputs)
+                        .answers(openQuestionAnswerAssembler.from(questionAnswers))
                         .build());
             }
         });

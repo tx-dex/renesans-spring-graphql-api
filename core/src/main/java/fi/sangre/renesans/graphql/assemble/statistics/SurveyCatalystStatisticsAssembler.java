@@ -11,10 +11,12 @@ import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
+import fi.sangre.renesans.graphql.assemble.OpenQuestionAnswerAssembler;
 import fi.sangre.renesans.graphql.output.statistics.SurveyCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyDriverStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyOpenQuestionStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyQuestionStatisticsOutput;
+import fi.sangre.renesans.persistence.model.answer.CatalystOpenQuestionAnswerEntity;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,8 +38,7 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class SurveyCatalystStatisticsAssembler {
-    private final static List<String> EMPTY = ImmutableList.of();
-    private final MultilingualUtils multilingualUtils;
+    private final OpenQuestionAnswerAssembler openQuestionAnswerAssembler;
 
     @NonNull
     public List<SurveyCatalystStatisticsOutput> from(@NonNull final OrganizationSurvey survey, @Nullable final SurveyResult statistics, @NonNull final String languageTag) {
@@ -116,12 +117,12 @@ public class SurveyCatalystStatisticsAssembler {
 
     @NonNull
     private SurveyOpenQuestionStatisticsOutput from(@NonNull final OpenQuestion question,
-                                                    @NonNull final Map<QuestionId, List<String>> answers,
+                                                    @NonNull final Map<QuestionId, List<CatalystOpenQuestionAnswerEntity>> answers,
                                                     @NonNull final String languageTag) {
         return SurveyOpenQuestionStatisticsOutput.builder()
                 .id(question.getId().getValue())
                 .title(MultilingualUtils.getText(question.getTitles().getPhrases(), languageTag))
-                .answers(answers.getOrDefault(question.getId(), EMPTY))
+                .answers(openQuestionAnswerAssembler.from(answers.getOrDefault(question.getId(), ImmutableList.of())))
                 .build();
     }
 }

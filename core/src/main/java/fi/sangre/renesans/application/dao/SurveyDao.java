@@ -79,7 +79,7 @@ public class SurveyDao {
         return organizationSurveyAssembler.from(surveyRepository.saveAndFlush(survey));
     }
 
-    @Nullable
+    @NonNull
     @Transactional(readOnly = true)
     public RespondentStateCounters countRespondentsBySurvey(@NonNull final SurveyId surveyId) {
         return surveyRespondentRepository.countSurveyRespondents(ImmutableSet.of(surveyId.getValue()))

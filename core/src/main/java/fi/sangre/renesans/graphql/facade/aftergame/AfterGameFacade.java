@@ -26,6 +26,7 @@ import fi.sangre.renesans.application.utils.ParameterUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
 import fi.sangre.renesans.exception.InternalServiceException;
 import fi.sangre.renesans.exception.SurveyException;
+import fi.sangre.renesans.graphql.assemble.OpenQuestionAnswerAssembler;
 import fi.sangre.renesans.graphql.assemble.SurveyParameterOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembler;
 import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
@@ -100,6 +101,7 @@ public class AfterGameFacade {
     private final AfterGameDetailedDriversStatisticsAssembler afterGameDetailedDriversStatisticsAssembler;
     private final AfterGameDiscussionAssembler afterGameDiscussionAssembler;
     private final SurveyParameterOutputAssembler surveyParameterOutputAssembler;
+    private final OpenQuestionAnswerAssembler openQuestionAnswerAssembler;
     private final AfterGameService afterGameService;
     private final InvitationAssembler invitationAssembler;
     private final ParameterUtils parameterUtils;
@@ -166,8 +168,7 @@ public class AfterGameFacade {
 
         allRespondentStatistics = surveyStatisticsService.calculateStatistics(survey);
 
-        RespondentStateCounters respondentStateCounters = surveyDao.countRespondentsBySurvey(new SurveyId(survey.getId()));
-        Long respondentsAnswered = respondentStateCounters != null ? respondentStateCounters.getAnswered() : 0L;
+        Long respondentsAnswered = surveyDao.countRespondentsBySurvey(new SurveyId(survey.getId())).getAnswered();
 
         return afterGameCatalystStatisticsAssembler.from(survey, respondentStatistics, allRespondentStatistics, respondentsAnswered);
     }
@@ -212,7 +213,7 @@ public class AfterGameFacade {
             })
                     .onSuccess(answers -> {
                         output.getOpenQuestions().forEach(question -> {
-                            question.setAnswers(answers.getOrDefault(question.getId(), ImmutableList.of()));
+                            question.setAnswers(openQuestionAnswerAssembler.from(answers.getOrDefault(question.getId(), ImmutableList.of())));
                         });
                     })
                     .onFailure(ex -> log.warn("Cannot get answers", ex))
@@ -565,11 +566,6 @@ public class AfterGameFacade {
                                                 @NonNull final UserDetails principal) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
         final SurveyId surveyId = new SurveyId(survey.getId());
-
-        final DiscussionQuestion question = survey.getDiscussionQuestions().stream()
-                .filter(q -> q.getId().equals(questionId))
-                .findFirst()
-                .orElseThrow(() -> new SurveyException("Cannot get discussion"));
 
         final ActorEntity actor = createActor(principal);
 

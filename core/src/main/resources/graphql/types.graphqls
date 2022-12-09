@@ -192,6 +192,11 @@ type OpenQuestion {
     title: String!
 }
 
+type OpenQuestionAnswer {
+    answer: String!
+    public: Boolean!
+}
+
 type LikertQuestion {
     id: ID!
     title: String!
@@ -258,7 +263,7 @@ type SurveyQuestionStatistics {
 
 type SurveyOpenQuestionStatistics {
     title: String
-    answers: [String!]!
+    answers: [OpenQuestionAnswer]
 }
 
 # type for the app
@@ -427,17 +432,12 @@ type AfterGameQuestionStatistics {
 type AfterGameOpenQuestionStatistics {
     title: String!
     catalystTitle: String
-    answers: [AfterGameOpenQuestionAnswer]
-}
-
-type AfterGameOpenQuestionAnswer {
-    answer: String!
-    isPublic: Boolean
+    answers: [OpenQuestionAnswer]
 }
 
 type AfterGameOpenQuestion {
     title: String
-    answers: [String!]!
+    answers: [OpenQuestionAnswer!]!
 }
 
 type DialogueTotalStatistics {

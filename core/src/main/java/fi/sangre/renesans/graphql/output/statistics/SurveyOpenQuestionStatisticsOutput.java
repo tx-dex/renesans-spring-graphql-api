@@ -15,5 +15,5 @@ import java.util.UUID;
 public class SurveyOpenQuestionStatisticsOutput {
     private UUID id;
     private String title;
-    private List<String> answers;
+    private List<OpenQuestionAnswerOutput> answers;
 }

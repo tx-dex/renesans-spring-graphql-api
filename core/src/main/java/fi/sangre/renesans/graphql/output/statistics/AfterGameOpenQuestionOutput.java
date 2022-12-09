@@ -16,5 +16,5 @@ import java.util.Map;
 public class AfterGameOpenQuestionOutput {
     private QuestionId id;
     private Map<String, String> titles;
-    private Collection<String> answers;
+    private Collection<OpenQuestionAnswerOutput> answers;
 }

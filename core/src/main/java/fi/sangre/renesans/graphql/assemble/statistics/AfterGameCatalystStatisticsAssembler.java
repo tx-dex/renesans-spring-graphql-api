@@ -11,11 +11,12 @@ import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.model.statistics.SurveyStatistics;
 import fi.sangre.renesans.application.utils.CatalystUtils;
-import fi.sangre.renesans.application.utils.MultilingualUtils;
+import fi.sangre.renesans.graphql.assemble.OpenQuestionAnswerAssembler;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameCatalystStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameDriverStatisticsOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameOpenQuestionOutput;
 import fi.sangre.renesans.graphql.output.statistics.AfterGameQuestionStatisticsOutput;
+import fi.sangre.renesans.persistence.model.answer.CatalystOpenQuestionAnswerEntity;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,10 +39,8 @@ import static java.util.stream.Collectors.toList;
 
 @Component
 public class AfterGameCatalystStatisticsAssembler {
-    private final static List<String> EMPTY = ImmutableList.of();
-
-    private final MultilingualUtils multilingualUtils;
     private final CatalystUtils catalystUtils;
+    private final OpenQuestionAnswerAssembler openQuestionAnswerAssembler;
 
     @NonNull
     public List<AfterGameCatalystStatisticsOutput> from(@NonNull final OrganizationSurvey survey,
@@ -106,8 +105,7 @@ public class AfterGameCatalystStatisticsAssembler {
                 .questions(catalyst.getQuestions().stream()
                         .map((question -> from(question,
                                 respondentCatalyst.getQuestions(),
-                                respondentGroupCatalyst.getQuestions(),
-                                respondentsAnswered)))
+                                respondentGroupCatalyst.getQuestions())))
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList)))
                 .openQuestions(catalyst.getOpenQuestions().stream()
                         .map((question -> from(question, ImmutableMap.of()))) // TODO: provide this
@@ -118,11 +116,11 @@ public class AfterGameCatalystStatisticsAssembler {
 
     @NonNull
     private AfterGameOpenQuestionOutput from(@NonNull final OpenQuestion question,
-                                             @NonNull final Map<QuestionId, List<String>> answers) {
+                                             @NonNull final Map<QuestionId, List<CatalystOpenQuestionAnswerEntity>> answers) {
         return AfterGameOpenQuestionOutput.builder()
                 .id(question.getId())
                 .titles(question.getTitles().getPhrases())
-                .answers(answers.getOrDefault(question.getId(), EMPTY))
+                .answers(openQuestionAnswerAssembler.from(answers.getOrDefault(question.getId(), ImmutableList.of())))
                 .build();
     }
 
@@ -148,9 +146,7 @@ public class AfterGameCatalystStatisticsAssembler {
     @NonNull
     private AfterGameQuestionStatisticsOutput from(@NonNull final LikertQuestion question,
                                                    @NonNull final Map<QuestionId, QuestionStatistics> respondentQuestions,
-                                                   @NonNull final Map<QuestionId, QuestionStatistics> respondentGroupQuestions,
-                                                   @NonNull final Long respondentsAnswered) {
-        final QuestionStatistics respondentQuestion = respondentQuestions.getOrDefault(question.getId(), QuestionStatistics.EMPTY);
+                                                   @NonNull final Map<QuestionId, QuestionStatistics> respondentGroupQuestions) {
         final QuestionStatistics respondentGroupQuestion = respondentGroupQuestions.getOrDefault(question.getId(), QuestionStatistics.EMPTY);
 
         return AfterGameQuestionStatisticsOutput.builder()

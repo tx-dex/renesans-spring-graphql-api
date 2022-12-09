@@ -54,7 +54,7 @@ public class AnswerDao {
 
     @NonNull
     @Transactional(readOnly = true)
-    public Map<QuestionId, List<String>> getAllOpenAnswers(@NonNull final SurveyId surveyId, @NonNull final CatalystId catalystId, @NonNull final Set<RespondentId> respondentIds) {
+    public Map<QuestionId, List<CatalystOpenQuestionAnswerEntity>> getAllOpenAnswers(@NonNull final SurveyId surveyId, @NonNull final CatalystId catalystId, @NonNull final Set<RespondentId> respondentIds) {
         if (respondentIds.size() > 0) {
             final List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository
                     .findAllByIdSurveyIdAndCatalystIdAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(),
@@ -69,7 +69,7 @@ public class AnswerDao {
 
     @NonNull
     @Transactional(readOnly = true)
-    public Map<QuestionId, List<String>> getPublicOpenAnswers(@NonNull final SurveyId surveyId, @NonNull final CatalystId catalystId, @NonNull final Set<RespondentId> respondentIds) {
+    public Map<QuestionId, List<CatalystOpenQuestionAnswerEntity>> getPublicOpenAnswers(@NonNull final SurveyId surveyId, @NonNull final CatalystId catalystId, @NonNull final Set<RespondentId> respondentIds) {
         if (respondentIds.size() > 0) {
             final List<CatalystOpenQuestionAnswerEntity> answers = catalystOpenQuestionAnswerRepository
                     .findAllByIdSurveyIdAndCatalystIdAndIsPublicIsTrueAndIdRespondentIdInOrderByAnswerTimeDesc(surveyId.getValue(),
@@ -226,14 +226,13 @@ public class AnswerDao {
     }
 
     @NonNull
-    private Map<QuestionId, List<String>> from(@NonNull final List<CatalystOpenQuestionAnswerEntity> answers) {
+    private Map<QuestionId, List<CatalystOpenQuestionAnswerEntity>> from(@NonNull final List<CatalystOpenQuestionAnswerEntity> answers) {
         return answers.stream()
                 .collect(groupingBy(v -> v.getId().getQuestionId()))
                 .entrySet().stream()
                 .collect(collectingAndThen(toMap(
                         e -> new QuestionId(e.getKey()),
                         e -> e.getValue().stream()
-                                .map(CatalystOpenQuestionAnswerEntity::getResponse)
                                 .collect(collectingAndThen(toList(), Collections::unmodifiableList))), Collections::unmodifiableMap));
     }
 

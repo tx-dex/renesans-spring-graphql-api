@@ -9,7 +9,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class AfterGameOpenQuestionAnswerOutput {
+public class OpenQuestionAnswerOutput {
     private String answer;
     private boolean isPublic;
 }
