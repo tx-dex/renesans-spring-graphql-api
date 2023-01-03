@@ -310,7 +310,7 @@ public class StatisticsService {
 
                 Double questionDriverWeight = questionWeights.get(questionStatisticsEntryKey).get(driverStatistics.getId());
 
-                if (questionDriverWeight > 0.0 && questionStatisticsObject.getAvg() != null) {
+                if (questionDriverWeight > 0.0) {
                     relatedQuestionsStatistics.put(questionStatisticsEntryKey, questionStatisticsObject);
                 }
             }
