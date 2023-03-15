@@ -49,8 +49,8 @@ public class StatisticsService {
     public final static Comparator<StatisticsQuestion> QUESTION_COMPARATOR = Comparator.comparingDouble(e -> e.getAnswer().getAvg() != null ? e.getAnswer().getAvg() : 0);
     private final static Double MEDIAN_PERCENTILE_VALUE = 50d;
     private final static Double DEFAULT_WEIGHT_VALUE = 1d;
-    private final static Double NORMALIZED_MIN_ANSWER_VALUE = 0.2;
-    private final static Double NORMALIZED_RESULT_RANGE = 0.8;
+    private final static Double NORMALIZED_MIN_ANSWER_VALUE = 0.0;
+    private final static Double NORMALIZED_RESULT_RANGE = 1.0;
     private final static String EMPTY_FIELD = "-";
 
     private final AnswerRepository answerRepository;

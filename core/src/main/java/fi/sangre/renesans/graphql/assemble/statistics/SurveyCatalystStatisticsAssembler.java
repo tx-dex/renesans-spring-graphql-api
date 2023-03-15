@@ -93,7 +93,7 @@ public class SurveyCatalystStatisticsAssembler {
         return SurveyDriverStatisticsOutput.builder()
                 .id(driver.getId().toString())
                 .title(MultilingualUtils.getText(driver.getTitles().getPhrases(), languageTag))
-                .result(rateToPercent(driverStatistics.getWeighedResult()))
+                .result(rateToPercent(driverStatistics.getResult()))
                 .build();
     }
 
