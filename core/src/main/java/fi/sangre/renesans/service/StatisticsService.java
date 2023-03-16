@@ -366,7 +366,9 @@ public class StatisticsService {
 
             final Double catalystWeight = catalystDriversStatistics.stream().mapToDouble(DriverStatistics::getWeight).sum() / allDriverWeightSum;
             final Double catalystResult = catalystDriversStatistics.stream().mapToDouble(e -> e.getResult() != null ? e.getResult() : 0d).sum() / catalystDriversStatistics.size();
-            final Double catalystWeighedResult = catalystDriversStatistics.stream().mapToDouble(e -> e.getWeighedResult() != null ? e.getWeighedResult() : 0d).sum() / catalystDriversStatistics.size();
+            double weightedDriverResultSum = catalystDriversStatistics.stream().mapToDouble(e -> e.getWeighedResult() != null ? e.getWeighedResult() : 0d).sum();
+            double driverWeightModifierSum = catalystDriversStatistics.stream().mapToDouble(e -> e.getWeightModifier()).sum();
+            final Double catalystWeighedResult = weightedDriverResultSum / driverWeightModifierSum;
 
             builder.add(CatalystStatistics.builder()
                     .id(catalyst.getId())
@@ -813,7 +815,7 @@ public class StatisticsService {
 
     private Double calculateWeighedQuestionResult(final Double questionAverage, final Double driverWeightModifier) {
         // Average is from 0 to 1, but for 0 we want to have like min 20% so we must normalize the result
-        return NORMALIZED_RESULT_RANGE * Math.pow(questionAverage, driverWeightModifier) + NORMALIZED_MIN_ANSWER_VALUE;
+        return NORMALIZED_RESULT_RANGE * questionAverage * driverWeightModifier + NORMALIZED_MIN_ANSWER_VALUE;
     }
 
     private int getUniqueCount(List list) {
