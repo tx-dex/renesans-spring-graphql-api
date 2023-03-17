@@ -91,9 +91,9 @@ public class AfterGameCatalystStatisticsAssembler {
         return AfterGameCatalystStatisticsOutput.builder()
                 .id(catalyst.getId().getValue())
                 .titles(catalyst.getTitles().getPhrases())
-                .respondentResult(rateToPercent(respondentCatalyst.getResult()))
+                .respondentResult(rateToPercent(respondentCatalyst.getWeighedResult()))
                 .respondentGroupResult(respondentsAnswered >= RESPONDENTS_ANSWERED_MINIMUM
-                        ? rateToPercent(respondentGroupCatalyst.getResult())
+                        ? rateToPercent(respondentGroupCatalyst.getWeighedResult())
                         : null
                 )
                 .drivers(catalyst.getDrivers().stream()
