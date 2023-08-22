@@ -60,7 +60,7 @@
       "text": "Take a stand"
     },
     "trademark": {
-      "text": "©2020 by Renesans"
+      "text": "©2023 by Renesans"
     },
     "privacy_policy": {
       "text": "Privacy policy"
@@ -70,13 +70,13 @@
     }
   },
   "parameters": {
-    "title": {
+    "parameters_page_title": {
       "text": "Tell us about yourself"
     },
-    "description": {
+    "parameters_page_description": {
       "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation."
     },
-    "submit": {
+    "parameters_submit_button": {
       "text": "Submit and start Engager"
     },
     "confirm_leave_text": {
@@ -87,31 +87,31 @@
     }
   },
   "privacy_policy": {
-    "title": {
+    "privacy_policy_title": {
       "text": "Privacy policy"
     },
-    "text": {
+    "privacy_policy_text": {
       "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation."
     },
     "accept": {
       "text": "Accept"
     },
-    "label": {
+    "checkbox_label": {
       "text": "I agree and consent to the"
     },
     "read_more": {
       "text": "Privacy Policy"
-    },
-    "name": {
-      "text": "Name"
     }
   },
   "catalyst": {
-    "submit": {
+    "respond_button": {
       "text": "Respond to questions"
     },
-    "theme": {
-      "text": "THEMES"
+    "theme_nav_title": {
+      "text": "Themes"
+    },
+    "mobile_theme_title": {
+      "text": "Theme"
     }
   },
   "questions": {
@@ -136,7 +136,7 @@
     "excellent": {
       "text": "Excellent"
     },
-    "submit": {
+    "submit_answers": {
       "text": "Submit"
     },
     "submit_survey": {
@@ -151,8 +151,8 @@
     "no_concern": {
       "text": "Does not concern me"
     },
-    "theme": {
-      "text": "THEME"
+    "hero_subtitle": {
+      "text": "Theme"
     }
   },
   "email_template": {
@@ -167,26 +167,35 @@
     }
   },
   "finish": {
-    "game_on": {
-      "text": "Game is on !"
+    "overview_title": {
+      "text": "Now it’s time to participate!"
     },
-    "results": {
-      "text": "Your results !"
+    "overview_description": {
+      "text": "Please find the survey result below and your own answers compared to your reference groups."
     },
-    "results_description": {
-      "text": "Label for unfinished results"
+    "overview_late_title": {
+      "text": "The survey is finished"
     },
-    "description": {
-      "text": "Now it’s time to participate! <br/> Please find the survey result below and your own answers compared to your reference groups."
+    "overview_late_description": {
+      "text": "Please ask the facilitator to grant you access to see the results."
     },
     "drivers": {
       "text": "Drivers"
+    },
+    "themes": {
+      "text": "Themes"
+    },
+    "statements": {
+      "text": "Statements"
+    },
+    "open_answers": {
+      "text": "Open answers"
     },
     "more_details": {
       "text": "More details"
     },
     "overview": {
-      "text": "Overview"
+      "text": "Summary"
     },
     "discussion": {
       "text": "Discussion"
@@ -194,40 +203,82 @@
     "overview_for": {
       "text": "Overview result for"
     },
-    "questions": {
-      "text": "Questions"
-    },
-    "discussions": {
-      "text": "Open discussions"
-    },
-    "likes": {
-      "text": "like(s)"
-    },
-    "comments": {
-      "text": "comment(s)"
-    },
     "you": {
       "text": "You"
     },
     "everyone": {
       "text": "Everyone"
     },
-    "rating": {
-      "text": "Rating"
+    "importance": {
+      "text": "Importance"
+    },
+    "statistics": {
+      "text": "Statistics"
+    },
+    "your_statistics": {
+      "text": "Your statistics"
+    },
+    "your_statistics_description": {
+      "text": "Thanks for participating, you can checkout your results below. You'll get an email notification to join the aftergame once enough users have answered the survey."
+    },
+    "VAI": {
+      "text": "Vision Attainment Indicator (VAI)"
+    },
+    "VAI_description": {
+      "text": "This indicator summarizes your view on how close we are to achieving our vision of our future organisation."
+    },
+    "see_statistics": {
+      "text": "See statistics"
+    },
+    "participants": {
+      "text": "Participants"
+    },
+    "invited": {
+      "text": "Invited"
+    },
+    "engagement_ratio": {
+      "text": "Engagement ratio"
+    },
+    "open_statement": {
+      "text": "Open statements +"
+    },
+    "close_statement": {
+      "text": "Close statements -"
+    },
+    "other_theme_results": {
+      "text": "Other theme results"
+    },
+    "no_concern": {
+      "text": "Does not concern me"
+    },
+    "hidden_from_public": {
+      "text": "Hidden from public"
+    },
+    "only_visible_to_you": {
+      "text": "Only visible to you"
     }
   },
   "discussion": {
-    "title": {
+    "discussion_title": {
       "text": "Discussion"
     },
-    "description": {
+    "discussion_description": {
       "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet"
     },
+    "answer": {
+      "text": "vastaus"
+    },
+    "Answer": {
+      "text": "Vastaus"
+    },
     "answers": {
-      "text": "answer(s)"
+      "text": "vastauksia"
+    },
+    "Answers": {
+      "text": "Vastauksia"
     },
     "view": {
-      "text": "View"
+      "text": "Katso"
     },
     "no_answers": {
       "text": "No comments yet!"
@@ -235,7 +286,7 @@
     "more_answers": {
       "text": "more answer(s)"
     },
-    "back": {
+    "back_to_discussion_link": {
       "text": "Back to discussion"
     },
     "reply": {
@@ -248,6 +299,54 @@
       "text": "Write your comment..."
     },
     "add_comment": {
+      "text": "Add a comment"
+    },
+    "delete_comment": {
+      "text": "Delete comment"
+    },
+    "active_topic": {
+      "text": "Active topic"
+    },
+    "active_topics": {
+      "text": "Active topics"
+    },
+    "closed_topic": {
+      "text": "Closed topic"
+    },
+    "view_topic": {
+      "text": "View topic"
+    },
+    "question": {
+      "text": "Question"
+    },
+    "questions": {
+      "text": "questions"
+    },
+    "Questions": {
+      "text": "Questions"
+    },
+    "tips": {
+      "text": "Tips"
+    },
+    "support": {
+      "text": "Support"
+    },
+    "supports": {
+      "text": "supports"
+    },
+    "Supports": {
+      "text": "Supports"
+    },
+    "no_comments_yet": {
+      "text": "No comments yet. Be the first to comment!"
+    },
+    "no_comments_yet_guest_user": {
+      "text": "No comments yet."
+    },
+    "submit_comment": {
+      "text": "Submit comment"
+    },
+    "comment_field_placeholder": {
       "text": "Add a comment"
     }
   }
