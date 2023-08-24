@@ -18,7 +18,6 @@ public class MultilingualText {
 
     public boolean isEmpty() {
         return phrases == null
-                || phrases.isEmpty()
                 || phrases.values().stream().allMatch(Objects::isNull);
     }
 

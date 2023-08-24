@@ -74,7 +74,7 @@ public class MultilingualUtils {
 
     @Nullable
     public Map<String, String> emptyToNull(@Nullable final MultilingualText text) {
-        if (text == null || text.isEmpty()) {
+        if (text == null) {
             return null;
         } else {
             return text.getPhrases();

@@ -130,7 +130,7 @@ public class OrganizationSurveyAssembler {
         multilingualUtils.checkLanguageTag(languageTag);
         Survey surveyEntity = surveyRepository.findById(id).orElse(null);
 
-        if (StringUtils.isNotBlank(input.getText())) {
+        if (input.getText() != null) {
             return OrganizationSurvey.builder()
                     .id(id)
                     .isDialogueActive(surveyEntity != null ? surveyEntity.getIsDialogueActive() : false)
