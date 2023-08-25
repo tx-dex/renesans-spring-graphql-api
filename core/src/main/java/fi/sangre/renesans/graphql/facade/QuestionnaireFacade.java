@@ -63,7 +63,7 @@ public class QuestionnaireFacade {
                 token = tokenService.generateQuestionnaireToken(guestId);
                 applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(guestId));
             } else {
-                throw new SurveyException("Cannot open questionnaire");
+                throw new SurveyException("Could not find respondent or guest to open a questionnaire");
             }
         } else {
             token = tokenService.generateQuestionnaireToken(respondentId);
