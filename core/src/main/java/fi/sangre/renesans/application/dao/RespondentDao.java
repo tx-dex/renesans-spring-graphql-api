@@ -133,6 +133,14 @@ public class RespondentDao {
     }
 
     @Transactional(readOnly = true)
+    public Set<RespondentId> findRespondentsNotInState(@NonNull final SurveyId surveyId, @NonNull final SurveyRespondentState state) {
+        return surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()).stream()
+                .filter(e -> e.getState() != state)
+                .map(e -> new RespondentId(e.getId()))
+                .collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+    }
+
+    @Transactional(readOnly = true)
     public Set<RespondentId> findRespondents(@NonNull final SurveyId surveyId) {
         return surveyRespondentRepository.findAllBySurveyId(surveyId.getValue()).stream()
                 .map(e -> new RespondentId(e.getId()))

@@ -3,10 +3,12 @@ package fi.sangre.renesans.graphql.facade;
 import com.google.common.collect.ImmutableList;
 import fi.sangre.renesans.application.dao.AnswerDao;
 import fi.sangre.renesans.application.dao.OrganizationDao;
+import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.questions.QuestionId;
+import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.SurveyUtils;
@@ -19,6 +21,7 @@ import fi.sangre.renesans.graphql.assemble.statistics.SurveyCatalystStatisticsAs
 import fi.sangre.renesans.graphql.input.SurveyInput;
 import fi.sangre.renesans.graphql.output.OrganizationOutput;
 import fi.sangre.renesans.graphql.output.statistics.SurveyCatalystStatisticsOutput;
+import fi.sangre.renesans.persistence.model.SurveyRespondentState;
 import fi.sangre.renesans.service.OrganizationService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
@@ -29,10 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -52,6 +52,7 @@ public class OrganizationSurveyFacade {
     private final OrganizationOutputAssembler organizationOutputAssembler;
     private final SurveyStatisticsService surveyStatisticsService;
     private final RespondentStatisticsService respondentStatisticsService;
+    private final RespondentDao respondentDao;
     private final SurveyCatalystStatisticsAssembler surveyCatalystStatisticsAssembler;
     private final OpenQuestionAnswerAssembler openQuestionAnswerAssembler;
     private final SurveyUtils surveyUtils;
@@ -108,11 +109,18 @@ public class OrganizationSurveyFacade {
     @NonNull
     public OrganizationSurvey enableAfterGame(@NonNull final SurveyId surveyId, @NonNull final Long version) {
         try {
-            return surveyDao.enableAfterGame(surveyId, version);
+            OrganizationSurvey survey = surveyDao.enableAfterGame(surveyId, version);
+            deleteRespondentsWhoHaveNotAnswered(surveyId);
+            return survey;
         } catch (final Exception ex) {
             log.warn("Cannot enable after game for survey(id={})", surveyId, ex);
             throw new SurveyException("Cannot enable after game");
         }
+    }
+
+    private void deleteRespondentsWhoHaveNotAnswered(SurveyId surveyId) {
+        Set<RespondentId> respondentIds = respondentDao.findRespondentsNotInState(surveyId, SurveyRespondentState.ANSWERED);
+        respondentIds.forEach(respondentDao::softDeleteRespondent);
     }
 
     @NonNull
