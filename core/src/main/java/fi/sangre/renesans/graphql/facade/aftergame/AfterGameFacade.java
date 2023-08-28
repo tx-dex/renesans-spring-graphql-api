@@ -445,7 +445,9 @@ public class AfterGameFacade {
 
         }
 
-        parameters.add(getGlobalEveryoneParameter(survey));
+        if (survey.getState() == SurveyState.AFTER_GAME) {
+            parameters.add(getGlobalEveryoneParameter(survey));
+        }
 
         return parameters.build();
     }
