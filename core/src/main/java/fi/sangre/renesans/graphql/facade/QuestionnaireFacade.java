@@ -9,6 +9,7 @@ import fi.sangre.renesans.application.assemble.ParameterAssembler;
 import fi.sangre.renesans.application.dao.GuestDao;
 import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.event.QuestionnaireOpenedEvent;
+import fi.sangre.renesans.application.model.IdValueObject;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.respondent.GuestId;
@@ -22,6 +23,8 @@ import fi.sangre.renesans.graphql.input.answer.LikertQuestionRateInput;
 import fi.sangre.renesans.graphql.input.answer.ParameterAnswerInput;
 import fi.sangre.renesans.graphql.output.AuthorizationOutput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
+import fi.sangre.renesans.persistence.model.SurveyGuest;
+import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import fi.sangre.renesans.persistence.model.SurveyRespondentState;
 import fi.sangre.renesans.service.AnswerService;
 import fi.sangre.renesans.service.OrganizationSurveyService;
@@ -54,21 +57,27 @@ public class QuestionnaireFacade {
 
     @NonNull
     public AuthorizationOutput openQuestionnaire(@NonNull final UUID id, @NonNull final String invitationHash) {
-        final RespondentId respondentId = respondentDao.findRespondent(new RespondentId(id), invitationHash);
-        final String token;
+        IdValueObject<UUID> respondentId = respondentDao.findRespondent(new RespondentId(id), invitationHash);
+        final SurveyRespondentState state;
 
-        if (respondentId == null) {
-            final GuestId guestId = guestDao.findGuest(new GuestId(id), invitationHash);
-            if (guestId != null) {
-                token = tokenService.generateQuestionnaireToken(guestId);
-                applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(guestId));
+        if (respondentId != null) {
+            state = respondentDao.getRespondent((RespondentId) respondentId, SurveyRespondent::getState);
+        } else {
+            respondentId = guestDao.findGuest(new GuestId(id), invitationHash);
+            if (respondentId != null) {
+                state = guestDao.getGuest((GuestId) respondentId, SurveyGuest::getState);
             } else {
                 throw new SurveyException("Could not find respondent or guest to open a questionnaire");
             }
-        } else {
-            token = tokenService.generateQuestionnaireToken(respondentId);
-            applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(respondentId));
         }
+
+        if (state == SurveyRespondentState.CANCELLED) {
+            throw new SurveyException("Respondent is cancelled");
+        }
+
+        final String token = tokenService.generateQuestionnaireToken(respondentId);
+        applicationEventPublisher.publishEvent(new QuestionnaireOpenedEvent(respondentId));
+
 
         final AuthorizationOutput output = AuthorizationOutput.builder()
                 // TODO: provide invitation hash for the user so it can refresh token

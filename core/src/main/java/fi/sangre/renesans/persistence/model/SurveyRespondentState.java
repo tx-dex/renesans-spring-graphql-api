@@ -9,5 +9,6 @@ public enum SurveyRespondentState {
     ANSWERING,
     ANSWERED,
     OPENED_AFTER_GAME,
+    CANCELLED,
     ERROR;
 }

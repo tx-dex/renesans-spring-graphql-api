@@ -2,6 +2,7 @@ package fi.sangre.renesans.service;
 
 import com.google.common.collect.ImmutableMap;
 import fi.sangre.renesans.aaa.JwtTokenService;
+import fi.sangre.renesans.application.model.IdValueObject;
 import fi.sangre.renesans.application.model.respondent.GuestId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static fi.sangre.renesans.application.utils.TokenUtils.*;
 
@@ -55,6 +57,26 @@ public class TokenService {
     public String generateQuestionnaireToken(@NonNull final GuestId id) {
         final Map<String, Object> claims = new HashMap<>(QUESTIONNAIRE_TOKEN_CLAIMS);
         claims.put(QUESTIONNAIRE_USER_TYPE, QUESTIONNAIRE_GUEST_USER);
+
+        return jwtTokenService.generateToken(id.asString()
+                , claims
+                , Duration.ofDays(7).toMillis());
+    }
+
+    @NonNull
+    public String generateQuestionnaireToken(@NonNull final IdValueObject<UUID> id) {
+        final Map<String, Object> claims = new HashMap<>(QUESTIONNAIRE_TOKEN_CLAIMS);
+        final String userType;
+
+        if(id instanceof RespondentId) {
+            userType = QUESTIONNAIRE_RESPONDENT_USER;
+        } else if (id instanceof GuestId) {
+            userType = QUESTIONNAIRE_GUEST_USER;
+        } else {
+            throw new RuntimeException("Invalid id " + id);
+        }
+
+        claims.put(QUESTIONNAIRE_USER_TYPE, userType);
 
         return jwtTokenService.generateToken(id.asString()
                 , claims

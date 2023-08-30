@@ -120,7 +120,7 @@ public class OrganizationSurveyFacade {
 
     private void deleteRespondentsWhoHaveNotAnswered(SurveyId surveyId) {
         Set<RespondentId> respondentIds = respondentDao.findRespondentsNotInState(surveyId, SurveyRespondentState.ANSWERED);
-        respondentIds.forEach(respondentDao::softDeleteRespondent);
+        respondentIds.forEach(respondentDao::disableRespondentInvitation);
     }
 
     @NonNull
