@@ -132,6 +132,7 @@ public class AfterGameCatalystStatisticsAssembler {
         final DriverId driverId = new DriverId(driver.getId());
         final DriverStatistics respondentDriver = respondentDrivers.getOrDefault(driverId, DriverStatistics.EMPTY);
         final DriverStatistics respondentGroupDriver = respondentGroupDrivers.getOrDefault(driverId, DriverStatistics.EMPTY);
+        //Double driveSum = respondentGroupDrivers.values().stream().map(DriverStatistics::getImportance).reduce(0.0, Double::sum);
 
         return AfterGameDriverStatisticsOutput.builder()
                 .titles(driver.getTitles().getPhrases())

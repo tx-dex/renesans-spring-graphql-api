@@ -24,4 +24,5 @@ public class DetailedDriverStatistics {
     private Map<QuestionId, QuestionStatistics> questionsStatistics;
     private Map<String, String> titles;
     private Double result;
+    private Double rate;
 }
