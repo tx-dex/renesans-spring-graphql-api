@@ -191,4 +191,12 @@ public class RespondentDao {
 
         return respondentAssembler.from(respondent);
     }
+
+    public void disableRespondentInvitation(@NonNull final RespondentId respondentId) {
+        final SurveyRespondent respondent = surveyRespondentRepository.findById(respondentId.getValue())
+                .orElseThrow(() -> new SurveyException("Respondent not found"));
+
+        respondent.setState(SurveyRespondentState.CANCELLED);
+        surveyRespondentRepository.save(respondent);
+    }
 }
