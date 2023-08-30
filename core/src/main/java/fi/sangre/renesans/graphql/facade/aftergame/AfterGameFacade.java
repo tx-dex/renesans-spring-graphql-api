@@ -436,16 +436,16 @@ public class AfterGameFacade {
             questionnaire = null;
         }
 
-        if (questionnaire != null) {
+        if (survey.getState() == SurveyState.AFTER_GAME) {
+            if (questionnaire != null) {
                 parameters.addAll(questionnaire.getParameters().stream()
                         .filter(QuestionnaireParameterOutput::isAnswered)
                         .map(parameter -> parameterUtils.findChildren(ParameterId.fromUUID(parameter.getSelectedAnswer()), surveyUtils.findParameter(parameter.getValue(), survey)))
                         .flatMap(Collection::stream)
                         .collect(toList()));
 
-        }
+            }
 
-        if (survey.getState() == SurveyState.AFTER_GAME) {
             parameters.add(getGlobalEveryoneParameter(survey));
         }
 
