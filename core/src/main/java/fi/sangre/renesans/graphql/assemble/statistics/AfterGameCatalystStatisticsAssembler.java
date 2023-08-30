@@ -87,14 +87,20 @@ public class AfterGameCatalystStatisticsAssembler {
                                                    @NonNull final Long respondentsAnswered) {
         final CatalystStatistics respondentCatalyst = respondentCatalysts.getOrDefault(catalyst.getId(), CatalystStatistics.EMPTY);
         final CatalystStatistics respondentGroupCatalyst = respondentGroupCatalysts.getOrDefault(catalyst.getId(), CatalystStatistics.EMPTY);
+        boolean everyoneSkipped =
+                !respondentCatalyst.getQuestions().isEmpty() &&
+                respondentCatalyst.getQuestions().values().stream().allMatch(questionStatistics -> questionStatistics.getSkipped() == questionStatistics.getCount());
+        boolean groupEveryoneSkipped =
+                !respondentGroupCatalyst.getQuestions().isEmpty() &&
+                respondentGroupCatalyst.getQuestions().values().stream().allMatch(questionStatistics -> questionStatistics.getSkipped() == questionStatistics.getCount());
 
         return AfterGameCatalystStatisticsOutput.builder()
                 .id(catalyst.getId().getValue())
                 .titles(catalyst.getTitles().getPhrases())
-                .respondentResult((respondentCatalyst.getWeighedResult() != null && respondentCatalyst.getWeighedResult() > 0)
+                .respondentResult(!everyoneSkipped
                         ? rateToPercent(respondentCatalyst.getWeighedResult())
                         : null)
-                .respondentGroupResult((respondentsAnswered >= RESPONDENTS_ANSWERED_MINIMUM && respondentGroupCatalyst.getWeighedResult() != null && respondentGroupCatalyst.getWeighedResult() > 0)
+                .respondentGroupResult((respondentsAnswered >= RESPONDENTS_ANSWERED_MINIMUM && !groupEveryoneSkipped)
                         ? rateToPercent(respondentGroupCatalyst.getWeighedResult())
                         : null
                 )
