@@ -219,6 +219,7 @@ public class StatisticsService {
         final Map<DriverId, Double> sumOfQuestionsWeightsPerDriver = Maps.newHashMap();
         final Map<DriverId, Double> sumOfQuestionsResultsPerDriver = Maps.newHashMap();
         final Map<DriverId, Double> sumOfQuestionsWeighedResultsPerDriver = Maps.newHashMap();
+        final Map<DriverId, Double> sumOfQuestionsRatesPerDriver = Maps.newHashMap();
 
         final Map<QuestionId, Map<DriverId, Double>> questionWeights = surveyUtils.getAllQuestions(survey).stream()
                 .collect(collectingAndThen(toMap(
@@ -241,6 +242,7 @@ public class StatisticsService {
                 sumOfQuestionsWeightsPerDriver.put(driverId, 0d);
                 sumOfQuestionsResultsPerDriver.put(driverId, 0d);
                 sumOfQuestionsWeighedResultsPerDriver.put(driverId, 0d);
+                sumOfQuestionsRatesPerDriver.put(driverId, 0d);
             }));
 
         applyDriverWeightModifier(driversStatistics, driverWeights);
@@ -248,6 +250,7 @@ public class StatisticsService {
         // Sums all question results and weights per driver to calculate weighted average after all
         for (final Map.Entry<QuestionId, QuestionStatistics> entry : questionStatistics.entrySet()) {
             final Double questionAverage = entry.getValue().getAvg();
+            final Double questionRate = entry.getValue().getRate();
 
             // do not count skipped question, null is set for questions that does not concern respondents.
             // This is only case when it can be null, as we always calculate stats for respondents that finished questionnaire
@@ -257,11 +260,12 @@ public class StatisticsService {
                 weights.forEach((driverId, questionWeight) -> {
                     if (questionWeight > 0) { //  weight = 0 can be skipped as it does not change results
                         final Double driverWeightModifier = driversStatistics.get(driverId).getWeightModifier();
-                        final Double questionRate = questionAverage / MAX_ANSWER_VALUE;
+                        final Double questionResult = questionAverage / MAX_ANSWER_VALUE;
 
                         sumOfQuestionsWeightsPerDriver.computeIfPresent(driverId, (k, v) -> v + questionWeight);
-                        sumOfQuestionsResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * questionRate));
-                        sumOfQuestionsWeighedResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * calculateWeighedQuestionResult(questionRate, driverWeightModifier)));
+                        sumOfQuestionsResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * questionResult));
+                        sumOfQuestionsWeighedResultsPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * calculateWeighedQuestionResult(questionResult, driverWeightModifier)));
+                        sumOfQuestionsRatesPerDriver.computeIfPresent(driverId, (k, v) -> v + (questionWeight * questionRate));
                     }
                 });
             }
@@ -272,10 +276,12 @@ public class StatisticsService {
             final Double driverQuestionWeightsSum = sumOfQuestionsWeightsPerDriver.get(entry.getKey());
             final Double driverQuestionResultsSum = sumOfQuestionsResultsPerDriver.get(entry.getKey());
             final Double driverQuestionWeighedResultSum = sumOfQuestionsWeighedResultsPerDriver.get(entry.getKey());
+            final Double driverQuestionRatesSum = sumOfQuestionsRatesPerDriver.get(entry.getKey());
 
             if (driverQuestionWeightsSum > 0d) {
                 entry.getValue().setResult(driverQuestionResultsSum / driverQuestionWeightsSum);
                 entry.getValue().setWeighedResult(driverQuestionWeighedResultSum / driverQuestionWeightsSum);
+                entry.getValue().setRate(driverQuestionRatesSum / driverQuestionWeightsSum);
             }
         }
 

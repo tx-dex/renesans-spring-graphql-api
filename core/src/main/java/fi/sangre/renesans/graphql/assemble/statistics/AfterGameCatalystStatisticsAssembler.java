@@ -141,6 +141,7 @@ public class AfterGameCatalystStatisticsAssembler {
                         ? rateToPercent(respondentGroupDriver.getResult())
                         : null
                 )
+                .rate(respondentGroupDriver.getRate())
                 .build();
     }
 
