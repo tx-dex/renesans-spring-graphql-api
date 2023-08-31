@@ -411,6 +411,7 @@ type AfterGameDriverStatistics {
     # result for "Everyone" or selected parameter group on details page
     # may be null if group is not selected, or it's just "You"
     respondentGroupResult: Float
+    rate: Float
 }
 
 type AfterGameParameterStatistics {

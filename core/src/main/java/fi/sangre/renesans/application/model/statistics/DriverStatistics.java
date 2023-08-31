@@ -24,4 +24,5 @@ public class DriverStatistics {
     private Double weight;
     private Double weightModifier;
     private Double importance;
+    private Double rate;
 }

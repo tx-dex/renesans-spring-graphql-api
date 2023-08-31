@@ -17,4 +17,5 @@ public class AfterGameDriverStatisticsOutput {
     private Map<String, String> titles;
     private Double respondentResult;
     private Double respondentGroupResult;
+    private Double rate;
 }
