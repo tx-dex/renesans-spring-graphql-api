@@ -287,7 +287,13 @@ public class AfterGameFacade {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
         final boolean isAfterGameEnabled = SurveyState.AFTER_GAME.equals(survey.getState());
         final Set<RespondentId> respondentIds;
-        RespondentId loggedRespondent = ((RespondentPrincipal) principal).getId();
+        final RespondentId loggedRespondent;
+
+        if(principal instanceof RespondentPrincipal) {
+            loggedRespondent = ((RespondentPrincipal) principal).getId();
+        } else {
+            loggedRespondent = null;
+        }
 
         if (isAfterGameEnabled) {
             respondentIds = getRespondentIdsFromStatistics(getSurveyResultForAfterGame(survey, principal, parameterValue));
