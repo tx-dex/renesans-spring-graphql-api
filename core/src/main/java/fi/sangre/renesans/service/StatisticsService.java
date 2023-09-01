@@ -324,6 +324,7 @@ public class StatisticsService {
             DetailedDriverStatistics detailedDriverStatistics = DetailedDriverStatistics.builder()
                     .titles(driverStatistics.getTitles())
                     .result(driverStatistics.getResult())
+                    .rate(driverStatistics.getRate())
                     .catalyst(catalyst)
                     .questionsStatistics(relatedQuestionsStatistics)
                     .build();

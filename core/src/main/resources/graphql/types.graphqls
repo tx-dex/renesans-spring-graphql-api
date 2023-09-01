@@ -523,6 +523,7 @@ type AfterGameDetailedDriverStatistics {
     questionsStatistics: [AfterGameQuestionStatistics!]!
     title: String
     result: Float
+    rate: Float
 }
 
 type AfterGameOverviewVisionAttainmentIndicatorOutput {
