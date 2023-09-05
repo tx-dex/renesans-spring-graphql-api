@@ -25,7 +25,7 @@ public interface SurveyRespondentRepository extends JpaRepository<SurveyResponde
 
     @Query("SELECT p " +
             "FROM SurveyRespondent p " +
-            "WHERE NOT p.state = 'CANCELLED'")
+            "WHERE p.surveyId = :surveyId AND NOT p.state = 'CANCELLED'")
     List<SurveyRespondent> findAllActiveBySurveyId(@NonNull UUID surveyId);
 
     @Query("SELECT new fi.sangre.renesans.persistence.model.RespondentStateCounters(p.surveyId, " +
