@@ -66,7 +66,7 @@ public class AfterGameService {
     private Set<IdValueObject<UUID>> register(@NonNull final SurveyId surveyId,@NonNull final Invitation invitation) {
         final String languageTag = translationService.getLanguageTagOrDefault(invitation.getLanguage());
 
-        final Map<RespondentId, String> existing = respondentDao.findRespondents(surveyId, SurveyRespondent::getEmail);
+        final Map<RespondentId, String> existing = respondentDao.findActiveRespondents(surveyId, SurveyRespondent::getEmail);
 
         final Set<IdValueObject<UUID>> toInvite = new HashSet<>();
         if (invitation.getInviteAll()) {

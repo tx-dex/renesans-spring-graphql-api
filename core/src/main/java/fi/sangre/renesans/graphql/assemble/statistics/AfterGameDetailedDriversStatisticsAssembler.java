@@ -32,6 +32,7 @@ public class AfterGameDetailedDriversStatisticsAssembler {
                     .titles(detailedDriverStatistics.getTitles())
                     .catalyst(detailedDriverStatistics.getCatalyst())
                     .result(rateToPercent(detailedDriverStatistics.getResult()))
+                    .rate(detailedDriverStatistics.getRate())
                     .questionsStatistics(
                             afterGameQuestionsStatisticsAssembler.from(
                                     detailedDriverStatistics.getQuestionsStatistics(),

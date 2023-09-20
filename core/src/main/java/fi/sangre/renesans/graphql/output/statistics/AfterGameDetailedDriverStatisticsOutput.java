@@ -22,4 +22,5 @@ public class AfterGameDetailedDriverStatisticsOutput {
     private CatalystOutput catalyst;
     private Collection<AfterGameQuestionStatisticsOutput> questionsStatistics;
     private Double result;
+    private Double rate;
 }

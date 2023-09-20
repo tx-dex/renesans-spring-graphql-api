@@ -154,6 +154,13 @@ public class RespondentDao {
                 .collect(collectingAndThen(toMap(v -> new RespondentId(v.getId()), mapper), Collections::unmodifiableMap));
     }
 
+    @Transactional(readOnly = true)
+    public <T> Map<RespondentId, T> findActiveRespondents(@NonNull final SurveyId surveyId,
+                                                    @NonNull final Function<SurveyRespondent, T> mapper) {
+        return surveyRespondentRepository.findAllActiveBySurveyId(surveyId.getValue()).stream()
+                .collect(collectingAndThen(toMap(v -> new RespondentId(v.getId()), mapper), Collections::unmodifiableMap));
+    }
+
     private SurveyRespondent getRespondentOrThrow(@NonNull final RespondentId id) {
         return surveyRespondentRepository.findById(id.getValue())
                 .orElseThrow(() -> new SurveyException("Respondent not found"));

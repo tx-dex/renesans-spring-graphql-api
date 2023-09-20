@@ -1,5 +1,6 @@
 package fi.sangre.renesans.persistence.repository;
 
+import fi.sangre.renesans.application.model.SurveyState;
 import fi.sangre.renesans.persistence.model.RespondentStateCounters;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,6 +22,11 @@ public interface SurveyRespondentRepository extends JpaRepository<SurveyResponde
 
     @NonNull
     Optional<SurveyRespondent> findByIdAndInvitationHash(@NonNull UUID id, @NonNull String invitationHash);
+
+    @Query("SELECT p " +
+            "FROM SurveyRespondent p " +
+            "WHERE p.surveyId = :surveyId AND NOT p.state = 'CANCELLED'")
+    List<SurveyRespondent> findAllActiveBySurveyId(@NonNull UUID surveyId);
 
     @Query("SELECT new fi.sangre.renesans.persistence.model.RespondentStateCounters(p.surveyId, " +
             "sum(CASE WHEN p.state = 'OPENED' THEN 1 ELSE 0 END), " +
