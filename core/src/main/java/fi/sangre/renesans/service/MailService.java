@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sangre.mail.dto.MailDto;
 import com.sangre.mail.dto.NameEmailPairDto;
-import com.sangre.mail.dto.attachements.Base64AttachmentDto;
 import fi.sangre.renesans.application.client.FeignMailClient;
 import fi.sangre.renesans.application.event.ActivateUserEvent;
 import fi.sangre.renesans.application.event.RequestUserPasswordResetEvent;
@@ -103,8 +102,7 @@ public class MailService {
                           @NonNull final String htmlBody,
                           @NonNull final String textBody,
                           @NonNull final Map<String, String> tags,
-                          @NonNull final Pair<String, String> replyTo,
-                          @NonNull final Base64AttachmentDto logo) {
+                          @NonNull final Pair<String, String> replyTo) {
         log.trace("Sending mail with tags: {} to: {}", tags, recipient);
 
         final String senderName = replyTo.getLeft() + " | Engager";
@@ -120,7 +118,6 @@ public class MailService {
                         .name(senderName)
                         .email(replyTo.getRight())
                         .build())
-                .attachments(ImmutableList.of(logo))
                 .tags(tags)
                 .build();
 
