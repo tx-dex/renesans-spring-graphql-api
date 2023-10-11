@@ -29,7 +29,7 @@ jobs:
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.event.ref }}-${{ github.run_id }}
+          name: ${{ github.event.workflow }}-${{ github.run_id }}
           path: core/build/libs/*.jar
 
   publish_image:
