@@ -1,0 +1,68 @@
+name: Build and Publish
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  tags:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+
+      - name: Build
+        run: |
+          ./gradlew -p core clean test bootJar --stacktrace
+        working-directory: ${{ github.workspace }}/your_project_directory
+
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ github.ref }}-${{ github.run_id }}
+          path: your_project_directory/core/build/libs/*.jar
+
+  publish_image:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push tagged image
+        run: |
+          docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${{ github.ref }} .
+          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${{ github.ref }}
+        env:
+          DOCKER_BUILDKIT: 1
+
+      - name: Build and push latest master image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:latest .
+          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:latest
+        env:
+          DOCKER_BUILDKIT: 1
+
+      - name: Build and push latest branch image
+        if: startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/master'
+        run: |
+          BRANCH_REGISTRY=${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}/$(echo ${{ github.ref }} | awk '{print tolower($0)}' | sed  -r 's/^(feature|bug|task)\///g')
+          docker build --pull --rm -t "$BRANCH_REGISTRY:${{ github.run_id }}" .
+          docker push "$BRANCH_REGISTRY:${{ github.run_id }}"
+          docker tag "$BRANCH_REGISTRY:${{ github.run_id }}" "$BRANCH_REGISTRY:latest"
+          docker push "$BRANCH_REGISTRY:latest"
+        env:
+          DOCKER_BUILDKIT: 1
