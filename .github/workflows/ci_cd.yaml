@@ -25,13 +25,12 @@ jobs:
       - name: Build
         run: |
           ./gradlew -p core clean test bootJar --stacktrace
-        working-directory: ${{ github.workspace }}/renesans-spring-graphql-api
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ${{ github.ref }}-${{ github.run_id }}
-          path: renesans-spring-graphql-api/core/build/libs/*.jar
+          path: core/build/libs/*.jar
 
   publish_image:
     needs: build
