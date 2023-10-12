@@ -45,7 +45,7 @@ jobs:
         run: |
           docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${BRANCH_NAME} .
           docker push ${{ secrets.DOCKER_REGISTRY }}/renesans-spring-graphql-api:${BRANCH_NAME}
-        working-directory: ${{ github.workspace }}/core
+        working-directory: ./core
 
         env:
           DOCKER_BUILDKIT: 1
@@ -55,7 +55,7 @@ jobs:
         run: |
           docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/renesans-spring-graphql-api:latest .
           docker push ${{ secrets.DOCKER_REGISTRY }}/renesans-spring-graphql-api:latest
-        working-directory: ${{ github.workspace }}/core
+        working-directory: ./core
         env:
           DOCKER_BUILDKIT: 1
 
@@ -67,5 +67,7 @@ jobs:
           docker push "$BRANCH_REGISTRY:${{ github.run_id }}"
           docker tag "$BRANCH_REGISTRY:${{ github.run_id }}" "$BRANCH_REGISTRY:latest"
           docker push "$BRANCH_REGISTRY:latest"
+        working-directory: ./core
         env:
           DOCKER_BUILDKIT: 1
+        
