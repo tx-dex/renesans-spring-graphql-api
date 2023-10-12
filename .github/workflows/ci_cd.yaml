@@ -42,8 +42,8 @@ jobs:
 
       - name: Build and push tagged image
         run: |
-          docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${ GITHUB_REF##*/ } .
-          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${ GITHUB_REF##*/ }
+          docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${GITHUB_REF##*/} .
+          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${GITHUB_REF##*/}
         env:
           DOCKER_BUILDKIT: 1
 
