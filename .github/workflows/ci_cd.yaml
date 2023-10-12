@@ -44,7 +44,7 @@ jobs:
       - name: Build and push tagged image
         run: |
           docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${BRANCH_NAME} .
-          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${BRANCH_NAME}
+          docker push ${{ secrets.DOCKER_REGISTRY }}/$(basename ${{ github.repository }}):${BRANCH_NAME}
         env:
           DOCKER_BUILDKIT: 1
 
@@ -52,7 +52,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:latest .
-          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:latest
+          docker push ${{ secrets.DOCKER_REGISTRY }}/$(basename ${{ github.repository }}):latest
         env:
           DOCKER_BUILDKIT: 1
 
