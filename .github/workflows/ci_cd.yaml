@@ -33,11 +33,11 @@ jobs:
           name: ${{ github.event.workflow }}-${{ github.run_id }}
           path: core/build/libs/*.jar
 
-  publish_image:
-    needs: build
-    runs-on: ubuntu-latest
+  # publish_image:
+  #   needs: build
+  #   runs-on: ubuntu-latest
 
-    steps:
+  #   steps:
       - name: Login to Docker Hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
