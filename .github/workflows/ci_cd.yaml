@@ -43,7 +43,7 @@ jobs:
 
       - name: Build and push tagged image
         run: |
-          docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}:${BRANCH_NAME} .
+          docker build --pull --rm -t ${{ secrets.DOCKER_REGISTRY }}/renesans-spring-graphql-api:${BRANCH_NAME} .
           docker push ${{ secrets.DOCKER_REGISTRY }}/renesans-spring-graphql-api:${BRANCH_NAME}
         working-directory: core
 
@@ -62,7 +62,7 @@ jobs:
       - name: Build and push latest branch image
         if: startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/master'
         run: |
-          BRANCH_REGISTRY=${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}/$(echo ${{ github.ref }} | awk '{print tolower($0)}' | sed  -r 's/^(feature|bug|task)\///g')
+          BRANCH_REGISTRY=${{ secrets.DOCKER_REGISTRY }}/renesans-spring-graphql-api/$(echo ${{ github.ref }} | awk '{print tolower($0)}' | sed  -r 's/^(feature|bug|task)\///g')
           docker build --pull --rm -t "$BRANCH_REGISTRY:${{ github.run_id }}" .
           docker push "$BRANCH_REGISTRY:${{ github.run_id }}"
           docker tag "$BRANCH_REGISTRY:${{ github.run_id }}" "$BRANCH_REGISTRY:latest"
