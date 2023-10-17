@@ -32,6 +32,26 @@
     "contribute_btn": {
       "text": "Ready to contribute"
     },
+    "video_embed_title_1": {
+      "text": "Video 1 otsikko"
+    },
+    "video_embed_url_1": {
+      "text": "Put Youtube video url here",
+      "description": "Youtube video url must be in format: https://www.youtube.com/embed/tpiyEe_CqB4 where the last part is the video id"
+    },
+    "video_embed_title_2": {
+      "text": "Video 2 otsikko"
+    },
+    "video_embed_url_2": {
+      "text": "Put Youtube video url here",
+      "description": "Youtube video url must be in format: https://www.youtube.com/embed/tpiyEe_CqB4 where the last part is the video id"
+    },
+    "download_video_instruction": {
+      "text": "If the video doesn't play on your browser, you can download it."
+    },
+    "download_video": {
+      "text": "Lataa video"
+    },
     "rules_welcome": {
       "text": "General rules of engager"
     },
@@ -197,17 +217,19 @@
     "overview": {
       "text": "Summary"
     },
+    "you": {
+      "text": "Sinä",
+      "description": "DON'T EDIT"
+    },
+    "everyone": {
+      "text": "Kaikki",
+      "description": "DON'T EDIT"
+    },
     "discussion": {
       "text": "Discussion"
     },
     "overview_for": {
       "text": "Overview result for"
-    },
-    "you": {
-      "text": "You"
-    },
-    "everyone": {
-      "text": "Everyone"
     },
     "importance": {
       "text": "Importance"
@@ -256,6 +278,18 @@
     },
     "only_visible_to_you": {
       "text": "Only visible to you"
+    },
+    "result_descending": {
+      "text": "Result descending"
+    },
+    "result_ascending": {
+      "text": "Result ascending"
+    },
+    "importance_descending": {
+      "text": "Importance descending"
+    },
+    "importance_ascending": {
+      "text": "Importance ascending"
     }
   },
   "discussion": {
