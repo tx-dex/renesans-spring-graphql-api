@@ -3,7 +3,6 @@ package fi.sangre.renesans.service;
 import com.google.common.collect.ImmutableMap;
 import com.sangre.mail.dto.MailInfoDto;
 import com.sangre.mail.dto.MailStatus;
-import com.sangre.mail.dto.attachements.Base64AttachmentDto;
 import fi.sangre.renesans.application.client.FeignMailClient;
 import fi.sangre.renesans.application.dao.RespondentDao;
 import fi.sangre.renesans.application.dao.SurveyDao;
@@ -50,14 +49,12 @@ import static java.util.stream.Collectors.toMap;
 
 @Service
 public class InvitationService {
-    private static final Base64AttachmentDto LOGO = new Base64AttachmentDto("logo", "image/png", "logo.png", resourceToString("/templates/email-logo.base64"));
     private static final String HTML_BASE_TEMPLATE = resourceToString("/templates/email-template.html");
 
     private static final String MAIL_TEMPLATE_TEXT_GROUP = "email_template";
     private static final String HEADING_TITLE_KEY = "heading_title";
     private static final String HEADING_PARAGRAPH_KEY = "heading_paragraph";
     private static final String INVITATION_BUTTON_KEY = "invitation_button";
-
 
     private static final String MAIL_TYPE_TAG = "email-type";
     private static final String MAIL_TYPE_QUESTIONNAIRE_INVITATION_VALUE = "survey-invitation";
@@ -159,8 +156,7 @@ public class InvitationService {
                 ImmutableMap.of(MAIL_TYPE_TAG, MAIL_TYPE_QUESTIONNAIRE_INVITATION_VALUE,
                         SURVEY_ID_TAG, surveyId.asString(),
                         RESPONDENT_ID_TAG, respondentId.asString()),
-                replyTo,
-                LOGO);
+                replyTo);
     }
 
     private void sendAfterGameInvitation(@NonNull final IdValueObject<? extends UUID> id,
@@ -208,8 +204,7 @@ public class InvitationService {
                 composeHtmlBody(invitationLink, body, survey, languageTag),
                 null,
                 tags,
-                replyTo,
-                LOGO);
+                replyTo);
     }
 
     private void sendAfterGameDiscussionInvitation(@NonNull final IdValueObject<? extends UUID> id,
@@ -260,8 +255,7 @@ public class InvitationService {
                 composeHtmlBody(invitationLink, body, survey, languageTag),
                 null,
                 tags,
-                replyTo,
-                LOGO);
+                replyTo);
     }
 
     @NonNull
