@@ -186,7 +186,7 @@
       "text": "Yes, I’m in!"
     }
   },
-  "finish": {
+  "dashboard": {
     "overview_title": {
       "text": "Now it’s time to participate!"
     },
@@ -198,6 +198,56 @@
     },
     "overview_late_description": {
       "text": "Please ask the facilitator to grant you access to see the results."
+    },
+    "participants": {
+      "text": "Participants"
+    },
+    "invited": {
+      "text": "Invited"
+    },
+    "engagement_ratio": {
+      "text": "Engagement ratio"
+    },
+    "dashboard_section_vai_title": {
+      "text": "KPI: we as strategy-driven networked team"
+    },
+    "dashboard_section_vai_description": {
+      "text": "This indicator summarizes on how close we are to achieving our vision of strategy-driven teams with the capability to operate successfully in a networked business context"
+    },
+    "dashboard_section_themes_title": {
+      "text": "Our 5 building blocks and their current state"
+    },
+    "dashboard_section_themes_description": {
+      "text": "For each building block, we have identified three development drivers, this is their current state."
+    },
+    "dashboard_section_drivers_title": {
+      "text": "Our development drivers and their current state"
+    },
+    "dashboard_section_drivers_description": {
+      "text": "For each building block, we have identified three development drivers, this is their current state."
+    },
+    "dashboard_section_statements_title": {
+      "text": "The statements and their current state"
+    },
+    "dashboard_section_statements_description": {
+      "text": "For each building block, we have identified a number of statements describing the target state of how it should be visible in practice. These are the top 5 and bottom 5 rated statements."
+    },
+    "top_5_statements_by_result": {
+      "text": "TOP 5 statements by current state (‘closest to our vision’)"
+    },
+    "bottom_5_statements_by_result": {
+      "text": "BOTTOM 5 statements by current state (‘furthest away from our vision’)"
+    },
+    "top_5_statements_by_importance": {
+      "text": "TOP 5 statements by importance (‘most important’)"
+    },
+    "bottom_5_statements_by_importance": {
+      "text": "BOTTOM 5 statements by importance (‘least important)"
+    }
+  },
+  "finish": {
+    "edit_answers_button": {
+      "text": "Edit answers"
     },
     "drivers": {
       "text": "Drivers"
@@ -218,11 +268,11 @@
       "text": "Summary"
     },
     "you": {
-      "text": "Sinä",
+      "text": "You",
       "description": "DON'T EDIT"
     },
     "everyone": {
-      "text": "Kaikki",
+      "text": "Everyone",
       "description": "DON'T EDIT"
     },
     "discussion": {
@@ -243,23 +293,8 @@
     "your_statistics_description": {
       "text": "Thanks for participating, you can checkout your results below. You'll get an email notification to join the aftergame once enough users have answered the survey."
     },
-    "VAI": {
-      "text": "Vision Attainment Indicator (VAI)"
-    },
-    "VAI_description": {
-      "text": "This indicator summarizes your view on how close we are to achieving our vision of our future organisation."
-    },
     "see_statistics": {
       "text": "See statistics"
-    },
-    "participants": {
-      "text": "Participants"
-    },
-    "invited": {
-      "text": "Invited"
-    },
-    "engagement_ratio": {
-      "text": "Engagement ratio"
     },
     "open_statement": {
       "text": "Open statements +"
