@@ -85,7 +85,7 @@ public class SurveyRespondentsFacade {
                         .collect(collectingAndThen(toList(), Collections::unmodifiableList));
             }
         } catch (final ExecutionException | InterruptedException ex) {
-            log.warn("Cannot get respondents for survey(id={})", surveyId);
+            log.error("Cannot get respondents for survey " + surveyId, ex);
             throw new InternalServiceException("Cannot get respondent list");
         }
     }
