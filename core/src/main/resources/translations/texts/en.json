@@ -25,6 +25,10 @@
       "text": "Start Engager",
       "description": "Button text (enter survey)"
     },
+    "scroll_down_button_text": {
+      "text": "Scroll down for more info",
+      "description": "Scroll down arrow indicator text"
+    },
     "about_title": {
       "text": "Context within your organisation",
       "description": "Section title"
@@ -111,39 +115,39 @@
       "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation.",
       "description": "Page description"
     },
+    "privacy_policy_checkbox_label": {
+      "text": "I agree and consent to the",
+      "description": "Accept privacy policy checkbox text part 1"
+    },
+    "privacy_policy_link": {
+      "text": "Privacy Policy",
+      "description": "Accept privacy policy checkbox text part 2 (this is a link which opens the privacy policy)"
+    },
     "parameters_submit_button": {
       "text": "Submit and start Engager",
       "description": "Button text (start survey)"
     },
     "confirm_leave_text": {
       "text": "After submitting your selection you will not be able to change your parameters, are you sure you wish to continue ?",
-      "description": "Confirmation text"
+      "description": "Confirmation popup text"
     },
     "continue": {
       "text": "Continue",
-      "description": "Button text"
+      "description": "Confirmation popup continue button text"
     }
   },
   "privacy_policy": {
     "privacy_policy_title": {
       "text": "Privacy policy",
-      "description": "Privacy policy popup title"
+      "description": "Privacy policy popup title (also on landing page)"
     },
     "privacy_policy_text": {
       "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation.",
-      "description": "Privacy policy text"
+      "description": "Privacy policy popup text(also on landing page)"
     },
     "accept": {
       "text": "Accept",
-      "description": "Button text"
-    },
-    "checkbox_label": {
-      "text": "I agree and consent to the",
-      "description": "Accept privacy policy checkbox text part 1"
-    },
-    "read_more": {
-      "text": "Privacy Policy",
-      "description": "Accept privacy policy checkbox text part 2 (this is a link which opens the privacy policy)"
+      "description": "Privacy policy popup: accept button text"
     }
   },
   "catalyst": {
@@ -163,7 +167,7 @@
   "questions": {
     "hero_subtitle": {
       "text": "Theme",
-      "description": "Small text above the theme title"
+      "description": "Before theme number (Theme X)"
     },
     "hearts_label": {
       "text": "Tap a heart to rate",
@@ -327,6 +331,18 @@
       "text": "Open answers",
       "description": "Navigation link text, also used in titles"
     },
+    "statistics_title": {
+      "text": "Statistics",
+      "description": "The title for the statistics section pages when aftergame is ON"
+    },
+    "your_statistics_title": {
+      "text": "Your statistics",
+      "description": "The title for the statistics section pages when aftergame is OFF"
+    },
+    "your_statistics_description": {
+      "text": "Thanks for participating, you can checkout your results below. You'll get an email notification to join the aftergame once enough users have answered the survey.",
+      "description": "The description for the statistics section pages when aftergame is OFF"
+    },
     "edit_answers_button": {
       "text": "Edit answers",
       "description": "Button text"
@@ -343,9 +359,6 @@
       "text": "Everyone",
       "description": "DON'T EDIT"
     },
-    "overview_for": {
-      "text": "Overview result for"
-    },
     "importance": {
       "text": "Importance",
       "description": "Label for importance"
@@ -353,15 +366,6 @@
     "current_state": {
       "text": "Current state",
       "description": "Label for current state"
-    },
-    "statistics_title": {
-      "text": "Statistics"
-    },
-    "your_statistics_title": {
-      "text": "Your statistics"
-    },
-    "your_statistics_description": {
-      "text": "Thanks for participating, you can checkout your results below. You'll get an email notification to join the aftergame once enough users have answered the survey."
     },
     "open_statements": {
       "text": "Open statements +",
@@ -375,33 +379,49 @@
       "text": "Other theme results",
       "description": "Subtitle in theme details page"
     },
-    "no_concern": {
+    "does_not_concern": {
       "text": "Does not concern me",
-      "description": "Shown in statement result bars"
+      "description": "Shown in statement result bars (Does not concern me X/X)"
     },
     "hidden_from_public": {
       "text": "Hidden from public",
       "description": "Small info label for an open question answer"
     },
-    "only_visible_to_you": {
-      "text": "Only visible to you",
-      "description": "Small info label for an open question answer"
+    "no_open_answers": {
+      "text": "No open answers",
+      "description": "Shown when there are no open answers"
+    },
+    "no_public_answers": {
+      "text": "No public answers",
+      "description": "Shown when there are no public answers"
+    },
+    "sort_dropdown_label": {
+      "text": "Sort by",
+      "description": "Label for sorting dropdown"
     },
     "result_descending": {
       "text": "Result descending",
-      "description": "Select sorting option"
+      "description": "Sorting dropdown option"
     },
     "result_ascending": {
       "text": "Result ascending",
-      "description": "Select sorting option"
+      "description": "Sorting dropdown option"
     },
     "importance_descending": {
       "text": "Importance descending",
-      "description": "Select sorting option"
+      "description": "Sorting dropdown option"
     },
     "importance_ascending": {
       "text": "Importance ascending",
-      "description": "Select sorting option"
+      "description": "Sorting dropdown option"
+    },
+    "show_dropdown_label": {
+      "text": "Show",
+      "description": "Label for 'filter by parameter' dropdown"
+    },
+    "no_results_for_parameter": {
+      "text": "No results for this parameter",
+      "description": "Shown when there are no results to show for a parameter"
     }
   },
   "discussion": {
@@ -413,45 +433,85 @@
       "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet",
       "description": "Description below the main title. 1 short sentence."
     },
-    "Answer": {
-      "text": "Answer",
-      "description": "Button text"
-    },
-    "Answers": {
-      "text": "Answer(s)",
-      "description": "Label for 'X answers'"
+    "active_topics": {
+      "text": "Active topics",
+      "description": "Label for 'X Active topics' (capitalized)"
     },
     "answer_amount": {
       "text": "answer(s)",
       "description": "Label for 'X answers'"
     },
+    "Answers": {
+      "text": "Answer(s)",
+      "description": "Label for 'X answers' (capitalized)"
+    },
     "more_answers": {
       "text": "more answers",
-      "description": "Button to show more answers"
-    },
-    "reply": {
-      "text": "Comment",
-      "description": "Button text: reply to an answer/comment"
+      "description": "(X more answers) Button to show more answers"
     },
     "replies": {
       "text": "replies",
       "description": "X replies "
     },
-    "cancel": {
+    "question": {
+      "text": "Question",
+      "description": "Question X (capitalized)"
+    },
+    "questions": {
+      "text": "questions",
+      "description": "X questions"
+    },
+    "supports": {
+      "text": "supports",
+      "description": "X supports"
+    },
+    "Supports": {
+      "text": "Supports",
+      "description": "Label for 'X Supports' (capitalized)"
+    },
+    "answer_field_placeholder": {
+      "text": "Add an answer",
+      "description": "Placeholder for the answer field."
+    },
+    "reply_field_placeholder": {
+      "text": "Add a reply",
+      "description": "Placeholder for the reply field."
+    },
+    "answer_button": {
+      "text": "Answer",
+      "description": "Button text"
+    },
+    "reply_button": {
+      "text": "Reply",
+      "description": "Button text: reply to an answer"
+    },
+    "support_button": {
+      "text": "Support",
+      "description": "Button text"
+    },
+    "cancel_button": {
       "text": "Cancel",
       "description": "Button text"
     },
-    "delete_comment": {
-      "text": "Delete comment",
+    "delete_button": {
+      "text": "Delete",
+      "description": "Button text"
+    },
+    "delete_answer": {
+      "text": "Delete answer",
       "description": "Link text"
+    },
+    "delete_answer_modal_header": {
+      "text": "Delete answer?",
+      "description": "Modal header"
+    },
+    "delete_answer_modal_content": {
+      "text": "All replies to this answer will also be deleted.",
+      "description": "Modal content"
     },
     "active_topic": {
       "text": "Active topic",
       "description": "Label to indicate that the topic is active"
-    },
-    "active_topics": {
-      "text": "Active topics",
-      "description": "X Active topics"
     },
     "closed_topic": {
       "text": "Closed topic",
@@ -461,45 +521,21 @@
       "text": "View topic",
       "description": "Button text"
     },
-    "question": {
-      "text": "Question",
-      "description": "Question X"
-    },
-    "questions": {
-      "text": "questions",
-      "description": "X questions"
-    },
     "tips": {
       "text": "Tips",
       "description": "Title for tips section"
     },
-    "support": {
-      "text": "Support",
-      "description": "Button text"
-    },
-    "supports": {
-      "text": "supports",
-      "description": "X supports"
-    },
-    "Supports": {
-      "text": "Supports",
-      "description": "X Supports"
-    },
-    "no_comments_yet": {
-      "text": "No comments yet. Be the first to comment!",
+    "no_answers_yet": {
+      "text": "No answers yet. Be the first to answer!",
       "description": "Text indicating that there are no answers yet."
     },
-    "no_comments_yet_guest_user": {
-      "text": "No comments yet.",
-      "description": "Same as above but for a guest user who can't comment."
+    "no_answers_yet_guest_user": {
+      "text": "No answers yet.",
+      "description": "Same as above but for a guest user who can't answer."
     },
-    "submit_comment": {
-      "text": "Submit comment",
-      "description": "Screen readers only! Submit comment/answer button text."
-    },
-    "comment_field_placeholder": {
-      "text": "Add a comment",
-      "description": "Placeholder for the comment/answer field."
+    "submit_answer_screenreader_text": {
+      "text": "Submit answer",
+      "description": "Screen readers only! Submit answer button text."
     }
   }
 }
