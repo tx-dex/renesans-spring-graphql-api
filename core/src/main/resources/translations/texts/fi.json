@@ -1,9 +1,8 @@
 {
   "landing": {
     "about": {
-      "title": "About",
-      "description": "Main navigation link",
-      "text": "About"
+      "text": "About",
+      "description": "Fi Main navigation link"
     },
     "rules": {
       "text": "Rules",
@@ -223,13 +222,16 @@
   },
   "email_template": {
     "heading_title": {
-      "text": "Your personal invitiation"
+      "text": "Your personal invitiation",
+      "description": "Used also in Aftergame invitation. Only English version is used!"
     },
     "heading_paragraph": {
-      "text": "Come along, join our network of business builders - let’s start building our future organisation!"
+      "text": "Come along, join our network of business builders - let’s start building our future organisation!",
+      "description": "Used also in Aftergame invitation. Only English version is used!"
     },
     "invitation_button": {
-      "text": "Yes, I’m in!"
+      "text": "Yes, I’m in!",
+      "description": "Used also in Aftergame invitation. Only English version is used!"
     }
   },
   "dashboard": {
