@@ -1,0 +1,543 @@
+{
+  "landing": {
+    "about": {
+      "text": "About",
+      "description": "En Main navigation link"
+    },
+    "rules": {
+      "text": "Rules",
+      "description": "Main navigation link"
+    },
+    "welcome": {
+      "text": "Welcome!",
+      "description": "Text above the main title"
+    },
+    "title": {
+      "text": "Engager",
+      "description": "Page title (main title)"
+    },
+    "subtitle": {
+      "text": "An innovative tool for future companies and organization",
+      "description": "Description below the main page title"
+    },
+    "start_btn": {
+      "text": "Start Engager",
+      "description": "Button text (enter survey)"
+    },
+    "scroll_down_button_text": {
+      "text": "Scroll down for more info",
+      "description": "Scroll down arrow indicator text"
+    },
+    "about_title": {
+      "text": "Context within your organisation",
+      "description": "Section title"
+    },
+    "about_paragraph_1": {
+      "text": "Placeholder text"
+    },
+    "about_paragraph_2": {
+      "text": "Placeholder text"
+    },
+    "contribute_btn": {
+      "text": "Ready to contribute",
+      "description": "Button text (enter survey)"
+    },
+    "video_embed_title_1": {
+      "text": "Video 1 title"
+    },
+    "video_embed_url_1": {
+      "text": "Put Youtube video url here",
+      "description": "Youtube video url must be in format: https://www.youtube.com/embed/tpiyEe_CqB4 where the last part is the video id"
+    },
+    "video_embed_title_2": {
+      "text": "Video 2 title"
+    },
+    "video_embed_url_2": {
+      "text": "Put Youtube video url here",
+      "description": "Youtube video url must be in format: https://www.youtube.com/embed/tpiyEe_CqB4 where the last part is the video id"
+    },
+    "download_video_instruction": {
+      "text": "If the video doesn't play on your browser, you can download it."
+    },
+    "download_video": {
+      "text": "Download video"
+    },
+    "rules_welcome": {
+      "text": "General rules of engager",
+      "description": "Small text above the section title"
+    },
+    "rules_title": {
+      "text": "Easy to follow and fun to answer",
+      "description": "Section title"
+    },
+    "rule_1_title": {
+      "text": "Well-defined organisational themes"
+    },
+    "rule_1_text": {
+      "text": "In the first phase you are asked to map yourself inside the organisation. After that you will find themed statements or questions about typical scenes at work."
+    },
+    "rule_2_title": {
+      "text": "Your viewpoint and opinions matter"
+    },
+    "rule_2_text": {
+      "text": "The viewpoints are yourself, your team and the whole organisation. If not otherwise specified in the statement, please use yourself as the viewpoint."
+    },
+    "rule_3_title": {
+      "text": "Create value within your community"
+    },
+    "rule_3_text": {
+      "text": "It will take less than 20 minutes to indicate your opinion on the tool. After that you will be able to review your own and other’s answers and that’s when you get to participate within your community."
+    },
+    "rules_btn": {
+      "text": "Take a stand",
+      "description": "Button text (enter survey)"
+    },
+    "trademark": {
+      "text": "©2023 by Renesans",
+      "description": "Footer copyright text"
+    },
+    "privacy_policy": {
+      "text": "Privacy policy",
+      "description": "Footer link text"
+    },
+    "cookie_policy": {
+      "text": "Cookie policy",
+      "description": "Footer link text"
+    }
+  },
+  "parameters": {
+    "parameters_page_title": {
+      "text": "Tell us about yourself",
+      "description": "Page title (main title)"
+    },
+    "parameters_page_description": {
+      "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation.",
+      "description": "Page description"
+    },
+    "privacy_policy_checkbox_label": {
+      "text": "I agree and consent to the",
+      "description": "Accept privacy policy checkbox text part 1"
+    },
+    "privacy_policy_link": {
+      "text": "Privacy Policy",
+      "description": "Accept privacy policy checkbox text part 2 (this is a link which opens the privacy policy)"
+    },
+    "parameters_submit_button": {
+      "text": "Submit and start Engager",
+      "description": "Button text (start survey)"
+    },
+    "confirm_leave_text": {
+      "text": "After submitting your selection you will not be able to change your parameters, are you sure you wish to continue ?",
+      "description": "Confirmation popup text"
+    },
+    "continue": {
+      "text": "Continue",
+      "description": "Confirmation popup continue button text"
+    }
+  },
+  "privacy_policy": {
+    "privacy_policy_title": {
+      "text": "Privacy policy",
+      "description": "Privacy policy popup title (also on landing page)"
+    },
+    "privacy_policy_text": {
+      "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation.",
+      "description": "Privacy policy popup text(also on landing page)"
+    },
+    "accept": {
+      "text": "Accept",
+      "description": "Privacy policy popup: accept button text"
+    }
+  },
+  "catalyst": {
+    "respond_button": {
+      "text": "Respond to questions",
+      "description": "Button text"
+    },
+    "theme_nav_title": {
+      "text": "Themes",
+      "description": "Small title above theme navigation"
+    },
+    "mobile_theme_title": {
+      "text": "Theme",
+      "description": "Only visible on mobile. Above the theme title and after it is the theme number"
+    }
+  },
+  "questions": {
+    "hero_subtitle": {
+      "text": "Theme",
+      "description": "Before theme number (Theme X)"
+    },
+    "hearts_label": {
+      "text": "Tap a heart to rate",
+      "description": "Small instruction text below the hearts where you select importance"
+    },
+    "question_importance": {
+      "text": "How important is this issue to you?",
+      "description": "Title for importance selection"
+    },
+    "unacceptable": {
+      "text": "Unacceptable",
+      "description": "NOT USED ATM. This is defined in the question."
+    },
+    "needs_improvement": {
+      "text": "Needs improvement",
+      "description": "NOT SHOWN ATM."
+    },
+    "acceptable": {
+      "text": "Acceptable",
+      "description": "NOT SHOWN ATM."
+    },
+    "good": {
+      "text": "Good",
+      "description": "NOT SHOWN ATM."
+    },
+    "excellent": {
+      "text": "Excellent",
+      "description": "NOT USED ATM. This is defined in the question."
+    },
+    "no_concern": {
+      "text": "Does not concern me",
+      "description": "Label for 'Does not concern me' checkbox"
+    },
+    "make_public": {
+      "text": "Make public",
+      "description": "Label for checkbox in an open question (If you want to make the answer public). "
+    },
+    "open_question_placeholder": {
+      "text": "Write your answer here"
+    },
+    "submit_answers": {
+      "text": "Submit",
+      "description": "Submit answers button text"
+    },
+    "submit_survey": {
+      "text": "Submit survey",
+      "description": "Submit survey button text"
+    }
+  },
+  "email_template": {
+    "heading_title": {
+      "text": "Your personal invitiation",
+      "description": "Used also in Aftergame invitation. Only English version is used!"
+    },
+    "heading_paragraph": {
+      "text": "Come along, join our network of business builders - let’s start building our future organisation!",
+      "description": "Used also in Aftergame invitation. Only English version is used!"
+    },
+    "invitation_button": {
+      "text": "Yes, I’m in!",
+      "description": "Used also in Aftergame invitation. Only English version is used!"
+    }
+  },
+  "dashboard": {
+    "overview_title": {
+      "text": "Now it’s time to participate!",
+      "description": "Main title of the page"
+    },
+    "overview_description": {
+      "text": "Please find the survey result below and your own answers compared to your reference groups.",
+      "description": "Longer text under the title"
+    },
+    "overview_late_title": {
+      "text": "The survey is finished",
+      "description": "Shown if user is late to survey"
+    },
+    "overview_late_description": {
+      "text": "Please ask the facilitator to grant you access to see the results.",
+      "description": "Shown if user is late to survey"
+    },
+    "participants": {
+      "text": "Participants",
+      "description": "Participants amount label"
+    },
+    "invited": {
+      "text": "Invited",
+      "description": "Invited users amount label"
+    },
+    "engagement_ratio": {
+      "text": "Engagement ratio",
+      "description": "Engagement ratio label"
+    },
+    "dashboard_section_vai_title": {
+      "text": "KPI: we as strategy-driven networked team",
+      "description": "Title"
+    },
+    "dashboard_section_vai_description": {
+      "text": "This indicator summarizes on how close we are to achieving our vision of strategy-driven teams with the capability to operate successfully in a networked business context"
+    },
+    "dashboard_section_themes_title": {
+      "text": "Our 5 building blocks and their current state",
+      "description": "Title"
+    },
+    "dashboard_section_themes_description": {
+      "text": "For each building block, we have identified three development drivers, this is their current state."
+    },
+    "dashboard_section_drivers_title": {
+      "text": "Our development drivers and their current state",
+      "description": "Title"
+    },
+    "dashboard_section_drivers_description": {
+      "text": "For each building block, we have identified three development drivers, this is their current state."
+    },
+    "dashboard_section_statements_title": {
+      "text": "The statements and their current state",
+      "description": "Title"
+    },
+    "dashboard_section_statements_description": {
+      "text": "For each building block, we have identified a number of statements describing the target state of how it should be visible in practice. These are the top 5 and bottom 5 rated statements."
+    },
+    "top_5_statements_by_result": {
+      "text": "TOP 5 statements by current state (‘closest to our vision’)",
+      "description": "Title"
+    },
+    "bottom_5_statements_by_result": {
+      "text": "BOTTOM 5 statements by current state (‘furthest away from our vision’)",
+      "description": "Title"
+    },
+    "top_5_statements_by_importance": {
+      "text": "TOP 5 statements by importance (‘most important’)",
+      "description": "Title"
+    },
+    "bottom_5_statements_by_importance": {
+      "text": "BOTTOM 5 statements by importance (‘least important)",
+      "description": "Title"
+    }
+  },
+  "finish": {
+    "overview": {
+      "text": "Summary",
+      "description": "Main navigation link text"
+    },
+    "statistics": {
+      "text": "Statistics",
+      "description": "Main navigation link text"
+    },
+    "discussion": {
+      "text": "Discussion",
+      "description": "Main navigation link text"
+    },
+    "themes": {
+      "text": "Themes",
+      "description": "Navigation link text, also used in titles"
+    },
+    "drivers": {
+      "text": "Drivers",
+      "description": "Navigation link text, also used in titles"
+    },
+    "statements": {
+      "text": "Statements",
+      "description": "Navigation link text, also used in titles"
+    },
+    "open_answers": {
+      "text": "Open answers",
+      "description": "Navigation link text, also used in titles"
+    },
+    "statistics_title": {
+      "text": "Statistics",
+      "description": "The title for the statistics section pages when aftergame is ON"
+    },
+    "your_statistics_title": {
+      "text": "Your statistics",
+      "description": "The title for the statistics section pages when aftergame is OFF"
+    },
+    "your_statistics_description": {
+      "text": "Thanks for participating, you can checkout your results below. You'll get an email notification to join the aftergame once enough users have answered the survey.",
+      "description": "The description for the statistics section pages when aftergame is OFF"
+    },
+    "edit_answers_button": {
+      "text": "Edit answers",
+      "description": "Button text"
+    },
+    "more_details": {
+      "text": "More details",
+      "description": "Button text"
+    },
+    "you": {
+      "text": "You",
+      "description": "DON'T EDIT"
+    },
+    "everyone": {
+      "text": "Everyone",
+      "description": "DON'T EDIT"
+    },
+    "importance": {
+      "text": "Importance",
+      "description": "Label for importance"
+    },
+    "current_state": {
+      "text": "Current state",
+      "description": "Label for current state"
+    },
+    "open_statements": {
+      "text": "Open statements +",
+      "description": "Button text"
+    },
+    "close_statements": {
+      "text": "Close statements -",
+      "description": "Button text"
+    },
+    "other_theme_results": {
+      "text": "Other theme results",
+      "description": "Subtitle in theme details page"
+    },
+    "does_not_concern": {
+      "text": "Does not concern me",
+      "description": "Shown in statement result bars (Does not concern me X/X)"
+    },
+    "hidden_from_public": {
+      "text": "Hidden from public",
+      "description": "Small info label for an open question answer"
+    },
+    "no_open_answers": {
+      "text": "No open answers",
+      "description": "Shown when there are no open answers"
+    },
+    "no_public_answers": {
+      "text": "No public answers",
+      "description": "Shown when there are no public answers"
+    },
+    "sort_dropdown_label": {
+      "text": "Sort by",
+      "description": "Label for sorting dropdown"
+    },
+    "result_descending": {
+      "text": "Result descending",
+      "description": "Sorting dropdown option"
+    },
+    "result_ascending": {
+      "text": "Result ascending",
+      "description": "Sorting dropdown option"
+    },
+    "importance_descending": {
+      "text": "Importance descending",
+      "description": "Sorting dropdown option"
+    },
+    "importance_ascending": {
+      "text": "Importance ascending",
+      "description": "Sorting dropdown option"
+    },
+    "show_dropdown_label": {
+      "text": "Show",
+      "description": "Label for 'filter by parameter' dropdown"
+    },
+    "no_results_for_parameter": {
+      "text": "No results for this parameter",
+      "description": "Shown when there are no results to show for a parameter"
+    }
+  },
+  "discussion": {
+    "discussion_title": {
+      "text": "Discussion",
+      "description": "Main title"
+    },
+    "discussion_description": {
+      "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet",
+      "description": "Description below the main title. 1 short sentence."
+    },
+    "active_topics": {
+      "text": "Active topics",
+      "description": "Label for 'X Active topics' (capitalized)"
+    },
+    "answer_amount": {
+      "text": "answer(s)",
+      "description": "Label for 'X answers'"
+    },
+    "Answers": {
+      "text": "Answer(s)",
+      "description": "Label for 'X answers' (capitalized)"
+    },
+    "more_answers": {
+      "text": "more answers",
+      "description": "(X more answers) Button to show more answers"
+    },
+    "replies": {
+      "text": "replies",
+      "description": "X replies "
+    },
+    "question": {
+      "text": "Question",
+      "description": "Question X (capitalized)"
+    },
+    "questions": {
+      "text": "questions",
+      "description": "X questions"
+    },
+    "supports": {
+      "text": "supports",
+      "description": "X supports"
+    },
+    "Supports": {
+      "text": "Supports",
+      "description": "Label for 'X Supports' (capitalized)"
+    },
+    "answer_field_placeholder": {
+      "text": "Add an answer",
+      "description": "Placeholder for the answer field."
+    },
+    "reply_field_placeholder": {
+      "text": "Add a reply",
+      "description": "Placeholder for the reply field."
+    },
+    "answer_button": {
+      "text": "Answer",
+      "description": "Button text"
+    },
+    "reply_button": {
+      "text": "Reply",
+      "description": "Button text: reply to an answer"
+    },
+    "support_button": {
+      "text": "Support",
+      "description": "Button text"
+    },
+    "cancel_button": {
+      "text": "Cancel",
+      "description": "Button text"
+    },
+    "delete_button": {
+      "text": "Delete",
+      "description": "Button text"
+    },
+    "delete_answer": {
+      "text": "Delete answer",
+      "description": "Link text"
+    },
+    "delete_answer_modal_header": {
+      "text": "Delete answer?",
+      "description": "Modal header"
+    },
+    "delete_answer_modal_content": {
+      "text": "All replies to this answer will also be deleted.",
+      "description": "Modal content"
+    },
+    "active_topic": {
+      "text": "Active topic",
+      "description": "Label to indicate that the topic is active"
+    },
+    "closed_topic": {
+      "text": "Closed topic",
+      "description": "Label to indicate that the topic is closed"
+    },
+    "view_topic": {
+      "text": "View topic",
+      "description": "Button text"
+    },
+    "tips": {
+      "text": "Tips",
+      "description": "Title for tips section"
+    },
+    "no_answers_yet": {
+      "text": "No answers yet. Be the first to answer!",
+      "description": "Text indicating that there are no answers yet."
+    },
+    "no_answers_yet_guest_user": {
+      "text": "No answers yet.",
+      "description": "Same as above but for a guest user who can't answer."
+    },
+    "submit_answer_screenreader_text": {
+      "text": "Submit answer",
+      "description": "Screen readers only! Submit answer button text."
+    }
+  }
+}
