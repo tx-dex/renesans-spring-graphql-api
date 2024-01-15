@@ -16,7 +16,7 @@ import java.util.*;
 
 @Component
 public class MultilingualUtils {
-    private static final Set<String> VALID_LANGUAGE_TAGS = ImmutableSet.of("en", "fi");
+    private static final Set<String> VALID_LANGUAGE_TAGS = ImmutableSet.of("en", "fi", "lv", "no", "sv");
     private static final String DEFAULT_LANGUAGE_TAG = "en";
     private static final MultilingualText EMPTY = new MultilingualText(ImmutableMap.of());
 
