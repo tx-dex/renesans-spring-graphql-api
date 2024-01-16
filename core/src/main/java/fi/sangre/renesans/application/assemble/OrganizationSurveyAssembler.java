@@ -213,6 +213,7 @@ public class OrganizationSurveyAssembler {
                 .parameters(parameterAssembler.fromMetadata(metadata.getParameters()))
                 .discussionQuestions(discussionQuestionAssembler.fromMetadata(metadata.getDiscussionQuestions()))
                 .staticTexts(texts)
+                .languages(survey.getLanguages())
                 .build();
     }
 }

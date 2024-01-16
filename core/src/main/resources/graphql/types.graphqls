@@ -123,6 +123,7 @@ type OrganizationSurvey {
     discussionQuestions: [SurveyDiscussionQuestion!]!
     respondentCounts: RespondentCounters!
     isDialogueActive: Boolean
+    languages: [String]
 }
 
 type SurveyMedia {

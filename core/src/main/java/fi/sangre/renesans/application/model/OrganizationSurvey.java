@@ -35,4 +35,5 @@ public class OrganizationSurvey {
     //TODO: create OrganizationSurveyOutput and move this there
     private RespondentCounters respondentCounters;
     private Boolean isDialogueActive;
+    private List<String> languages;
 }

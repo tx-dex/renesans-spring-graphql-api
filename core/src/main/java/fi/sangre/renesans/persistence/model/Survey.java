@@ -112,6 +112,15 @@ public class Survey {
     @Builder.Default
     private Boolean isDialogueActive = false;
 
+    @NotAudited
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(name = "language", nullable = false)
+    @CollectionTable(
+            name = "survey_language",
+            joinColumns = @JoinColumn(name = "survey_id")
+    )
+    private List<String> languages;
+
     @LastModifiedBy
     @Column(name="muser", nullable=false)
     private Long modifiedBy;
