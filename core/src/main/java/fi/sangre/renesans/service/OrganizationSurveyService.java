@@ -105,8 +105,9 @@ public class OrganizationSurveyService {
     public OrganizationSurvey copySurvey(@NonNull final OrganizationId targetId,
                                          @NonNull final SurveyId sourceId,
                                          @NonNull final MultilingualText titles,
-                                         @NonNull final MultilingualText descriptions) {
-        final Survey survey = surveyRepository.saveAndFlush(createCopy(sourceId, titles, descriptions));
+                                         @NonNull final MultilingualText descriptions,
+                                         final List<String> languages) {
+        final Survey survey = surveyRepository.saveAndFlush(createCopy(sourceId, titles, descriptions, languages));
 
         addToOrganization(targetId, survey);
 
@@ -125,7 +126,7 @@ public class OrganizationSurveyService {
                     .map(SurveyId::new)
                     .orElse(null);
 
-            survey = createOrCopySurvey(sourceId, titles, descriptions);
+            survey = createOrCopySurvey(sourceId, titles, descriptions, input.getLanguages());
 
             addToOrganization(organizationId, survey);
         } else { // update
@@ -158,6 +159,10 @@ public class OrganizationSurveyService {
 
                 metadata.setTitles(titles.getPhrases());
                 metadata.setDescriptions(descriptions.getPhrases());
+
+                if(input.getLanguages() != null) {
+                    survey.setLanguages(input.getLanguages());
+                }
             }
 
             survey.setMetadata(metadata);
@@ -171,7 +176,8 @@ public class OrganizationSurveyService {
     @NonNull
     private Survey createCopy(@NonNull final SurveyId sourceId,
                               @NonNull final MultilingualText titles,
-                              @NonNull final MultilingualText descriptions) {
+                              @NonNull final MultilingualText descriptions,
+                              final List<String> languages) {
         final OrganizationSurvey source = getSurvey(sourceId);
 
         final MultilingualText newTitles;
@@ -188,6 +194,7 @@ public class OrganizationSurveyService {
         source.setVersion(1L);
         source.setTitles(newTitles);
         source.setDescriptions(multilingualUtils.combine(source.getDescriptions(), descriptions));
+        source.setLanguages(languages);
 
         final Survey copy = surveyAssembler.from(source);
         copy.setState(SurveyState.OPEN);
@@ -318,7 +325,8 @@ public class OrganizationSurveyService {
     @NonNull
     private Survey createOrCopySurvey(@Nullable final SurveyId sourceId,
                                       @NonNull final MultilingualText titles,
-                                      @NonNull final MultilingualText descriptions) {
+                                      @NonNull final MultilingualText descriptions,
+                                      final List<String> languages) {
         final Survey survey;
         if (sourceId == null) {
             if (titles.isEmpty()) {
@@ -337,9 +345,10 @@ public class OrganizationSurveyService {
                     .isDefault(false)
                     .state(SurveyState.OPEN)
                     .metadata(metadata.build())
+                    .languages(languages)
                     .build();
         } else {
-            survey = createCopy(sourceId, titles, descriptions);
+            survey = createCopy(sourceId, titles, descriptions, languages);
         }
 
         return surveyRepository.save(survey);

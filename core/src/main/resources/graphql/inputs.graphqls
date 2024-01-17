@@ -63,6 +63,7 @@ input SurveyInput {
     version: Long
     title: String
     description: String
+    languages: [String]
     # some properties of the survey that may be changed
     # This will update only properties if set!!!
     # Skip it for updating just the survey info like title or description

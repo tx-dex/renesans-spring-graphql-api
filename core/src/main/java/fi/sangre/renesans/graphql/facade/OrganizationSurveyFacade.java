@@ -69,7 +69,7 @@ public class OrganizationSurveyFacade {
         final MultilingualText titles = multilingualUtils.create(input.getTitle(), languageTag);
         final MultilingualText descriptions = multilingualUtils.create(input.getDescription(), languageTag);
 
-        return organizationSurveyService.copySurvey(organizationId, sourceId, titles, descriptions);
+        return organizationSurveyService.copySurvey(organizationId, sourceId, titles, descriptions, input.getLanguages());
     }
 
 
