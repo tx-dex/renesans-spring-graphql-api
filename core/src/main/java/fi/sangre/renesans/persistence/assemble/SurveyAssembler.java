@@ -51,6 +51,8 @@ public class SurveyAssembler {
         entity.setVersion(model.getVersion());
         entity.setState(model.getState());
 
+        entity.setLanguages(model.getLanguages());
+
         final StaticTextGroup questions = Optional.ofNullable(model.getStaticTexts())
                 .map(v -> v.get(TranslationService.QUESTIONS_TRANSLATION_GROUP))
                 .orElse(EMPTY_GROUP);
