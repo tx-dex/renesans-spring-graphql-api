@@ -275,6 +275,7 @@ type Questionnaire {
     logo: MediaDetails
     selectedLanguage: String!
     staticTexts: Translation!
+    languages: [String]
     catalysts: [QuestionnaireCatalyst!]!
     hideCatalystThemePages: Boolean!
     parameters: [QuestionnaireParameter!]!

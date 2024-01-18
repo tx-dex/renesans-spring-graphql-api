@@ -24,6 +24,7 @@ public class QuestionnaireOutput {
     private boolean hideCatalystThemePages;
     private List<QuestionnaireParameterOutput> parameters;
     private Map<String, StaticTextGroup> staticTexts;
+    private List<String> languages;
     private boolean consented;
     private boolean finished;
     private boolean isAfterGameGuest;

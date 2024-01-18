@@ -157,6 +157,7 @@ public class QuestionnaireAssembler {
                 .logo(mediaDetailsAssembler.from(survey.getLogo()))
                 .media(surveyMediaAssembler.from(survey.getMedia()))
                 .staticTexts(survey.getStaticTexts())
+                .languages(survey.getLanguages())
                 .hideCatalystThemePages(Boolean.TRUE.equals(survey.getHideCatalystThemePages()))
                 .consented(false)
                 .finished(true)
