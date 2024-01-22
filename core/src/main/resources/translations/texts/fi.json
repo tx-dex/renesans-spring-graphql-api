@@ -97,8 +97,8 @@
       "description": "Button text (enter survey)"
     },
     "trademark": {
-      "text": "©2023 by Renesans",
-      "description": "Footer copyright text"
+      "text": "by Renesans",
+      "description": "Copyright text: ©XXXX by Renesans"
     },
     "privacy_policy": {
       "text": "Privacy policy",
