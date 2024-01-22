@@ -38,7 +38,7 @@ public class SurveyStatisticsService {
         if (respondentIds.size() < properties.getMinRespondentCount()) {
             return SurveyResult.EMPTY;
         } else {
-            final Map<QuestionId, QuestionStatistics> results = statisticsDao.getQuestionStatistics(surveyId);
+            final Map<QuestionId, QuestionStatistics> results = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
             return SurveyResult.builder()
                     .respondentIds(respondentIds)
                     .statistics(statisticsService.calculateStatistics(survey, results))

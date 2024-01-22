@@ -29,10 +29,12 @@ public interface LikerQuestionAnswerRepository extends JpaRepository<LikertQuest
             "GROUP BY id.questionId")
     List<QuestionStatistics> getQuestionStatisticsByQuestionAndRespondentsIn(@Param("surveyId") UUID surveyId, @Param("respondentIds") Set<UUID> respondentIds);
 
-    @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.QuestionStatistics(id.questionId, AVG(response), MIN(response), MAX(response), COUNT(id.questionId), AVG(rate), SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END)) " +
-            "FROM LikertQuestionAnswerEntity " +
-            "WHERE id.surveyId = :surveyId " +
-            "GROUP BY id.questionId")
+    @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.QuestionStatistics(a.id.questionId, AVG(a.response), MIN(a.response), MAX(a.response), COUNT(a.id.questionId), AVG(a.rate), SUM(CASE WHEN a.status = 2 THEN 1 ELSE 0 END)) " +
+            "FROM LikertQuestionAnswerEntity a " +
+            "LEFT JOIN a.respondent r " +
+            "WHERE a.id.surveyId = :surveyId " +
+            "AND r.state = 'ANSWERED' " +
+            "GROUP BY a.id.questionId")
     List<QuestionStatistics> getQuestionStatisticsByQuestion(@Param("surveyId") UUID surveyId);
 
     void deleteAllByRespondent(@NonNull SurveyRespondent respondent);
