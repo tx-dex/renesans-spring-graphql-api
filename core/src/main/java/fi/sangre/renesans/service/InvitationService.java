@@ -326,12 +326,14 @@ public class InvitationService {
         final MultilingualText headingParagraph = texts.getOrDefault(HEADING_PARAGRAPH_KEY, multilingualUtils.empty());
         final MultilingualText invitationButton = texts.getOrDefault(INVITATION_BUTTON_KEY, multilingualUtils.empty());
 
+        final String bodyTextWithLink = templateService.templateBody(bodyText, ImmutableMap.of("invitation_link", invitationLink));
+
         return templateService.templateBody(HTML_BASE_TEMPLATE, ImmutableMap.of(
                 HEADING_TITLE_KEY, multilingualUtils.combine(defaultHeadingTitle, headingTitle).getPhrase(languageTag),
                 HEADING_PARAGRAPH_KEY, multilingualUtils.combine(defaultHeadingParagraph, headingParagraph).getPhrase(languageTag),
                 INVITATION_BUTTON_KEY, multilingualUtils.combine(defaultInvitationButton, invitationButton).getPhrase(languageTag),
                 "invitation_link", invitationLink,
-                "email_content", bodyText));
+                "email_content", bodyTextWithLink));
     }
 
     private void setErrorSilently(@NonNull final IdValueObject<? extends UUID> id, @NonNull final String error) {
