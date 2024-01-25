@@ -372,8 +372,8 @@ public class AfterGameFacade {
         parameterItems.forEach(parameter -> {
             Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId,
                     ImmutableList.of(RespondentParameterFilter.builder()
-                    .values(ImmutableList.of(parameter.getId().getValue()))
-                    .build()));
+                        .values(ImmutableList.of(parameter.getId().getValue()))
+                        .build()));
             Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
 
             DriverStatistics driverStatistics = statisticsService.calculateDriversStatistics(ImmutableList.of(driver),
