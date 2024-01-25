@@ -108,4 +108,14 @@ public class ParameterUtils {
             return null;
         }
     }
+
+    public List<Parameter> getAllParents(@NonNull final Parameter parameter) {
+        List<Parameter> parents = new ArrayList<>();
+        Parameter parentParameter = getParent(parameter);
+        if (parentParameter != null) {
+            parents.add(parentParameter);
+            parents.addAll(getAllParents(parentParameter));
+        }
+        return parents;
+    }
 }

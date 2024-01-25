@@ -15,12 +15,14 @@ import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
+import fi.sangre.renesans.application.model.filter.RespondentParameterFilter;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
+import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
@@ -354,13 +356,49 @@ public class AfterGameFacade {
     }
 
     public AfterGameComparativeParameterStatisticsOutput afterGameComparativeParameterStatistics(@NonNull final UUID questionnaireId,
-                                                                                                 @NonNull final UUID topicId,
-                                                                                                 @NonNull final UserDetails principal) {
+                                                                                                 @NonNull final Long topicId,
+                                                                                                 @NonNull final String topicType,
+                                                                                                 @NonNull final UserDetails principal,
+                                                                                                 @NonNull final String languageCode) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        SurveyId surveyId = new SurveyId(survey.getId());
+        Map<QuestionId, Map<DriverId, Double>> questionWeights = statisticsService.getQuestionWeights(survey);
+        Driver driver = surveyUtils.findDriver(topicId, survey);
 
-        List<Parameter> parameters = survey.getParameters();
+        List<Parameter> parentParameters = survey.getParameters();
+        List<ParameterChild> parameterItems = parameterUtils.getChildren(parentParameters);
+        List<ParameterStatisticOutput> parameterStatisticOutputs = new ArrayList<>();
 
+        parameterItems.forEach(parameter -> {
+            Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId,
+                    ImmutableList.of(RespondentParameterFilter.builder()
+                    .values(ImmutableList.of(parameter.getId().getValue()))
+                    .build()));
+            Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
 
+            DriverStatistics driverStatistics = statisticsService.calculateDriversStatistics(ImmutableList.of(driver),
+                    questionWeights,
+                    questionStatistics).get(0);
+
+            List<String> parents = parameterUtils.getAllParents(parameter)
+                    .stream().map(parent -> parent.getLabel().getPhrase(languageCode))
+                    .collect(toList());
+
+            ParameterStatisticOutput parameterStatistic = ParameterStatisticOutput.builder()
+                    .label(parameter.getLabel().getPhrase(languageCode))
+                    .parents(parents)
+                    .result(driverStatistics.getResult())
+                    .rate(driverStatistics.getRate())
+                    .build();
+
+            parameterStatisticOutputs.add(parameterStatistic);
+        });
+
+        return AfterGameComparativeParameterStatisticsOutput.builder()
+                .topic(driver.getTitles().getPhrase(languageCode))
+                .type(topicType)
+                .parameters(parameterStatisticOutputs)
+                .build();
     }
 
     private <T> boolean isAllSuccess(@NonNull final Collection<Try<T>> tries) {

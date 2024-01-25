@@ -113,4 +113,10 @@ public class SurveyUtils {
                 .flatMap(v -> v.getDrivers().stream())
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
+
+    public Driver findDriver(@NonNull final Long driverId, @NonNull final OrganizationSurvey survey) {
+        return getAllDrivers(survey).stream()
+                .filter(driver -> driver.getId().equals(driverId))
+                .findFirst().orElseThrow(() -> new RuntimeException("Driver " + driverId + " not found in survey " + survey.getId()));
+    }
 }

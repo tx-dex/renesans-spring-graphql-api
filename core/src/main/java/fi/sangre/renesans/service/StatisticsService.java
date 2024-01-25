@@ -214,17 +214,22 @@ public class StatisticsService {
     }
 
     public List<DriverStatistics> calculateDriversStatistics(@NonNull final OrganizationSurvey survey, @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
+        final Map<QuestionId, Map<DriverId, Double>> questionWeights = getQuestionWeights(survey);
+
+        List<Driver> drivers = new ArrayList<>();
+        survey.getCatalysts().forEach(catalyst -> drivers.addAll(catalyst.getDrivers()));
+
+        return calculateDriversStatistics(drivers, questionWeights, questionStatistics);
+    }
+
+    public Map<QuestionId, Map<DriverId, Double>> getQuestionWeights(OrganizationSurvey survey) {
         final Map<QuestionId, Map<DriverId, Double>> questionWeights = surveyUtils.getAllQuestions(survey).stream()
                 .collect(collectingAndThen(toMap(
                         LikertQuestion::getId,
                         LikertQuestion::getWeights,
                         (v1, v2) -> v1
                 ), Collections::unmodifiableMap));
-
-        List<Driver> drivers = new ArrayList<>();
-        survey.getCatalysts().forEach(catalyst -> drivers.addAll(catalyst.getDrivers()));
-
-        return calculateDriversStatistics(drivers, questionWeights, questionStatistics);
+        return questionWeights;
     }
 
     public List<DriverStatistics> calculateDriversStatistics(@NonNull final List<Driver> drivers, @NonNull final Map<QuestionId, Map<DriverId, Double>> questionWeights, @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
@@ -263,7 +268,9 @@ public class StatisticsService {
                 final Map<DriverId, Double> weights = questionWeights.get(entry.getKey());
 
                 weights.forEach((driverId, questionWeight) -> {
-                    if (questionWeight > 0) { //  weight = 0 can be skipped as it does not change results
+                    Optional<Driver> matchDriver = drivers.stream().filter(driver -> driver.getId().equals(driverId.getValue())).findFirst();
+
+                    if (matchDriver.isPresent() && questionWeight > 0) { //  weight = 0 can be skipped as it does not change results
                         final Double driverWeightModifier = driversStatistics.get(driverId).getWeightModifier();
                         final Double questionResult = questionAverage / MAX_ANSWER_VALUE;
 
@@ -299,12 +306,7 @@ public class StatisticsService {
         ) {
         List<DriverStatistics> driverStatisticsList = calculateDriversStatistics(survey, questionStatistics);
 
-        final Map<QuestionId, Map<DriverId, Double>> questionWeights = surveyUtils.getAllQuestions(survey).stream()
-                .collect(collectingAndThen(toMap(
-                        LikertQuestion::getId,
-                        LikertQuestion::getWeights,
-                        (v1, v2) -> v1
-                ), Collections::unmodifiableMap));
+        final Map<QuestionId, Map<DriverId, Double>> questionWeights = getQuestionWeights(survey);
 
         List<DetailedDriverStatistics> detailedDriverStatisticsList = new ArrayList<>();
 

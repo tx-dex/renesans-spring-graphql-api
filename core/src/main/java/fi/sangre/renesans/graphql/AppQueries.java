@@ -130,14 +130,14 @@ public class AppQueries implements GraphQLQueryResolver {
     @NonNull
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
     public AfterGameComparativeParameterStatisticsOutput afterGameComparativeParameterStatistics(@NonNull final UUID questionnaireId,
-                                                                                                 @NonNull final UUID topicId,
+                                                                                                 @NonNull final Long topicId,
                                                                                                  @NonNull final String topicType,
                                                                                                  @Nullable final String languageCode,
                                                                                                  @NonNull final DataFetchingEnvironment environment) {
         log.debug("Getting after game comparative parameter statistics questionnaire(id={}, topicId={})", questionnaireId, topicId);
         resolverHelper.setLanguageCode(languageCode, environment);
 
-
+        return afterGameFacade.afterGameComparativeParameterStatistics(questionnaireId, topicId, topicType, resolverHelper.getRequiredPrincipal(environment), languageCode);
     }
 
     @NonNull

@@ -14,6 +14,6 @@ import java.util.List;
 public class ParameterStatisticOutput {
     private String label;
     private List<String> parents;
-    private double result;
-    private double rate;
+    private Double result;
+    private Double rate;
 }
