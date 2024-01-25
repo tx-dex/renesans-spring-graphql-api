@@ -15,6 +15,7 @@ import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
+import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
 import fi.sangre.renesans.application.model.questions.QuestionId;
@@ -321,7 +322,7 @@ public class AfterGameFacade {
         final List<ParameterChild> parameters = getParameters(survey, principal);
 
         RespondentStateCounters respondentStateCounters = surveyDao.countRespondentsBySurvey(new SurveyId(survey.getId()));
-        Long respondentsAnswered = respondentStateCounters != null ? respondentStateCounters.getAnswered() : 0L;
+        Long respondentsAnswered = respondentStateCounters.getAnswered();
 
         parameters.forEach(parameter -> {
             log.debug("Get async stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameter.getId());
@@ -350,6 +351,16 @@ public class AfterGameFacade {
         } else {
             throw new SurveyException("Cannot get statistics");
         }
+    }
+
+    public AfterGameComparativeParameterStatisticsOutput afterGameComparativeParameterStatistics(@NonNull final UUID questionnaireId,
+                                                                                                 @NonNull final UUID topicId,
+                                                                                                 @NonNull final UserDetails principal) {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+
+        List<Parameter> parameters = survey.getParameters();
+
+
     }
 
     private <T> boolean isAllSuccess(@NonNull final Collection<Try<T>> tries) {

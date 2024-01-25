@@ -214,13 +214,6 @@ public class StatisticsService {
     }
 
     public List<DriverStatistics> calculateDriversStatistics(@NonNull final OrganizationSurvey survey, @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
-        final Map<DriverId, DriverStatistics> driversStatistics = Maps.newHashMap();
-        final Map<DriverId, Double> driverWeights = Maps.newHashMap();
-        final Map<DriverId, Double> sumOfQuestionsWeightsPerDriver = Maps.newHashMap();
-        final Map<DriverId, Double> sumOfQuestionsResultsPerDriver = Maps.newHashMap();
-        final Map<DriverId, Double> sumOfQuestionsWeighedResultsPerDriver = Maps.newHashMap();
-        final Map<DriverId, Double> sumOfQuestionsRatesPerDriver = Maps.newHashMap();
-
         final Map<QuestionId, Map<DriverId, Double>> questionWeights = surveyUtils.getAllQuestions(survey).stream()
                 .collect(collectingAndThen(toMap(
                         LikertQuestion::getId,
@@ -228,22 +221,34 @@ public class StatisticsService {
                         (v1, v2) -> v1
                 ), Collections::unmodifiableMap));
 
+        List<Driver> drivers = new ArrayList<>();
+        survey.getCatalysts().forEach(catalyst -> drivers.addAll(catalyst.getDrivers()));
+
+        return calculateDriversStatistics(drivers, questionWeights, questionStatistics);
+    }
+
+    public List<DriverStatistics> calculateDriversStatistics(@NonNull final List<Driver> drivers, @NonNull final Map<QuestionId, Map<DriverId, Double>> questionWeights, @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
+        final Map<DriverId, DriverStatistics> driversStatistics = Maps.newHashMap();
+        final Map<DriverId, Double> driverWeights = Maps.newHashMap();
+        final Map<DriverId, Double> sumOfQuestionsWeightsPerDriver = Maps.newHashMap();
+        final Map<DriverId, Double> sumOfQuestionsResultsPerDriver = Maps.newHashMap();
+        final Map<DriverId, Double> sumOfQuestionsWeighedResultsPerDriver = Maps.newHashMap();
+        final Map<DriverId, Double> sumOfQuestionsRatesPerDriver = Maps.newHashMap();
+
         // Prepare temporary maps
-        survey.getCatalysts().forEach(catalyst -> catalyst.getDrivers()
-            .forEach(driver -> {
+        drivers.forEach(driver -> {
                 final DriverId driverId = new DriverId(driver.getId());
                 driversStatistics.put(driverId, DriverStatistics.builder()
                         .id(driverId)
                         .titles(driver.getTitles().getPhrases())
-                        .catalystId(catalyst.getId())
-                        .build());
+                        .build()); //TODO get catalyst id?
                 driverWeights.put(driverId, driver.getWeight());
 
                 sumOfQuestionsWeightsPerDriver.put(driverId, 0d);
                 sumOfQuestionsResultsPerDriver.put(driverId, 0d);
                 sumOfQuestionsWeighedResultsPerDriver.put(driverId, 0d);
                 sumOfQuestionsRatesPerDriver.put(driverId, 0d);
-            }));
+            });
 
         applyDriverWeightModifier(driversStatistics, driverWeights);
 
