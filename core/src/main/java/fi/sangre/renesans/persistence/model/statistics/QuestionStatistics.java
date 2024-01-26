@@ -27,4 +27,7 @@ public class QuestionStatistics implements Statistics {
     private Double rate;
     private Long skipped;
 
+    public Double getResult() {
+        return avg;
+    }
 }

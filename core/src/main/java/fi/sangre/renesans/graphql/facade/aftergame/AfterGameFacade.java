@@ -370,9 +370,12 @@ public class AfterGameFacade {
         List<ParameterStatisticOutput> parameterStatisticOutputs = new ArrayList<>();
 
         parameterItems.forEach(parameter -> {
+            List<UUID> parameterIds = parameterUtils.getChildren(parameter).stream().map(childParameter -> parameter.getId().getValue()).collect(toList());
+            parameterIds.add(parameter.getId().getValue());
+
             Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId,
                     ImmutableList.of(RespondentParameterFilter.builder()
-                        .values(ImmutableList.of(parameter.getId().getValue()))
+                        .values(parameterIds)
                         .build()));
             Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
 
