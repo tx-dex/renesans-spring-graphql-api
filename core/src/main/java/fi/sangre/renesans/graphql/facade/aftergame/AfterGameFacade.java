@@ -19,6 +19,7 @@ import fi.sangre.renesans.application.model.filter.RespondentParameterFilter;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
+import fi.sangre.renesans.application.model.parameter.ParentParameter;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
@@ -366,11 +367,11 @@ public class AfterGameFacade {
         Driver driver = surveyUtils.findDriver(topicId, survey);
 
         List<Parameter> parentParameters = survey.getParameters();
-        List<ParameterChild> parameterItems = parameterUtils.getChildren(parentParameters);
+        List<Parameter> parameterItems = parameterUtils.getAllChildren(parentParameters);
         List<ParameterStatisticOutput> parameterStatisticOutputs = new ArrayList<>();
 
         parameterItems.forEach(parameter -> {
-            List<UUID> parameterIds = parameterUtils.getChildren(parameter).stream().map(childParameter -> parameter.getId().getValue()).collect(toList());
+            List<UUID> parameterIds = parameterUtils.getAllChildren(parameter).stream().map(childParameter -> parameter.getId().getValue()).collect(toList());
             parameterIds.add(parameter.getId().getValue());
 
             Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId,

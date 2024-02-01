@@ -42,5 +42,19 @@ public class TreeParameter implements Parameter, ParentParameter, ParameterChild
         }
     }
 
-
+    @Override
+    public List<Parameter> getAllChildren() {
+        if (hasChildren()) {
+            final ImmutableList.Builder<Parameter> children = ImmutableList.builder();
+            for(final ParameterChild child : this.children) {
+                children.add(child);
+                if (child instanceof ParentParameter) {
+                    children.addAll(((ParentParameter) child).getLeaves());
+                }
+            }
+            return children.build();
+        } else {
+            return ImmutableList.of();
+        }
+    }
 }

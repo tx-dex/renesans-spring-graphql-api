@@ -35,7 +35,8 @@ public class ParameterUtils {
     public List<ParameterChild> getChildren(@NonNull final Parameter parameter) {
         if (parameter instanceof ParentParameter) {
             final ParentParameter parent = (ParentParameter) parameter;
-            return ImmutableList.copyOf(Optional.ofNullable(parent.getLeaves())
+            return ImmutableList.copyOf(
+                    Optional.of(parent.getLeaves().stream().map(child -> (ParameterChild) child).collect(toList()))
                     .orElse(ImmutableList.of()));
         } else if (parameter instanceof ListParameter) {
             final ListParameter list = (ListParameter) parameter;
@@ -46,12 +47,35 @@ public class ParameterUtils {
         }
     }
 
+    @NonNull
+    public List<Parameter> getAllChildren(@NonNull final List<Parameter> parameters) {
+        return parameters.stream()
+                .map(this::getAllChildren)
+                .flatMap(Collection::stream)
+                .collect(collectingAndThen(toList(), Collections::unmodifiableList));
+    }
+
+    @NonNull
+    public List<Parameter> getAllChildren(@NonNull final Parameter parameter) {
+        if (parameter instanceof ParentParameter) {
+            final ParentParameter parent = (ParentParameter) parameter;
+            return ImmutableList.copyOf(Optional.ofNullable(parent.getAllChildren())
+                    .orElse(ImmutableList.of()));
+        } else if (parameter instanceof ListParameter) {
+            final ListParameter list = (ListParameter) parameter;
+            return ImmutableList.copyOf(Optional.ofNullable(list.getValues())
+                    .orElse(ImmutableList.of()));
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
     @Nullable
     public ParameterChild findChild(@NonNull final ParameterId childId, @NonNull final Parameter parameter) {
         if (parameter instanceof ParentParameter) {
             final ParentParameter parent = (ParentParameter) parameter;
             if (parent.hasChildren()) {
-                return parent.getLeaves().stream()
+                return (ParameterChild) parent.getLeaves().stream()
                         .filter(child -> childId.equals(child.getId()))
                         .findFirst()
                         .orElse(null);
@@ -81,8 +105,8 @@ public class ParameterUtils {
                 if (parent.hasChildren()) {
                     return parent.getLeaves().stream()
                             .filter(child -> childrenIds.contains(child.getId()))
+                            .map(child -> (ParameterChild) child)
                             .collect(collectingAndThen(toList(), Collections::unmodifiableList));
-
                 } else {
                     return ImmutableList.of();
                 }
