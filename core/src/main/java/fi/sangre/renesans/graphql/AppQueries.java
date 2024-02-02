@@ -1,6 +1,7 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import fi.sangre.renesans.application.model.TopicType;
 import fi.sangre.renesans.graphql.facade.aftergame.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.facade.aftergame.DialogueFacade;
@@ -131,7 +132,7 @@ public class AppQueries implements GraphQLQueryResolver {
     @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
     public AfterGameComparativeParameterStatisticsOutput afterGameComparativeParameterStatistics(@NonNull final UUID questionnaireId,
                                                                                                  @NonNull final Long topicId,
-                                                                                                 @NonNull final String topicType,
+                                                                                                 @NonNull final TopicType topicType,
                                                                                                  @Nullable final String languageCode,
                                                                                                  @NonNull final DataFetchingEnvironment environment) {
         log.debug("Getting after game comparative parameter statistics questionnaire(id={}, topicId={})", questionnaireId, topicId);

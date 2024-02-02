@@ -19,11 +19,9 @@ import fi.sangre.renesans.application.model.filter.RespondentParameterFilter;
 import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
-import fi.sangre.renesans.application.model.parameter.ParentParameter;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
-import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
@@ -54,6 +52,7 @@ import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.RespondentStateCounters;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
+import fi.sangre.renesans.persistence.model.statistics.Statistics;
 import fi.sangre.renesans.service.*;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
@@ -358,7 +357,7 @@ public class AfterGameFacade {
 
     public AfterGameComparativeParameterStatisticsOutput afterGameComparativeParameterStatistics(@NonNull final UUID questionnaireId,
                                                                                                  @NonNull final Long topicId,
-                                                                                                 @NonNull final String topicType,
+                                                                                                 @NonNull final TopicType topicType,
                                                                                                  @NonNull final UserDetails principal,
                                                                                                  @NonNull final String languageCode) {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
@@ -380,9 +379,17 @@ public class AfterGameFacade {
                         .build()));
             Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
 
-            DriverStatistics driverStatistics = statisticsService.calculateDriversStatistics(ImmutableList.of(driver),
-                    questionWeights,
-                    questionStatistics).get(0);
+            Statistics statistics;
+
+            if(topicType.equals(TopicType.DRIVER)) {
+                statistics = statisticsService.calculateDriversStatistics(ImmutableList.of(driver),
+                        questionWeights,
+                        questionStatistics).get(0);
+            } else if(topicType.equals(TopicType.STATEMENT)) {
+                statistics = questionStatistics.get(topicId);
+            } else {
+                throw new RuntimeException("Invalid topic type " + topicType);
+            }
 
             List<String> parents = parameterUtils.getAllParents(parameter)
                     .stream().map(parent -> parent.getLabel().getPhrase(languageCode))
@@ -391,8 +398,8 @@ public class AfterGameFacade {
             ParameterStatisticOutput parameterStatistic = ParameterStatisticOutput.builder()
                     .label(parameter.getLabel().getPhrase(languageCode))
                     .parents(parents)
-                    .result(driverStatistics.getResult())
-                    .rate(driverStatistics.getRate())
+                    .result(statistics.getResult())
+                    .rate(statistics.getRate())
                     .build();
 
             parameterStatisticOutputs.add(parameterStatistic);
@@ -400,7 +407,7 @@ public class AfterGameFacade {
 
         return AfterGameComparativeParameterStatisticsOutput.builder()
                 .topic(driver.getTitles().getPhrase(languageCode))
-                .type(topicType)
+                .type(topicType.name())
                 .parameters(parameterStatisticOutputs)
                 .build();
     }
