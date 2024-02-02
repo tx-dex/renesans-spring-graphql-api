@@ -342,13 +342,19 @@ public class StatisticsService {
     }
 
     public List<CatalystStatistics> calculateCatalystsStatistics(@NonNull final OrganizationSurvey survey,
+                                                                 @NonNull final List<DriverStatistics> driverStatistics,
+                                                                 @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
+        return calculateCatalystListStatistics(survey.getCatalysts(), driverStatistics, questionStatistics);
+    }
+
+    public List<CatalystStatistics> calculateCatalystListStatistics(@NonNull final List<Catalyst> catalysts,
                                                                   @NonNull final List<DriverStatistics> driverStatistics,
                                                                   @NonNull final Map<QuestionId, QuestionStatistics> questionStatistics) {
         final double allDriverWeightSum = driverStatistics.stream().mapToDouble(DriverStatistics::getWeight).sum();
 
         final ImmutableList.Builder<CatalystStatistics> builder = ImmutableList.builder();
 
-        survey.getCatalysts().forEach(catalyst -> {
+        catalysts.forEach(catalyst -> {
             final Set<QuestionId> questionsIds = catalyst.getQuestions().stream()
                     .map(LikertQuestion::getId)
                     .collect(toSet());
@@ -399,16 +405,16 @@ public class StatisticsService {
                     .build());
         });
 
-        final List<CatalystStatistics> catalysts = builder.build();
+        final List<CatalystStatistics> catalystStatistics = builder.build();
 
-        final DescriptiveStatistics statistics = new DescriptiveStatistics(catalysts.stream().mapToDouble(CatalystStatistics::getWeight).toArray());
+        final DescriptiveStatistics statistics = new DescriptiveStatistics(catalystStatistics.stream().mapToDouble(CatalystStatistics::getWeight).toArray());
         final Double catalystWeightMax = statistics.getMax();
 
-        catalysts.forEach(e -> {
+        catalystStatistics.forEach(e -> {
             e.setImportance(e.getWeight() / catalystWeightMax);
         });
 
-        return catalysts;
+        return catalystStatistics;
     }
 
     private List<CatalystStatistics> findEnabledCatalysts(final List<CatalystStatistics> catalysts) {

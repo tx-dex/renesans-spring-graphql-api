@@ -1,9 +1,6 @@
 package fi.sangre.renesans.service;
 
-import fi.sangre.renesans.application.model.Driver;
-import fi.sangre.renesans.application.model.DriverId;
-import fi.sangre.renesans.application.model.OrganizationSurvey;
-import fi.sangre.renesans.application.model.TopicType;
+import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.utils.SurveyUtils;
@@ -23,6 +20,9 @@ public class TopicStatisticsCalculatorFactory {
             case DRIVER:
                 Driver driver = surveyUtils.findDriver(Long.parseLong(topicId), survey);
                 return new DriverTopicStatisticCalculator(driver, survey, statisticsService);
+            case THEME:
+                Catalyst catalyst = surveyUtils.findCatalyst(new CatalystId(UUID.fromString(topicId)), survey);
+                return new ThemeTopicStatisticCalculator(catalyst, survey, statisticsService);
             default:
                 throw new Exception("Unexpected topic type " + topicType);
         }
