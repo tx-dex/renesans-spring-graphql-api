@@ -402,9 +402,15 @@ public class AfterGameFacade {
             parameterStatisticOutputs.add(parameterStatistic);
         });
 
+        final Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId);
+        Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
+        Statistics statistics = topicStatisticsCalculator.getStatistics(questionStatistics);
+
         return AfterGameComparativeParameterStatisticsOutput.builder()
                 .topic(topicStatisticsCalculator.getLabel(languageCode))
                 .type(topicType.name())
+                .totalResult(statistics.getResult())
+                .totalImportance(statistics.getRate())
                 .parameters(parameterStatisticOutputs)
                 .build();
     }
