@@ -1,5 +1,6 @@
 package fi.sangre.renesans.persistence.model.statistics;
 
+import fi.sangre.renesans.application.utils.StatisticsUtils;
 import lombok.*;
 
 import java.util.UUID;
@@ -28,7 +29,7 @@ public class QuestionStatistics implements StatisticsResult {
     private Long skipped;
 
     public Double getResult() {
-        return avg;
+        return StatisticsUtils.indexToRate(avg);
     }
-    public Double getWeighedResult() { return avg; }
+    public Double getWeighedResult() { return getResult(); }
 }
