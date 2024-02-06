@@ -55,7 +55,7 @@ public class AfterGameComparativeStatisticsAssembler {
                 .totalResult(totalStatisticsResult != null
                         ? rateToPercent(totalStatisticsResult.getWeighedResult())
                         : null)
-                .totalImportance(totalStatisticsResult != null
+                .totalRate(totalStatisticsResult != null
                         ? totalStatisticsResult.getRate()
                         :null)
                 .parameters(parameterOutputs)

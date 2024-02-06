@@ -15,6 +15,6 @@ public class AfterGameComparativeStatisticsOutput {
     private String topic;
     private String type;
     private Double totalResult;
-    private Double totalImportance;
+    private Double totalRate;
     private List<ParameterStatisticOutput> parameters;
 }

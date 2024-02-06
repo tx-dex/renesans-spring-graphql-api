@@ -436,7 +436,7 @@ type AfterGameComparativeParameterStatistics {
     topic: String!
     type: String
     totalResult: Float
-    totalImportance: Float
+    totalRate: Float
     parameters: [ParameterStatistic!]!
 }
 
