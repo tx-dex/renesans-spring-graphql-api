@@ -5,9 +5,8 @@ import fi.sangre.renesans.application.model.Catalyst;
 import fi.sangre.renesans.application.model.OrganizationSurvey;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.statistics.DriverStatistics;
-import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
-import fi.sangre.renesans.persistence.model.statistics.Statistics;
+import fi.sangre.renesans.persistence.model.statistics.StatisticsResult;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ public class ThemeTopicStatisticCalculator implements TopicStatisticsCalculator 
     }
 
     @Override
-    public Statistics getStatistics(Map<QuestionId, QuestionStatistics> questionStatistics) {
+    public StatisticsResult getStatistics(Map<QuestionId, QuestionStatistics> questionStatistics) {
         List<DriverStatistics> driverStatistics = statisticsService.calculateDriversStatistics(survey, questionStatistics);
 
         return statisticsService.calculateCatalystListStatistics(ImmutableList.of(catalyst),

@@ -11,10 +11,10 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class AfterGameComparativeParameterStatisticsOutput {
+public class AfterGameComparativeStatisticsOutput {
     private String topic;
     private String type;
-    private double totalResult;
-    private double totalImportance;
+    private Double totalResult;
+    private Double totalImportance;
     private List<ParameterStatisticOutput> parameters;
 }

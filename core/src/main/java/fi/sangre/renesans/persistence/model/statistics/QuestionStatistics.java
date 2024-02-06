@@ -13,7 +13,7 @@ import java.util.UUID;
 @Data
 @Builder
 @EqualsAndHashCode(of = "questionId")
-public class QuestionStatistics implements Statistics {
+public class QuestionStatistics implements StatisticsResult {
     public static final QuestionStatistics EMPTY = QuestionStatistics.builder()
             .avg(null)
             .rate(null)
@@ -30,4 +30,5 @@ public class QuestionStatistics implements Statistics {
     public Double getResult() {
         return avg;
     }
+    public Double getWeighedResult() { return avg; }
 }

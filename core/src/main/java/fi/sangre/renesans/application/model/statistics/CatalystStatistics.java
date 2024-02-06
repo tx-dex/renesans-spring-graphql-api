@@ -6,7 +6,7 @@ import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.DriverId;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
-import fi.sangre.renesans.persistence.model.statistics.Statistics;
+import fi.sangre.renesans.persistence.model.statistics.StatisticsResult;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Data
 @Builder
-public class CatalystStatistics implements Statistics {
+public class CatalystStatistics implements StatisticsResult {
     public static final CatalystStatistics EMPTY = CatalystStatistics.builder()
             .weighedResult(null)
             .drivers(ImmutableMap.of())
@@ -33,7 +33,6 @@ public class CatalystStatistics implements Statistics {
     @Builder.Default
     private Map<QuestionId, QuestionStatistics> questions = Maps.newHashMap();
 
-    //TODO Korjaa tämä
     @Override
     public Double getRate() {
         return importance;

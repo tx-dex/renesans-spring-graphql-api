@@ -22,7 +22,6 @@ import fi.sangre.renesans.application.model.parameter.ParameterItem;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.Invitation;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
-import fi.sangre.renesans.application.model.statistics.DriverStatistics;
 import fi.sangre.renesans.application.model.statistics.SurveyResult;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
 import fi.sangre.renesans.application.utils.ParameterUtils;
@@ -33,10 +32,7 @@ import fi.sangre.renesans.graphql.assemble.OpenQuestionAnswerAssembler;
 import fi.sangre.renesans.graphql.assemble.SurveyParameterOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembler;
 import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
-import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
-import fi.sangre.renesans.graphql.assemble.statistics.AfterGameDetailedDriversStatisticsAssembler;
-import fi.sangre.renesans.graphql.assemble.statistics.AfterGameOpenQuestionsStatisticsAssembler;
-import fi.sangre.renesans.graphql.assemble.statistics.AfterGameQuestionsStatisticsAssembler;
+import fi.sangre.renesans.graphql.assemble.statistics.*;
 import fi.sangre.renesans.graphql.input.MailInvitationInput;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
@@ -52,9 +48,8 @@ import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatistics
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.RespondentStateCounters;
-import fi.sangre.renesans.persistence.model.Survey;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
-import fi.sangre.renesans.persistence.model.statistics.Statistics;
+import fi.sangre.renesans.persistence.model.statistics.StatisticsResult;
 import fi.sangre.renesans.service.*;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
@@ -114,6 +109,7 @@ public class AfterGameFacade {
     private final MultilingualUtils multilingualUtils;
     private final TranslationService translationService;
     private final StatisticsService statisticsService;
+    private final AfterGameComparativeStatisticsAssembler afterGameComparativeStatisticsAssembler;
 
     @Qualifier(DAO_EXECUTOR_NAME)
     private final ThreadPoolTaskExecutor daoExecutor;
@@ -357,11 +353,11 @@ public class AfterGameFacade {
         }
     }
 
-    public AfterGameComparativeParameterStatisticsOutput afterGameComparativeParameterStatistics(@NonNull final UUID questionnaireId,
-                                                                                                 @NonNull final String topicId,
-                                                                                                 @NonNull final TopicType topicType,
-                                                                                                 @NonNull final UserDetails principal,
-                                                                                                 @NonNull final String languageCode) throws Exception {
+    public AfterGameComparativeStatisticsOutput afterGameComparativeParameterStatistics(@NonNull final UUID questionnaireId,
+                                                                                        @NonNull final String topicId,
+                                                                                        @NonNull final TopicType topicType,
+                                                                                        @NonNull final UserDetails principal,
+                                                                                        @NonNull final String languageCode) throws Exception {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
         SurveyId surveyId = new SurveyId(survey.getId());
 
@@ -372,47 +368,40 @@ public class AfterGameFacade {
                 surveyUtils,
                 statisticsService);
 
-        List<Parameter> parentParameters = survey.getParameters();
-        List<Parameter> parameterItems = parameterUtils.getAllChildren(parentParameters);
-        List<ParameterStatisticOutput> parameterStatisticOutputs = new ArrayList<>();
+        List<Parameter> parameters = parameterUtils.getAllChildren(survey.getParameters());
+        Map<ParameterId, StatisticsResult> parameterStatistics = new HashMap<>();
 
-        parameterItems.forEach(parameter -> {
-            List<UUID> parameterIds = parameterUtils.getAllChildren(parameter).stream().map(childParameter -> parameter.getId().getValue()).collect(toList());
-            parameterIds.add(parameter.getId().getValue());
-
-            Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId,
-                    ImmutableList.of(RespondentParameterFilter.builder()
-                        .values(parameterIds)
-                        .build()));
-            Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
-
-            Statistics statistics = topicStatisticsCalculator.getStatistics(questionStatistics);
-
-            List<String> parents = parameterUtils.getAllParents(parameter)
-                    .stream().map(parent -> parent.getLabel().getPhrase(languageCode))
-                    .collect(toList());
-
-            ParameterStatisticOutput parameterStatistic = ParameterStatisticOutput.builder()
-                    .label(parameter.getLabel().getPhrase(languageCode))
-                    .parents(parents)
-                    .result(statistics != null ? statistics.getResult() : null)
-                    .rate(statistics != null ? statistics.getRate() : null)
-                    .build();
-
-            parameterStatisticOutputs.add(parameterStatistic);
+        parameters.forEach(parameter -> {
+            StatisticsResult statisticsResult = getParameterStatisticsResult(parameter, surveyId, topicStatisticsCalculator);
+            parameterStatistics.put(parameter.getId(), statisticsResult);
         });
 
-        final Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId);
-        Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
-        Statistics statistics = topicStatisticsCalculator.getStatistics(questionStatistics);
+        StatisticsResult totalStatisticsResult = getStatisticsResult(surveyId, answerDao.getAnsweredRespondentIds(surveyId), topicStatisticsCalculator);
 
-        return AfterGameComparativeParameterStatisticsOutput.builder()
-                .topic(topicStatisticsCalculator.getLabel(languageCode))
-                .type(topicType.name())
-                .totalResult(statistics.getResult())
-                .totalImportance(statistics.getRate())
-                .parameters(parameterStatisticOutputs)
-                .build();
+        return afterGameComparativeStatisticsAssembler.from(
+                topicStatisticsCalculator.getLabel(languageCode),
+                topicType,
+                totalStatisticsResult,
+                parameters,
+                parameterStatistics,
+                languageCode);
+    }
+
+    private StatisticsResult getParameterStatisticsResult(Parameter parameter, SurveyId surveyId, TopicStatisticsCalculator topicStatisticsCalculator) {
+        List<UUID> parameterIds = parameterUtils.getAllChildren(parameter).stream().map(childParameter -> parameter.getId().getValue()).collect(toList());
+        parameterIds.add(parameter.getId().getValue());
+
+        Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId,
+                ImmutableList.of(RespondentParameterFilter.builder()
+                    .values(parameterIds)
+                    .build()));
+
+        return getStatisticsResult(surveyId, respondentIds, topicStatisticsCalculator);
+    }
+
+    private StatisticsResult getStatisticsResult(SurveyId surveyId, Set<RespondentId> respondentIds, TopicStatisticsCalculator topicStatisticsCalculator) {
+        Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
+        return topicStatisticsCalculator.getStatistics(questionStatistics);
     }
 
     private <T> boolean isAllSuccess(@NonNull final Collection<Try<T>> tries) {

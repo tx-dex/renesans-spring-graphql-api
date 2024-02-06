@@ -3,7 +3,7 @@ package fi.sangre.renesans.service;
 import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
-import fi.sangre.renesans.persistence.model.statistics.Statistics;
+import fi.sangre.renesans.persistence.model.statistics.StatisticsResult;
 import org.springframework.beans.factory.annotation.Configurable;
 
 import java.util.Map;
@@ -17,7 +17,7 @@ public class StatementTopicStatisticCalculator implements TopicStatisticsCalcula
         this.question = question;
     }
 
-    public Statistics getStatistics(Map<QuestionId, QuestionStatistics> questionStatistics) {
+    public StatisticsResult getStatistics(Map<QuestionId, QuestionStatistics> questionStatistics) {
         return questionStatistics.get(question.getId());
     }
 
