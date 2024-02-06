@@ -54,6 +54,8 @@ import fi.sangre.renesans.service.*;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
 import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
+import fi.sangre.renesans.service.statistics.comparative.ComparativeStatisticsCalculator;
+import fi.sangre.renesans.service.statistics.comparative.ComparativeStatisticsCalculatorFactory;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -361,7 +363,7 @@ public class AfterGameFacade {
         final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
         SurveyId surveyId = new SurveyId(survey.getId());
 
-        TopicStatisticsCalculator topicStatisticsCalculator = TopicStatisticsCalculatorFactory.getCalculator(
+        ComparativeStatisticsCalculator comparativeStatisticsCalculator = ComparativeStatisticsCalculatorFactory.getCalculator(
                 topicType,
                 topicId,
                 survey,
@@ -372,14 +374,14 @@ public class AfterGameFacade {
         Map<ParameterId, StatisticsResult> parameterStatistics = new HashMap<>();
 
         parameters.forEach(parameter -> {
-            StatisticsResult statisticsResult = getParameterStatisticsResult(parameter, surveyId, topicStatisticsCalculator);
+            StatisticsResult statisticsResult = getParameterStatisticsResult(parameter, surveyId, comparativeStatisticsCalculator);
             parameterStatistics.put(parameter.getId(), statisticsResult);
         });
 
-        StatisticsResult totalStatisticsResult = getStatisticsResult(surveyId, answerDao.getAnsweredRespondentIds(surveyId), topicStatisticsCalculator);
+        StatisticsResult totalStatisticsResult = getStatisticsResult(surveyId, answerDao.getAnsweredRespondentIds(surveyId), comparativeStatisticsCalculator);
 
         return afterGameComparativeStatisticsAssembler.from(
-                topicStatisticsCalculator.getLabel(languageCode),
+                comparativeStatisticsCalculator.getLabel(languageCode),
                 topicType,
                 totalStatisticsResult,
                 parameters,
@@ -387,7 +389,7 @@ public class AfterGameFacade {
                 languageCode);
     }
 
-    private StatisticsResult getParameterStatisticsResult(Parameter parameter, SurveyId surveyId, TopicStatisticsCalculator topicStatisticsCalculator) {
+    private StatisticsResult getParameterStatisticsResult(Parameter parameter, SurveyId surveyId, ComparativeStatisticsCalculator comparativeStatisticsCalculator) {
         List<UUID> parameterIds = parameterUtils.getAllChildren(parameter).stream().map(childParameter -> parameter.getId().getValue()).collect(toList());
         parameterIds.add(parameter.getId().getValue());
 
@@ -396,12 +398,12 @@ public class AfterGameFacade {
                     .values(parameterIds)
                     .build()));
 
-        return getStatisticsResult(surveyId, respondentIds, topicStatisticsCalculator);
+        return getStatisticsResult(surveyId, respondentIds, comparativeStatisticsCalculator);
     }
 
-    private StatisticsResult getStatisticsResult(SurveyId surveyId, Set<RespondentId> respondentIds, TopicStatisticsCalculator topicStatisticsCalculator) {
+    private StatisticsResult getStatisticsResult(SurveyId surveyId, Set<RespondentId> respondentIds, ComparativeStatisticsCalculator comparativeStatisticsCalculator) {
         Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
-        return topicStatisticsCalculator.getStatistics(questionStatistics);
+        return comparativeStatisticsCalculator.getStatistics(questionStatistics);
     }
 
     private <T> boolean isAllSuccess(@NonNull final Collection<Try<T>> tries) {
