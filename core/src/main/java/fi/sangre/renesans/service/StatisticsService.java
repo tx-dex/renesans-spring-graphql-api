@@ -246,7 +246,8 @@ public class StatisticsService {
                 driversStatistics.put(driverId, DriverStatistics.builder()
                         .id(driverId)
                         .titles(driver.getTitles().getPhrases())
-                        .build()); //TODO get catalyst id?
+                        .catalystId(driver.getCatalystId())
+                        .build());
                 driverWeights.put(driverId, driver.getWeight());
 
                 sumOfQuestionsWeightsPerDriver.put(driverId, 0d);
