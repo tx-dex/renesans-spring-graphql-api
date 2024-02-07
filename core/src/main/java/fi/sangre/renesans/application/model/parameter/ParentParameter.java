@@ -10,4 +10,5 @@ public interface ParentParameter {
     boolean hasChildren();
     List<ParameterChild> getLeaves();
 
+    List<Parameter> getAllChildren();
 }

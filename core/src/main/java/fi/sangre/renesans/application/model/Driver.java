@@ -13,6 +13,7 @@ public class Driver implements DriverOutput {
     private Long id;
     @Deprecated
     private String pdfName;
+    private CatalystId catalystId;
     private MultilingualText titles;
     private MultilingualText descriptions;
     private MultilingualText prescriptions;

@@ -114,6 +114,10 @@
       "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation.",
       "description": "Page description"
     },
+    "select_menu_default_text": {
+      "text": "Select",
+      "description": "Select menu default text (used also on other pages)"
+    },
     "privacy_policy_checkbox_label": {
       "text": "I agree and consent to the",
       "description": "Accept privacy policy checkbox text part 1"
@@ -424,6 +428,52 @@
     "no_results_for_parameter": {
       "text": "No results for this parameter",
       "description": "Shown when there are no results to show for a parameter"
+    }
+  },
+  "comparative_reports": {
+    "cr_nav_overall": {
+      "text": "Overall",
+      "description": "Section navigation link text"
+    },
+    "cr_nav_themes": {
+      "text": "Themes",
+      "description": "Section navigation link text"
+    },
+    "cr_nav_drivers": {
+      "text": "Drivers",
+      "description": "Section navigation link text"
+    },
+    "cr_nav_statements": {
+      "text": "Statements",
+      "description": "Section navigation link text"
+    },
+    "select_statement": {
+      "text": "Select statement",
+      "description": "Dropdown menu label"
+    },
+    "select_driver": {
+      "text": "Select driver",
+      "description": "Dropdown menu label"
+    },
+    "select_theme": {
+      "text": "Select theme",
+      "description": "Dropdown menu label"
+    },
+    "select_theme_instruction": {
+      "text": "No theme selected",
+      "description": "Text shown when there is no theme selected yet"
+    },
+    "select_driver_instruction": {
+      "text": "No driver selected",
+      "description": "Text shown when there is no driver selected yet"
+    },
+    "select_statement_instruction": {
+      "text": "No statement selected",
+      "description": "Text shown when there is no statement selected yet"
+    },
+    "overall_result_page_title": {
+      "text": "Overall result",
+      "description": "Page title on the overall result (VAI, KPI) page"
     }
   },
   "discussion": {
