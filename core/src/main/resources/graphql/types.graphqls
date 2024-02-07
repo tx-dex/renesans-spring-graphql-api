@@ -433,7 +433,7 @@ type AfterGameQuestionStatistics {
 }
 
 type AfterGameComparativeParameterStatistics {
-    topic: String!
+    topic: String
     type: String
     totalResult: Float
     totalRate: Float
