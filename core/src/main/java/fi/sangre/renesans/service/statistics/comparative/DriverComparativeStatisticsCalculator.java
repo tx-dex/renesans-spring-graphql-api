@@ -8,19 +8,18 @@ import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import fi.sangre.renesans.persistence.model.statistics.StatisticsResult;
 import fi.sangre.renesans.service.StatisticsService;
-import fi.sangre.renesans.service.statistics.comparative.ComparativeStatisticsCalculator;
 import org.springframework.beans.factory.annotation.Configurable;
 
 import java.util.Map;
 
 @Configurable(preConstruction = true)
-public class DriverComparativeStatisticCalculator implements ComparativeStatisticsCalculator {
+public class DriverComparativeStatisticsCalculator implements ComparativeStatisticsCalculator {
 
     private final StatisticsService statisticsService;
     private final Driver driver;
     private final Map<QuestionId, Map<DriverId, Double>> questionWeights;
 
-    public DriverComparativeStatisticCalculator(Driver driver, OrganizationSurvey survey, StatisticsService statisticsService) {
+    public DriverComparativeStatisticsCalculator(Driver driver, OrganizationSurvey survey, StatisticsService statisticsService) {
         this.driver = driver;
         this.statisticsService = statisticsService;
         questionWeights = statisticsService.getQuestionWeights(survey);

@@ -4,17 +4,16 @@ import fi.sangre.renesans.application.model.questions.LikertQuestion;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import fi.sangre.renesans.persistence.model.statistics.StatisticsResult;
-import fi.sangre.renesans.service.statistics.comparative.ComparativeStatisticsCalculator;
 import org.springframework.beans.factory.annotation.Configurable;
 
 import java.util.Map;
 
 @Configurable(preConstruction = true)
-public class StatementComparativeStatisticCalculator implements ComparativeStatisticsCalculator {
+public class StatementComparativeStatisticsCalculator implements ComparativeStatisticsCalculator {
 
     private final LikertQuestion question;
 
-    public StatementComparativeStatisticCalculator(LikertQuestion question) {
+    public StatementComparativeStatisticsCalculator(LikertQuestion question) {
         this.question = question;
     }
 

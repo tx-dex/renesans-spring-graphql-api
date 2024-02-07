@@ -17,13 +17,15 @@ public class ComparativeStatisticsCalculatorFactory {
         switch (topicType) {
             case STATEMENT:
                 LikertQuestion question = surveyUtils.findQuestion(new QuestionId(UUID.fromString(topicId)), survey);
-                return new StatementComparativeStatisticCalculator(question);
+                return new StatementComparativeStatisticsCalculator(question);
             case DRIVER:
                 Driver driver = surveyUtils.findDriver(Long.parseLong(topicId), survey);
-                return new DriverComparativeStatisticCalculator(driver, survey, statisticsService);
+                return new DriverComparativeStatisticsCalculator(driver, survey, statisticsService);
             case THEME:
                 Catalyst catalyst = surveyUtils.findCatalyst(new CatalystId(UUID.fromString(topicId)), survey);
-                return new ThemeComparativeStatisticCalculator(catalyst, survey, statisticsService);
+                return new ThemeComparativeStatisticsCalculator(catalyst, survey, statisticsService);
+            case OVERALL:
+                return new VaiComparativeStatisticsCalculator(survey, statisticsService);
             default:
                 throw new Exception("Unexpected topic type " + topicType);
         }
