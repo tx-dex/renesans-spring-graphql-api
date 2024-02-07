@@ -103,7 +103,7 @@ type Query {
 
     afterGameComparativeParameterStatistics (
         questionnaireId: ID!
-        topicId: ID!
+        topicId: ID
         topicType: String!
         languageCode: String
     ) : AfterGameComparativeParameterStatistics!
