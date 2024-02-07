@@ -467,6 +467,10 @@
     "select_statement_instruction": {
       "text": "No statement selected",
       "description": "Text shown when there is no statement selected yet"
+    },
+    "overall_result_page_title": {
+      "text": "Overall result",
+      "description": "Page title on the overall result (VAI, KPI) page"
     }
   },
   "discussion": {
