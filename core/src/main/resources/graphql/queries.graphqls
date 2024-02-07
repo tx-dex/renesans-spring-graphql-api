@@ -186,7 +186,9 @@ type Query {
         questionnaireId: ID!
     ): AfterGameOverviewVisionAttainmentIndicatorOutput!
 
-
+    answerDistribution(
+        questionId: ID!
+    ): AnswerDistributions
 
     customer(
         languageCode: String

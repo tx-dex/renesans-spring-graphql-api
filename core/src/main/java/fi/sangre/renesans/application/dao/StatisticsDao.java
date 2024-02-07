@@ -5,6 +5,7 @@ import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.questions.QuestionId;
 import fi.sangre.renesans.application.model.respondent.RespondentId;
 import fi.sangre.renesans.persistence.model.answer.CatalystOpenQuestionAnswerEntity;
+import fi.sangre.renesans.persistence.model.statistics.AnswerDistribution;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import fi.sangre.renesans.persistence.repository.CatalystOpenQuestionAnswerRepository;
 import fi.sangre.renesans.persistence.repository.LikerQuestionAnswerRepository;
@@ -65,5 +66,13 @@ public class StatisticsDao {
         }
 
         return answers;
+    }
+
+    public List<AnswerDistribution> getResponseDistributions(@NonNull final UUID questionId) {
+        return likerQuestionAnswerRepository.getQuestionResponseDistribution(questionId);
+    }
+
+    public List<AnswerDistribution> getRateDistributions(@NonNull final UUID questionId) {
+        return likerQuestionAnswerRepository.getQuestionRateDistribution(questionId);
     }
 }

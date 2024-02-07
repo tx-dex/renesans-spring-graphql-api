@@ -3,6 +3,7 @@ package fi.sangre.renesans.persistence.repository;
 import fi.sangre.renesans.persistence.model.SurveyRespondent;
 import fi.sangre.renesans.persistence.model.answer.LikertQuestionAnswerEntity;
 import fi.sangre.renesans.persistence.model.answer.QuestionAnswerId;
+import fi.sangre.renesans.persistence.model.statistics.AnswerDistribution;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,6 +37,20 @@ public interface LikerQuestionAnswerRepository extends JpaRepository<LikertQuest
             "AND r.state = 'ANSWERED' " +
             "GROUP BY a.id.questionId")
     List<QuestionStatistics> getQuestionStatisticsByQuestion(@Param("surveyId") UUID surveyId);
+
+    @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.AnswerDistribution(CAST(a.response as string), COUNT(a.response)) " +
+            "FROM LikertQuestionAnswerEntity a " +
+            "WHERE a.id.questionId = :questionId " +
+            "AND a.status = 1 " +
+            "GROUP BY a.response")
+    List<AnswerDistribution> getQuestionResponseDistribution(@Param("questionId") UUID questionId);
+
+    @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.AnswerDistribution(CAST(a.rate as string), COUNT(a.response)) " +
+            "FROM LikertQuestionAnswerEntity a " +
+            "WHERE a.id.questionId = :questionId " +
+            "AND a.status = 1 " +
+            "GROUP BY a.rate")
+    List<AnswerDistribution> getQuestionRateDistribution(@Param("questionId") UUID questionId);
 
     void deleteAllByRespondent(@NonNull SurveyRespondent respondent);
 }

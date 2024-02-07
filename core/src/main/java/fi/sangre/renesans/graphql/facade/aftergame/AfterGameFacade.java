@@ -30,10 +30,7 @@ import fi.sangre.renesans.graphql.assemble.OpenQuestionAnswerAssembler;
 import fi.sangre.renesans.graphql.assemble.SurveyParameterOutputAssembler;
 import fi.sangre.renesans.graphql.assemble.discussion.AfterGameDiscussionAssembler;
 import fi.sangre.renesans.graphql.assemble.questionnaire.QuestionnaireAssembler;
-import fi.sangre.renesans.graphql.assemble.statistics.AfterGameCatalystStatisticsAssembler;
-import fi.sangre.renesans.graphql.assemble.statistics.AfterGameDetailedDriversStatisticsAssembler;
-import fi.sangre.renesans.graphql.assemble.statistics.AfterGameOpenQuestionsStatisticsAssembler;
-import fi.sangre.renesans.graphql.assemble.statistics.AfterGameQuestionsStatisticsAssembler;
+import fi.sangre.renesans.graphql.assemble.statistics.*;
 import fi.sangre.renesans.graphql.input.MailInvitationInput;
 import fi.sangre.renesans.graphql.input.discussion.DiscussionCommentInput;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
@@ -49,6 +46,7 @@ import fi.sangre.renesans.graphql.output.statistics.AfterGameParameterStatistics
 import fi.sangre.renesans.persistence.discussion.model.ActorEntity;
 import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.RespondentStateCounters;
+import fi.sangre.renesans.persistence.model.statistics.AnswerDistribution;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
 import fi.sangre.renesans.service.*;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
@@ -109,6 +107,7 @@ public class AfterGameFacade {
     private final MultilingualUtils multilingualUtils;
     private final TranslationService translationService;
     private final StatisticsService statisticsService;
+    private final AnswerDistributionAssembler answerDistributionAssembler;
 
     @Qualifier(DAO_EXECUTOR_NAME)
     private final ThreadPoolTaskExecutor daoExecutor;
@@ -455,6 +454,14 @@ public class AfterGameFacade {
         }
 
         return parameters.build();
+    }
+
+    @NonNull
+    public AnswerDistributionsOutput answerDistributionsOutput(@NonNull final UUID questionId) {
+        List<AnswerDistribution> responseDistributions = statisticsDao.getResponseDistributions(questionId);
+        List<AnswerDistribution> rateDistributions = statisticsDao.getRateDistributions(questionId);
+
+        return answerDistributionAssembler.from(responseDistributions, rateDistributions);
     }
 
     @NonNull

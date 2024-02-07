@@ -250,4 +250,12 @@ public class AppQueries implements GraphQLQueryResolver {
                 resolverHelper.getRequiredPrincipal(environment)
         );
     }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionId, 'survey', 'READ')")
+    public AnswerDistributionsOutput getAnswerDistribution(
+            @NonNull final UUID questionId
+    ) {
+        return afterGameFacade.answerDistributionsOutput(questionId);
+    }
 }
