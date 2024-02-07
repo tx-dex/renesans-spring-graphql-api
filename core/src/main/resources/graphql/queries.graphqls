@@ -101,6 +101,13 @@ type Query {
         languageCode: String
     ) : [AfterGameDetailedDriverStatistics]!
 
+    afterGameComparativeParameterStatistics (
+        questionnaireId: ID!
+        topicId: ID
+        topicType: String!
+        languageCode: String
+    ) : AfterGameComparativeParameterStatistics!
+
     # Returns a collection of question statistics for specific questionnaire and parameter
     afterGameDetailedQuestionsStatistics(
         questionnaireId: ID!

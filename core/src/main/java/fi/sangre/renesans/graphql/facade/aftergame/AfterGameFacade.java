@@ -15,6 +15,8 @@ import fi.sangre.renesans.application.dao.SurveyDao;
 import fi.sangre.renesans.application.model.*;
 import fi.sangre.renesans.application.model.answer.ParameterItemAnswer;
 import fi.sangre.renesans.application.model.discussion.DiscussionQuestion;
+import fi.sangre.renesans.application.model.filter.RespondentParameterFilter;
+import fi.sangre.renesans.application.model.parameter.Parameter;
 import fi.sangre.renesans.application.model.parameter.ParameterChild;
 import fi.sangre.renesans.application.model.parameter.ParameterItem;
 import fi.sangre.renesans.application.model.questions.QuestionId;
@@ -48,10 +50,13 @@ import fi.sangre.renesans.persistence.discussion.model.CommentEntity;
 import fi.sangre.renesans.persistence.model.RespondentStateCounters;
 import fi.sangre.renesans.persistence.model.statistics.AnswerDistribution;
 import fi.sangre.renesans.persistence.model.statistics.QuestionStatistics;
+import fi.sangre.renesans.persistence.model.statistics.StatisticsResult;
 import fi.sangre.renesans.service.*;
 import fi.sangre.renesans.service.statistics.ParameterStatisticsService;
 import fi.sangre.renesans.service.statistics.RespondentStatisticsService;
 import fi.sangre.renesans.service.statistics.SurveyStatisticsService;
+import fi.sangre.renesans.service.statistics.comparative.ComparativeStatisticsCalculator;
+import fi.sangre.renesans.service.statistics.comparative.ComparativeStatisticsCalculatorFactory;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,6 +113,7 @@ public class AfterGameFacade {
     private final TranslationService translationService;
     private final StatisticsService statisticsService;
     private final AnswerDistributionAssembler answerDistributionAssembler;
+    private final AfterGameComparativeStatisticsAssembler afterGameComparativeStatisticsAssembler;
 
     @Qualifier(DAO_EXECUTOR_NAME)
     private final ThreadPoolTaskExecutor daoExecutor;
@@ -320,7 +326,7 @@ public class AfterGameFacade {
         final List<ParameterChild> parameters = getParameters(survey, principal);
 
         RespondentStateCounters respondentStateCounters = surveyDao.countRespondentsBySurvey(new SurveyId(survey.getId()));
-        Long respondentsAnswered = respondentStateCounters != null ? respondentStateCounters.getAnswered() : 0L;
+        Long respondentsAnswered = respondentStateCounters.getAnswered();
 
         parameters.forEach(parameter -> {
             log.debug("Get async stats for Survey(id={}), Catalyst(id={}) Parameter(id={})", survey.getId(), catalyst.getId(), parameter.getId());
@@ -349,6 +355,57 @@ public class AfterGameFacade {
         } else {
             throw new SurveyException("Cannot get statistics");
         }
+    }
+
+    public AfterGameComparativeStatisticsOutput afterGameComparativeParameterStatistics(@NonNull final UUID questionnaireId,
+                                                                                        @NonNull final String topicId,
+                                                                                        @NonNull final TopicType topicType,
+                                                                                        @NonNull final UserDetails principal,
+                                                                                        @NonNull final String languageCode) throws Exception {
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        SurveyId surveyId = new SurveyId(survey.getId());
+
+        ComparativeStatisticsCalculator comparativeStatisticsCalculator = ComparativeStatisticsCalculatorFactory.getCalculator(
+                topicType,
+                topicId,
+                survey,
+                surveyUtils,
+                statisticsService);
+
+        List<Parameter> parameters = parameterUtils.getAllChildren(survey.getParameters());
+        Map<ParameterId, StatisticsResult> parameterStatistics = new HashMap<>();
+
+        parameters.forEach(parameter -> {
+            StatisticsResult statisticsResult = getParameterStatisticsResult(parameter, surveyId, comparativeStatisticsCalculator);
+            parameterStatistics.put(parameter.getId(), statisticsResult);
+        });
+
+        StatisticsResult totalStatisticsResult = getStatisticsResult(surveyId, answerDao.getAnsweredRespondentIds(surveyId), comparativeStatisticsCalculator);
+
+        return afterGameComparativeStatisticsAssembler.from(
+                comparativeStatisticsCalculator.getLabel(languageCode),
+                topicType,
+                totalStatisticsResult,
+                parameters,
+                parameterStatistics,
+                languageCode);
+    }
+
+    private StatisticsResult getParameterStatisticsResult(Parameter parameter, SurveyId surveyId, ComparativeStatisticsCalculator comparativeStatisticsCalculator) {
+        List<UUID> parameterIds = parameterUtils.getAllChildren(parameter).stream().map(childParameter -> parameter.getId().getValue()).collect(toList());
+        parameterIds.add(parameter.getId().getValue());
+
+        Set<RespondentId> respondentIds = answerDao.getAnsweredRespondentIds(surveyId,
+                ImmutableList.of(RespondentParameterFilter.builder()
+                    .values(parameterIds)
+                    .build()));
+
+        return getStatisticsResult(surveyId, respondentIds, comparativeStatisticsCalculator);
+    }
+
+    private StatisticsResult getStatisticsResult(SurveyId surveyId, Set<RespondentId> respondentIds, ComparativeStatisticsCalculator comparativeStatisticsCalculator) {
+        Map<QuestionId, QuestionStatistics> questionStatistics = statisticsDao.getQuestionStatistics(surveyId, respondentIds);
+        return comparativeStatisticsCalculator.getStatistics(questionStatistics);
     }
 
     private <T> boolean isAllSuccess(@NonNull final Collection<Try<T>> tries) {

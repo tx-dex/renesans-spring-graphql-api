@@ -1,5 +1,6 @@
 package fi.sangre.renesans.persistence.model.statistics;
 
+import fi.sangre.renesans.application.utils.StatisticsUtils;
 import lombok.*;
 
 import java.util.UUID;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Data
 @Builder
 @EqualsAndHashCode(of = "questionId")
-public class QuestionStatistics {
+public class QuestionStatistics implements StatisticsResult {
     public static final QuestionStatistics EMPTY = QuestionStatistics.builder()
             .avg(null)
             .rate(null)
@@ -27,4 +28,8 @@ public class QuestionStatistics {
     private Double rate;
     private Long skipped;
 
+    public Double getResult() {
+        return StatisticsUtils.indexToRate(avg);
+    }
+    public Double getWeighedResult() { return getResult(); }
 }

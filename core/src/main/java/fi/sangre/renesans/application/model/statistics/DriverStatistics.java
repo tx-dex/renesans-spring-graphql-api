@@ -2,6 +2,7 @@ package fi.sangre.renesans.application.model.statistics;
 
 import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.DriverId;
+import fi.sangre.renesans.persistence.model.statistics.StatisticsResult;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,7 +12,7 @@ import java.util.Map;
 @Data
 @Builder
 @EqualsAndHashCode(of = "id")
-public class DriverStatistics {
+public class DriverStatistics implements StatisticsResult {
     public static final DriverStatistics EMPTY = DriverStatistics.builder()
             .weighedResult(null)
             .build();

@@ -1,6 +1,7 @@
 package fi.sangre.renesans.application.assemble;
 
 import com.google.common.collect.ImmutableList;
+import fi.sangre.renesans.application.model.CatalystId;
 import fi.sangre.renesans.application.model.Driver;
 import fi.sangre.renesans.application.model.MultilingualText;
 import fi.sangre.renesans.application.utils.MultilingualUtils;
@@ -59,19 +60,20 @@ public class DriverAssembler {
     }
 
     @NonNull
-    public List<Driver> fromMetadata(@Nullable final List<DriverMetadata> metadata) {
+    public List<Driver> fromMetadata(@Nullable final List<DriverMetadata> metadata, CatalystId catalystId) {
         return Optional.ofNullable(metadata)
                 .orElse(ImmutableList.of())
                 .stream()
-                .map(this::from)
+                .map(driverMetadata -> from(driverMetadata, catalystId))
                 .collect(collectingAndThen(toList(), Collections::unmodifiableList));
     }
 
     @NonNull
-    private Driver from(@NonNull final DriverMetadata metadata) {
+    private Driver from(@NonNull final DriverMetadata metadata, CatalystId catalystId) {
         return Driver.builder()
                 .id(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER))
                 .pdfName(metadata.getPdfName())
+                .catalystId(catalystId)
                 .titles(multilingualUtils.create(metadata.getTitles()))
                 .descriptions(multilingualUtils.create(metadata.getDescriptions()))
                 .prescriptions(multilingualUtils.create(metadata.getPrescriptions()))

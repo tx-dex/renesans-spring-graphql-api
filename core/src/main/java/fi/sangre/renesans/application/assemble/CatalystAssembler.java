@@ -90,12 +90,14 @@ public class CatalystAssembler {
                           @NonNull final MultilingualText lowEndLabel,
                           @NonNull final MultilingualText highEndLabel) {
 
+        CatalystId catalystId = new CatalystId(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER));
+
         final Catalyst catalyst = Catalyst.builder()
-                .id(new CatalystId(Objects.requireNonNull(metadata.getId(), MissingIdException.MESSAGE_SUPPLIER)))
+                .id(catalystId)
                 .pdfName(metadata.getPdfName())
                 .titles(multilingualUtils.create(metadata.getTitles()))
                 .descriptions(multilingualUtils.create(metadata.getDescriptions()))
-                .drivers(driverAssembler.fromMetadata(metadata.getDrivers()))
+                .drivers(driverAssembler.fromMetadata(metadata.getDrivers(), catalystId))
                 .weight(metadata.getWeight())
                 .build();
 

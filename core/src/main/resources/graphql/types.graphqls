@@ -432,6 +432,21 @@ type AfterGameQuestionStatistics {
     skipped: Long
 }
 
+type AfterGameComparativeParameterStatistics {
+    topic: String
+    type: String
+    totalResult: Float
+    totalRate: Float
+    parameters: [ParameterStatistic!]!
+}
+
+type ParameterStatistic {
+    label: String!
+    parents: [String]
+    result: Float,
+    rate: Float
+}
+
 type AfterGameOpenQuestionStatistics {
     title: String!
     catalystTitle: String

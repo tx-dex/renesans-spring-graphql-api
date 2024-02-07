@@ -1,11 +1,11 @@
 package fi.sangre.renesans.graphql;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import fi.sangre.renesans.application.model.TopicType;
 import fi.sangre.renesans.graphql.facade.aftergame.AfterGameFacade;
 import fi.sangre.renesans.graphql.facade.QuestionnaireFacade;
 import fi.sangre.renesans.graphql.facade.aftergame.DialogueFacade;
 import fi.sangre.renesans.graphql.output.QuestionnaireOutput;
-import fi.sangre.renesans.graphql.output.dialogue.DialogueQuestionOutput;
 import fi.sangre.renesans.graphql.output.dialogue.DialogueTopicOutput;
 import fi.sangre.renesans.graphql.output.dialogue.DialogueTotalStatisticsOutput;
 import fi.sangre.renesans.graphql.output.discussion.AfterGameDiscussionOutput;
@@ -125,6 +125,19 @@ public class AppQueries implements GraphQLQueryResolver {
         return afterGameFacade.afterGameRespondentParametersStatistics(questionnaireId,
                 catalystId,
                 resolverHelper.getRequiredPrincipal(environment));
+    }
+
+    @NonNull
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
+    public AfterGameComparativeStatisticsOutput afterGameComparativeParameterStatistics(@NonNull final UUID questionnaireId,
+                                                                                        @NonNull final String topicId,
+                                                                                        @NonNull final TopicType topicType,
+                                                                                        @Nullable final String languageCode,
+                                                                                        @NonNull final DataFetchingEnvironment environment) throws Exception {
+        log.debug("Getting after game comparative parameter statistics questionnaire(id={}, topicId={})", questionnaireId, topicId);
+        resolverHelper.setLanguageCode(languageCode, environment);
+
+        return afterGameFacade.afterGameComparativeParameterStatistics(questionnaireId, topicId, topicType, resolverHelper.getRequiredPrincipal(environment), languageCode);
     }
 
     @NonNull
