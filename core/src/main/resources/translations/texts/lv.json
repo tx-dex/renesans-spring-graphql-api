@@ -114,6 +114,10 @@
       "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Map yourself to your organisation.",
       "description": "Page description"
     },
+    "select_menu_default_text": {
+      "text": "Select",
+      "description": "Select menu default text (used also on other pages)"
+    },
     "privacy_policy_checkbox_label": {
       "text": "I agree and consent to the",
       "description": "Accept privacy policy checkbox text part 1"
