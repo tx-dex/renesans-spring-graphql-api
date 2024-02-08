@@ -75,11 +75,15 @@ public class StatisticsDao {
     }
 
     public List<AnswerDistribution> getResponseDistributions(@NonNull final SurveyId surveyId, @NonNull final UUID questionId, @Nullable final UUID parameterId) {
-        return likerQuestionAnswerRepository.getQuestionResponseDistributionByRespondentsIn(surveyId.getValue(), questionId, getRespondentIds(surveyId, parameterId));
+        Set<UUID> respondentIds = getRespondentIds(surveyId, parameterId);
+        if (respondentIds.isEmpty()) return new ArrayList<>();
+        return likerQuestionAnswerRepository.getQuestionResponseDistributionByRespondentsIn(surveyId.getValue(), questionId, respondentIds);
     }
 
     public List<AnswerDistribution> getRateDistributions(@NonNull final SurveyId surveyId, @NonNull final UUID questionId, @Nullable final UUID parameterId) {
-        return likerQuestionAnswerRepository.getQuestionRateDistributionByRespondentsIn(surveyId.getValue(), questionId, getRespondentIds(surveyId, parameterId));
+        Set<UUID> respondentIds = getRespondentIds(surveyId, parameterId);
+        if (respondentIds.isEmpty()) return new ArrayList<>();
+        return likerQuestionAnswerRepository.getQuestionRateDistributionByRespondentsIn(surveyId.getValue(), questionId, respondentIds);
     }
 
     private Set<UUID> getRespondentIds(@NonNull final SurveyId surveyId, @Nullable final UUID parameterId) {
