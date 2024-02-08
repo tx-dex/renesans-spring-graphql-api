@@ -160,6 +160,7 @@ public class AfterGameCatalystStatisticsAssembler {
         final QuestionStatistics respondentGroupQuestion = respondentGroupQuestions.getOrDefault(question.getId(), QuestionStatistics.EMPTY);
 
         return AfterGameQuestionStatisticsOutput.builder()
+                .id(question.getId().getValue())
                 .titles(question.getTitles().getPhrases())
                 .result(rateToPercent(respondentGroupQuestion.getAvg()))
                 .rate(respondentGroupQuestion.getRate())
