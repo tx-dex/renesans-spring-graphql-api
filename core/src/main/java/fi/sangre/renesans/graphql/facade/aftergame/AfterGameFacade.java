@@ -514,9 +514,11 @@ public class AfterGameFacade {
     }
 
     @NonNull
-    public AnswerDistributionsOutput answerDistributionsOutput(@NonNull final UUID questionId) {
-        List<AnswerDistribution> responseDistributions = statisticsDao.getResponseDistributions(questionId);
-        List<AnswerDistribution> rateDistributions = statisticsDao.getRateDistributions(questionId);
+    public AnswerDistributionsOutput answerDistributionsOutput(
+            @NonNull final UUID questionnaireId,
+            @NonNull final UUID questionId) {
+        List<AnswerDistribution> responseDistributions = statisticsDao.getResponseDistributions(questionnaireId, questionId);
+        List<AnswerDistribution> rateDistributions = statisticsDao.getRateDistributions(questionnaireId, questionId);
 
         return answerDistributionAssembler.from(responseDistributions, rateDistributions);
     }

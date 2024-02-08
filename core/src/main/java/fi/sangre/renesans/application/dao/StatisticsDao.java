@@ -68,11 +68,11 @@ public class StatisticsDao {
         return answers;
     }
 
-    public List<AnswerDistribution> getResponseDistributions(@NonNull final UUID questionId) {
-        return likerQuestionAnswerRepository.getQuestionResponseDistribution(questionId);
+    public List<AnswerDistribution> getResponseDistributions(@NonNull final UUID surveyId, @NonNull final UUID questionId) {
+        return likerQuestionAnswerRepository.getQuestionResponseDistribution(surveyId, questionId);
     }
 
-    public List<AnswerDistribution> getRateDistributions(@NonNull final UUID questionId) {
-        return likerQuestionAnswerRepository.getQuestionRateDistribution(questionId);
+    public List<AnswerDistribution> getRateDistributions(@NonNull final UUID surveyId, @NonNull final UUID questionId) {
+        return likerQuestionAnswerRepository.getQuestionRateDistribution(surveyId, questionId);
     }
 }

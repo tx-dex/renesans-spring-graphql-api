@@ -194,6 +194,7 @@ type Query {
     ): AfterGameOverviewVisionAttainmentIndicatorOutput!
 
     answerDistribution(
+        questionnaireId: ID!
         questionId: ID!
     ): AnswerDistributions
 
