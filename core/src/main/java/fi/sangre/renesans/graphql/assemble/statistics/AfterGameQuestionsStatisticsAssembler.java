@@ -42,6 +42,7 @@ public class AfterGameQuestionsStatisticsAssembler {
                     .orElse(null);
 
             outputs.add(AfterGameQuestionStatisticsOutput.builder()
+                    .id(questionId.getValue())
                     .titles(question.getTitles().getPhrases())
                     .catalystTitles(catalystTitles)
                     .result(rateToPercent(indexToRate(questionStatistics.getAvg())))

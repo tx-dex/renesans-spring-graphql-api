@@ -194,7 +194,9 @@ type Query {
     ): AfterGameOverviewVisionAttainmentIndicatorOutput!
 
     answerDistribution(
+        questionnaireId: ID!
         questionId: ID!
+        parameterValue: ID
     ): AnswerDistributions
 
     customer(

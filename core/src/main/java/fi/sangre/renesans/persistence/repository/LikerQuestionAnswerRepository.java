@@ -41,16 +41,20 @@ public interface LikerQuestionAnswerRepository extends JpaRepository<LikertQuest
     @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.AnswerDistribution(CAST(a.response as string), COUNT(a.response)) " +
             "FROM LikertQuestionAnswerEntity a " +
             "WHERE a.id.questionId = :questionId " +
+            "AND a.id.surveyId = :surveyId " +
+            "AND a.id.respondentId in :respondentIds " +
             "AND a.status = 1 " +
             "GROUP BY a.response")
-    List<AnswerDistribution> getQuestionResponseDistribution(@Param("questionId") UUID questionId);
+    List<AnswerDistribution> getQuestionResponseDistributionByRespondentsIn(@Param("surveyId") UUID surveyId, @Param("questionId") UUID questionId, @Param("respondentIds") Set<UUID> respondentIds);
 
     @Query("SELECT new fi.sangre.renesans.persistence.model.statistics.AnswerDistribution(CAST(a.rate as string), COUNT(a.response)) " +
             "FROM LikertQuestionAnswerEntity a " +
             "WHERE a.id.questionId = :questionId " +
+            "AND a.id.surveyId = :surveyId " +
+            "AND a.id.respondentId in :respondentIds " +
             "AND a.status = 1 " +
             "GROUP BY a.rate")
-    List<AnswerDistribution> getQuestionRateDistribution(@Param("questionId") UUID questionId);
+    List<AnswerDistribution> getQuestionRateDistributionByRespondentsIn(@Param("surveyId") UUID surveyId, @Param("questionId") UUID questionId, @Param("respondentIds") Set<UUID> respondentIds);
 
     void deleteAllByRespondent(@NonNull SurveyRespondent respondent);
 }

@@ -265,10 +265,13 @@ public class AppQueries implements GraphQLQueryResolver {
     }
 
     @NonNull
-    @PreAuthorize("hasPermission(#questionId, 'survey', 'READ')")
+    @PreAuthorize("hasPermission(#questionnaireId, 'survey', 'READ')")
     public AnswerDistributionsOutput getAnswerDistribution(
-            @NonNull final UUID questionId
+            @NonNull final UUID questionnaireId,
+            @NonNull final UUID questionId,
+            @Nullable final UUID parameterValue,
+            @NonNull final DataFetchingEnvironment environment
     ) {
-        return afterGameFacade.answerDistributionsOutput(questionId);
+        return afterGameFacade.answerDistributionsOutput(questionnaireId, questionId, parameterValue, resolverHelper.getRequiredPrincipal(environment));
     }
 }

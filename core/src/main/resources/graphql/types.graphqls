@@ -423,6 +423,7 @@ type AfterGameParameterStatistics {
 }
 
 type AfterGameQuestionStatistics {
+    id: ID!
     title: String!
     catalystTitle: String
     result: Float
