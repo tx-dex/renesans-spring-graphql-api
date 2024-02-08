@@ -29,6 +29,7 @@ public class Permissions implements PermissionEvaluator {
 
     public static final String ORGANIZATION_TARGET = "organization";
     public static final String SURVEY_TARGET = "survey";
+    public static final String QUESTION_TARGET = "question";
 
     private final UserPrincipalService userPrincipalService;
     private final SurveyMappingService surveyMappingService;
@@ -93,14 +94,22 @@ public class Permissions implements PermissionEvaluator {
                 return permitOrganization(user(authentication), (UUID) targetId, authentication, permission);
             } else if (SURVEY_TARGET.equalsIgnoreCase(targetType)) {
                 return permitSurvey(user(authentication), (UUID) targetId, authentication, permission);
+            } else if (QUESTION_TARGET.equalsIgnoreCase(targetType)) {
+                return permitQuestion(user(authentication), (UUID) targetId);
             }
         } else if (hasRole(authentication.getAuthorities(), ROLE_RESPONDENT)) {
             if (SURVEY_TARGET.equalsIgnoreCase(targetType)) {
                 return permitSurvey(respondent(authentication), (UUID) targetId, authentication, permission);
             }
+            if (QUESTION_TARGET.equalsIgnoreCase(targetType)) {
+                return permitQuestion(respondent(authentication), (UUID) targetId);
+            }
         } else if (hasRole(authentication.getAuthorities(), ROLE_GUEST)) {
             if (SURVEY_TARGET.equalsIgnoreCase(targetType)) {
                 return permitSurvey(guest(authentication), (UUID) targetId, authentication, permission);
+            }
+            if (QUESTION_TARGET.equalsIgnoreCase(targetType)) {
+                return permitQuestion(guest(authentication), (UUID) targetId);
             }
         }
 
@@ -138,5 +147,24 @@ public class Permissions implements PermissionEvaluator {
         final Set<UUID> surveyOrganizationIds = surveyMappingService.getSurveyOrganizations(questionnaireId);
 
         return !Sets.intersection(userOrganizationIds, surveyOrganizationIds).isEmpty();
+    }
+
+    private boolean permitQuestion(@NonNull final RespondentPrincipal respondent,
+                                   @NonNull final UUID questionId) {
+        return surveyMappingService.getSurveyQuestions(respondent.getSurveyId().getValue()).contains(questionId);
+    }
+
+    private boolean permitQuestion(@NonNull final GuestPrincipal guest,
+                                   @NonNull final UUID questionId) {
+        return surveyMappingService.getSurveyQuestions(guest.getSurveyId().getValue()).contains(questionId);
+    }
+
+    private boolean permitQuestion(@NonNull final UserPrincipal user,
+                                   @NonNull final UUID questionnaireId) {
+        final Set<UUID> userOrganizationIds = userPrincipalService.getCustomerIdsThatPrincipalCanAccess(user);
+        return surveyMappingService.getOrganizationsSurveys(userOrganizationIds)
+                .stream()
+                .anyMatch(surveyId ->
+                        surveyMappingService.getSurveyQuestions(surveyId).contains(questionnaireId));
     }
 }

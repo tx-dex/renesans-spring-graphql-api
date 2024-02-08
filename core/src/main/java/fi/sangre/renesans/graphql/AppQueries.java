@@ -265,7 +265,7 @@ public class AppQueries implements GraphQLQueryResolver {
     }
 
     @NonNull
-    @PreAuthorize("hasPermission(#questionId, 'survey', 'READ')")
+    @PreAuthorize("hasPermission(#questionId, 'question', 'READ')")
     public AnswerDistributionsOutput getAnswerDistribution(
             @NonNull final UUID questionId
     ) {
