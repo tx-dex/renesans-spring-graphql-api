@@ -2,6 +2,8 @@ package fi.sangre.renesans.application.dao;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import fi.sangre.renesans.application.model.ParameterId;
+import fi.sangre.renesans.application.model.Respondent;
 import fi.sangre.renesans.application.model.SurveyId;
 import fi.sangre.renesans.application.model.filter.RespondentFilter;
 import fi.sangre.renesans.application.model.filter.RespondentParameterFilter;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,26 +77,38 @@ public class StatisticsDao {
         return answers;
     }
 
-    public List<AnswerDistribution> getResponseDistributions(@NonNull final SurveyId surveyId, @NonNull final UUID questionId, @Nullable final UUID parameterId) {
-        Set<UUID> respondentIds = getRespondentIds(surveyId, parameterId);
+    public List<AnswerDistribution> getResponseDistributions(@NonNull final SurveyId surveyId,
+                                                             @NonNull final UUID questionId,
+                                                             @Nullable final UUID parameterId,
+                                                             @NonNull final UserDetails principal) {
+        Set<UUID> respondentIds = getRespondentIds(surveyId, parameterId, principal);
         if (respondentIds.isEmpty()) return new ArrayList<>();
         return likerQuestionAnswerRepository.getQuestionResponseDistributionByRespondentsIn(surveyId.getValue(), questionId, respondentIds);
     }
 
-    public List<AnswerDistribution> getRateDistributions(@NonNull final SurveyId surveyId, @NonNull final UUID questionId, @Nullable final UUID parameterId) {
-        Set<UUID> respondentIds = getRespondentIds(surveyId, parameterId);
+    public List<AnswerDistribution> getRateDistributions(@NonNull final SurveyId surveyId,
+                                                         @NonNull final UUID questionId,
+                                                         @Nullable final UUID parameterId,
+                                                         @NonNull final UserDetails principal) {
+        Set<UUID> respondentIds = getRespondentIds(surveyId, parameterId, principal);
         if (respondentIds.isEmpty()) return new ArrayList<>();
         return likerQuestionAnswerRepository.getQuestionRateDistributionByRespondentsIn(surveyId.getValue(), questionId, respondentIds);
     }
 
-    private Set<UUID> getRespondentIds(@NonNull final SurveyId surveyId, @Nullable final UUID parameterId) {
-        if(parameterId != null) {
+    private Set<UUID> getRespondentIds(@NonNull final SurveyId surveyId, @Nullable final UUID parameterId, @NonNull final UserDetails principal) {
+        Set<RespondentId> respondents = new HashSet<>();
+        if(parameterId == null || parameterId.equals(ParameterId.GLOBAL_EVERYONE_PARAMETER_ID.getValue())) {
+            respondents = answerDao.getAnsweredRespondentIds(surveyId);
+        } else if(parameterId.equals(ParameterId.GLOBAL_YOU_PARAMETER_ID.getValue()) && principal instanceof Respondent) {
+            Respondent respondent = (Respondent) principal;
+            respondents.add(respondent.getId());
+        } else {
             final List<RespondentFilter> filters = ImmutableList.of(RespondentParameterFilter.builder()
                     .values(ImmutableList.of(parameterId))
                     .build());
-            return answerDao.getAnsweredRespondentIds(surveyId, filters).stream().map(RespondentId::getValue).collect(Collectors.toSet());
-        } else {
-            return answerDao.getAnsweredRespondentIds(surveyId).stream().map(RespondentId::getValue).collect(Collectors.toSet());
+            respondents = answerDao.getAnsweredRespondentIds(surveyId, filters);
         }
+
+        return respondents.stream().map(RespondentId::getValue).collect(Collectors.toSet());
     }
 }

@@ -269,8 +269,9 @@ public class AppQueries implements GraphQLQueryResolver {
     public AnswerDistributionsOutput getAnswerDistribution(
             @NonNull final UUID questionnaireId,
             @NonNull final UUID questionId,
-            @Nullable final UUID parameterValue
+            @Nullable final UUID parameterValue,
+            @NonNull final DataFetchingEnvironment environment
     ) {
-        return afterGameFacade.answerDistributionsOutput(questionnaireId, questionId, parameterValue);
+        return afterGameFacade.answerDistributionsOutput(questionnaireId, questionId, parameterValue, resolverHelper.getRequiredPrincipal(environment));
     }
 }
