@@ -519,7 +519,9 @@ public class AfterGameFacade {
             @NonNull final UUID questionId,
             @Nullable final UUID parameterValue,
             @NonNull final UserDetails principal) {
-        SurveyId surveyId = new SurveyId(questionnaireId);
+        final OrganizationSurvey survey = getSurvey(questionnaireId, principal);
+        final SurveyId surveyId = new SurveyId(survey.getId());
+
         List<AnswerDistribution> responseDistributions = statisticsDao.getResponseDistributions(surveyId, questionId, parameterValue, principal);
         List<AnswerDistribution> rateDistributions = statisticsDao.getRateDistributions(surveyId, questionId, parameterValue, principal);
 
